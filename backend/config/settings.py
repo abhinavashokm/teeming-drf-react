@@ -1,6 +1,9 @@
 import os
-from dotenv import load_dotenv
+from datetime import timedelta
 from pathlib import Path
+
+from dotenv import load_dotenv
+
 
 
 load_dotenv()
@@ -29,6 +32,7 @@ INSTALLED_APPS = [
 
     #installed apps
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
 
     #myapps
     'apps.users',
@@ -49,7 +53,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [f"{BASE_DIR}/templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -117,6 +121,7 @@ STATIC_URL = 'static/'
 
 AUTH_USER_MODEL = "users.User"
 
+
 #Email service
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
@@ -131,3 +136,25 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 #Redis configuration
 REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_PORT = os.getenv('REDIS_PORT')
+
+
+#JWT setup
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+
+#expiry time for otp verification
+OTP_EXPIRY = 300 #in seconds. 300s -> 5min

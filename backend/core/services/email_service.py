@@ -1,21 +1,28 @@
 from django.conf import settings
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from .otp_service import format_otp_expiry
 
 
-def send_otp(email, otp):
+def send_verification_otp_email(email, otp):
 
-    subject = "Email Verification OTP"
+    subject = "Verify Your Email Address"
 
-    message = f"Your OTP for account verification is: {otp}"
+    otp_expiry = format_otp_expiry(settings.OTP_EXPIRY)
+    plain_message = f"""
+Your OTP for email verification is: {otp}
 
-    from_email = settings.EMAIL_HOST_USER
+This OTP is valid for {otp_expiry}.
+"""
+
+    html_message = render_to_string("emails/verification_otp.html", {"otp": otp, "otp_expiry": otp_expiry})
 
     send_mail(
         subject=subject,
-        message=message,
-        from_email=from_email,
+        message=plain_message,
+        from_email=settings.EMAIL_HOST_USER,
         recipient_list=[email],
         fail_silently=False,
+        html_message=html_message,
     )
-
-    return otp
