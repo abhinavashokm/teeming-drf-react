@@ -18,6 +18,7 @@ class UserManager(BaseUserManager):
         
         return user
 
+    #used when python3 manage.py createsuperuser
     def create_superuser(self, email, password=None, **extra_fields):
 
         extra_fields.setdefault("is_staff", True)
@@ -27,6 +28,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+
     class PlanChoices(models.TextChoices):
         FREE = "FREE", "Free"
         PRO = "PRO", "Pro"
@@ -52,8 +54,8 @@ class User(AbstractUser):
 
     # Hide AbstractUser's fields
     username = None
-    first_name = None  # Removes the field
-    last_name = None  # Removes the field
+    first_name = None 
+    last_name = None  
 
     objects = UserManager()
 
