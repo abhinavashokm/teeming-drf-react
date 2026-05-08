@@ -9,10 +9,10 @@ def save_otp(email, otp):
 
 
 def get_otp(email):
-    return redis_client.get(f"otp{email}")
+    return redis_client.get(f"otp:{email}")
 
 
 def delete_otp(email):
-    return redis_client.delete(f"otp{email}")
+    return redis_client.delete(f"otp:{email}")
 
 
