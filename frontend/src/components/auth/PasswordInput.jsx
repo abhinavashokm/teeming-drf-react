@@ -1,27 +1,21 @@
 import InputField from "../ui/InputField";
-import AuthInput from "./AuthInput";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
-function PasswordInput({ placeholder }) {
+
+function PasswordInput(props) {
+    const [showPassword, setShowPassword] = useState(false)
+
     return (
         <div className="relative w-full">
 
-            <InputField type={"password"} placeholder={placeholder} />
+            <InputField type={showPassword ? "text" : "password"} {...props} />
 
-            <button className="absolute right-1 top-1/2 -translate-y-1/2 p-2 flex items-center justify-center text-teeming-light-gray hover:text-gray-600 transition-colors">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                    <circle cx="12" cy="12" r="3" />
-                </svg>
+            <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-1 top-1/2 -translate-y-1/2 p-2 flex items-center justify-center text-teeming-light-gray hover:text-gray-600 transition-colors">
+                {showPassword ? <EyeOff size={18}/> : <Eye size={18} />}
             </button>
 
         </div>

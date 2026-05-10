@@ -1,4 +1,7 @@
 import { useRef, useState } from "react";
+import AuthLogo from "../../components/auth/AuthLogo";
+import { Link } from "react-router-dom";
+import AuthButton from "../../components/auth/AuthButton";
 
 function VerifyOTPPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -66,7 +69,7 @@ function VerifyOTPPage() {
 
   return (
     <div className="w-full max-w-[420px] px-6 flex flex-col items-center">
-      
+
       {/* Main Content Area */}
       <div className="w-full flex flex-col items-stretch pb-10">
 
@@ -74,17 +77,7 @@ function VerifyOTPPage() {
         <div className="flex flex-col items-center w-full">
 
           {/* Logo */}
-          <div className="mb-4 flex justify-center items-center">
-            <div className="w-12 h-12 bg-teeming-green rounded-xl shadow-sm flex items-center justify-center">
-              <span className="text-white font-bold text-2xl leading-8 -tracking-[0.05em]">
-                <img
-                  src="./logo.png"
-                  alt=""
-                  className="w-6 h-6 object-contain"
-                />
-              </span>
-            </div>
-          </div>
+          <AuthLogo />
 
           {/* Typography */}
           <div className="flex flex-col pb-1 text-center">
@@ -129,14 +122,9 @@ function VerifyOTPPage() {
 
           {/* Verify Button */}
           <div className="w-full pb-6">
-            <button
-              onClick={handleVerify}
-              className="w-full py-[10px] bg-teeming-green hover:bg-emerald-600 rounded-lg shadow-sm transition-colors flex justify-center items-center"
-            >
-              <span className="text-white font-bold text-[14px] leading-[21px] tracking-[0.0117em]">
-                Verify
-              </span>
-            </button>
+            <AuthButton>
+              Verify
+            </AuthButton>
           </div>
 
           {/* Resend / Logout Links */}
@@ -154,9 +142,9 @@ function VerifyOTPPage() {
               or
             </span>
 
-            <button className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none">
+            <Link to={"/auth/login"} className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none">
               Logout
-            </button>
+            </Link>
           </div>
         </div>
       </div>

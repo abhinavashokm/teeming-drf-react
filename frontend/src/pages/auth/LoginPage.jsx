@@ -3,8 +3,26 @@ import GoogleButton from '../../components/auth/GoogleButton'
 import AuthInput from '../../components/auth/AuthInput'
 import PasswordInput from '../../components/auth/PasswordInput'
 import AuthLogo from '../../components/auth/AuthLogo'
+import AuthDivider from '../../components/auth/AuthDivider'
+import AuthButton from '../../components/auth/AuthButton'
+import { login } from '../../services/authService'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+
 
 function LoginPage() {
+
+    const { register, handleSubmit } = useForm()
+
+    const handleLogin = async(data) => {
+        try{
+            const res_data = await login(data)
+            console.log(res_data)
+        }catch(error){
+            console.log(error.response.data)
+        }
+    }
+
     return (
         <>
             <div className="w-full max-w-[400px] px-6 flex flex-col items-center">
@@ -34,53 +52,37 @@ function LoginPage() {
                     </div>
 
                     {/* Form & Actions Section */}
-                    <div className="flex flex-col items-stretch w-full mt-6 gap-0">
+                    <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col items-stretch w-full mt-6 gap-0">
 
                         <GoogleButton />
 
                         {/* Divider */}
-                        <div className="flex flex-row items-center w-full py-[22px]">
-                            <div className="flex-1 h-px bg-teeming-light-gray opacity-30"></div>
-
-                            <div className="px-4">
-                                <span className="text-teeming-light-gray text-[12px]">
-                                    or
-                                </span>
-                            </div>
-
-                            <div className="flex-1 h-px bg-teeming-light-gray opacity-30"></div>
-                        </div>
+                        <AuthDivider />
 
                         {/* Inputs & Login Button */}
                         <div className="flex flex-col items-stretch w-full pb-2 gap-[14px]">
 
                             {/* Email Input */}
-                            <AuthInput type={"email"} placeholder={"Work email"} />
+                            <AuthInput type={"email"} placeholder={"Work email"} {...register('email')} />
 
                             {/* Password Input */}
-                            <PasswordInput placeholder={"Password"} />
+                            <PasswordInput placeholder={"Password"} {...register('password')} />
 
                             {/* Login Button Container */}
                             <div className="pt-[14px] w-full">
-                                <button className="w-full py-[10px] bg-teeming-green hover:bg-emerald-600 rounded-lg shadow-sm transition-colors flex justify-center items-center">
-                                    <span className="text-white font-medium text-[14px] leading-5 tracking-wide">
-                                        Log In
-                                    </span>
-                                </button>
+                                <AuthButton type={'submit'} >Log In</AuthButton>
                             </div>
 
                         </div>
 
                         {/* Forgot Password */}
                         <div className="pt-3 w-full flex justify-center">
-                            <a
-                                href="#"
-                                className="text-teeming-green font-medium text-[13px] leading-5 hover:underline"
-                            >
+                            <Link to={'/auth/forgot-password'} className="text-teeming-green font-medium text-[13px] leading-5 hover:underline">
                                 Forgot Password?
-                            </a>
+                            </Link>
                         </div>
-                    </div>
+
+                    </form>
                 </div>
             </div>
 

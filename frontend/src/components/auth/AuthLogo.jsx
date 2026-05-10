@@ -7,7 +7,7 @@ const AuthLogo = () => {
             <img
                 src={logo}
                 alt="Teeming Logo"
-                className="w-auto h-18 object-contain"
+                className="w-auto h-14 object-contain"
             />
         </div>
     )

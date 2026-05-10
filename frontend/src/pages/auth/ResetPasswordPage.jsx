@@ -1,3 +1,5 @@
+import AuthLogo from "../../components/auth/AuthLogo"
+
 function ResetPasswordPage() {
     return (
         <div className="w-full max-w-[440px] px-6 flex flex-col items-center">
@@ -9,22 +11,7 @@ function ResetPasswordPage() {
                 <div className="flex flex-col items-center w-full">
 
                     {/* Logo */}
-                    <div className="mb-5 flex flex-col items-center gap-2">
-
-                        <div className="w-12 h-12 bg-teeming-green rounded-xl shadow-sm flex items-center justify-center">
-                            <span className="text-white font-bold text-2xl leading-8 -tracking-[0.05em]">
-                                <img
-                                    src="./logo.png"
-                                    alt=""
-                                    className="w-6 h-6 object-contain"
-                                />
-                            </span>
-                        </div>
-
-                        <span className="font-bold text-[20px] text-[#1E293B] leading-7 tracking-[-0.025em]">
-                            Teeming
-                        </span>
-                    </div>
+                    <AuthLogo />
 
                     {/* Typography */}
                     <div className="flex flex-col pb-1 text-center">

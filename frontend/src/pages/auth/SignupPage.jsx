@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import InputField from '../../components/ui/InputField'
 import PasswordInput from '../../components/auth/PasswordInput'
 import AuthLogo from '../../components/auth/AuthLogo'
+import AuthDivider from '../../components/auth/AuthDivider'
+import AuthButton from '../../components/auth/AuthButton'
 
 
 function SignupPage() {
@@ -17,7 +19,7 @@ function SignupPage() {
                     <div className="flex flex-col items-center w-full">
 
                         {/* Logo */}
-                        <AuthLogo/>
+                        <AuthLogo />
 
                         {/* Typography */}
                         <div className="flex flex-col pb-1 text-center">
@@ -41,17 +43,7 @@ function SignupPage() {
                         <GoogleButton />
 
                         {/* Divider */}
-                        <div className="flex flex-row items-center w-full py-[22px]">
-                            <div className="flex-1 h-px bg-teeming-light-gray opacity-30"></div>
-
-                            <div className="px-4">
-                                <span className="text-teeming-light-gray text-[12px]">
-                                    or
-                                </span>
-                            </div>
-
-                            <div className="flex-1 h-px bg-teeming-light-gray opacity-30"></div>
-                        </div>
+                        <AuthDivider />
 
                         {/* Inputs & Signup Button */}
                         <div className="flex flex-col items-stretch w-full pb-2 gap-[14px]">
@@ -67,11 +59,11 @@ function SignupPage() {
 
                             {/* Sign Up Button */}
                             <div className="pt-[14px] w-full">
-                                <button className="w-full py-[10px] bg-teeming-green hover:bg-emerald-600 rounded-lg shadow-sm transition-colors flex justify-center items-center">
-                                    <span className="text-white font-medium text-[14px] leading-5 tracking-wide">
+                                <AuthButton>
+                                    <Link to={"/auth/verify-otp"}>
                                         Sign up with Email
-                                    </span>
-                                </button>
+                                    </Link>
+                                </AuthButton>
                             </div>
 
                         </div>
@@ -82,7 +74,7 @@ function SignupPage() {
             {/* Footer */}
             <div className="absolute bottom-8 w-full flex justify-center">
                 <p className="text-teeming-gray text-[13px] leading-[21px]">
-                    By continuing, you agree to our
+                    By continuing, you agree to our{" "}
                     <a
                         href="#"
                         className="text-teeming-green font-medium underline hover:text-emerald-700"
