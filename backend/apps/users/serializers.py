@@ -29,3 +29,14 @@ class LoginSerializer(serializers.Serializer):
 
     email = serializers.EmailField()
     password = serializers.CharField()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'full_name',
+            'email'
+        ]

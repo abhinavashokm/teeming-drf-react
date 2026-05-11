@@ -3,12 +3,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from core.constants.error_codes import ErrorCode
 
 from .serializers import (
     RegisterSerializer,
     VerifyOTPSerializer,
     ResendOTPSerializer,
     LoginSerializer,
+    UserSerializer,
 )
 from core.services import otp_service, email_service
 from core.redis import otp_storage
@@ -32,8 +34,11 @@ class RegisterView(APIView):
         # send otp to users mail
         email_service.send_verification_otp_email(email=user.email, otp=otp)
 
+        # user data - testing purpose only
+        user_data = serializer.validated_data
+
         return Response(
-            {"message": "OTP sent successfully", "email": serializer.data.get("email")},
+            {"message": "OTP sent successfully", "email": serializer.data.get("email"), "user": user_data},
             status=status.HTTP_201_CREATED,
         )
 
@@ -108,7 +113,11 @@ class LoginView(APIView):
 
         if not user:
             return Response(
-                {"message": "Invalid Credentials"}, status=status.HTTP_401_UNAUTHORIZED
+                {
+                    "code": ErrorCode.AUTH_INVALID_CREDENTIALS,
+                    "message": "Invalid Credentials",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if not user.is_verified:
@@ -117,11 +126,12 @@ class LoginView(APIView):
             )
 
         refresh = RefreshToken.for_user(user)
-
+        user_data = UserSerializer(user).data
 
         response = Response(
             {
                 "message": "Login successfull",
+                "user": user_data,
                 "access_token": str(refresh.access_token),
             },
             status=status.HTTP_200_OK,
@@ -129,12 +139,12 @@ class LoginView(APIView):
 
         # Set refresh token as httpOnly cookie
         response.set_cookie(
-            key='refresh_token',
+            key="refresh_token",
             value=str(refresh),
             httponly=True,
             secure=True,
-            samesite='Lax',
-            max_age= 7*24*60*60 #7days (in seconds)
+            samesite="Lax",
+            max_age=7 * 24 * 60 * 60,  # 7days (in seconds)
         )
 
         return response
