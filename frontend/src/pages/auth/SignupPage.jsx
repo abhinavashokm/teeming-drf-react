@@ -5,14 +5,22 @@ import AuthLogo from '../../components/auth/AuthLogo'
 import AuthDivider from '../../components/auth/AuthDivider'
 import AuthButton from '../../components/auth/AuthButton'
 import { useForm } from 'react-hook-form'
-import authService from '../../services/authService'
 import AuthInput from '../../components/auth/AuthInput'
 import { validations } from '../../utils/validations'
+import AuthFormError from '../../components/auth/AuthFormError'
+import { useAuthError } from '../../hooks/auth/useAuthError'
+import { useDispatch } from 'react-redux'
+import { signup } from '../../store/slices/authSlice'
+import { useNavigate } from 'react-router-dom'
 
 
 function SignupPage() {
 
-    const testMode = false
+    const testMode = true
+
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+
     const { handleSubmit, register, formState: { errors } } = useForm(testMode && {
         defaultValues: {
             full_name: 'Arjun Kumar',
@@ -23,11 +31,15 @@ function SignupPage() {
 
     const handleSignup = async (data) => {
         try {
-            const res_data = await authService.signup(data)
-        } catch (error) {
-            console.log(error.response.data)
+            await dispatch(signup(data)).unwrap()
+            navigate('/')
+        } catch {
+            //nothing
         }
     }
+
+    const displayError = useAuthError()
+
 
     return (
         <>
@@ -69,9 +81,15 @@ function SignupPage() {
                         {/* Inputs & Signup Button */}
                         <form onSubmit={handleSubmit(handleSignup)} className="flex flex-col items-stretch w-full pb-2 gap-[14px]" noValidate>
 
+                            {
+                                displayError &&
+                                <AuthFormError errorMsg={displayError} />
+                            }
+
+
                             {/* Full Name Input */}
-                            <AuthInput type="text" placeholder={"Full name"} autoComplete={'name'} 
-                            {...register('full_name', validations.full_name)} error={errors.full_name} />
+                            <AuthInput type="text" placeholder={"Full name"} autoComplete={'name'}
+                                {...register('full_name', validations.full_name)} error={errors.full_name} />
 
                             {/* Email Input */}
                             <AuthInput type={"email"} placeholder={"Work email"} autoComplete={'email'}
@@ -79,8 +97,8 @@ function SignupPage() {
                             />
 
                             {/* Password Input */}
-                            <PasswordInput placeholder={"Password"} autoComplete={'new-password'} 
-                            {...register('password', validations.password)} error={errors.password} />
+                            <PasswordInput placeholder={"Password"} autoComplete={'new-password'}
+                                {...register('password', validations.password)} error={errors.password} />
 
                             {/* Sign Up Button */}
                             <div className="pt-[14px] w-full">

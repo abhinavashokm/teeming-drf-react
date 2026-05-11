@@ -10,22 +10,19 @@ import AuthFormError from '../../components/auth/AuthFormError'
 import { validations } from '../../utils/validations'
 import { useDispatch, useSelector } from 'react-redux'
 import { login } from '../../store/slices/authSlice'
-import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuthError } from '../../hooks/auth/useAuthError'
 
 
 function LoginPage() {
 
     const testMode = true
 
-    const dispach = useDispatch()
+    const dispatch = useDispatch()
     const auth = useSelector(store => store.auth)
+    const navigate = useNavigate()
 
-    //testing - access token is stroing correctly
-    useEffect(() => {
-        console.log(auth)
-    })
-
-    const { register, handleSubmit, setError, formState: { errors } } = useForm(testMode && {
+    const { register, handleSubmit, formState: { errors } } = useForm(testMode && {
         defaultValues: {
             email: 'yicir53558@deapad.com',
             password: 'securepass123'
@@ -35,22 +32,15 @@ function LoginPage() {
 
     const handleLogin = async (data) => {
         try {
-            
-            await dispach(login(data)).unwrap()
-
-        } catch (error) {
-
-            console.log(error)
-
-            if (error.response?.status === 401) {
-                setError("root", {
-                    type: 'server',
-                    message: 'invalid credentials'
-                })
-            }
+            await dispatch(login(data)).unwrap()
+            navigate('/')
+        } catch {
+            // error already handled by redux state (auth.error)
         }
     }
 
+    //filtered server error message
+    const displayError = useAuthError()
 
     return (
         <>
@@ -91,8 +81,8 @@ function LoginPage() {
                         {/* Inputs & Login Button */}
                         <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col items-stretch w-full pb-2 gap-[14px]">
 
-                            {errors.root && (
-                                <AuthFormError errorMsg={errors.root.message} />
+                            {displayError && (
+                                <AuthFormError errorMsg={displayError} />
                             )}
 
                             {/* Email Input */}
