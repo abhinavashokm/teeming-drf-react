@@ -6,20 +6,34 @@ import AuthLogo from '../../components/auth/AuthLogo'
 import AuthDivider from '../../components/auth/AuthDivider'
 import AuthButton from '../../components/auth/AuthButton'
 import { login } from '../../services/authService'
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import AuthFormError from '../../components/auth/AuthFormError'
+import { validations } from '../../utils/validations'
 
 
 function LoginPage() {
+    const testMode = true
 
-    const { register, handleSubmit } = useForm()
+    const { register, handleSubmit, setError, formState: { errors } } = useForm(testMode && {
+        defaultValues: {
+            email: 'yicir53558@deapad.com',
+            password: 'securepass123'
+        }
+    })
 
-    const handleLogin = async(data) => {
-        try{
+    const handleLogin = async (data) => {
+        try {
             const res_data = await login(data)
             console.log(res_data)
-        }catch(error){
+        } catch (error) {
             console.log(error.response.data)
+
+            if (error.response?.status === 401) {
+                setError("root", {
+                    type: 'server',
+                    message: 'invalid credentials'
+                })
+            }
         }
     }
 
@@ -52,7 +66,7 @@ function LoginPage() {
                     </div>
 
                     {/* Form & Actions Section */}
-                    <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col items-stretch w-full mt-6 gap-0">
+                    <div className="flex flex-col items-stretch w-full mt-6 gap-0">
 
                         <GoogleButton />
 
@@ -60,20 +74,27 @@ function LoginPage() {
                         <AuthDivider />
 
                         {/* Inputs & Login Button */}
-                        <div className="flex flex-col items-stretch w-full pb-2 gap-[14px]">
+                        <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col items-stretch w-full pb-2 gap-[14px]">
+
+                            {errors.root && (
+                                <AuthFormError errorMsg={errors.root.message} />
+                            )}
 
                             {/* Email Input */}
-                            <AuthInput type={"email"} placeholder={"Work email"} {...register('email')} />
+                            <AuthInput type={"email"} placeholder={"Work email"} autoComplete={'email'}
+                                {...register('email', validations.email)} error={errors.email} />
+
 
                             {/* Password Input */}
-                            <PasswordInput placeholder={"Password"} {...register('password')} />
+                            <PasswordInput placeholder={"Password"} autoComplete={'current-password'}
+                                {...register('password', { required: "Password is required" })} error={errors.password} />
 
                             {/* Login Button Container */}
                             <div className="pt-[14px] w-full">
                                 <AuthButton type={'submit'} >Log In</AuthButton>
                             </div>
 
-                        </div>
+                        </form>
 
                         {/* Forgot Password */}
                         <div className="pt-3 w-full flex justify-center">
@@ -82,7 +103,7 @@ function LoginPage() {
                             </Link>
                         </div>
 
-                    </form>
+                    </div>
                 </div>
             </div>
 

@@ -1,13 +1,34 @@
 import GoogleButton from '../../components/auth/GoogleButton'
 import { Link } from 'react-router-dom'
-import InputField from '../../components/ui/InputField'
 import PasswordInput from '../../components/auth/PasswordInput'
 import AuthLogo from '../../components/auth/AuthLogo'
 import AuthDivider from '../../components/auth/AuthDivider'
 import AuthButton from '../../components/auth/AuthButton'
+import { useForm } from 'react-hook-form'
+import { signup } from '../../services/authService'
+import AuthInput from '../../components/auth/AuthInput'
+import { validations } from '../../utils/validations'
 
 
 function SignupPage() {
+
+    const testMode = false
+    const { handleSubmit, register, formState: { errors } } = useForm(testMode && {
+        defaultValues: {
+            full_name: 'Arjun Kumar',
+            email: 'arjunraj@gmail.com',
+            password: 'password'
+        }
+    })
+
+    const handleSignup = async (data) => {
+        try {
+            const res_data = await signup(data)
+        } catch (error) {
+            console.log(error.response.data)
+        }
+    }
+
     return (
         <>
             <div className="w-full max-w-[400px] px-6 flex flex-col items-center">
@@ -46,34 +67,36 @@ function SignupPage() {
                         <AuthDivider />
 
                         {/* Inputs & Signup Button */}
-                        <div className="flex flex-col items-stretch w-full pb-2 gap-[14px]">
+                        <form onSubmit={handleSubmit(handleSignup)} className="flex flex-col items-stretch w-full pb-2 gap-[14px]" noValidate>
 
                             {/* Full Name Input */}
-                            <InputField type="text" placeholder={"Full name"} />
+                            <AuthInput type="text" placeholder={"Full name"} autoComplete={'name'} 
+                            {...register('full_name', validations.full_name)} error={errors.full_name} />
 
                             {/* Email Input */}
-                            <InputField type={"email"} placeholder={"Work email"} />
+                            <AuthInput type={"email"} placeholder={"Work email"} autoComplete={'email'}
+                                {...register('email', validations.email)} error={errors.email}
+                            />
 
                             {/* Password Input */}
-                            <PasswordInput placeholder={"Password"} />
+                            <PasswordInput placeholder={"Password"} autoComplete={'new-password'} 
+                            {...register('password', validations.password)} error={errors.password} />
 
                             {/* Sign Up Button */}
                             <div className="pt-[14px] w-full">
                                 <AuthButton>
-                                    <Link to={"/auth/verify-otp"}>
-                                        Sign up with Email
-                                    </Link>
+                                    Sign up with Email
                                 </AuthButton>
                             </div>
 
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
 
             {/* Footer */}
             <div className="absolute bottom-8 w-full flex justify-center">
-                <p className="text-teeming-gray text-[13px] leading-[21px]">
+                <p className="text-teeming-gray text-center text-[13px] leading-[21px]">
                     By continuing, you agree to our{" "}
                     <a
                         href="#"
