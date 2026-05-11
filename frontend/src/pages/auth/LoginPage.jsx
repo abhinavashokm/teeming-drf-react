@@ -5,14 +5,25 @@ import PasswordInput from '../../components/auth/PasswordInput'
 import AuthLogo from '../../components/auth/AuthLogo'
 import AuthDivider from '../../components/auth/AuthDivider'
 import AuthButton from '../../components/auth/AuthButton'
-import { login } from '../../services/authService'
 import { useForm } from 'react-hook-form'
 import AuthFormError from '../../components/auth/AuthFormError'
 import { validations } from '../../utils/validations'
+import { useDispatch, useSelector } from 'react-redux'
+import { login } from '../../store/slices/authSlice'
+import { useEffect } from 'react'
 
 
 function LoginPage() {
+
     const testMode = true
+
+    const dispach = useDispatch()
+    const auth = useSelector(store => store.auth)
+
+    //testing - access token is stroing correctly
+    useEffect(() => {
+        console.log(auth)
+    })
 
     const { register, handleSubmit, setError, formState: { errors } } = useForm(testMode && {
         defaultValues: {
@@ -21,12 +32,15 @@ function LoginPage() {
         }
     })
 
+
     const handleLogin = async (data) => {
         try {
-            const res_data = await login(data)
-            console.log(res_data)
+            
+            await dispach(login(data)).unwrap()
+
         } catch (error) {
-            console.log(error.response.data)
+
+            console.log(error)
 
             if (error.response?.status === 401) {
                 setError("root", {
@@ -36,6 +50,7 @@ function LoginPage() {
             }
         }
     }
+
 
     return (
         <>

@@ -5,7 +5,7 @@ import AuthLogo from '../../components/auth/AuthLogo'
 import AuthDivider from '../../components/auth/AuthDivider'
 import AuthButton from '../../components/auth/AuthButton'
 import { useForm } from 'react-hook-form'
-import { signup } from '../../services/authService'
+import authService from '../../services/authService'
 import AuthInput from '../../components/auth/AuthInput'
 import { validations } from '../../utils/validations'
 
@@ -23,7 +23,7 @@ function SignupPage() {
 
     const handleSignup = async (data) => {
         try {
-            const res_data = await signup(data)
+            const res_data = await authService.signup(data)
         } catch (error) {
             console.log(error.response.data)
         }

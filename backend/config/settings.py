@@ -52,6 +52,8 @@ CORS_ALLOWED_ORIGINS = [
     os.getenv("FRONTEND_URL"),
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROOT_URLCONF = 'config.urls'
 

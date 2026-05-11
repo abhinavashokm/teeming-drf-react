@@ -118,11 +118,23 @@ class LoginView(APIView):
 
         refresh = RefreshToken.for_user(user)
 
-        return Response(
+
+        response = Response(
             {
                 "message": "Login successfull",
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
+                "access_token": str(refresh.access_token),
             },
             status=status.HTTP_200_OK,
         )
+
+        # Set refresh token as httpOnly cookie
+        response.set_cookie(
+            key='refresh_token',
+            value=str(refresh),
+            httponly=True,
+            secure=True,
+            samesite='Lax',
+            max_age= 7*24*60*60 #7days (in seconds)
+        )
+
+        return response
