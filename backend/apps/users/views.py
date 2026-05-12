@@ -4,6 +4,7 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.constants.error_codes import ErrorCode
+from django.contrib.auth.hashers import make_password
 
 from .serializers import (
     RegisterSerializer,
@@ -12,8 +13,7 @@ from .serializers import (
     LoginSerializer,
     UserSerializer,
 )
-from core.services import otp_service, email_service
-from core.redis import otp_storage
+from .services import otp_service, signup_service
 from .models import User
 
 
@@ -23,23 +23,26 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = serializer.save()
+        email = serializer.validated_data["email"]
 
         # generate otp
         otp = otp_service.generate_otp()
 
-        # store otp to redis
-        otp_storage.save_otp(user.email, otp)
+        # store signup data in redis
+        signup_service.save_signup_data(
+            email=email,
+            full_name=serializer.validated_data["full_name"],
+            password=make_password(serializer.validated_data["password"]), #hashed password
+            otp=otp,
+        )
 
         # send otp to users mail
-        email_service.send_verification_otp_email(email=user.email, otp=otp)
+        otp_service.send_verification_otp_email(email=email, otp=otp)
 
-        # user data - testing purpose only
-        user_data = serializer.validated_data
 
         return Response(
-            {"message": "OTP sent successfully", "email": serializer.data.get("email"), "user": user_data},
-            status=status.HTTP_201_CREATED,
+            {"message": "OTP sent successfully", "email": email},
+            status=status.HTTP_200_OK,
         )
 
 

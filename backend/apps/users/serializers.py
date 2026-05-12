@@ -7,7 +7,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = "__all__"
+        fields = ['full_name', 'email', 'password']
+        extra_kwargs = {
+            "password": {
+                "write_only": True,
+            }
+        }
 
     # manually call create user because modelserializer calls User.objects.create() which will not hash password
     def create(self, validated_data):

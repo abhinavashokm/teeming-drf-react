@@ -47,10 +47,15 @@ export const signup = createAsyncThunk(
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
+
         accessToken: null,
         user: null,
+
+        verificationEmail: null, //for storing email after signup for otp verification
+
         error: null,
         loading: true
+
     },
     reducers: {
         setAccessToken: (state, action) => {
@@ -66,7 +71,7 @@ const authSlice = createSlice({
 
         builder
 
-            //login
+            //LOGIN
             .addCase(login.pending, (state) => {
 
                 state.error = null
@@ -85,16 +90,19 @@ const authSlice = createSlice({
                 state.loading = false
 
             })
+
+            //SIGNUP
             .addCase(signup.pending, (state) => {
                 
                 state.error = null
                 state.loading = true
             })
             .addCase(signup.fulfilled, (state, action) => {
-                
+
+                console.log(action.payload?.email)
+                state.verificationEmail = action.payload.email
                 state.error = null
                 state.loading = false
-                state.user = action.payload?.user
             })
             .addCase(signup.rejected, (state, action) => {
 
