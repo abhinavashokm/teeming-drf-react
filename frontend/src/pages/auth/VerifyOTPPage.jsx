@@ -1,70 +1,27 @@
-import { useRef, useState } from "react";
-import AuthLogo from "../../components/auth/AuthLogo";
+import { useState } from "react";
+import { OTPInput } from "input-otp";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import AuthLogo from "../../components/auth/AuthLogo";
 import AuthButton from "../../components/auth/AuthButton";
+import { verifyOTP } from "../../store/slices/authSlice";
 
 function VerifyOTPPage() {
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
-  const inputRefs = useRef([]);
+  const [otp, setOtp] = useState("");
 
-  const handleChange = (value, index) => {
-    if (!/^[a-zA-Z0-9]?$/.test(value)) return;
+  const dispatch = useDispatch()
+  const { loading, verificationEmail } = useSelector(store => store.auth)
 
-    const updatedOtp = [...otp];
-    updatedOtp[index] = value;
+  const handleVerify = async() => {
+    
+    try {
 
-    setOtp(updatedOtp);
+      const email = verificationEmail || "arjunraj2121@gmail.com"
+      await dispatch(verifyOTP({verificationEmail: email, otp})).unwrap()
+    } catch { }
 
-    // Move to next input
-    if (value && index < otp.length - 1) {
-      inputRefs.current[index + 1].focus();
-    }
-  };
-
-  const handleKeyDown = (e, index) => {
-    // Move to previous input on backspace
-    if (
-      e.key === "Backspace" &&
-      !otp[index] &&
-      index > 0
-    ) {
-      inputRefs.current[index - 1].focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-
-    const pastedData = e.clipboardData
-      .getData("text")
-      .slice(0, otp.length)
-      .replace(/[^a-zA-Z0-9]/g, "");
-
-    if (!pastedData) return;
-
-    const updatedOtp = [...otp];
-
-    pastedData.split("").forEach((char, index) => {
-      updatedOtp[index] = char;
-    });
-
-    setOtp(updatedOtp);
-
-    const focusIndex =
-      pastedData.length >= otp.length
-        ? otp.length - 1
-        : pastedData.length;
-
-    inputRefs.current[focusIndex]?.focus();
-  };
-
-  const handleVerify = () => {
-    const otpCode = otp.join("");
-
-    console.log("OTP:", otpCode);
-
-    // API call here
   };
 
   return (
@@ -100,30 +57,38 @@ function VerifyOTPPage() {
 
           {/* OTP Inputs */}
           <div className="flex flex-row justify-center gap-2 sm:gap-3 w-full pb-8">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type="text"
-                maxLength={1}
-                value={digit}
-                autoFocus={index === 0}
-                onChange={(e) =>
-                  handleChange(e.target.value, index)
-                }
-                onKeyDown={(e) =>
-                  handleKeyDown(e, index)
-                }
-                onPaste={handlePaste}
-                className="w-[46px] h-[54px] sm:w-[52px] sm:h-[60px] bg-white border border-teeming-border rounded-[10px] text-center text-xl sm:text-[22px] font-bold text-teeming-text-dark focus:outline-none focus:ring-1 focus:ring-teeming-green focus:border-teeming-green transition-all shadow-[0_0_8px_0_rgba(29,158,117,0.0)] focus:shadow-[0_0_8px_0_rgba(29,158,117,0.15)]"
-              />
-            ))}
+
+            <OTPInput
+              value={otp}
+              onChange={setOtp}
+              maxLength={6}
+              render={({ slots }) => (
+
+                <div className="flex flex-row justify-center gap-2 sm:gap-3 w-full">
+                  {slots.map((slot, index) => (
+                    <div
+                      key={index}
+                      className={`w-[46px] h-[54px] sm:w-[52px] sm:h-[60px] bg-white border rounded-[10px] text-center text-xl sm:text-[22px] font-bold text-teeming-text-dark transition-all flex items-center justify-center
+                          ${slot.isActive
+                          ? "border-teeming-green ring-1 ring-teeming-green shadow-[0_0_8px_0_rgba(29,158,117,0.15)]"
+                          : "border-teeming-border shadow-[0_0_8px_0_rgba(29,158,117,0.0)]"
+                        }`}
+                    >
+                      {slot.char || ""}
+                    </div>
+                  ))}
+                </div>
+
+              )}
+
+            />
+
           </div>
 
           {/* Verify Button */}
           <div className="w-full pb-6">
-            <AuthButton>
-              Verify
+            <AuthButton onClick={handleVerify} disabled={otp.length !== 6} loading={loading}>
+              {loading ? "Verifing..." : "Verify"}
             </AuthButton>
           </div>
 
@@ -142,9 +107,13 @@ function VerifyOTPPage() {
               or
             </span>
 
-            <Link to={"/auth/login"} className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none">
+            <Link
+              to={"/auth/login"}
+              className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none"
+            >
               Logout
             </Link>
+
           </div>
         </div>
       </div>

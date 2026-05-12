@@ -8,7 +8,7 @@ export const login = createAsyncThunk(
         try {
 
             const res = await authService.login({ email, password })
-            return res.data
+            return res
 
         } catch (error) {
 
@@ -26,13 +26,14 @@ export const login = createAsyncThunk(
 
 export const signup = createAsyncThunk(
     "auth/signup",
-    async({ email, password, full_name }, thunkAPI) => {
+    async ({ email, password, full_name }, thunkAPI) => {
         try {
-            
-            const res = await authService.signup({ email, password, full_name })
-            return res.data
+
+            const res_data = await authService.signup({ email, password, full_name })
+            return res_data.data
+
         } catch (error) {
-            
+
             return thunkAPI.rejectWithValue(
                 error.response?.data || {
                     code: errorCodes.UNKNOWN_ERROR,
@@ -40,6 +41,28 @@ export const signup = createAsyncThunk(
                 }
             )
         }
+    }
+)
+
+export const verifyOTP = createAsyncThunk(
+    "auth/verifyOTP",
+    async ({ verificationEmail, otp }, thunkAPI) => {
+
+        try {
+
+            const res_data = await authService.verifyOTP({ email: verificationEmail, otp })
+            return res_data
+
+        } catch (error) {
+          
+            return thunkAPI.rejectWithValue(
+                error.response?.data || {
+                    code: errorCodes.UNKNOWN_ERROR,
+                    message: "something went wrong!",
+                }
+            )
+        }
+
     }
 )
 
@@ -54,7 +77,7 @@ const authSlice = createSlice({
         verificationEmail: null, //for storing email after signup for otp verification
 
         error: null,
-        loading: true
+        loading: false
 
     },
     reducers: {
@@ -93,13 +116,12 @@ const authSlice = createSlice({
 
             //SIGNUP
             .addCase(signup.pending, (state) => {
-                
+
                 state.error = null
                 state.loading = true
             })
             .addCase(signup.fulfilled, (state, action) => {
 
-                console.log(action.payload?.email)
                 state.verificationEmail = action.payload.email
                 state.error = null
                 state.loading = false
@@ -107,7 +129,24 @@ const authSlice = createSlice({
             .addCase(signup.rejected, (state, action) => {
 
                 state.loading = false
-                console.log(action.payload)
+                state.error = action.payload
+            })
+
+            //VERIFY OTP
+            .addCase(verifyOTP.pending, (state) => {
+
+                state.loading = true
+                state.error = null
+            })
+            .addCase(verifyOTP.fulfilled, (state, action) => {
+
+                state.loading = false
+                state.error = null
+                state.user = action.payload.user
+            })
+            .addCase(verifyOTP.rejected, (state, action) => {
+
+                state.loading = false
                 state.error = action.payload
             })
             ;

@@ -9,7 +9,7 @@ import AuthInput from '../../components/auth/AuthInput'
 import { validations } from '../../utils/validations'
 import AuthFormError from '../../components/auth/AuthFormError'
 import { useAuthError } from '../../hooks/auth/useAuthError'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { signup } from '../../store/slices/authSlice'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,6 +18,7 @@ function SignupPage() {
 
     const testMode = true
 
+    const { loading } = useSelector(store => store.auth)
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
@@ -32,10 +33,8 @@ function SignupPage() {
     const handleSignup = async (data) => {
         try {
             await dispatch(signup(data)).unwrap()
-            navigate('/')
-        } catch {
-            //nothing
-        }
+            navigate('/auth/verify-otp')
+        } catch { }
     }
 
     const displayError = useAuthError()
@@ -102,8 +101,11 @@ function SignupPage() {
 
                             {/* Sign Up Button */}
                             <div className="pt-[14px] w-full">
-                                <AuthButton>
-                                    Sign up with Email
+                                <AuthButton loading={loading}>
+                                    {
+                                        loading ? "Sending OTP..." : "Sign up with Email"
+                                    }
+                                    
                                 </AuthButton>
                             </div>
 

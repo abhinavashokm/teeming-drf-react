@@ -39,7 +39,6 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=255)
     avatar_url = models.URLField(blank=True, null=True)
 
-    is_verified = models.BooleanField(default=False, help_text="Verified via OTP")
     current_plan = models.CharField(
         default=PlanChoices.FREE,
         choices=PlanChoices.choices,

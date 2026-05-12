@@ -6,6 +6,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from core.constants.error_codes import ErrorCode
 from django.contrib.auth.hashers import make_password
 
+from core.responses.api_response import success_response, error_response
+
+
 from .serializers import (
     RegisterSerializer,
     VerifyOTPSerializer,
@@ -21,7 +24,15 @@ class RegisterView(APIView):
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+
+        if not serializer.is_valid():
+
+            return error_response(
+                message="Validation failed",
+                details=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST,
+                error_code="validation_error",
+            )
 
         email = serializer.validated_data["email"]
 
@@ -32,23 +43,26 @@ class RegisterView(APIView):
         signup_service.save_signup_data(
             email=email,
             full_name=serializer.validated_data["full_name"],
-            password=make_password(serializer.validated_data["password"]), #hashed password
+            password=make_password(
+                serializer.validated_data["password"]
+            ),  # hashed password
             otp=otp,
         )
 
         # send otp to users mail
         otp_service.send_verification_otp_email(email=email, otp=otp)
 
-
-        return Response(
-            {"message": "OTP sent successfully", "email": email},
-            status=status.HTTP_200_OK,
+        return success_response(
+            message="OTP sent successfully",
+            data={"email": email},
+            status_code=status.HTTP_200_OK,
         )
 
 
 class VerifyOTPView(APIView):
 
     def post(self, request):
+    
         serializer = VerifyOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -56,24 +70,29 @@ class VerifyOTPView(APIView):
         otp = serializer.validated_data["otp"]
         email = serializer.validated_data["email"]
 
-        stored_otp = otp_storage.get_otp(email)
+        stored_signup_data = signup_service.get_signup_data(email)
 
-        if not stored_otp:
-            return Response(
-                {"message": "OTP expired or not found"},
-                status=status.HTTP_400_BAD_REQUEST,
+        if not stored_signup_data:
+            return error_response(
+                message= "OTP expired or not found",
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
-        if stored_otp != otp:
-            return Response(
-                {"message": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST
+        if stored_signup_data.get("otp") != otp:
+            return error_response(
+                message="Invalid OTP", 
+                status_code=status.HTTP_400_BAD_REQUEST
             )
 
         # user verified - update db
-        User.objects.filter(email=email).update(is_verified=True)
+        User.objects.create_user(
+            email=stored_signup_data["email"],
+            password=stored_signup_data["password"],
+            full_name=stored_signup_data["full_name"],
+        )
 
         # delete otp record
-        otp_storage.delete_otp(email)
+        signup_service.delete_signup_data(email)
 
         return Response(
             {"message": "verification successfull"}, status=status.HTTP_200_OK

@@ -11,8 +11,22 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {
                 "write_only": True,
+            },
+            "email": {
+                "validators": []
             }
         }
+
+    def validate_email(self, value):
+
+        if User.objects.filter(email=value).exists():
+
+            raise serializers.ValidationError(
+                "Account already exists, Please log in",
+                code="account_exists"
+            )
+
+        return value
 
     # manually call create user because modelserializer calls User.objects.create() which will not hash password
     def create(self, validated_data):
