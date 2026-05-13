@@ -27,6 +27,26 @@ def save_signup_data(email, full_name, password, otp):
     )
 
 
+def update_signup_otp(email, otp):
+
+    signup_data = get_signup_data(email)
+    if signup_data is None:
+        return False
+    
+    signup_data['otp'] = otp
+    signup_data['otp_expires_at'] = time.time() + settings.OTP_EXPIRY
+
+    set_data(
+        key=_make_key(email),
+        value=signup_data,
+        timeout=SIGNUP_SESSION_EXPIRY
+    )
+
+    return True
+    
+
+
+
 def get_signup_data(email):
     return get_data(_make_key(email))
 

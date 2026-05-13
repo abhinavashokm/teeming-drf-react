@@ -17,8 +17,10 @@ from .serializers import (
     ResendOTPSerializer,
     LoginSerializer,
     UserSerializer,
+    ForgotPasswordSerializer,
+    ResetPasswordSerializer,
 )
-from .services import otp_service, signup_service
+from .services import otp_service, signup_service, password_reset_service
 from .models import User
 from django.conf import settings
 
@@ -26,6 +28,7 @@ from django.conf import settings
 class RegisterView(APIView):
 
     def post(self, request):
+        print(request.data)
         serializer = RegisterSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -60,7 +63,6 @@ class VerifyOTPView(APIView):
 
     def post(self, request):
 
-        print("1: ", request.data)
         serializer = VerifyOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -70,7 +72,6 @@ class VerifyOTPView(APIView):
 
         stored_signup_data = signup_service.get_signup_data(email)
 
-        print("2 ", stored_signup_data)
         if not stored_signup_data:
             return error_response(
                 message="OTP expired or not found",
@@ -82,14 +83,20 @@ class VerifyOTPView(APIView):
                 message="Invalid OTP", status_code=status.HTTP_400_BAD_REQUEST
             )
 
-        # user verified - update db
-        User.objects.create_user(
-            email=stored_signup_data["email"],
-            password=stored_signup_data["password"],
-            full_name=stored_signup_data["full_name"],
+
+        email = stored_signup_data["email"]
+        hashed_password = stored_signup_data["password"]
+        full_name = stored_signup_data["full_name"]
+
+        # create new user (password is already hashed. so use 'create' instead of 'create_user',
+        # else it will double hash password)
+        User.objects.create(
+            email=User.objects.normalize_email(email),
+            password=hashed_password,
+            full_name=full_name,
         )
 
-        # delete otp record
+        # delete signup record
         signup_service.delete_signup_data(email)
 
         return success_response(
@@ -108,15 +115,22 @@ class ResendOTPView(APIView):
         # generate otp
         otp = otp_service.generate_otp()
 
-        # store otp to redis
-        otp_storage.save_otp(email, otp)
+        # update otp in redis
+        updated = signup_service.update_signup_otp(email=email, otp=otp)
+
+        if not updated:
+            return error_response(
+                message="Your signup session has expired. Please sign up again to continue.",
+                error_code=ErrorCode.SIGNUP_SESSION_EXPIRED,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
 
         # send otp to users mail
-        email_service.send_verification_otp_email(email=email, otp=otp)
+        otp_service.send_verification_otp_email(email=email, otp=otp)
 
         return Response(
             {"message": "OTP resent successfully"},
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
 
@@ -129,7 +143,10 @@ class LoginView(APIView):
         email = serializer.validated_data["email"]
         password = serializer.validated_data["password"]
 
-        user = authenticate(request, email=email, password=password)
+        print(email, password)
+
+        user = authenticate(request, username=email, password=password)
+        print(user)
 
         if not user:
             return error_response(
@@ -137,7 +154,6 @@ class LoginView(APIView):
                 message="Invalid Credentials",
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )
-        
 
         refresh = RefreshToken.for_user(user)
         user_data = UserSerializer(user).data
@@ -162,3 +178,47 @@ class LoginView(APIView):
         )
 
         return response
+
+
+class ForgotPasswordView(APIView):
+
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # send password reset link to mail
+        password_reset_service.send_password_reset_mail(
+            serializer.validated_data["email"]
+        )
+
+        return success_response(
+            message="reset password link sent to mail", status_code=status.HTTP_200_OK
+        )
+
+
+class ResetPasswordView(APIView):
+
+    def post(self, request):
+
+        serializer = ResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["password"]
+
+        verified_user = password_reset_service.verify_reset_token(token)
+
+        if not verified_user:
+            return error_response(
+                message="Unauthorized access", status_code=status.HTTP_401_UNAUTHORIZED
+            )
+
+        print(verified_user)
+        user = User.objects.get(email=verified_user.get("email"))
+        user.set_password(new_password)
+        user.save()
+
+        return success_response(
+            message="password reset successfull",
+            status_code=status.HTTP_200_OK,
+        )

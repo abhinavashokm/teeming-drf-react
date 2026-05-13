@@ -8,14 +8,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['full_name', 'email', 'password']
+        fields = ["full_name", "email", "password"]
         extra_kwargs = {
             "password": {
                 "write_only": True,
             },
-            "email": {
-                "validators": []
-            }
+            "email": {"validators": []},
         }
 
     def validate_email(self, value):
@@ -24,12 +22,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
             raise serializers.ValidationError(
                 "Account already exists, Please log in",
-                code=ErrorCode.ACCOUNT_ALREADY_EXISTS
+                code=ErrorCode.ACCOUNT_ALREADY_EXISTS,
             )
 
         return value
 
-    # manually call create user because modelserializer calls User.objects.create(), 
+    # manually call create user because modelserializer calls User.objects.create(),
     # which will not hash password
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -45,6 +43,16 @@ class ResendOTPSerializer(serializers.Serializer):
 
     email = serializers.EmailField()
 
+    def validate_email(self, value):
+        user_exists = User.objects.filter(email=value).exists()
+
+        if user_exists:
+            raise serializers.ValidationError(
+                "Account already verified", code=ErrorCode.ACCOUNT_ALREADY_EXISTS
+            )
+
+        return value
+
 
 class LoginSerializer(serializers.Serializer):
 
@@ -53,11 +61,28 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = User
-        fields = [
-            'id',
-            'full_name',
-            'email'
-        ]
+        fields = ["id", "full_name", "email"]
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        user_exists = User.objects.filter(email=value).exists()
+
+        if not user_exists:
+            raise serializers.ValidationError(
+                "No account found with this email.", code=ErrorCode.ACCOUNT_NOT_FOUND
+            )
+
+        return value
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+
+    token = serializers.CharField()
+    password = serializers.CharField()

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import AuthLogo from "../../components/auth/AuthLogo";
 import AuthButton from "../../components/auth/AuthButton";
-import { verifyOTP } from "../../store/slices/authSlice";
+import { resendOTP, verifyOTP } from "../../store/slices/authSlice";
 
 function VerifyOTPPage() {
 
@@ -17,16 +17,26 @@ function VerifyOTPPage() {
 
   const navigate = useNavigate()
 
-  const handleVerify = async() => {
-    
+
+  const handleVerify = async () => {
+
     try {
 
-      await dispatch(verifyOTP({verificationEmail, otp})).unwrap()
+      await dispatch(verifyOTP({ verificationEmail, otp })).unwrap()
       navigate('/auth/login')
 
     } catch { }
 
   };
+
+
+  const resendOTPHandler = async () => {
+    try {
+
+      await dispatch(resendOTP({ verificationEmail })).unwrap()
+
+    } catch { }
+  }
 
   return (
     <div className="w-full max-w-[420px] px-6 flex flex-col items-center">
@@ -51,7 +61,7 @@ function VerifyOTPPage() {
           <div className="text-[14px] leading-relaxed text-teeming-gray text-center px-4">
             Enter the code we sent to{" "}
             <span className="text-teeming-text-dark font-bold">
-              { verificationEmail ?? "your email"}
+              {verificationEmail ?? "your email"}
             </span>
           </div>
         </div>
@@ -91,7 +101,7 @@ function VerifyOTPPage() {
 
           {/* Verify Button */}
           <div className="w-full pb-6">
-            <AuthButton onClick={handleVerify} disabled={otp.length !== 6} loading={loading}>
+            <AuthButton onClick={handleVerify} disabled={otp.length !== 6}>
               {loading ? "Verifing..." : "Verify"}
             </AuthButton>
           </div>
@@ -103,7 +113,7 @@ function VerifyOTPPage() {
               Don't see a code?
             </span>
 
-            <button className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none">
+            <button onClick={resendOTPHandler} className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none">
               Resend code
             </button>
 

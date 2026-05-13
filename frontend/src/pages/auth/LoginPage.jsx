@@ -25,7 +25,7 @@ function LoginPage() {
     const { register, handleSubmit, formState: { errors } } = useForm(testMode && {
         defaultValues: {
             email: 'yicir53558@deapad.com',
-            password: 'securepass123'
+            password: 'password'
         }
     })
 

@@ -1,25 +1,46 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, isPending, isRejected, isFulfilled } from "@reduxjs/toolkit";
 import authService from "../../services/authService";
 import { errorCodes } from "../../constants/errorCodes";
 
+
+const handleThunkError = (error, thunkAPI) => {
+
+    // No response received
+    if (!error.response) {
+
+        return thunkAPI.rejectWithValue({
+            code: errorCodes.UNKNOWN_ERROR,
+            message: error.message || "Unable to connect to server."
+        })
+    }
+
+    // Response exists
+    return thunkAPI.rejectWithValue(
+        error.response.data ?? {
+            code: errorCodes.UNKNOWN_ERROR,
+            message: "Something went wrong!"
+        }
+    )
+
+}
+
+const asyncHandler = async (apiCall, thunkAPI) => {
+    try {
+        return await apiCall()
+    } catch (error) {
+        return handleThunkError(error, thunkAPI)
+    }
+}
+
 export const login = createAsyncThunk(
     'auth/login',
+
     async ({ email, password }, thunkAPI) => {
-        try {
 
-            const res = await authService.login({ email, password })
-            return res
-
-        } catch (error) {
-
-            return thunkAPI.rejectWithValue(
-                error.response?.data || {
-                    code: errorCodes.UNKNOWN_ERROR,
-                    message: "something went wrong!"
-                }
-            )
-
-        }
+        return asyncHandler(
+            () => authService.login({ email, password }),
+            thunkAPI
+        )
 
     })
 
@@ -27,19 +48,12 @@ export const login = createAsyncThunk(
 export const signup = createAsyncThunk(
     "auth/signup",
     async ({ email, password, full_name }, thunkAPI) => {
-        try {
 
-            return await authService.signup({ email, password, full_name })
+        return asyncHandler(
+            () => authService.signup({ email, password, full_name }),
+            thunkAPI
+        )
 
-        } catch (error) {
-
-            return thunkAPI.rejectWithValue(
-                error.response?.data || {
-                    code: errorCodes.UNKNOWN_ERROR,
-                    message: "something went wrong!",
-                }
-            )
-        }
     }
 )
 
@@ -47,19 +61,47 @@ export const verifyOTP = createAsyncThunk(
     "auth/verifyOTP",
     async ({ verificationEmail, otp }, thunkAPI) => {
 
-        try {
+        return asyncHandler(
+            () => authService.verifyOTP({ email: verificationEmail, otp }),
+            thunkAPI
+        )
 
-            return await authService.verifyOTP({ email: verificationEmail, otp })
+    }
+)
 
-        } catch (error) {
-          
-            return thunkAPI.rejectWithValue(
-                error.response?.data || {
-                    code: errorCodes.UNKNOWN_ERROR,
-                    message: "something went wrong!",
-                }
-            )
-        }
+
+export const resendOTP = createAsyncThunk(
+    "auth/resendOTP",
+    ({ verificationEmail }, thunkAPI) => {
+        return asyncHandler(
+            () => authService.resendOTP({ email: verificationEmail }),
+            thunkAPI
+        )
+    }
+)
+
+
+export const forgotPassword = createAsyncThunk(
+    "auth/forgot-password",
+    async ({ email }, thunkAPI) => {
+
+        return asyncHandler(
+            () => authService.forgotPassword({ email }),
+            thunkAPI
+        )
+
+    }
+)
+
+
+export const resetPassword = createAsyncThunk(
+    "auth/reset-password",
+    async ({ reset_token, password }, thunkAPI) => {
+
+        return asyncHandler(
+            () => authService.resetPassword({ token: reset_token, password }),
+            thunkAPI
+        )
 
     }
 )
@@ -93,61 +135,68 @@ const authSlice = createSlice({
         builder
 
             //LOGIN
-            .addCase(login.pending, (state) => {
-
-                state.error = null
-                state.loading = true
-            })
             .addCase(login.fulfilled, (state, action) => {
 
                 state.user = action.payload.data.user
                 state.accessToken = action.payload.access_token
-                state.error = null
-                state.loading = false
-            })
-            .addCase(login.rejected, (state, action) => {
-
-                state.error = action.payload
-                state.loading = false
             })
 
             //SIGNUP
-            .addCase(signup.pending, (state) => {
-
-                state.error = null
-                state.loading = true
-            })
             .addCase(signup.fulfilled, (state, action) => {
 
                 state.verificationEmail = action.payload.data.email
-                state.error = null
-                state.loading = false
-            })
-            .addCase(signup.rejected, (state, action) => {
-
-                state.loading = false
-                state.error = action.payload
             })
 
             //VERIFY OTP
-            .addCase(verifyOTP.pending, (state) => {
-
-                state.loading = true
-                state.error = null
-            })
             .addCase(verifyOTP.fulfilled, (state, action) => {
 
-                state.loading = false
-                state.error = null
                 state.user = action.payload.user
             })
-            .addCase(verifyOTP.rejected, (state, action) => {
 
-                state.loading = false
-                state.error = action.payload
-            })
-            ;
+            // GENERIC MATCHERS LAST
+            .addMatcher(
+                isPending(
+                    login,
+                    signup,
+                    verifyOTP,
+                    resendOTP,
+                    forgotPassword,
+                    resetPassword,
+                ),
+                (state) => {
+                    state.loading = true
+                    state.error = null
+                }
+            )
 
+            .addMatcher(isFulfilled(
+                login,
+                signup,
+                verifyOTP,
+                resendOTP,
+                forgotPassword,
+                resetPassword,
+            ),
+                (state) => {
+                    state.loading = false
+                    state.error = null
+                }
+            )
+
+            .addMatcher(
+                isRejected(
+                    login,
+                    signup,
+                    verifyOTP,
+                    resendOTP,
+                    forgotPassword,
+                    resetPassword,
+                ),
+                (state, action) => {
+                    state.loading = false
+                    state.error = action.payload
+                }
+            )
     }
 })
 

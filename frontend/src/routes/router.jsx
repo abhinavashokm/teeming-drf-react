@@ -6,6 +6,8 @@ import VerifyOTPPage from "../pages/auth/VerifyOTPPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import HomePage from "../pages/home/HomePage";
+import ResetPasswordSentPage from "../pages/auth/ResetPasswordSentPage";
+import PasswordChangedPage from "../pages/auth/PasswordChangedPage";
 
 
 
@@ -33,7 +35,15 @@ const router = createBrowserRouter([
             {
                 path: 'reset-password',
                 element: <ResetPasswordPage />
-            }
+            },
+            {
+                path: 'reset-password-sent',
+                element: <ResetPasswordSentPage/>
+            },
+            {
+                path: 'reset-password-success',
+                element: <PasswordChangedPage />
+            },
         ]
 
     },

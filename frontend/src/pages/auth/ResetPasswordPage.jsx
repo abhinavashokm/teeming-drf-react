@@ -1,6 +1,28 @@
+import { useForm } from "react-hook-form"
 import AuthLogo from "../../components/auth/AuthLogo"
+import PasswordInput from "../../components/auth/PasswordInput"
+import AuthButton from "../../components/auth/AuthButton"
+import { useSearchParams } from "react-router-dom"
+import { useDispatch } from "react-redux"
+import { resetPassword } from "../../store/slices/authSlice"
+
 
 function ResetPasswordPage() {
+
+    const { register, handleSubmit, formState: { errors } } = useForm()
+
+    const dispatch = useDispatch()
+
+    const [searchParams] = useSearchParams()
+    const reset_token = searchParams.get('token')
+
+    const handleResetPassword = ({ password }) => {
+        try {
+            dispatch(resetPassword({ password, reset_token }))
+        } catch { }
+
+    }
+
     return (
         <div className="w-full max-w-[440px] px-6 flex flex-col items-center">
 
@@ -28,89 +50,23 @@ function ResetPasswordPage() {
                 </div>
 
                 {/* Form & Actions Section */}
-                <div className="flex flex-col items-stretch w-full mt-[40px] gap-4">
+                <form onSubmit={handleSubmit(handleResetPassword)} className="flex flex-col items-stretch w-full mt-[40px] gap-4">
 
-                    {/* Enter Password Input */}
-                    <div className="w-full flex flex-col items-stretch gap-1.5">
+                    <PasswordInput placeholder={"Enter password"} autocomplete="new-password"
+                        {...register('password')} error={errors.password}
+                    />
 
-                        <label className="text-[12px] font-semibold text-[#334155] pl-0.5 uppercase tracking-[0.05em]">
-                            Enter Password
-                        </label>
-
-                        <div className="relative w-full">
-
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className="w-full py-3 pl-4 pr-12 bg-white border border-teeming-border rounded-lg text-[14px] text-teeming-text-dark placeholder-[#CBD5E1] focus:outline-none focus:ring-1 focus:ring-teeming-green focus:border-teeming-green transition-all"
-                            />
-
-                            <button className="absolute right-1 top-1/2 -translate-y-1/2 p-2 flex items-center justify-center text-teeming-light-gray hover:text-gray-600 transition-colors">
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                    <circle cx="12" cy="12" r="3" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Confirm Password Input */}
-                    <div className="w-full flex flex-col items-stretch gap-1.5">
-
-                        <label className="text-[12px] font-semibold text-[#334155] pl-0.5 uppercase tracking-[0.05em]">
-                            Confirm Password
-                        </label>
-
-                        <div className="relative w-full">
-
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className="w-full py-3 pl-4 pr-12 bg-white border border-teeming-border rounded-lg text-[14px] text-teeming-text-dark placeholder-[#CBD5E1] focus:outline-none focus:ring-1 focus:ring-teeming-green focus:border-teeming-green transition-all"
-                            />
-
-                            <button className="absolute right-1 top-1/2 -translate-y-1/2 p-2 flex items-center justify-center text-teeming-light-gray hover:text-gray-600 transition-colors">
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                    <circle cx="12" cy="12" r="3" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                    <PasswordInput placeholder={"Confirm password"} autocomplete="new-password"
+                        {...register('confirmPassword')} error={errors.confirmPassword}
+                    />
 
                     {/* Create Password Button */}
                     <div className="pt-2 w-full">
-
-                        <button className="w-full py-3 bg-teeming-green hover:bg-emerald-600 rounded-lg shadow-sm transition-colors flex justify-center items-center">
-
-                            <span className="text-white font-medium text-[14px] leading-5 tracking-wide">
-                                Create Password
-                            </span>
-                        </button>
+                        <AuthButton>
+                            Create Password
+                        </AuthButton>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     )

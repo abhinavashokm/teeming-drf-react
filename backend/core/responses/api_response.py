@@ -19,7 +19,10 @@ def success_response(
         }
     """
 
-    response_data = {"success": True, "data": data}
+    response_data = {"success": True}
+
+    if data:
+        response_data["data"] = data
 
     if message:
         response_data["message"] = message
