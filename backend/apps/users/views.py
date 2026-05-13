@@ -6,9 +6,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from core.constants.error_codes import ErrorCode
 from django.contrib.auth.hashers import make_password
 
-from core.responses.api_response import success_response, error_response
-
-
+from core.responses.api_response import (
+    success_response,
+    error_response,
+    validation_error_response,
+)
 from .serializers import (
     RegisterSerializer,
     VerifyOTPSerializer,
@@ -18,6 +20,7 @@ from .serializers import (
 )
 from .services import otp_service, signup_service
 from .models import User
+from django.conf import settings
 
 
 class RegisterView(APIView):
@@ -26,13 +29,7 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
 
         if not serializer.is_valid():
-
-            return error_response(
-                message="Validation failed",
-                details=serializer.errors,
-                status_code=status.HTTP_400_BAD_REQUEST,
-                error_code="validation_error",
-            )
+            return validation_error_response(serializer.errors)
 
         email = serializer.validated_data["email"]
 
@@ -62,7 +59,8 @@ class RegisterView(APIView):
 class VerifyOTPView(APIView):
 
     def post(self, request):
-    
+
+        print("1: ", request.data)
         serializer = VerifyOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -72,16 +70,16 @@ class VerifyOTPView(APIView):
 
         stored_signup_data = signup_service.get_signup_data(email)
 
+        print("2 ", stored_signup_data)
         if not stored_signup_data:
             return error_response(
-                message= "OTP expired or not found",
+                message="OTP expired or not found",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         if stored_signup_data.get("otp") != otp:
             return error_response(
-                message="Invalid OTP", 
-                status_code=status.HTTP_400_BAD_REQUEST
+                message="Invalid OTP", status_code=status.HTTP_400_BAD_REQUEST
             )
 
         # user verified - update db
@@ -94,8 +92,8 @@ class VerifyOTPView(APIView):
         # delete otp record
         signup_service.delete_signup_data(email)
 
-        return Response(
-            {"message": "verification successfull"}, status=status.HTTP_200_OK
+        return success_response(
+            message="verification successfull", status_code=status.HTTP_200_OK
         )
 
 
@@ -134,29 +132,23 @@ class LoginView(APIView):
         user = authenticate(request, email=email, password=password)
 
         if not user:
-            return Response(
-                {
-                    "code": ErrorCode.AUTH_INVALID_CREDENTIALS,
-                    "message": "Invalid Credentials",
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
+            return error_response(
+                error_code=ErrorCode.INVALID_CREDENTIALS,
+                message="Invalid Credentials",
+                status_code=status.HTTP_401_UNAUTHORIZED,
             )
-
-        if not user.is_verified:
-            return Response(
-                {"message": "Account not verified"}, status=status.HTTP_403_FORBIDDEN
-            )
+        
 
         refresh = RefreshToken.for_user(user)
         user_data = UserSerializer(user).data
 
-        response = Response(
-            {
-                "message": "Login successfull",
+        response = success_response(
+            message="Login successfull",
+            data={
                 "user": user_data,
                 "access_token": str(refresh.access_token),
             },
-            status=status.HTTP_200_OK,
+            status_code=status.HTTP_200_OK,
         )
 
         # Set refresh token as httpOnly cookie
@@ -166,7 +158,7 @@ class LoginView(APIView):
             httponly=True,
             secure=True,
             samesite="Lax",
-            max_age=7 * 24 * 60 * 60,  # 7days (in seconds)
+            max_age=settings.REFRESH_TOKEN_MAX_AGE,
         )
 
         return response

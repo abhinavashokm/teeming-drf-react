@@ -29,8 +29,7 @@ export const signup = createAsyncThunk(
     async ({ email, password, full_name }, thunkAPI) => {
         try {
 
-            const res_data = await authService.signup({ email, password, full_name })
-            return res_data.data
+            return await authService.signup({ email, password, full_name })
 
         } catch (error) {
 
@@ -50,8 +49,7 @@ export const verifyOTP = createAsyncThunk(
 
         try {
 
-            const res_data = await authService.verifyOTP({ email: verificationEmail, otp })
-            return res_data
+            return await authService.verifyOTP({ email: verificationEmail, otp })
 
         } catch (error) {
           
@@ -102,7 +100,7 @@ const authSlice = createSlice({
             })
             .addCase(login.fulfilled, (state, action) => {
 
-                state.user = action.payload.user
+                state.user = action.payload.data.user
                 state.accessToken = action.payload.access_token
                 state.error = null
                 state.loading = false
@@ -111,7 +109,6 @@ const authSlice = createSlice({
 
                 state.error = action.payload
                 state.loading = false
-
             })
 
             //SIGNUP
@@ -122,7 +119,7 @@ const authSlice = createSlice({
             })
             .addCase(signup.fulfilled, (state, action) => {
 
-                state.verificationEmail = action.payload.email
+                state.verificationEmail = action.payload.data.email
                 state.error = null
                 state.loading = false
             })

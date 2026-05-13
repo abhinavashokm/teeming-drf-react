@@ -2,6 +2,7 @@ import { useState } from "react";
 import { OTPInput } from "input-otp";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import AuthLogo from "../../components/auth/AuthLogo";
 import AuthButton from "../../components/auth/AuthButton";
@@ -14,12 +15,15 @@ function VerifyOTPPage() {
   const dispatch = useDispatch()
   const { loading, verificationEmail } = useSelector(store => store.auth)
 
+  const navigate = useNavigate()
+
   const handleVerify = async() => {
     
     try {
 
-      const email = verificationEmail || "arjunraj2121@gmail.com"
-      await dispatch(verifyOTP({verificationEmail: email, otp})).unwrap()
+      await dispatch(verifyOTP({verificationEmail, otp})).unwrap()
+      navigate('/auth/login')
+
     } catch { }
 
   };
@@ -47,7 +51,7 @@ function VerifyOTPPage() {
           <div className="text-[14px] leading-relaxed text-teeming-gray text-center px-4">
             Enter the code we sent to{" "}
             <span className="text-teeming-text-dark font-bold">
-              arjun@acmecorp.com
+              { verificationEmail ?? "your email"}
             </span>
           </div>
         </div>

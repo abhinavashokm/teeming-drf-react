@@ -156,7 +156,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    # "EXCEPTION_HANDLER": "core.exceptions.handlers.custom_exception_handler"
+    "EXCEPTION_HANDLER": "core.exceptions.handlers.custom_exception_handler"
 }
 
 SIMPLE_JWT = {
@@ -166,6 +166,8 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 # 7days (in seconds)
 
 
 # expiry time for otp verification

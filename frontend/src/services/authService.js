@@ -14,7 +14,7 @@ const authService = {
     verifyOTP: async (data) => {
 
         const res = await api.post('/auth/verify-otp/', data)
-        return res
+        return res.data
     }
 }
 

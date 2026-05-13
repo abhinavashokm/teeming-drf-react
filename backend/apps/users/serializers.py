@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import User
+from core.constants.error_codes import ErrorCode
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -23,12 +24,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 
             raise serializers.ValidationError(
                 "Account already exists, Please log in",
-                code="account_exists"
+                code=ErrorCode.ACCOUNT_ALREADY_EXISTS
             )
 
         return value
 
-    # manually call create user because modelserializer calls User.objects.create() which will not hash password
+    # manually call create user because modelserializer calls User.objects.create(), 
+    # which will not hash password
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
