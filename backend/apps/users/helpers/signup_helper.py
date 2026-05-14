@@ -1,19 +1,15 @@
 import time
 
-from core.redis.store import set_data, get_data, delete_data
+from core.redis import store
 from django.conf import settings
 
 
-SIGNUP_SESSION_EXPIRY = 600  # 10 minutes
-
-
 def _make_key(email):
-    hashed = email  # make hash here
-    return f"signup:{hashed}"
+    return store.make_key(prefix="signup", identifier=email)
 
 
 def save_signup_data(email, full_name, password, otp):
-    set_data(
+    store.set_data(
         key=_make_key(email),
         value={
             "email": email,
@@ -23,8 +19,12 @@ def save_signup_data(email, full_name, password, otp):
             "otp_expires_at": time.time() + settings.OTP_EXPIRY,
             "attempts": 0,
         },
-        timeout=SIGNUP_SESSION_EXPIRY,
+        timeout=settings.SIGNUP_SESSION_EXPIRY,
     )
+
+
+def signup_data_exists(email):
+    return store.exists(_make_key(email))
 
 
 def update_signup_otp(email, otp):
@@ -36,20 +36,22 @@ def update_signup_otp(email, otp):
     signup_data['otp'] = otp
     signup_data['otp_expires_at'] = time.time() + settings.OTP_EXPIRY
 
-    set_data(
+    store.set_data(
         key=_make_key(email),
         value=signup_data,
-        timeout=SIGNUP_SESSION_EXPIRY
+        timeout=settings.SIGNUP_SESSION_EXPIRY
     )
 
     return True
     
 
-
-
 def get_signup_data(email):
-    return get_data(_make_key(email))
+    return store.get_data(_make_key(email))
 
 
 def delete_signup_data(email):
-    delete_data(_make_key(email))
+    store.delete_data(_make_key(email))
+
+
+def is_otp_expired(otp_expires_at):
+    return float(otp_expires_at) < time.time()

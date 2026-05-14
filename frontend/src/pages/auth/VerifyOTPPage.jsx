@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OTPInput } from "input-otp";
+import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -31,11 +31,10 @@ function VerifyOTPPage() {
 
 
   const resendOTPHandler = async () => {
-    try {
 
-      await dispatch(resendOTP({ verificationEmail })).unwrap()
+    setOtp("")
+    dispatch(resendOTP({ verificationEmail }))
 
-    } catch { }
   }
 
   return (
@@ -76,6 +75,7 @@ function VerifyOTPPage() {
               value={otp}
               onChange={setOtp}
               maxLength={6}
+              pattern={REGEXP_ONLY_DIGITS}  // blocks non-digit input
               render={({ slots }) => (
 
                 <div className="flex flex-row justify-center gap-2 sm:gap-3 w-full">

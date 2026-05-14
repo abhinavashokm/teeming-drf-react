@@ -1,5 +1,12 @@
 import json
+import hashlib
 from django.core.cache import cache
+
+
+def make_key(prefix, identifier):
+    """make key for securly storing reset token to redis"""
+    hashed_identifier = hashlib.sha256(str(identifier).lower().encode()).hexdigest()
+    return f"{prefix}:{hashed_identifier}"
 
 
 def set_data(key: str, value: dict, timeout: int) -> None:

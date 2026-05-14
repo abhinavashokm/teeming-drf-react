@@ -2,6 +2,7 @@ from rest_framework.views import exception_handler
 from core.responses.api_response import error_response
 from rest_framework.exceptions import ValidationError
 from core.constants.error_codes import ErrorCode
+from core.exceptions.base import AppException
 
 
 def custom_exception_handler(exc, context):
@@ -28,6 +29,13 @@ def custom_exception_handler(exc, context):
                     status_code=response.status_code,
                     error_code=error_code
                 )
+        
+        elif(isinstance(exc, AppException)):
+            return error_response(
+                message=exc.message,
+                error_code=exc.error_code,
+                status_code=exc.status_code,
+            )
 
         # All other DRF exceptions (401, 403, 404, throttle, etc.)
         return error_response(
