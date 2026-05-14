@@ -8,6 +8,14 @@ from core.exceptions.base import AppException
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
+    if isinstance(exc, AppException):
+        print("hello ")
+        return error_response(
+            message=exc.message,
+            error_code=exc.error_code,
+            status_code=exc.status_code,
+        )
+
     if response is not None:
 
         if isinstance(exc, ValidationError):
@@ -17,32 +25,22 @@ def custom_exception_handler(exc, context):
 
             for field_errors in response.data.values():
                 for error in field_errors:
-                    if isinstance(error, dict) and 'code' in error.keys():
-                        error_code = error['code']
+                    if isinstance(error, dict) and "code" in error.keys():
+                        error_code = error["code"]
                         break
 
             # Handle serializer validation errors separately
             if isinstance(exc, ValidationError):
                 return error_response(
                     message="Validation failed",
-                    details=response.data,   # {"email": ["This field is required."]}
+                    details=response.data,  # {"email": ["This field is required."]}
                     status_code=response.status_code,
-                    error_code=error_code
+                    error_code=error_code,
                 )
-        
-        elif(isinstance(exc, AppException)):
-            return error_response(
-                message=exc.message,
-                error_code=exc.error_code,
-                status_code=exc.status_code,
-            )
 
         # All other DRF exceptions (401, 403, 404, throttle, etc.)
-        return error_response(
-            message=str(exc),
-            status_code=response.status_code
-        )
-    
+        return error_response(message=str(exc), status_code=response.status_code)
+
     return None
 
 

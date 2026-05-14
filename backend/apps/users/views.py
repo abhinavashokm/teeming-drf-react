@@ -2,6 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenBlacklistView
+
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
+from allauth.socialaccount.models import SocialAccount
 
 from core.responses.api_response import (
     success_response,
@@ -108,19 +114,15 @@ class LoginView(APIView):
 class RefreshTokenView(APIView):
 
     def post(self, request):
-        refresh_token = request.COOKIES.get('refresh_token')
+        refresh_token = request.COOKIES.get("refresh_token")
 
         if not refresh_token:
             raise exceptions.InvalidCredentials()
-        
+
         token = RefreshToken(refresh_token)
 
-        return success_response(
-            data={
-                'access_token': str(token.access_token)
-            }
-        )
-    
+        return success_response(data={"access_token": str(token.access_token)})
+
 
 class MeView(APIView):
 
@@ -170,3 +172,66 @@ class ResetPasswordView(APIView):
         )
 
 
+class CookieTokenBlacklistView(TokenBlacklistView):
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get("refresh_token")
+
+        if not refresh_token:
+            return Response(
+                {"detail": "No refresh token."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Inject into request data so parent handles blacklisting
+        request.data["refresh"] = refresh_token
+        response = super().post(request, *args, **kwargs)
+
+        # Clear cookie
+        response.delete_cookie("refresh_token")
+        return response
+
+
+class GoogleLoginView(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = settings.FRONTEND_URL
+    client_class = OAuth2Client
+
+    def get_response(self):
+        response = super().get_response()
+
+        access_token = response.data.get("access")
+        refresh_token = response.data.get("refresh")
+
+        user = self.request.user
+
+
+        # get google profile name to full_name
+        try:
+            social_account = SocialAccount.objects.get(user=user, provider='google')
+            extra_data = social_account.extra_data  # dict from Google
+            full_name = extra_data.get('name', '')  # Google sends 'name' field
+        except SocialAccount.DoesNotExist:
+            full_name = user.full_name  # fallback
+
+
+        res = success_response(
+            data={
+                "access_token": access_token,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": full_name,  # adjust to your User model fields
+                },
+            }
+        )
+
+        res.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=False,  # True in production
+            samesite="Lax",
+            max_age=7 * 24 * 60 * 60,  # 7 days
+        )
+
+        return res

@@ -4,10 +4,10 @@ import { Navigate, Outlet } from "react-router-dom"
 
 function PublicRoute() {
 
-  const { accessToken } = useSelector(store => store.auth)
+  const { user } = useSelector(store => store.auth)
 
   return (
-    accessToken 
+    user 
     ? <Navigate to={'/'} replace/>
     : <Outlet />
 

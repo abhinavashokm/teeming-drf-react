@@ -129,6 +129,32 @@ export const initializeUser = createAsyncThunk(
     }
 )
 
+export const logout = createAsyncThunk(
+    "auth/logout",
+    (_, thunkAPI) => {
+        return asyncHandler(
+            async() => {
+
+                thunkAPI.dispatch(clearAuth())
+                await authService.logout()
+
+            },
+            thunkAPI
+        )
+    }
+)
+
+
+export const googleLogin = createAsyncThunk(
+    "auth/googleLogin",
+    ({code}, thunkAPI) => {
+        return asyncHandler(
+            () => authService.googleLogin({code}),
+            thunkAPI
+        )
+    }
+)
+
 
 
 const authSlice = createSlice({
@@ -155,6 +181,11 @@ const authSlice = createSlice({
             state.error = null
         },
 
+        clearAuth: (state) => {
+            state.user = null
+            state.accessToken = null
+        }
+
     },
     extraReducers: (builder) => {
 
@@ -163,8 +194,15 @@ const authSlice = createSlice({
             //LOGIN
             .addCase(login.fulfilled, (state, action) => {
                 state.user = action.payload.data.user
-                state.accessToken = action.payload.data.access_token
+                state.accessToken = action.payload.data.accessToken
             })
+
+            //GOOGLE LOGIN
+            .addCase(googleLogin.fulfilled, (state, action) => {
+                console.log("fullfilled")
+                state.user = action.payload.data.user
+                state.accessToken = action.payload.data.accessToken
+            } )
 
             //SIGNUP
             .addCase(signup.fulfilled, (state, action) => {
@@ -190,8 +228,6 @@ const authSlice = createSlice({
                 state.authLoading = false
             })
 
-
-
             // GENERIC MATCHERS LAST
             .addMatcher(
                 isPending(
@@ -201,6 +237,8 @@ const authSlice = createSlice({
                     resendOTP,
                     forgotPassword,
                     resetPassword,
+                    googleLogin,
+
                 ),
                 (state) => {
                     state.loading = true
@@ -215,6 +253,7 @@ const authSlice = createSlice({
                 resendOTP,
                 forgotPassword,
                 resetPassword,
+                googleLogin,
             ),
                 (state) => {
                     state.loading = false
@@ -230,6 +269,7 @@ const authSlice = createSlice({
                     resendOTP,
                     forgotPassword,
                     resetPassword,
+                    googleLogin,
                 ),
                 (state, action) => {
                     state.loading = false
@@ -240,5 +280,5 @@ const authSlice = createSlice({
 })
 
 
-export const { setAccessToken, clearAuthError } = authSlice.actions
+export const { setAccessToken, clearAuthError, clearAuth } = authSlice.actions
 export default authSlice.reducer

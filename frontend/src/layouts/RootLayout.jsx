@@ -3,10 +3,11 @@ import { useDispatch, useSelector } from "react-redux"
 import { initializeUser } from "../store/slices/authSlice"
 import { useEffect } from "react"
 import FullPageLoader from "../components/ui/FullPageLoader"
+import { Toaster } from "react-hot-toast"
 
 
 function RootLayout() {
-
+    
     const dispatch = useDispatch()
     const authLoading = useSelector(store => store.auth.authLoading)
 
@@ -15,11 +16,14 @@ function RootLayout() {
     }, [])
 
     return (
-        authLoading 
-        ?
-        <FullPageLoader/> 
-        :
-        <Outlet />
+        authLoading
+            ?
+            <FullPageLoader />
+            :
+            <>
+                <Toaster position="top-center" />
+                <Outlet />
+            </>
     )
 }
 

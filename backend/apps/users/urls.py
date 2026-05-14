@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+
 from .views import (
     RegisterView,
     VerifyOTPView,
@@ -8,6 +9,8 @@ from .views import (
     ResendOTPView,
     RefreshTokenView,
     MeView,
+    CookieTokenBlacklistView,
+    GoogleLoginView,
 )
 
 urlpatterns = [
@@ -19,4 +22,11 @@ urlpatterns = [
     path("reset-password/", ResetPasswordView.as_view()),
     path("refresh/", RefreshTokenView.as_view()),
     path("me/", MeView.as_view()),
+    path("logout/", CookieTokenBlacklistView.as_view(), name="logout"),
+
+    # google Oauth urls
+    path("", include("dj_rest_auth.urls")),
+    path('accounts/', include('allauth.urls')),
+    path("registration/", include("dj_rest_auth.registration.urls")),
+    path("social/google/", GoogleLoginView.as_view()),
 ]

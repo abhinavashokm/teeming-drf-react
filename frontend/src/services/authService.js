@@ -47,6 +47,18 @@ const authService = {
         const res = await api.get("/auth/me/")
         return res.data
     },
+
+    logout: async () => {
+
+        const res = await api.post('/auth/logout/')
+        return res.data
+    },
+
+    googleLogin: async (data) => {
+
+        const res = await api.post("/auth/social/google/", data)
+        return res.data
+    }
 }
 
 export default authService

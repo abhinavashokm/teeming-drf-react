@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import GoogleButton from '../../components/auth/GoogleButton'
+import { Link, replace } from 'react-router-dom'
+import GoogleLogin from '../../components/auth/GoogleLogin'
 import AuthInput from '../../components/auth/AuthInput'
 import PasswordInput from '../../components/auth/PasswordInput'
 import AuthLogo from '../../components/auth/AuthLogo'
@@ -8,10 +8,11 @@ import AuthButton from '../../components/auth/AuthButton'
 import { useForm } from 'react-hook-form'
 import AuthFormError from '../../components/auth/AuthFormError'
 import { validations } from '../../utils/validations'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { login } from '../../store/slices/authSlice'
 import { useNavigate } from 'react-router-dom'
 import { useAuthError } from '../../hooks/auth/useAuthError'
+import { showSuccess } from '../../utils/toast'
 
 
 function LoginPage() {
@@ -19,7 +20,6 @@ function LoginPage() {
     const testMode = true
 
     const dispatch = useDispatch()
-    const auth = useSelector(store => store.auth)
     const navigate = useNavigate()
 
     const { register, handleSubmit, formState: { errors } } = useForm(testMode && {
@@ -32,11 +32,12 @@ function LoginPage() {
 
     const handleLogin = async (data) => {
         try {
+
             await dispatch(login(data)).unwrap()
-            navigate('/')
-        } catch {
-            // error already handled by redux state (auth.error)
-        }
+            showSuccess("login success")
+            navigate('/', {replace: true})
+
+        } catch {}
     }
 
     //filtered server error message
@@ -73,7 +74,7 @@ function LoginPage() {
                     {/* Form & Actions Section */}
                     <div className="flex flex-col items-stretch w-full mt-6 gap-0">
 
-                        <GoogleButton />
+                        <GoogleLogin />
 
                         {/* Divider */}
                         <AuthDivider />

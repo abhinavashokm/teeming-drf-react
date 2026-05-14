@@ -4,10 +4,10 @@ import { Navigate, Outlet } from "react-router-dom"
 
 function ProtectedRoute() {
 
-  const { accessToken } = useSelector(store => store.auth)
+  const { user } = useSelector(store => store.auth)
 
   return (
-    accessToken 
+    user 
     ? <Outlet />
     : <Navigate to={'/auth/login'} replace/>
 

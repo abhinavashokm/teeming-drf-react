@@ -1,6 +1,45 @@
-function GoogleButton() {
+import { useGoogleLogin } from '@react-oauth/google'
+import { useDispatch } from 'react-redux';
+import { googleLogin } from '../../store/slices/authSlice';
+import { showError, showSuccess } from '../../utils/toast';
+import { useNavigate } from 'react-router-dom';
+
+
+function GoogleLogin() {
+
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+
+    const login = useGoogleLogin({
+        flow: 'auth-code',
+        onSuccess: async ({ code }) => {
+
+            try {
+
+                await dispatch(googleLogin({ code })).unwrap()
+                showSuccess("Google sign-in successfull")
+                navigate("/", { replace: true })
+
+            } catch {
+                showError("Something went wrong. Please try again.")
+            }
+
+        },
+        onError: (err) => {
+            if (err.type === 'popup_closed_by_user') return; // silent
+
+            if (err.type === 'access_denied') {
+                showError('Google sign-in was denied.');
+                return;
+            }
+
+            showError('Google sign-in failed. Please try again.');
+        }
+    });
+
+
     return (
-        <button className="w-full flex flex-row items-center justify-center py-[10px] px-4 bg-white border border-teeming-border rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
+        <button onClick={login} className="w-full flex flex-row items-center justify-center py-[10px] px-4 bg-white border border-teeming-border rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
             <div className="flex items-center justify-center relative w-full">
 
                 <svg
@@ -35,4 +74,4 @@ function GoogleButton() {
     )
 }
 
-export default GoogleButton
+export default GoogleLogin

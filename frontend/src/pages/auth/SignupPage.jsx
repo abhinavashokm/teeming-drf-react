@@ -1,4 +1,4 @@
-import GoogleButton from '../../components/auth/GoogleButton'
+import GoogleLogin from '../../components/auth/GoogleLogin'
 import { Link } from 'react-router-dom'
 import PasswordInput from '../../components/auth/PasswordInput'
 import AuthLogo from '../../components/auth/AuthLogo'
@@ -72,7 +72,7 @@ function SignupPage() {
                     {/* Form & Actions Section */}
                     <div className="flex flex-col items-stretch w-full mt-6 gap-0">
 
-                        <GoogleButton />
+                        <GoogleLogin />
 
                         {/* Divider */}
                         <AuthDivider />

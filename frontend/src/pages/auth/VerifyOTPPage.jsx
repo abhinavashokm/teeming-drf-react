@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import AuthLogo from "../../components/auth/AuthLogo";
 import AuthButton from "../../components/auth/AuthButton";
 import { resendOTP, verifyOTP } from "../../store/slices/authSlice";
+import { showError, showSuccess } from "../../utils/toast";
+
 
 function VerifyOTPPage() {
 
@@ -25,16 +27,26 @@ function VerifyOTPPage() {
       await dispatch(verifyOTP({ verificationEmail, otp })).unwrap()
       navigate('/auth/login')
 
-    } catch { }
+    } catch {
+
+      setOtp("")
+      showError("Invalid OTP, Please try again")
+
+    }
 
   };
 
 
   const resendOTPHandler = async () => {
+    try{
 
-    setOtp("")
-    dispatch(resendOTP({ verificationEmail }))
+      await dispatch(resendOTP({ verificationEmail })).unwrap()
+      setOtp("")
+      showSuccess("OTP resent successfully")
 
+    }catch {
+
+    }
   }
 
   return (

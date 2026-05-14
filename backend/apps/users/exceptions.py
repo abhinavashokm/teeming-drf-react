@@ -19,9 +19,9 @@ class InvalidOTP(AppException):
 
 
 class InvalidCredentials(AppException):
-    error_code=ErrorCode.INVALID_CREDENTIALS,
-    message="Invalid Credentials",
-    status_code=status.HTTP_401_UNAUTHORIZED,
+    error_code=ErrorCode.INVALID_CREDENTIALS
+    message="Invalid Credentials"
+    status_code=status.HTTP_401_UNAUTHORIZED
 
 
 class PasswordResetSessionExpired(AppException):

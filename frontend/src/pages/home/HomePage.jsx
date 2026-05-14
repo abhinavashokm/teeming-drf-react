@@ -1,5 +1,7 @@
 import { useDispatch, useSelector } from "react-redux"
 import { Link } from "react-router-dom"
+import { logout } from "../../store/slices/authSlice"
+import { showSuccess } from "../../utils/toast"
 
 function HomePage() {
 
@@ -7,8 +9,12 @@ function HomePage() {
 
     const user = useSelector((state) => state.auth.user)
 
-    const handleLogout = () => {
-
+    const handleLogout = async() => {
+        try{
+            await dispatch(logout()).unwrap()
+            showSuccess("You have been logged out.")
+        }catch {}
+        
     }
 
     return (
