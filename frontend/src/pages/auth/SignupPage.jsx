@@ -24,7 +24,7 @@ function SignupPage() {
 
     const { handleSubmit, register, formState: { errors } } = useForm(testMode && {
         defaultValues: {
-            full_name: 'Arjun Kumar',
+            fullName: 'Arjun Kumar',
             email: 'arjunraj@gmail.com',
             password: 'password'
         }
@@ -88,7 +88,7 @@ function SignupPage() {
 
                             {/* Full Name Input */}
                             <AuthInput type="text" placeholder={"Full name"} autoComplete={'name'}
-                                {...register('full_name', validations.full_name)} error={errors.full_name} />
+                                {...register('fullName', validations.fullName)} error={errors.fullName} />
 
                             {/* Email Input */}
                             <AuthInput type={"email"} placeholder={"Work email"} autoComplete={'email'}

@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.responses.api_response import (
     success_response,
@@ -16,7 +17,7 @@ from .serializers import (
     ResetPasswordSerializer,
 )
 from django.conf import settings
-from . import services
+from . import services, exceptions
 
 
 class RegisterView(APIView):
@@ -96,12 +97,45 @@ class LoginView(APIView):
             key="refresh_token",
             value=str(refresh_token),
             httponly=True,
-            secure=True,
+            secure=False if settings.DEBUG else True,
             samesite="Lax",
             max_age=settings.REFRESH_TOKEN_MAX_AGE,
         )
 
         return response
+
+
+class RefreshTokenView(APIView):
+
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            raise exceptions.InvalidCredentials()
+        
+        token = RefreshToken(refresh_token)
+
+        return success_response(
+            data={
+                'access_token': str(token.access_token)
+            }
+        )
+    
+
+class MeView(APIView):
+
+    def get(self, request):
+        user = request.user
+
+        return success_response(
+            data={
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": user.full_name,
+                }
+            }
+        )
 
 
 class ForgotPasswordView(APIView):
@@ -134,3 +168,5 @@ class ResetPasswordView(APIView):
             message="password reset successfull",
             status_code=status.HTTP_200_OK,
         )
+
+

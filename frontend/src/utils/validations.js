@@ -1,5 +1,5 @@
 export const validations = {
-    full_name: {
+    fullName: {
         required: "Full name is required",
 
         minLength: {

@@ -47,10 +47,10 @@ export const login = createAsyncThunk(
 
 export const signup = createAsyncThunk(
     "auth/signup",
-    async ({ email, password, full_name }, thunkAPI) => {
+    async ({ email, password, fullName }, thunkAPI) => {
 
         return asyncHandler(
-            () => authService.signup({ email, password, full_name }),
+            () => authService.signup({ email, password, fullName }),
             thunkAPI
         )
 
@@ -107,6 +107,30 @@ export const resetPassword = createAsyncThunk(
 )
 
 
+export const initializeUser = createAsyncThunk(
+    "auth/initializeUser",
+    (_, thunkAPI) => {
+
+        return asyncHandler(
+            async () => {
+
+                const refreshRes = await authService.refresh()
+
+                thunkAPI.dispatch(setAccessToken(refreshRes.data.accessToken))
+
+                const userRes = await authService.getUser()
+                return {
+                    user: userRes.data.user
+                }
+            },
+            thunkAPI
+        )
+
+    }
+)
+
+
+
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
@@ -117,7 +141,9 @@ const authSlice = createSlice({
         verificationEmail: null, //for storing email after signup for otp verification
 
         error: null,
-        loading: false
+        loading: false,
+
+        authLoading: true,
 
     },
     reducers: {
@@ -136,22 +162,35 @@ const authSlice = createSlice({
 
             //LOGIN
             .addCase(login.fulfilled, (state, action) => {
-
                 state.user = action.payload.data.user
-                state.accessToken = action.payload.access_token
+                state.accessToken = action.payload.data.access_token
             })
 
             //SIGNUP
             .addCase(signup.fulfilled, (state, action) => {
-
                 state.verificationEmail = action.payload.data.email
             })
 
             //VERIFY OTP
             .addCase(verifyOTP.fulfilled, (state, action) => {
-
                 state.user = action.payload.user
             })
+
+            //INITIALIZE USER ON PAGE REFRESH
+            .addCase(initializeUser.pending, (state) => {
+                state.authLoading = true
+            })
+
+            .addCase(initializeUser.fulfilled, (state, action) => {
+                state.user = action.payload.user
+                state.authLoading = false
+            })
+
+            .addCase(initializeUser.rejected, (state) => {
+                state.authLoading = false
+            })
+
+
 
             // GENERIC MATCHERS LAST
             .addMatcher(

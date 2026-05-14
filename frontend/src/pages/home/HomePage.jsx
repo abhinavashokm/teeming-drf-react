@@ -38,7 +38,7 @@ function HomePage() {
                             </p>
 
                             <p className="mt-1 text-sm font-medium text-gray-900">
-                                {user?.full_name || "No name"}
+                                {user?.fullName || "No name"}
                             </p>
                         </div>
 

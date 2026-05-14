@@ -1,55 +1,33 @@
 import { createBrowserRouter } from "react-router-dom";
-import AuthLayout from "../layouts/AuthLayout";
-import LoginPage from "../pages/auth/LoginPage";
-import SignupPage from "../pages/auth/SignupPage";
-import VerifyOTPPage from "../pages/auth/VerifyOTPPage";
-import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
-import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import HomePage from "../pages/home/HomePage";
-import ResetPasswordSentPage from "../pages/auth/ResetPasswordSentPage";
-import PasswordChangedPage from "../pages/auth/PasswordChangedPage";
+import RootLayout from "../layouts/RootLayout";
+import PublicRoute from "./guards/PublicRoute";
+import ProtectedRoute from "./guards/ProtectedRoute";
+import authRoutes from "./authRoutes";
 
 
 
 const router = createBrowserRouter([
     {
-        path: 'auth',
-        element: <AuthLayout />,
+        element: <RootLayout />,
         children: [
             {
-                path: 'login',
-                element: <LoginPage />
+                element: <PublicRoute />,
+                children: [{
+                    path: "auth",
+                    ...authRoutes
+                }]
             },
             {
-                path: 'signup',
-                element: <SignupPage />
-            },
-            {
-                path: 'verify-otp',
-                element: <VerifyOTPPage />
-            },
-            {
-                path: 'forgot-password',
-                element: <ForgotPasswordPage />
-            },
-            {
-                path: 'reset-password',
-                element: <ResetPasswordPage />
-            },
-            {
-                path: 'reset-password-sent',
-                element: <ResetPasswordSentPage/>
-            },
-            {
-                path: 'reset-password-success',
-                element: <PasswordChangedPage />
-            },
+                element: <ProtectedRoute />,
+                children: [{
+                    path: '/',
+                    element: <HomePage />
+                }]
+            }
+
         ]
 
-    },
-    {
-        path: '/',
-        element: <HomePage/>
     }
 ])
 

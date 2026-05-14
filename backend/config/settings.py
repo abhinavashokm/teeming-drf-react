@@ -46,7 +46,7 @@ MIDDLEWARE = [
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 CORS_ALLOWED_ORIGINS = [
-    FRONTEND_URL,
+    FRONTEND_URL
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -172,5 +172,5 @@ REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 # 7days (in seconds)
 
 
 # expiry time for otp verification
-OTP_EXPIRY = 180  # in seconds. 180s -> 3min
+OTP_EXPIRY = 60 * 2  # in seconds. 2min
 SIGNUP_SESSION_EXPIRY = 600 # 10 minutes

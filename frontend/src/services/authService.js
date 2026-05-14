@@ -1,5 +1,6 @@
 import api from "../api/axios";
 
+
 const authService = {
     login: async (data) => {
         const res = await api.post('/auth/login/', data)
@@ -33,7 +34,19 @@ const authService = {
 
         const res = await api.post('/auth/resend-otp/', data)
         return res.data
-    }
+    },
+
+    refresh: async () => {
+
+        const res = await api.post('/auth/refresh/')
+        return res.data
+    },
+
+    getUser: async () => {
+
+        const res = await api.get("/auth/me/")
+        return res.data
+    },
 }
 
 export default authService
