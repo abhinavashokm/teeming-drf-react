@@ -4,6 +4,11 @@ from core.exceptions.base import AppException
 from core.constants.error_codes import ErrorCode
 
 
+class AuthTokenException(AppException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    message = "Authentication token is missing or invalid."
+    error_code = ErrorCode.TOKEN_ERROR
+
 
 class SignupSessionExpired(AppException):
     message = "Signup session expired. Please sign up again."
@@ -21,7 +26,7 @@ class InvalidOTP(AppException):
 class InvalidCredentials(AppException):
     error_code=ErrorCode.INVALID_CREDENTIALS
     message="Invalid Credentials"
-    status_code=status.HTTP_401_UNAUTHORIZED
+    status_code=status.HTTP_400_BAD_REQUEST
 
 
 class PasswordResetSessionExpired(AppException):

@@ -24,12 +24,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # installed apps
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
-
     # google Oauth apps
     "rest_framework.authtoken",
     "django.contrib.sites",
@@ -38,8 +36,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "dj_rest_auth",
-
-
     # myapps
     "apps.users",
 ]
@@ -53,8 +49,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    #google Oauth
-    'allauth.account.middleware.AccountMiddleware', 
+    # google Oauth
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")
@@ -169,52 +165,63 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "EXCEPTION_HANDLER": "core.exceptions.handler.custom_exception_handler",
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/minute",
+        "user": "500/minute",
+        "auth": "10/minute",  # login, refresh, register
+        "sensitive": "5/minute",  # password reset, email verify
+    },
 }
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": False,
+    "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60  # 7days (in seconds)
 
-
 # expiry time for otp verification
 OTP_EXPIRY = 60 * 2  # in seconds. 2min
 SIGNUP_SESSION_EXPIRY = 600  # 10 minutes
 
 
-#Google OAuth configs
+# Google OAuth configs
 SITE_ID = 1
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
-            'secret': os.environ.get('GOOGLE_CLIENT_SECRET'),
-            'key': ''
+    "google": {
+        "APP": {
+            "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+            "secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
+            "key": "",
         },
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-        'OAUTH_PKCE_ENABLED': True,
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "OAUTH_PKCE_ENABLED": True,
     }
 }
 
 
 # return JWT instead of session
 REST_AUTH = {
-    'USE_JWT': True,
+    "USE_JWT": True,
 }
 
-SOCIALACCOUNT_ADAPTER = 'apps.users.adapters.CustomSocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = "apps.users.adapters.CustomSocialAccountAdapter"
 
 # disable signup redirect — handle via API only
 SOCIALACCOUNT_AUTO_SIGNUP = True  # auto create user, no signup page
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # or 'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = "none"  # or 'mandatory'
 
 # key setting — connect social account to existing user with same email
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
@@ -223,5 +230,4 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-
+ACCOUNT_AUTHENTICATION_METHOD = "email"

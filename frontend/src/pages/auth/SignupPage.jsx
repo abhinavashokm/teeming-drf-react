@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form'
 import AuthInput from '../../components/auth/AuthInput'
 import { validations } from '../../utils/validations'
 import AuthFormError from '../../components/auth/AuthFormError'
-import { useAuthError } from '../../hooks/auth/useAuthError'
+import { useAuthErrorMsg } from '../../hooks/auth/useAuthErrorMsg'
 import { useDispatch, useSelector } from 'react-redux'
 import { signup } from '../../store/slices/authSlice'
 import { useNavigate } from 'react-router-dom'
@@ -37,7 +37,7 @@ function SignupPage() {
         } catch { }
     }
 
-    const displayError = useAuthError()
+    const authErrorMsg = useAuthErrorMsg()
 
 
     return (
@@ -81,8 +81,8 @@ function SignupPage() {
                         <form onSubmit={handleSubmit(handleSignup)} className="flex flex-col items-stretch w-full pb-2 gap-[14px]" noValidate>
 
                             {
-                                displayError &&
-                                <AuthFormError errorMsg={displayError} />
+                                authErrorMsg &&
+                                <AuthFormError error={authErrorMsg} />
                             }
 
 

@@ -8,7 +8,7 @@ export const validations = {
         },
 
         pattern: {
-            value: /^[A-Za-z\s]+$/,
+            value: /^(?!\s*$)[A-Za-z\s]+$/,
             message: "Only letters are allowed",
         },
     },
@@ -17,7 +17,7 @@ export const validations = {
         required: "Email is required",
 
         pattern: {
-            value: /^\S+@\S+$/i,
+            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
             message: "Invalid email",
         },
     },
@@ -28,6 +28,10 @@ export const validations = {
         minLength: {
             value: 8,
             message: "Minimum 8 characters",
+        },
+        pattern: {
+            value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
+            message: "Must include uppercase, lowercase and number",
         },
     },
 }

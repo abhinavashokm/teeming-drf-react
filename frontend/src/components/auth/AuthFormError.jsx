@@ -1,5 +1,6 @@
 
-function AuthFormError({ errorMsg }) {
+function AuthFormError({ error }) {
+
     return (
         <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
             <svg
@@ -16,7 +17,7 @@ function AuthFormError({ errorMsg }) {
             </svg>
 
             <p className="text-[13px] font-normal text-rose-500">
-                {errorMsg}
+                {error}
             </p>
         </div>
     )

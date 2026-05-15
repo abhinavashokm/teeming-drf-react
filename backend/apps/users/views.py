@@ -1,17 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenBlacklistView
+from rest_framework.permissions import AllowAny
 
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
-from allauth.socialaccount.models import SocialAccount
 
 from core.responses.api_response import (
     success_response,
-    error_response,
 )
 from .serializers import (
     RegisterSerializer,
@@ -24,12 +22,15 @@ from .serializers import (
 )
 from django.conf import settings
 from . import services, exceptions
+from .helpers import cookie_helper
+from core.throttles import AuthThrottle, SensitiveThrottle
 
 
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AuthThrottle]
 
     def post(self, request):
-        print(request.data)
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -47,6 +48,8 @@ class RegisterView(APIView):
 
 
 class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [SensitiveThrottle]
 
     def post(self, request):
 
@@ -64,6 +67,7 @@ class VerifyOTPView(APIView):
 
 
 class ResendOTPView(APIView):
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = ResendOTPSerializer(data=request.data)
@@ -78,6 +82,8 @@ class ResendOTPView(APIView):
 
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AuthThrottle]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -97,31 +103,32 @@ class LoginView(APIView):
             },
             status_code=status.HTTP_200_OK,
         )
-
+        
         # Set refresh token as httpOnly cookie
-        response.set_cookie(
-            key="refresh_token",
-            value=str(refresh_token),
-            httponly=True,
-            secure=False if settings.DEBUG else True,
-            samesite="Lax",
-            max_age=settings.REFRESH_TOKEN_MAX_AGE,
+        response = cookie_helper.set_refresh_cookie(
+            refresh_token=refresh_token, response=response
         )
-
+        
         return response
 
 
 class RefreshTokenView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AuthThrottle]
 
     def post(self, request):
         refresh_token = request.COOKIES.get("refresh_token")
 
         if not refresh_token:
-            raise exceptions.InvalidCredentials()
+            raise exceptions.AuthTokenException()
 
-        token = RefreshToken(refresh_token)
+        token = services.rotate_refresh_token(refresh_token)
 
-        return success_response(data={"access_token": str(token.access_token)})
+        res = success_response(data={"access_token": token["access_token"]})
+        res = cookie_helper.set_refresh_cookie(
+            refresh_token=token["refresh_token"], response=res
+        )
+        return res
 
 
 class MeView(APIView):
@@ -141,6 +148,7 @@ class MeView(APIView):
 
 
 class ForgotPasswordView(APIView):
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -155,6 +163,8 @@ class ForgotPasswordView(APIView):
 
 
 class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [SensitiveThrottle]
 
     def post(self, request):
 
@@ -192,6 +202,8 @@ class CookieTokenBlacklistView(TokenBlacklistView):
 
 
 class GoogleLoginView(SocialLoginView):
+    permission_classes = [AllowAny]
+
     adapter_class = GoogleOAuth2Adapter
     callback_url = settings.FRONTEND_URL
     client_class = OAuth2Client
@@ -202,17 +214,7 @@ class GoogleLoginView(SocialLoginView):
         access_token = response.data.get("access")
         refresh_token = response.data.get("refresh")
 
-        user = self.request.user
-
-
-        # get google profile name to full_name
-        try:
-            social_account = SocialAccount.objects.get(user=user, provider='google')
-            extra_data = social_account.extra_data  # dict from Google
-            full_name = extra_data.get('name', '')  # Google sends 'name' field
-        except SocialAccount.DoesNotExist:
-            full_name = user.full_name  # fallback
-
+        user = services.get_or_update_google_user(self.request.user)
 
         res = success_response(
             data={
@@ -220,18 +222,13 @@ class GoogleLoginView(SocialLoginView):
                 "user": {
                     "id": user.id,
                     "email": user.email,
-                    "full_name": full_name,  # adjust to your User model fields
+                    "full_name": user.full_name,
                 },
             }
         )
 
-        res.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=False,  # True in production
-            samesite="Lax",
-            max_age=7 * 24 * 60 * 60,  # 7 days
+        res = cookie_helper.set_refresh_cookie(
+            refresh_token=refresh_token, response=res
         )
 
         return res

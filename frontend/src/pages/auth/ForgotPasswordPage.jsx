@@ -5,17 +5,31 @@ import AuthButton from "../../components/auth/AuthButton"
 import { useForm } from "react-hook-form"
 import { useDispatch } from "react-redux"
 import { forgotPassword } from "../../store/slices/authSlice"
+import { validations } from "../../utils/validations"
+import { showError } from "../../utils/toast"
+import { useNavigate } from "react-router-dom"
+import { useAuthErrorMsg } from "../../hooks/auth/useAuthErrorMsg"
+import { errorMessages } from "../../constants/errorMessages"
 
 
 function ForgotPasswordPage() {
 
-    const { register, handleSubmit } = useForm()
+    const { register, handleSubmit, formState: {errors} } = useForm()
     const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const authErrorMsg = useAuthErrorMsg()
 
-    const handleForgotPassword = ({email}) => {
+    const handleForgotPassword = async({email}) => {
         try{
-            dispatch(forgotPassword({email}))
-        }catch{ }
+
+            await dispatch(forgotPassword({email})).unwrap()
+            navigate('/auth/reset-password-sent/', {replace: true})
+
+        }catch{ 
+
+            showError( authErrorMsg ?? errorMessages.UNKNOWN_ERROR)
+
+        }
     }
 
     return (
@@ -54,7 +68,9 @@ function ForgotPasswordPage() {
                 <div className="flex flex-col items-stretch w-full mt-[40px] gap-0">
 
                     {/* Email Input */}
-                    <AuthInput type={"email"} {...register('email')} placeholder={"Work email"} />
+                    <AuthInput type={"email"} placeholder={"Work email"} 
+                    {...register('email', validations.email)}  error={errors.email}
+                    />
 
                     {/* Send Link Button */}
                     <div className="pt-6 w-full">

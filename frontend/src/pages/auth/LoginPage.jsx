@@ -1,4 +1,4 @@
-import { Link, replace } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import GoogleLogin from '../../components/auth/GoogleLogin'
 import AuthInput from '../../components/auth/AuthInput'
 import PasswordInput from '../../components/auth/PasswordInput'
@@ -11,7 +11,7 @@ import { validations } from '../../utils/validations'
 import { useDispatch } from 'react-redux'
 import { login } from '../../store/slices/authSlice'
 import { useNavigate } from 'react-router-dom'
-import { useAuthError } from '../../hooks/auth/useAuthError'
+import { useAuthErrorMsg } from '../../hooks/auth/useAuthErrorMsg'
 import { showSuccess } from '../../utils/toast'
 
 
@@ -24,8 +24,8 @@ function LoginPage() {
 
     const { register, handleSubmit, formState: { errors } } = useForm(testMode && {
         defaultValues: {
-            email: 'arjunraj@gmail.com',
-            password: 'password'
+            email: 'pihoxay220@hidevak.com',
+            password: '55555Abhii'
         }
     })
 
@@ -40,8 +40,7 @@ function LoginPage() {
         } catch {}
     }
 
-    //filtered server error message
-    const displayError = useAuthError()
+    const authErrorMsg = useAuthErrorMsg()
 
     return (
         <>
@@ -82,8 +81,8 @@ function LoginPage() {
                         {/* Inputs & Login Button */}
                         <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col items-stretch w-full pb-2 gap-[14px]">
 
-                            {displayError && (
-                                <AuthFormError errorMsg={displayError} />
+                            {authErrorMsg && (
+                                <AuthFormError error={authErrorMsg} />
                             )}
 
                             {/* Email Input */}
