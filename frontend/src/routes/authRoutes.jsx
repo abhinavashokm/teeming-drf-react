@@ -6,6 +6,7 @@ import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import ResetPasswordSentPage from "../pages/auth/ResetPasswordSentPage";
 import PasswordChangedPage from "../pages/auth/PasswordChangedPage";
+import ResetSuccessGuard from "./guards/auth/ResetSuccessGuard";
 
 
 
@@ -38,7 +39,7 @@ const authRoutes = {
         },
         {
             path: 'reset-password-success',
-            element: <PasswordChangedPage />
+            element: <ResetSuccessGuard />
         }
     ]
 }

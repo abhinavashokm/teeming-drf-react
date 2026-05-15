@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom'
 
 function SignupPage() {
 
-    const testMode = true
+    const testMode = false
 
     const { loading } = useSelector(store => store.auth)
     const dispatch = useDispatch()

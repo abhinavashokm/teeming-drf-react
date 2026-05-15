@@ -107,6 +107,15 @@ def verify_token_and_update_password(reset_token, new_password):
     user.save()
 
 
+def validate_reset_token(token):
+    reset_session = password_reset_helper.get_reset_session(token)
+    
+    if not reset_session:
+        raise exceptions.InvalidOrExpiredToken()
+    
+    return reset_session
+
+
 def get_or_update_google_user(user):
     """Get full_name from google social account and update user if empty."""
     try:
@@ -148,3 +157,5 @@ def rotate_refresh_token(refresh_token):
         "access_token": new_access_token,
         "refresh_token": new_refresh_token,
     }
+
+

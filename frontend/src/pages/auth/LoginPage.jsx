@@ -17,7 +17,7 @@ import { showSuccess } from '../../utils/toast'
 
 function LoginPage() {
 
-    const testMode = true
+    const testMode = false
 
     const dispatch = useDispatch()
     const navigate = useNavigate()

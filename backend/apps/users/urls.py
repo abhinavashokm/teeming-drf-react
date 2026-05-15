@@ -11,6 +11,7 @@ from .views import (
     MeView,
     CookieTokenBlacklistView,
     GoogleLoginView,
+    ValidateResetTokenView,
 )
 
 urlpatterns = [
@@ -23,6 +24,7 @@ urlpatterns = [
     path("refresh/", RefreshTokenView.as_view()),
     path("me/", MeView.as_view()),
     path("logout/", CookieTokenBlacklistView.as_view(), name="logout"),
+    path("validate-reset-token/", ValidateResetTokenView.as_view()),
 
     # google Oauth urls
     path("", include("dj_rest_auth.urls")),

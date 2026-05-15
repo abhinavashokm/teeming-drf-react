@@ -24,11 +24,23 @@ class InvalidOTP(AppException):
 
 
 class InvalidCredentials(AppException):
-    error_code=ErrorCode.INVALID_CREDENTIALS
-    message="Invalid Credentials"
-    status_code=status.HTTP_400_BAD_REQUEST
+    error_code = ErrorCode.INVALID_CREDENTIALS
+    message = "Invalid Credentials"
+    status_code = status.HTTP_400_BAD_REQUEST
 
 
 class PasswordResetSessionExpired(AppException):
     message = "Password reset link invalid or has expired. Please request a new one."
     status_code = status.HTTP_401_UNAUTHORIZED
+
+
+class TokenMissing(AppException):
+    status_code = 401
+    error_code = ErrorCode.TOKEN_MISSING
+    message = "Authentication token missing. Please login again."
+
+
+class InvalidOrExpiredToken(AppException):
+    status_code = 400
+    error_code = ErrorCode.INVALID_OR_EXPIRED_TOKEN
+    message = "Reset link is invalid or expired."

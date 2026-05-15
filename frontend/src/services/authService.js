@@ -58,6 +58,11 @@ const authService = {
 
         const res = await api.post("/auth/social/google/", data)
         return res.data
+    },
+
+    validateResetToken: async (token) => {
+        const res = await api.get(`/auth/validate-reset-token/?token=${token}`)
+        return res.data
     }
 }
 

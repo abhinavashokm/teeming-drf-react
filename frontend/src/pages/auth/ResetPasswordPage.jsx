@@ -10,6 +10,9 @@ import { useAuthErrorMsg } from "../../hooks/auth/useAuthErrorMsg"
 import { showError } from "../../utils/toast"
 import { errorMessages } from "../../constants/errorMessages"
 import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { Navigate } from "react-router-dom"
+import authService from "../../services/authService"
 
 
 function ResetPasswordPage() {
@@ -20,8 +23,20 @@ function ResetPasswordPage() {
     const navigate = useNavigate()
     const authErrorMsg = useAuthErrorMsg()
 
+    const [status, setStatus] = useState('loading')
     const [searchParams] = useSearchParams()
     const reset_token = searchParams.get('token')
+
+    useEffect(() => {
+        if (!reset_token) { setStatus('invalid'); return }
+
+        authService.validateResetToken(reset_token)
+            .then(() => setStatus('valid'))
+            .catch(() => setStatus('invalid'))
+
+    }, [reset_token])
+
+
 
     const handleResetPassword = async ({ password }) => {
         try {
@@ -32,6 +47,9 @@ function ResetPasswordPage() {
         }
 
     }
+
+    if (status === 'loading') return <div>Validating...</div>
+    if (status === 'invalid') return <Navigate to="/auth/forgot-password?error=invalid_link" replace />
 
     return (
         <div className="w-full max-w-[440px] px-6 flex flex-col items-center">

@@ -166,6 +166,8 @@ const authSlice = createSlice({
 
         verificationEmail: null, //for storing email after signup for otp verification
 
+        passwordResetSuccess: false, //for show password change success page
+
         error: null,
         loading: false,
 
@@ -226,6 +228,10 @@ const authSlice = createSlice({
 
             .addCase(initializeUser.rejected, (state) => {
                 state.authLoading = false
+            })
+
+            .addCase(resetPassword.fulfilled, (state) => {
+                state.passwordResetSuccess = true
             })
 
             // GENERIC MATCHERS LAST

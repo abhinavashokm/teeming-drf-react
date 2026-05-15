@@ -232,3 +232,17 @@ class GoogleLoginView(SocialLoginView):
         )
 
         return res
+
+
+class ValidateResetTokenView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        token = request.query_params.get('token')
+
+        if not token:
+            raise exceptions.TokenMissing()
+
+        services.validate_reset_token(token)
+
+        return success_response(message="Token is valid")
