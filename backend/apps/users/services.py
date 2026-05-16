@@ -100,18 +100,24 @@ def verify_token_and_update_password(reset_token, new_password):
     reset_session_email = password_reset_helper.get_reset_session(reset_token)
 
     if not reset_session_email:
-        raise exceptions.PasswordResetSessionExpired()
+        raise exceptions.InvalidPasswordResetToken()
 
     user = User.objects.get(email=reset_session_email)
+
+    if user.check_password(new_password):
+        raise exceptions.SamePasswordException()
+
     user.set_password(new_password)
     user.save()
+
+    password_reset_helper.delete_reset_session(reset_token)
 
 
 def validate_reset_token(token):
     reset_session = password_reset_helper.get_reset_session(token)
     
     if not reset_session:
-        raise exceptions.InvalidOrExpiredToken()
+        raise exceptions.InvalidPasswordResetToken()
     
     return reset_session
 
@@ -141,7 +147,7 @@ def rotate_refresh_token(refresh_token):
     try:
         token = RefreshToken(refresh_token)
     except TokenError:
-        raise exceptions.AuthTokenException()
+        raise exceptions.InvalidRefreshToken()
 
     new_access_token = str(token.access_token)
 

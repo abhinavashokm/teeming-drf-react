@@ -1,12 +1,11 @@
 import AuthLayout from "../layouts/AuthLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import SignupPage from "../pages/auth/SignupPage";
-import VerifyOTPPage from "../pages/auth/VerifyOTPPage";
+import VerifyOtpPage from "../pages/auth/VerifyOtpPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
-import ResetPasswordSentPage from "../pages/auth/ResetPasswordSentPage";
-import PasswordChangedPage from "../pages/auth/PasswordChangedPage";
-import ResetSuccessGuard from "./guards/auth/ResetSuccessGuard";
+import ResetLinkSentPage from "../pages/auth/ResetLinkSentPage";
+import PasswordResetSuccessPage from "../pages/auth/PasswordResetSuccessPage";
 
 
 
@@ -23,7 +22,7 @@ const authRoutes = {
         },
         {
             path: 'verify-otp',
-            element: <VerifyOTPPage />
+            element: <VerifyOtpPage />
         },
         {
             path: 'forgot-password',
@@ -35,11 +34,11 @@ const authRoutes = {
         },
         {
             path: 'reset-password-sent',
-            element: <ResetPasswordSentPage />
+            element: <ResetLinkSentPage />
         },
         {
             path: 'reset-password-success',
-            element: <ResetSuccessGuard />
+            element: <PasswordResetSuccessPage />
         }
     ]
 }

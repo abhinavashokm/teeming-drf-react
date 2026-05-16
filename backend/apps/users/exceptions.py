@@ -4,10 +4,10 @@ from core.exceptions.base import AppException
 from core.constants.error_codes import ErrorCode
 
 
-class AuthTokenException(AppException):
+class InvalidRefreshToken(AppException):
     status_code = status.HTTP_401_UNAUTHORIZED
-    message = "Authentication token is missing or invalid."
-    error_code = ErrorCode.TOKEN_ERROR
+    error_code = ErrorCode.REFRESH_TOKEN_INVALID
+    message = "Session expired. Please login again."
 
 
 class SignupSessionExpired(AppException):
@@ -17,10 +17,12 @@ class SignupSessionExpired(AppException):
 
 class OTPExpired(AppException):
     message = "OTP expired, please resend to continue!"
+    error_code = ErrorCode.OTP_EXPIRED
 
 
 class InvalidOTP(AppException):
-    message = "Invalid OTP"
+    message = "Invalid OTP. Please try again."
+    error_code = ErrorCode.OTP_INVALID
 
 
 class InvalidCredentials(AppException):
@@ -29,18 +31,16 @@ class InvalidCredentials(AppException):
     status_code = status.HTTP_400_BAD_REQUEST
 
 
-class PasswordResetSessionExpired(AppException):
-    message = "Password reset link invalid or has expired. Please request a new one."
-    status_code = status.HTTP_401_UNAUTHORIZED
+class InvalidPasswordResetToken(AppException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    error_code = ErrorCode.PASSWORD_RESET_TOKEN_INVALID
+    message = "Password reset link is invalid or expired. Please request a new one."
 
 
-class TokenMissing(AppException):
-    status_code = 401
-    error_code = ErrorCode.TOKEN_MISSING
-    message = "Authentication token missing. Please login again."
+class SamePasswordException(AppException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    message = "New password cannot be the same as your current password."
+    error_code = ErrorCode.SAME_AS_PREVIOUS_PASSWORD
 
 
-class InvalidOrExpiredToken(AppException):
-    status_code = 400
-    error_code = ErrorCode.INVALID_OR_EXPIRED_TOKEN
-    message = "Reset link is invalid or expired."
+

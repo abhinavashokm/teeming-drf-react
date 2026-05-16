@@ -1,28 +1,17 @@
-import { useGoogleLogin } from '@react-oauth/google'
-import { useDispatch } from 'react-redux';
-import { googleLogin } from '../../store/slices/authSlice';
-import { showError, showSuccess } from '../../utils/toast';
-import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
+import useGoogleOAuth from '../../hooks/auth/useGoogleOAuth';
+import { showError } from '../../utils/toast';
 
 
 function GoogleLogin() {
 
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
+    const { mutate: loginWithGoogle } = useGoogleOAuth()
 
     const login = useGoogleLogin({
         flow: 'auth-code',
         onSuccess: async ({ code }) => {
 
-            try {
-
-                await dispatch(googleLogin({ code })).unwrap()
-                showSuccess("Google sign-in successfull")
-                navigate("/", { replace: true })
-
-            } catch {
-                showError("Something went wrong. Please try again.")
-            }
+            loginWithGoogle({code})
 
         },
         onError: (err) => {

@@ -1,4 +1,4 @@
-import { setAccessToken, logout } from "../../store/slices/authSlice";
+import { setAccessToken, clearAuth } from "../../store/slices/authSlice";
 
 export const authResponseInterceptor =
     async (store, api, error) => {
@@ -23,7 +23,7 @@ export const authResponseInterceptor =
             } catch (refreshError) {
 
                 // Refresh token itself expired → log user out
-                store.dispatch(logout())
+                store.dispatch(clearAuth())
                 return Promise.reject(refreshError)
 
             }

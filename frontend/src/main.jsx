@@ -3,20 +3,27 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { GoogleOAuthProvider } from '@react-oauth/google'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import router from './routes/router.jsx'
 import './index.css'
 import store from './store/store.js'
 
+const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_OAUTH_CLIENT_ID} >
 
-        <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
 
-      </GoogleOAuthProvider>
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_OAUTH_CLIENT_ID} >
+
+          <RouterProvider router={router} />
+
+        </GoogleOAuthProvider>
+
+      </QueryClientProvider>
 
     </Provider>
   </StrictMode>,

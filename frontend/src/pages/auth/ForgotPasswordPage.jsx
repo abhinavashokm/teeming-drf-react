@@ -1,35 +1,21 @@
-import { Link } from "react-router-dom"
-import AuthLogo from "../../components/auth/AuthLogo"
-import AuthInput from "../../components/auth/AuthInput"
-import AuthButton from "../../components/auth/AuthButton"
 import { useForm } from "react-hook-form"
-import { useDispatch } from "react-redux"
-import { forgotPassword } from "../../store/slices/authSlice"
+import { Link } from "react-router-dom"
+import AuthButton from "../../components/auth/AuthButton"
+import AuthInput from "../../components/auth/AuthInput"
+import AuthLogo from "../../components/auth/AuthLogo"
+import { useForgotPassword } from "../../hooks/auth/useForgotPassword"
 import { validations } from "../../utils/validations"
-import { showError } from "../../utils/toast"
-import { useNavigate } from "react-router-dom"
-import { useAuthErrorMsg } from "../../hooks/auth/useAuthErrorMsg"
-import { errorMessages } from "../../constants/errorMessages"
 
 
 function ForgotPasswordPage() {
 
     const { register, handleSubmit, formState: {errors} } = useForm()
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-    const authErrorMsg = useAuthErrorMsg()
+    
+
+    const { mutate: forgotPassword, isPending, isError } = useForgotPassword()
 
     const handleForgotPassword = async({email}) => {
-        try{
-
-            await dispatch(forgotPassword({email})).unwrap()
-            navigate('/auth/reset-password-sent/', {replace: true})
-
-        }catch{ 
-
-            showError( authErrorMsg ?? errorMessages.UNKNOWN_ERROR)
-
-        }
+        forgotPassword({email})
     }
 
     return (
@@ -74,8 +60,8 @@ function ForgotPasswordPage() {
 
                     {/* Send Link Button */}
                     <div className="pt-6 w-full">
-                        <AuthButton onClick={handleSubmit(handleForgotPassword)}>
-                            Send me the link
+                        <AuthButton onClick={handleSubmit(handleForgotPassword)} loading={isPending}>
+                            { isPending ? "Sending..." : "Send me the link" }
                         </AuthButton>
                     </div>
 

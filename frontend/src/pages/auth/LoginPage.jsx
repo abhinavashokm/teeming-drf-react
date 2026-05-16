@@ -1,46 +1,49 @@
-import { Link } from 'react-router-dom'
-import GoogleLogin from '../../components/auth/GoogleLogin'
-import AuthInput from '../../components/auth/AuthInput'
-import PasswordInput from '../../components/auth/PasswordInput'
-import AuthLogo from '../../components/auth/AuthLogo'
-import AuthDivider from '../../components/auth/AuthDivider'
-import AuthButton from '../../components/auth/AuthButton'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
+import { Link, useLocation } from 'react-router-dom'
+import AuthButton from '../../components/auth/AuthButton'
+import AuthDivider from '../../components/auth/AuthDivider'
 import AuthFormError from '../../components/auth/AuthFormError'
-import { validations } from '../../utils/validations'
-import { useDispatch } from 'react-redux'
-import { login } from '../../store/slices/authSlice'
-import { useNavigate } from 'react-router-dom'
-import { useAuthErrorMsg } from '../../hooks/auth/useAuthErrorMsg'
+import AuthInput from '../../components/auth/AuthInput'
+import AuthLogo from '../../components/auth/AuthLogo'
+import GoogleLogin from '../../components/auth/GoogleLogin'
+import PasswordInput from '../../components/auth/PasswordInput'
+import { useLogin } from '../../hooks/auth/useLogin'
+import { getErrorMsg } from '../../utils/errorHandler'
 import { showSuccess } from '../../utils/toast'
+import { validations } from '../../utils/validations'
 
 
 function LoginPage() {
 
-    const testMode = false
-
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-
+    //form handling
+    const testMode = true
     const { register, handleSubmit, formState: { errors } } = useForm(testMode && {
         defaultValues: {
             email: 'pihoxay220@hidevak.com',
-            password: '55555Abhii'
+            password: '55555Abhi'
         }
     })
 
-
+    //loging handling
+    const { mutate: login, isPending, error, isError } = useLogin()
     const handleLogin = async (data) => {
-        try {
-
-            await dispatch(login(data)).unwrap()
-            showSuccess("login success")
-            navigate('/', {replace: true})
-
-        } catch {}
+        login(data)
     }
 
-    const authErrorMsg = useAuthErrorMsg()
+    
+    //success msg after signup (when redirecting after signup)
+    // const toastShown = useRef(false)
+    // const location = useLocation()
+
+    // useEffect(() => {
+    //     if (location.state?.verified && !toastShown.current) {
+    //         showSuccess("Email verified successfully, you can now login")
+    //         toastShown.current = true
+    //         window.history.replaceState({}, '')
+    //     }
+    // }, [])
+
 
     return (
         <>
@@ -81,8 +84,8 @@ function LoginPage() {
                         {/* Inputs & Login Button */}
                         <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col items-stretch w-full pb-2 gap-[14px]">
 
-                            {authErrorMsg && (
-                                <AuthFormError error={authErrorMsg} />
+                            {isError && (
+                                <AuthFormError error={getErrorMsg(error, "Login failed")} />
                             )}
 
                             {/* Email Input */}
@@ -96,7 +99,7 @@ function LoginPage() {
 
                             {/* Login Button Container */}
                             <div className="pt-[14px] w-full">
-                                <AuthButton type={'submit'} >Log In</AuthButton>
+                                <AuthButton loading={isPending} type={'submit'} >Log In</AuthButton>
                             </div>
 
                         </form>

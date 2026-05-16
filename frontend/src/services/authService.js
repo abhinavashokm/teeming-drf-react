@@ -42,7 +42,7 @@ const authService = {
         return res.data
     },
 
-    getUser: async () => {
+    getCurrentUser: async () => {
 
         const res = await api.get("/auth/me/")
         return res.data
@@ -60,7 +60,7 @@ const authService = {
         return res.data
     },
 
-    validateResetToken: async (token) => {
+    validateResetToken: async ({token}) => {
         const res = await api.get(`/auth/validate-reset-token/?token=${token}`)
         return res.data
     }

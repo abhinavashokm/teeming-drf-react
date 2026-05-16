@@ -1,41 +1,57 @@
-import { Outlet } from "react-router-dom"
-import { useDispatch, useSelector } from "react-redux"
-import { initializeUser } from "../store/slices/authSlice"
 import { useEffect } from "react"
-import FullPageLoader from "../components/ui/FullPageLoader"
 import { Toaster } from "react-hot-toast"
+import { Outlet, useLocation } from "react-router-dom"
+import FullPageLoader from "../components/ui/FullPageLoader"
 import { errorCodes } from "../constants/errorCodes"
-import { showError } from '../utils/toast'
 import { errorMessages } from "../constants/errorMessages"
+import useInitializeAuth from "../hooks/auth/useInitializeAuth"
+import { getErrorMsg } from "../utils/errorHandler"
+import { showError, showSuccess } from '../utils/toast'
 
 
 function RootLayout() {
 
-    const dispatch = useDispatch()
-    const { authLoading, error } = useSelector(store => store.auth)
+    const { isLoading, isError, error } = useInitializeAuth() // runs on mount automatically
 
+    //global errors
     useEffect(() => {
-        if(error?.error?.code === errorCodes.RATE_LIMITED){
-            showError("Too many requests. Please try again later.")
-        }else if(error?.error?.code === errorCodes.TOKEN_ERROR){
-            showError("Authentication token missing. Please login again.")
+
+        //hide refresh token errors for now
+        if(isError && error?.response?.data?.error?.code !== errorCodes.REFRESH_TOKEN_INVALID){
+           showApiError(error) 
         }
-    },[error])
 
+    }, [isError])
+
+
+    const location = useLocation()
+
+    //show redirecton toast messages if any
     useEffect(() => {
-        dispatch(initializeUser())  // thunk → calls /auth/token/refresh/
-    }, [])
+  
+        if (location.state?.toast) {
+
+            if (location.state.error) {
+                showError(location.state.toast)
+            } else {
+                showSuccess(location.state.toast)
+            }
+
+            window.history.replaceState({}, '')
+        }
+
+    }, [location.state])
+
+
+    if (isLoading) return <FullPageLoader />
 
     return (
-        authLoading
-            ?
-            <FullPageLoader />
-            :
-            <>
-                <Toaster position="top-center" />
-                <Outlet />
-            </>
+        <>
+            <Toaster position="top-center" />
+            <Outlet />
+        </>
     )
 }
+
 
 export default RootLayout

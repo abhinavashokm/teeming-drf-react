@@ -9,7 +9,7 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 
 from core.responses.api_response import (
-    success_response,
+    success_response, error_response
 )
 from .serializers import (
     RegisterSerializer,
@@ -103,12 +103,12 @@ class LoginView(APIView):
             },
             status_code=status.HTTP_200_OK,
         )
-        
+
         # Set refresh token as httpOnly cookie
         response = cookie_helper.set_refresh_cookie(
             refresh_token=refresh_token, response=response
         )
-        
+
         return response
 
 
@@ -120,7 +120,7 @@ class RefreshTokenView(APIView):
         refresh_token = request.COOKIES.get("refresh_token")
 
         if not refresh_token:
-            raise exceptions.AuthTokenException()
+            raise exceptions.InvalidRefreshToken()
 
         token = services.rotate_refresh_token(refresh_token)
 
@@ -188,8 +188,9 @@ class CookieTokenBlacklistView(TokenBlacklistView):
         refresh_token = request.COOKIES.get("refresh_token")
 
         if not refresh_token:
-            return Response(
-                {"detail": "No refresh token."}, status=status.HTTP_400_BAD_REQUEST
+            return error_response(
+                message= "No refresh token.",
+                status_code=status.HTTP_400_BAD_REQUEST
             )
 
         # Inject into request data so parent handles blacklisting
@@ -238,11 +239,13 @@ class ValidateResetTokenView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        token = request.query_params.get('token')
+        token = request.query_params.get("token")
 
         if not token:
-            raise exceptions.TokenMissing()
+            raise exceptions.InvalidPasswordResetToken()
 
         services.validate_reset_token(token)
 
-        return success_response(message="Token is valid")
+        return success_response(
+            message="password reset token verified", status_code=status.HTTP_200_OK
+        )

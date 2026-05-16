@@ -1,7 +1,20 @@
-import { Link } from 'react-router-dom'
-import AuthLogo from '../../components/auth/AuthLogo'
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import AuthLogo from "../../components/auth/AuthLogo"
+import { useEffect } from "react"
 
-function PasswordChangedPage() {
+function ResetLinkSentPage() {
+
+    const location = useLocation()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!location.state?.fromForgotPassword) {
+            navigate('/auth/login', { replace: true })
+        }
+    }, [])
+
+    if (!location.state?.fromForgotPassword) return null
+
     return (
         <div className="w-full max-w-[440px] px-6 flex flex-col items-center">
             {/* Main Content Area */}
@@ -16,16 +29,18 @@ function PasswordChangedPage() {
                     {/* Typography */}
                     <div className="flex flex-col pb-1 text-center">
                         <h1 className="text-teeming-text-dark font-bold text-xl sm:text-2xl leading-[34px] -tracking-[0.025em]">
-                            Password changed!
+                            Recovery link sent!
                         </h1>
                     </div>
 
                     {/* Subtitle */}
                     <div className="text-[13px] text-[#64748B] text-center mt-1">
-                        Your password has been changed.{" "}
+                        Remember password? {" "}
+
                         <Link to={'/auth/login/'} className="text-[#3B82F6] font-medium hover:underline" >
                             Sign in
                         </Link>
+
                     </div>
                 </div>
             </div>
@@ -33,4 +48,4 @@ function PasswordChangedPage() {
     )
 }
 
-export default PasswordChangedPage
+export default ResetLinkSentPage

@@ -32,10 +32,7 @@ api.interceptors.response.use(
 
     //response - error case
     async (error) => authResponseInterceptor(_store, api, error)
-
-    
-    
-   
+ 
 )
 
 

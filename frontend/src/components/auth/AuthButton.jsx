@@ -1,9 +1,6 @@
 import { Loader2 } from "lucide-react"
-import { useSelector } from "react-redux"
 
-
-function AuthButton({ children, type = 'submit', disabled = false, ...props }) {
-    const { loading } = useSelector(store => store.auth)
+function AuthButton({ children, type = 'submit', disabled = false, loading, ...props }) {
 
     return (
         <button

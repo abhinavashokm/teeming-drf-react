@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 
 from core.services.email_service import send_email
 from django.conf import settings
+from core.utils.time_utils import seconds_to_human
 
 
 def generate_otp():
@@ -23,7 +24,8 @@ def send_verification_otp_email(email, otp):
 
     subject = "Verify Your Email Address"
 
-    otp_expiry = _format_otp_expiry(settings.OTP_EXPIRY)
+    otp_expiry = seconds_to_human(settings.OTP_EXPIRY)
+    
     plain_message = f"""
 Your OTP for email verification is: {otp}
 

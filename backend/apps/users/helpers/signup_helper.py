@@ -1,15 +1,15 @@
 import time
 
-from core.redis import store
+from core import redis_store
 from django.conf import settings
 
 
 def _make_key(email):
-    return store.make_key(prefix="signup", identifier=email)
+    return redis_store.make_key(prefix="signup", identifier=email)
 
 
 def save_signup_data(email, full_name, password, otp):
-    store.set_data(
+    redis_store.set_data(
         key=_make_key(email),
         value={
             "email": email,
@@ -24,7 +24,7 @@ def save_signup_data(email, full_name, password, otp):
 
 
 def signup_data_exists(email):
-    return store.exists(_make_key(email))
+    return redis_store.exists(_make_key(email))
 
 
 def update_signup_otp(email, otp):
@@ -36,7 +36,7 @@ def update_signup_otp(email, otp):
     signup_data['otp'] = otp
     signup_data['otp_expires_at'] = time.time() + settings.OTP_EXPIRY
 
-    store.set_data(
+    redis_store.set_data(
         key=_make_key(email),
         value=signup_data,
         timeout=settings.SIGNUP_SESSION_EXPIRY
@@ -46,11 +46,11 @@ def update_signup_otp(email, otp):
     
 
 def get_signup_data(email):
-    return store.get_data(_make_key(email))
+    return redis_store.get_data(_make_key(email))
 
 
 def delete_signup_data(email):
-    store.delete_data(_make_key(email))
+    redis_store.delete_data(_make_key(email))
 
 
 def is_otp_expired(otp_expires_at):

@@ -1,53 +1,57 @@
-import { useState } from "react";
 import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 
-import AuthLogo from "../../components/auth/AuthLogo";
 import AuthButton from "../../components/auth/AuthButton";
-import { resendOTP, verifyOTP } from "../../store/slices/authSlice";
-import { showError, showSuccess } from "../../utils/toast";
+import AuthLogo from "../../components/auth/AuthLogo";
+import { useResendOtp } from "../../hooks/auth/useResendOtp";
+import { useVerifyOtp } from "../../hooks/auth/useVerifyOtp";
 
 
-function VerifyOTPPage() {
+function verifyOtpPage() {
 
   const [otp, setOtp] = useState("");
 
-  const dispatch = useDispatch()
-  const { loading, verificationEmail } = useSelector(store => store.auth)
+  const verificationEmail = sessionStorage.getItem('verificationEmail')
 
   const navigate = useNavigate()
 
+  const handleOtpChange = (otp) => {
+    setOtp(otp)
+    if (otp.length === 6) {
+      verifyOtp({ email: verificationEmail, otp })
+    }
+  }
+
+
+  const { mutate: verifyOtp, error: otpError, isError, isPending: verifyOtpPending } = useVerifyOtp({ onError: () => setOtp("") })
 
   const handleVerify = async () => {
-
-    try {
-
-      await dispatch(verifyOTP({ verificationEmail, otp })).unwrap()
-      navigate('/auth/login')
-
-    } catch {
-
-      setOtp("")
-      showError("Invalid OTP, Please try again")
-
-    }
-
+    verifyOtp({ email: verificationEmail, otp })
   };
 
 
-  const resendOTPHandler = async () => {
-    try{
 
-      await dispatch(resendOTP({ verificationEmail })).unwrap()
-      setOtp("")
-      showSuccess("OTP resent successfully")
+  const { mutate: resendOtp, error: resendOtpError, isPending: resendOtpPending } = useResendOtp()
 
-    }catch {
-
-    }
+  const resendOtpHandler = () => {
+    setOtp("")
+    resendOtp({ email: verificationEmail })
   }
+
+
+  //safe guard - only show when there is signup session active
+  useEffect(() => {
+
+    if (!verificationEmail) {
+      navigate("/auth/signup/", { state: { toast: "Signup session expired or not found!", error: true }, replace: true })
+    }
+
+  }, [verificationEmail])
+
+
+  if (!verificationEmail) return null
 
   return (
     <div className="w-full max-w-[420px] px-6 flex flex-col items-center">
@@ -69,11 +73,9 @@ function VerifyOTPPage() {
           </div>
 
           {/* Subtitle */}
-          <div className="text-[14px] leading-relaxed text-teeming-gray text-center px-4">
-            Enter the code we sent to{" "}
-            <span className="text-teeming-text-dark font-bold">
-              {verificationEmail ?? "your email"}
-            </span>
+          <div className="text-[14px] leading-relaxed text-teeming-gray text-center px-4 flex flex-wrap justify-center gap-x-1">
+            <span >Enter the code we sent to </span>
+            <span className="text-teeming-text-dark font-bold ">{verificationEmail ?? "your email"}</span>
           </div>
         </div>
 
@@ -85,7 +87,8 @@ function VerifyOTPPage() {
 
             <OTPInput
               value={otp}
-              onChange={setOtp}
+              autoFocus
+              onChange={handleOtpChange}
               maxLength={6}
               pattern={REGEXP_ONLY_DIGITS}  // blocks non-digit input
               render={({ slots }) => (
@@ -113,8 +116,8 @@ function VerifyOTPPage() {
 
           {/* Verify Button */}
           <div className="w-full pb-6">
-            <AuthButton onClick={handleVerify} disabled={otp.length !== 6}>
-              {loading ? "Verifing..." : "Verify"}
+            <AuthButton onClick={handleVerify} loading={verifyOtpPending} disabled={otp.length !== 6}>
+              {verifyOtpPending ? "Verifing..." : "Verify"}
             </AuthButton>
           </div>
 
@@ -125,8 +128,8 @@ function VerifyOTPPage() {
               Don't see a code?
             </span>
 
-            <button onClick={resendOTPHandler} className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none">
-              Resend code
+            <button onClick={resendOtpHandler} disabled={resendOtpPending} className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline">
+              {resendOtpPending ? "Resending..." : "Resend code"}
             </button>
 
             <span className="text-teeming-gray text-[14px] leading-[21px] px-0.5">
@@ -147,4 +150,4 @@ function VerifyOTPPage() {
   );
 }
 
-export default VerifyOTPPage;
+export default verifyOtpPage;

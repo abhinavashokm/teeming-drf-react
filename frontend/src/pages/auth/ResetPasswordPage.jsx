@@ -1,55 +1,48 @@
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
+import { useDispatch } from "react-redux"
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom"
+import AuthButton from "../../components/auth/AuthButton"
 import AuthLogo from "../../components/auth/AuthLogo"
 import PasswordInput from "../../components/auth/PasswordInput"
-import AuthButton from "../../components/auth/AuthButton"
-import { useSearchParams } from "react-router-dom"
-import { useDispatch } from "react-redux"
-import { resetPassword } from "../../store/slices/authSlice"
-import { validations } from "../../utils/validations"
-import { useAuthErrorMsg } from "../../hooks/auth/useAuthErrorMsg"
-import { showError } from "../../utils/toast"
-import { errorMessages } from "../../constants/errorMessages"
-import { useNavigate } from "react-router-dom"
-import { useEffect, useState } from "react"
-import { Navigate } from "react-router-dom"
+import { useResetPassword } from "../../hooks/auth/useResetPassword"
 import authService from "../../services/authService"
+import { validations } from "../../utils/validations"
+import { useValidateResetToken } from "../../hooks/auth/useValidateResetToken"
+import FullPageLoader from "../../components/ui/FullPageLoader"
+import { getErrorMsg } from "../../utils/errorHandler"
 
 
 function ResetPasswordPage() {
 
-    const { register, handleSubmit, formState: { errors } } = useForm()
-
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-    const authErrorMsg = useAuthErrorMsg()
-
-    const [status, setStatus] = useState('loading')
     const [searchParams] = useSearchParams()
     const reset_token = searchParams.get('token')
 
-    useEffect(() => {
-        if (!reset_token) { setStatus('invalid'); return }
+    const { isSuccess, isLoading, isError, error } = useValidateResetToken({token: reset_token})
 
-        authService.validateResetToken(reset_token)
-            .then(() => setStatus('valid'))
-            .catch(() => setStatus('invalid'))
-
-    }, [reset_token])
+    const { register, handleSubmit, formState: { errors }, getValues } = useForm()
 
 
+    const navigate = useNavigate()
+
+
+
+
+
+    const { mutate: resetPassword, isPending } = useResetPassword()
 
     const handleResetPassword = async ({ password }) => {
-        try {
-            await dispatch(resetPassword({ password, reset_token })).unwrap()
-            navigate("/auth/reset-password-success/")
-        } catch {
-            showError(authErrorMsg ?? errorMessages.UNKNOWN_ERROR)
-        }
-
+        resetPassword({ token: reset_token, password })
     }
 
-    if (status === 'loading') return <div>Validating...</div>
-    if (status === 'invalid') return <Navigate to="/auth/forgot-password?error=invalid_link" replace />
+    if (isLoading) return <FullPageLoader />
+
+    if (isError) return (
+        <Navigate to="/auth/forgot-password?error=invalid_link"
+            state={{ toast: getErrorMsg(error), error: true }}
+            replace
+        />
+    )
 
     return (
         <div className="w-full max-w-[440px] px-6 flex flex-col items-center">
@@ -85,13 +78,16 @@ function ResetPasswordPage() {
                     />
 
                     <PasswordInput placeholder={"Confirm password"} autocomplete="new-password"
-                        {...register('confirmPassword', { required: "Confirm password is required" })} error={errors.confirmPassword}
+                        {...register('confirmPassword', {
+                            required: "Confirm password is required",
+                            validate: (value) => value === getValues('password') || "Passwords do not match"
+                        })} error={errors.confirmPassword}
                     />
 
                     {/* Create Password Button */}
                     <div className="pt-2 w-full">
-                        <AuthButton>
-                            Create Password
+                        <AuthButton pending={isPending}>
+                            {isPending ? "Creating..." : "Create Password"}
                         </AuthButton>
                     </div>
                 </form>

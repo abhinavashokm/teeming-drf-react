@@ -1,44 +1,35 @@
-import GoogleLogin from '../../components/auth/GoogleLogin'
-import { Link } from 'react-router-dom'
-import PasswordInput from '../../components/auth/PasswordInput'
-import AuthLogo from '../../components/auth/AuthLogo'
-import AuthDivider from '../../components/auth/AuthDivider'
-import AuthButton from '../../components/auth/AuthButton'
 import { useForm } from 'react-hook-form'
-import AuthInput from '../../components/auth/AuthInput'
-import { validations } from '../../utils/validations'
+import { Link } from 'react-router-dom'
+import AuthButton from '../../components/auth/AuthButton'
+import AuthDivider from '../../components/auth/AuthDivider'
 import AuthFormError from '../../components/auth/AuthFormError'
-import { useAuthErrorMsg } from '../../hooks/auth/useAuthErrorMsg'
-import { useDispatch, useSelector } from 'react-redux'
-import { signup } from '../../store/slices/authSlice'
-import { useNavigate } from 'react-router-dom'
+import AuthInput from '../../components/auth/AuthInput'
+import AuthLogo from '../../components/auth/AuthLogo'
+import GoogleLogin from '../../components/auth/GoogleLogin'
+import PasswordInput from '../../components/auth/PasswordInput'
+import { useSignup } from '../../hooks/auth/useSignup'
+import { getErrorMsg } from '../../utils/errorHandler'
+import { validations } from '../../utils/validations'
 
 
 function SignupPage() {
 
-    const testMode = false
-
-    const { loading } = useSelector(store => store.auth)
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
+    const testMode = true
 
     const { handleSubmit, register, formState: { errors } } = useForm(testMode && {
         defaultValues: {
             fullName: 'Arjun Kumar',
             email: 'arjunraj@gmail.com',
-            password: 'password'
+            password: 'passwordA1'
         }
     })
 
+    const { mutate: signup, isPending, error:signupError, isError } = useSignup()
+
     const handleSignup = async (data) => {
-        try {
-            await dispatch(signup(data)).unwrap()
-            navigate('/auth/verify-otp')
-        } catch { }
+        signup(data)
     }
-
-    const authErrorMsg = useAuthErrorMsg()
-
+    
 
     return (
         <>
@@ -81,8 +72,8 @@ function SignupPage() {
                         <form onSubmit={handleSubmit(handleSignup)} className="flex flex-col items-stretch w-full pb-2 gap-[14px]" noValidate>
 
                             {
-                                authErrorMsg &&
-                                <AuthFormError error={authErrorMsg} />
+                                isError &&
+                                <AuthFormError error={getErrorMsg(signupError)} />
                             }
 
 
@@ -101,9 +92,9 @@ function SignupPage() {
 
                             {/* Sign Up Button */}
                             <div className="pt-[14px] w-full">
-                                <AuthButton loading={loading}>
+                                <AuthButton loading={isPending}>
                                     {
-                                        loading ? "Sending OTP..." : "Sign up with Email"
+                                        isPending ? "Sending OTP..." : "Sign up with Email"
                                     }
                                     
                                 </AuthButton>
