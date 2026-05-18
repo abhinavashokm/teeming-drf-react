@@ -3,10 +3,8 @@ import { Toaster } from "react-hot-toast"
 import { Outlet, useLocation } from "react-router-dom"
 import FullPageLoader from "../components/ui/FullPageLoader"
 import { errorCodes } from "../constants/errorCodes"
-import { errorMessages } from "../constants/errorMessages"
 import useInitializeAuth from "../hooks/auth/useInitializeAuth"
-import { getErrorMsg } from "../utils/errorHandler"
-import { showError, showSuccess } from '../utils/toast'
+import { showApiError, showError, showSuccess } from '../utils/toast'
 
 
 function RootLayout() {
