@@ -4,6 +4,7 @@ import RootLayout from "../layouts/RootLayout";
 import PublicRoute from "./guards/PublicRoute";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import authRoutes from "./authRoutes";
+import dashboardRoutes from "./dashboardRoutes";
 
 
 
@@ -20,10 +21,9 @@ const router = createBrowserRouter([
             },
             {
                 element: <ProtectedRoute />,
-                children: [{
-                    path: '/',
-                    element: <HomePage />
-                }]
+                children: [
+                    dashboardRoutes
+                ]
             }
 
         ]

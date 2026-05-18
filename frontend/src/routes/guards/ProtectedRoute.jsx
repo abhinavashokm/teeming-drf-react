@@ -7,7 +7,7 @@ function ProtectedRoute() {
   const { user } = useSelector(store => store.auth)
 
   return (
-    user 
+    true // user //for testing purpose turn off protected routes
     ? <Outlet />
     : <Navigate to={'/auth/login'} replace/>
 

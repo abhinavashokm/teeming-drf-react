@@ -16,7 +16,7 @@ function RootLayout() {
 
         //hide refresh token errors for now
         if(isError && error?.response?.data?.error?.code !== errorCodes.REFRESH_TOKEN_INVALID){
-           showApiError(error) 
+           //showApiError(error) 
         }
 
     }, [isError])
