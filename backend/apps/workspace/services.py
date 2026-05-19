@@ -1,0 +1,28 @@
+from .models import WorkspaceMember, Workspace
+
+
+def fetch_user_workspace_list(user):
+    memberships = WorkspaceMember.objects.filter(user=user).select_related(
+        "workspace"
+    )
+
+    membership_res = [
+        {
+            "id": m.workspace.id,
+            "name": m.workspace.name,
+            "slug": m.workspace.slug,
+            "role": m.role,
+        }
+        for m in memberships
+    ]
+
+    last_workspace = Workspace.objects.filter(id=user.last_workspace).filter()
+    last_workspace_res = {}
+
+    if last_workspace:
+        last_workspace_res = {
+            "id": last_workspace.id,
+            "slug": last_workspace.slug,
+        }
+
+    return membership_res, last_workspace_res

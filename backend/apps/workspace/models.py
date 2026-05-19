@@ -22,3 +22,34 @@ class Workspace(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class WorkspaceMember(models.Model):
+
+    class RoleChoices(models.TextChoices):
+        ADMIN = "ADMIN", "Admin"
+        MEMBER = "MEMBER", "Member"
+        OWNER = "OWNER", "Owner"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    workspace = models.ForeignKey(
+        Workspace, on_delete=models.CASCADE, related_name="workspace_members"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="workspace_memberships"
+    )
+
+    role = models.CharField(
+        max_length=15, choices=RoleChoices.choices, default=RoleChoices.MEMBER
+    )
+
+    joined_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "workspace_members"
+        unique_together = ("workspace", "user")
+
+    def __str__(self):
+        return f"{self.user} - {self.workspace} ({self.role})"
