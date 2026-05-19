@@ -59,7 +59,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
               </span>
             </button>
           </div>
-          <div className="pt-3 space-y-0.5">
+          <div className="pt-3 space-y-2">
             <a href="#" className="flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md border-l-2 border-teeming-green bg-teeming-green/10 text-teeming-green transition-colors">
               <Home className="h-4 w-4 text-teeming-green" strokeWidth={1.5} />
               Home

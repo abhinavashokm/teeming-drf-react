@@ -7,9 +7,10 @@ function PublicRoute() {
   const { user } = useSelector(store => store.auth)
 
   return (
-    user 
-    ? <Navigate to={'/'} replace/>
-    : <Outlet />
+    // user 
+    // ? <Navigate to={'/create-workspace'} replace/>
+    // : 
+    <Outlet />
 
   )
 }

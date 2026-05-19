@@ -16,7 +16,7 @@ function DashboardLayout() {
 
   return (
     <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      >
 
       {/* Sidebar */}
       {isSidebarVisible && (

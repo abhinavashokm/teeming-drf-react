@@ -5,6 +5,7 @@ import PublicRoute from "./guards/PublicRoute";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import authRoutes from "./authRoutes";
 import dashboardRoutes from "./dashboardRoutes";
+import CreateWorkspacePage from "../pages/workspace/CreateWorkspacePage";
 
 
 
@@ -21,8 +22,13 @@ const router = createBrowserRouter([
             },
             {
                 element: <ProtectedRoute />,
-                children: [
-                    dashboardRoutes
+                children: [{
+                    ...dashboardRoutes,
+                },{
+                     element: <CreateWorkspacePage/>,
+                     path: "create-workspace"
+                }
+                   
                 ]
             }
 
