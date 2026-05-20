@@ -4,9 +4,14 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from . import services
 from .serializers import CreateWorkspaceSerilaizer
+from .models import WorkspaceMember
 
 
-class UserWorkspaceListView(APIView):
+class WorkspaceSessionView(APIView):
+    """
+    Returns workspace session data for app initialization,
+    including user workspaces and last visited workspace.
+    """
 
     def get(self, request):
         print(request.user)
@@ -24,7 +29,7 @@ class UserWorkspaceListView(APIView):
         )
 
 
-class WorkspaceView(APIView):
+class WorkspaceListCreateView(APIView):
 
     def post(self, request):
         serializer = CreateWorkspaceSerilaizer(
@@ -40,6 +45,20 @@ class WorkspaceView(APIView):
                 "workspace_id": new_workspace.id,
                 "slug": new_workspace.slug,
                 "name": new_workspace.name,
+                "role": WorkspaceMember.RoleChoices.OWNER,
             },
             status_code=status.HTTP_201_CREATED,
         )
+
+    def get(self, request):
+
+        return success_response(message="good")
+
+
+class WorkspaceHomeView(APIView):
+
+    def get(self, request, **kwargs):
+
+        print(request.workspace)
+
+        return success_response(message="very good")

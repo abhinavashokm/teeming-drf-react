@@ -52,6 +52,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # google Oauth
     "allauth.account.middleware.AccountMiddleware",
+    # tenant/workspace resolution
+    "apps.workspace.middleware.WorkspaceMiddleware",
 ]
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")
