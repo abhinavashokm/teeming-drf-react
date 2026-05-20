@@ -7,6 +7,10 @@ export default function useWorkspaceHome() {
 
     return useQuery({
         'queryKey': ['workspace', workspaceSlug],
-        'queryFn': () => workspaceService.getWorkspaceHome(workspaceSlug),
+        'queryFn': async() => {
+
+            const res = await workspaceService.getWorkspaceHome(workspaceSlug)
+            return res.data
+        },
     })
 }

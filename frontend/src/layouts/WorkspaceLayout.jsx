@@ -6,12 +6,16 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Sidebar from '../components/layout/Sidebar';
+import useInitializeWorkspace from '../hooks/workspace/useInitializeWorkspace';
 
-function DashboardLayout() {
+function WorkspaceLayout() {
+
+  const { data, isPending } = useInitializeWorkspace()
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+
 
 
   return (
@@ -66,4 +70,4 @@ function DashboardLayout() {
   )
 }
 
-export default DashboardLayout
+export default WorkspaceLayout

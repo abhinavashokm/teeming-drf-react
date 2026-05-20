@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import HomePage from "../pages/home/HomePage";
-import RootLayout from "../layouts/RootLayout";
+import AppLayout from "../layouts/AppLayout";
 import PublicRoute from "./guards/PublicRoute";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import authRoutes from "./authRoutes";
@@ -11,7 +11,7 @@ import CreateWorkspacePage from "../pages/workspace/CreateWorkspacePage";
 
 const router = createBrowserRouter([
     {
-        element: <RootLayout />,
+        element: <AppLayout />,
         children: [
             {
                 element: <PublicRoute />,

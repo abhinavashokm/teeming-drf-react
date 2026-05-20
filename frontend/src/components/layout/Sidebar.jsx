@@ -8,9 +8,11 @@ import {
   Settings
 } from 'lucide-react';
 import { useState } from 'react';
+import useInitializeAuth from '../../hooks/auth/useInitializeAuth';
 
 
 function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
+  const { data: user } = useInitializeAuth()
   const [activeWorkspace, setActiveWorkspace] = useState(true);
 
   return (
@@ -141,7 +143,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
           AJ
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">Alex Johnson</span>
+          <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">{user.fullName}</span>
           <div className="flex items-center text-[12px] mt-0.5">
             <span className="text-gray-500 truncate">Free plan</span>
             <span className="text-gray-400 mx-1.5">·</span>

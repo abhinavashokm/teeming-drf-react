@@ -7,7 +7,7 @@ import useInitializeAuth from "../hooks/auth/useInitializeAuth"
 import { showApiError, showError, showSuccess } from '../utils/toast'
 
 
-function RootLayout() {
+function AppLayout() {
 
     const { isLoading, isError, error } = useInitializeAuth() // runs on mount automatically
 
@@ -52,4 +52,4 @@ function RootLayout() {
 }
 
 
-export default RootLayout
+export default AppLayout

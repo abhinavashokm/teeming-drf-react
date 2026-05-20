@@ -1,11 +1,11 @@
-import DashboardLayout from "../layouts/DashboardLayout";
+import WorkspaceLayout from "../layouts/WorkspaceLayout";
 import HomePage from "../pages/workspace/HomePage";
 
 
 
 const dashboardRoutes = {
     path: '/:workspaceSlug',
-    element: <DashboardLayout />,
+    element: <WorkspaceLayout />,
     children: [
         {
             index: true,

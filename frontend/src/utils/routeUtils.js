@@ -12,6 +12,6 @@ export const buildWorkspacePath = (slug) => {
 export const getWorkspaceRedirectPath = ({ workspaces, last_workspace }) => {
     if (workspaces.length === 0) return '/create-workspace'
     if (last_workspace) return buildWorkspacePath(last_workspace?.slug)
-    if (workspaces.length === 1) return `/${workspaces[0].slug}/home`
+    if (workspaces.length === 1) return `/${workspaces[0].slug}`
     return '/select-workspace'
 }

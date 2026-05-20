@@ -6,6 +6,7 @@ const workspaceSlice = createSlice({
     'initialState': {
         'workspaces': null,
         'current_workspace': null,
+        'role': null,
     },
     reducers: {
         setWorkspaces: (state, action) => {
@@ -14,10 +15,14 @@ const workspaceSlice = createSlice({
         },
         setCurrentWorkspace: (state, action) => {
             state.current_workspace = action.payload
+        },
+        setRole: (state, action) => {
+  
+            state.role = action.payload
         }
     }
 })
 
 
-export const { setWorkspaces, setCurrentWorkspace } = workspaceSlice.actions
-export default workspaceSlice
+export const { setWorkspaces, setCurrentWorkspace, setRole } = workspaceSlice.actions
+export default workspaceSlice.reducer

@@ -6,10 +6,12 @@ import AuthLogo from "../../components/auth/AuthLogo";
 import useLogout from "../../hooks/auth/useLogout";
 import { toSlug } from "../../utils/slugUtils";
 import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
+import useInitializeAuth from "../../hooks/auth/useInitializeAuth";
 
 
 function CreateWorkspacePage() {
-    const { user, accessToken } = useSelector((state) => state.auth);
+    const { data: user } = useInitializeAuth()
+    
     const navigate = useNavigate();
 
     const { register, handleSubmit, setValue } = useForm()
@@ -39,7 +41,7 @@ function CreateWorkspacePage() {
 
     const handleCreateWorkspace = ({name, slug}) => {
         createWorkspace({name, slug})
-        console.log(data)
+     
     }
 
     return (

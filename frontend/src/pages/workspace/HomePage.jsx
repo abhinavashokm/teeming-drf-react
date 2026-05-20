@@ -8,18 +8,23 @@ import {
   Users
 } from 'lucide-react';
 import { useState } from 'react';
-import useWorkspaceHome from '../../hooks/workspace/useWorkspaceHome';
 import FullPageLoader from '../../components/ui/FullPageLoader';
+import useInitializeWorkspace from '../../hooks/workspace/useInitializeWorkspace';
+import useWorkspaceHome from '../../hooks/workspace/useWorkspaceHome';
 
 
 function HomePage() {
 
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
-  const { data, isPending } = useWorkspaceHome()
 
-  if(isPending) return <FullPageLoader/>
-  console.log(data)
-  
+
+  const { data: workspaceData, isPending } = useInitializeWorkspace()
+
+  const { workspace, role } = workspaceData ?? {}
+
+
+  if (isPending) return <FullPageLoader />
+
   return (
 
     <>
@@ -29,7 +34,7 @@ function HomePage() {
         <div className="flex items-end justify-between border-b border-gray-200 pb-6">
           <div className="flex items-center gap-5">
             <div className="w-14 h-14 bg-gray-900 rounded-xl flex items-center justify-center shadow-sm">
-              <span className="text-white font-semibold text-2xl">A</span>
+              <span className="text-white font-semibold text-2xl">{workspace?.name?.[0]}</span>
             </div>
             <div>
               <div className="relative">
@@ -37,7 +42,7 @@ function HomePage() {
                   onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
                   className="flex items-center gap-2 mb-1 hover:opacity-80 transition-opacity"
                 >
-                  <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none">Acme Corp</h1>
+                  <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none">{workspace.name}</h1>
                   <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
                 </button>
 

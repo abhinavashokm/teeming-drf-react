@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import authService from "../../services/authService";
 import { useDispatch } from "react-redux";
+import { setAccessToken } from "../../store/slices/authSlice";
 
 
 export default function useInitializeAuth() {
@@ -12,9 +13,10 @@ export default function useInitializeAuth() {
             const refreshRes = await authService.refresh()
             dispatch(setAccessToken(refreshRes.data.accessToken))
             const userRes = await authService.getCurrentUser()
-            dispatch(setUser(userRes.data.user))
+            // dispatch(setUser(userRes.data.user))
             return userRes.data.user
         },
-        retry: false // don't retry on 401
+        retry: false, // don't retry on 401
+        staleTime: Infinity
     })
 } 

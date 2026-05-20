@@ -12,13 +12,13 @@ export default function useWorkspaceRedirect() {
 
     return async () => {
         try {
-            const res_data = await workspaceService.getMyWorkspaces()
-            dispatch(setWorkspaces(res_data.data))
-            console.log(res_data.data)
+            const res = await workspaceService.getMyWorkspaces()
+            dispatch(setWorkspaces(res.data))
 
-            const { workspaces, last_workspace } = res_data.data
 
-            navigate(getWorkspaceRedirectPath(res_data.data))
+            const { workspaces, last_workspace } = res.data
+
+            navigate(getWorkspaceRedirectPath(res.data))
 
 
         } catch (err) {
