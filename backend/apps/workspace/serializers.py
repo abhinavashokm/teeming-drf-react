@@ -8,3 +8,10 @@ class CreateWorkspaceSerilaizer(serializers.ModelSerializer):
     class Meta:
         model = Workspace
         fields = ["name", "slug", "owner"]
+
+
+class WorkspaceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Workspace
+        fields = ["name", "slug"]
