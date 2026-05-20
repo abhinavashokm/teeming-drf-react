@@ -1,37 +1,32 @@
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import AuthLogo from "../../components/auth/AuthLogo";
 import useLogout from "../../hooks/auth/useLogout";
+import { toSlug } from "../../utils/slugUtils";
+import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
 
 
 function CreateWorkspacePage() {
     const { user, accessToken } = useSelector((state) => state.auth);
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const [name, setName] = useState("");
-    const [slug, setSlug] = useState("");
+    const { register, handleSubmit, setValue } = useForm()
     const [slugEdited, setSlugEdited] = useState(false);
 
-    const toSlug = (val) =>
-        val.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
     const handleNameChange = (e) => {
         const val = e.target.value;
-        setName(val);
-        if (!slugEdited) setSlug(toSlug(val));
+        setValue("name", val);
+        if (!slugEdited) setValue('slug', toSlug(val));
     };
 
     const handleSlugChange = (e) => {
         setSlugEdited(true);
-        setSlug(toSlug(e.target.value));
+        setValue('slug', toSlug(e.target.value));
     };
 
-    const handleSubmit = () => {
-        if (!name.trim()) return;
-        // dispatch create workspace action here
-    };
 
     const { mutate: logout } = useLogout()
 
@@ -40,8 +35,13 @@ function CreateWorkspacePage() {
         navigate("/auth/login/")
     }
 
-    // console.log(user)
-    // console.log(accessToken)
+    const { mutate: createWorkspace } = useCreateWorkspace()
+
+    const handleCreateWorkspace = ({name, slug}) => {
+        createWorkspace({name, slug})
+        console.log(data)
+    }
+
     return (
         <div className="h-screen w-full flex flex-col relative overflow-hidden font-sans auth-body">
 
@@ -87,11 +87,12 @@ function CreateWorkspacePage() {
                                 <label className="text-teeming-text-dark font-semibold text-[14px] leading-5">
                                     Workspace Name
                                 </label>
+
                                 <input
                                     type="text"
-                                    value={name}
-                                    onChange={handleNameChange}
                                     placeholder="e.g. Acme Corp"
+                                    {...register('name')}
+                                    onChange={handleNameChange}
                                     className="w-full py-[10px] px-4 bg-white border border-teeming-border rounded-lg text-[15px] text-teeming-text-dark placeholder-teeming-light-gray focus:outline-none focus:ring-1 focus:ring-teeming-green focus:border-teeming-green transition-all"
                                 />
                             </div>
@@ -107,9 +108,9 @@ function CreateWorkspacePage() {
                                     </span>
                                     <input
                                         type="text"
-                                        value={slug}
-                                        onChange={handleSlugChange}
                                         placeholder="acme-corp"
+                                        {...register('slug')}
+                                        onChange={handleSlugChange}
                                         className="flex-1 py-[10px] pr-4 pl-0.5 bg-transparent text-[14px] text-teeming-text-dark placeholder-teeming-light-gray focus:outline-none"
                                     />
                                 </div>
@@ -118,8 +119,7 @@ function CreateWorkspacePage() {
                             {/* Submit */}
                             <button
                                 type="button"
-                                onClick={handleSubmit}
-                                disabled={!name.trim()}
+                                onClick={handleSubmit(handleCreateWorkspace)}
                                 className="w-full py-[10px] mt-1 bg-teeming-green hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors flex justify-center items-center"
                             >
                                 <span className="text-white font-bold text-[16px] leading-6 -tracking-[0.024em]">

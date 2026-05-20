@@ -1,17 +1,18 @@
 import { setAccessToken, clearAuth } from "../../store/slices/authSlice";
+import { REFRESH_URL } from "../../services/authService";
 
 export const authResponseInterceptor =
     async (store, api, error) => {
         console.log(error.response?.data)
 
-        const isRefreshCall = error.config?.url === "/auth/refresh/"
+        const isRefreshCall = error.config?.url === REFRESH_URL
 
         if (error.response?.status === 401 && !isRefreshCall) {
             try {
 
                 // call refresh endpoint → get new access token
-                const res_data = await api.post('/auth/refresh/')
-                const accessToken = res_data.access_token
+                const res = await api.post(REFRESH_URL)
+                const accessToken = res.data.data.accessToken
 
                 // store new access token in redux
                 store.dispatch(setAccessToken(accessToken))

@@ -1,5 +1,6 @@
 import api from "../api/axios";
 
+export const REFRESH_URL = "/auth/refresh/";
 
 const authService = {
     login: async (data) => {
@@ -38,7 +39,7 @@ const authService = {
 
     refresh: async () => {
 
-        const res = await api.post('/auth/refresh/')
+        const res = await api.post(REFRESH_URL)
         return res.data
     },
 

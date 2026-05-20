@@ -5,16 +5,19 @@ const workspaceSlice = createSlice({
     'name': 'workspace',
     'initialState': {
         'workspaces': null,
-        'last_workspace': null,
+        'current_workspace': null,
     },
     reducers: {
         setWorkspaces: (state, action) => {
             state.workspaces = action.payload.workspaces
-            state.last_workspace = action.payload.lastWorkspace
+            state.current_workspace_workspace = action.payload.lastWorkspace
         },
+        setCurrentWorkspace: (state, action) => {
+            state.current_workspace = action.payload
+        }
     }
 })
 
 
-export const { setWorkspaces } = workspaceSlice.actions
+export const { setWorkspaces, setCurrentWorkspace } = workspaceSlice.actions
 export default workspaceSlice

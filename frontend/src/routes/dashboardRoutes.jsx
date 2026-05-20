@@ -4,10 +4,11 @@ import HomePage from "../pages/workspace/HomePage";
 
 
 const dashboardRoutes = {
+    path: '/:workspaceSlug',
     element: <DashboardLayout />,
     children: [
         {
-            path: 'home',
+            index: true,
             element: <HomePage />
         }
     ]
