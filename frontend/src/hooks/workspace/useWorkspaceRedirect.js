@@ -12,7 +12,7 @@ export default function useWorkspaceRedirect() {
 
     return async () => {
         try {
-            const res = await workspaceService.getMyWorkspaces()
+            const res = await workspaceService.fetchMyWorkspaces()
             dispatch(setWorkspaces(res.data))
 
 

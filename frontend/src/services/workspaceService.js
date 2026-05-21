@@ -4,13 +4,13 @@ import api from "../api/axios";
 export const workspaceService = {
 
     //get all workspace and last active workspace of user for redirection
-    getMyWorkspaces: async () => {
+    fetchMyWorkspaces: async () => {
         const res = await api.get("/workspaces/session/")
         return res.data
     },
 
     //initialize workspace on page reload
-    getWorkspace: async (slug) => {
+    fetchWorkspaceBySlug: async (slug) => {
         const res = await api.get(`/workspaces/${slug}/`)
         return res.data
     },

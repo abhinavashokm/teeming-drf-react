@@ -9,18 +9,18 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import FullPageLoader from '../../components/ui/FullPageLoader';
-import useInitializeWorkspace from '../../hooks/workspace/useInitializeWorkspace';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 import useWorkspaceHome from '../../hooks/workspace/useWorkspaceHome';
+import InviteModal from '../../components/workspace/InviteModal';
 
 
 function HomePage() {
 
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
 
 
-  const { data: workspaceData, isPending } = useInitializeWorkspace()
-
-  const { workspace, role } = workspaceData ?? {}
+  const { data: currentWorkspace, isPending } = useWorkspace()
 
 
   if (isPending) return <FullPageLoader />
@@ -34,7 +34,7 @@ function HomePage() {
         <div className="flex items-end justify-between border-b border-gray-200 pb-6">
           <div className="flex items-center gap-5">
             <div className="w-14 h-14 bg-gray-900 rounded-xl flex items-center justify-center shadow-sm">
-              <span className="text-white font-semibold text-2xl">{workspace?.name?.[0]}</span>
+              <span className="text-white font-semibold text-2xl">{currentWorkspace?.name?.[0]}</span>
             </div>
             <div>
               <div className="relative">
@@ -42,7 +42,7 @@ function HomePage() {
                   onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
                   className="flex items-center gap-2 mb-1 hover:opacity-80 transition-opacity"
                 >
-                  <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none">{workspace.name}</h1>
+                  <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none">{currentWorkspace.name}</h1>
                   <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
                 </button>
 
@@ -81,12 +81,12 @@ function HomePage() {
               <div className="flex items-center gap-2 text-[13px]">
                 <span className="text-gray-500">Free plan</span>
                 <span className="text-gray-300">•</span>
-                <span className="text-teeming-green font-medium">Member</span>
+                <span className="text-teeming-green font-medium">{currentWorkspace.role}</span>
               </div>
             </div>
           </div>
           <div className="flex gap-3">
-            <button className="px-3 py-1.5 bg-gray-900 border border-transparent rounded-md text-[13px] font-medium text-white hover:bg-gray-800 transition-colors shadow-sm">
+            <button onClick={() => setIsInviteModalOpen(true)} className="px-3 py-1.5 bg-gray-900 border border-transparent rounded-md text-[13px] font-medium text-white hover:bg-gray-800 transition-colors shadow-sm">
               + Invite Members
             </button>
           </div>
@@ -279,6 +279,7 @@ function HomePage() {
 
       </div>
 
+      <InviteModal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} />
 
     </>
   )

@@ -6,11 +6,11 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Sidebar from '../components/layout/Sidebar';
-import useInitializeWorkspace from '../hooks/workspace/useInitializeWorkspace';
+import useWorkspace from '../hooks/workspace/useWorkspace';
 
 function WorkspaceLayout() {
 
-  const { data, isPending } = useInitializeWorkspace()
+  const { data, isPending } = useWorkspace()
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);

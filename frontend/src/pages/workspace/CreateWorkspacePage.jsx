@@ -6,11 +6,11 @@ import AuthLogo from "../../components/auth/AuthLogo";
 import useLogout from "../../hooks/auth/useLogout";
 import { toSlug } from "../../utils/slugUtils";
 import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
-import useInitializeAuth from "../../hooks/auth/useInitializeAuth";
+import useAuth from "../../hooks/auth/useAuth";
 
 
 function CreateWorkspacePage() {
-    const { data: user } = useInitializeAuth()
+    const { data: user } = useAuth()
     
     const navigate = useNavigate();
 

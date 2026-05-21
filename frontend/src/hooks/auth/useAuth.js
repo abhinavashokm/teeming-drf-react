@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { setAccessToken } from "../../store/slices/authSlice";
 
 
-export default function useInitializeAuth() {
+export default function useAuth() {
     const dispatch = useDispatch()
 
     return useQuery({

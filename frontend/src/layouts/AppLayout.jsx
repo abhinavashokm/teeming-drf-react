@@ -3,13 +3,13 @@ import { Toaster } from "react-hot-toast"
 import { Outlet, useLocation } from "react-router-dom"
 import FullPageLoader from "../components/ui/FullPageLoader"
 import { errorCodes } from "../constants/errorCodes"
-import useInitializeAuth from "../hooks/auth/useInitializeAuth"
+import useAuth from "../hooks/auth/useAuth"
 import { showApiError, showError, showSuccess } from '../utils/toast'
 
 
 function AppLayout() {
 
-    const { isLoading, isError, error } = useInitializeAuth() // runs on mount automatically
+    const { isLoading, isError, error } = useAuth() // runs on mount automatically
 
     //global errors
     useEffect(() => {

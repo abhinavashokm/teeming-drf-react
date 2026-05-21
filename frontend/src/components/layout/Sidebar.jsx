@@ -8,11 +8,11 @@ import {
   Settings
 } from 'lucide-react';
 import { useState } from 'react';
-import useInitializeAuth from '../../hooks/auth/useInitializeAuth';
+import useAuth from '../../hooks/auth/useAuth';
 
 
 function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
-  const { data: user } = useInitializeAuth()
+  const { data: user } = useAuth()
   const [activeWorkspace, setActiveWorkspace] = useState(true);
 
   return (
@@ -140,7 +140,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
       {/* User Profile Strip */}
       <div className="shrink-0 border-t border-gray-200 px-4 py-3 flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
-          AJ
+          { user.fullName?.slice(0, 2) }
         </div>
         <div className="flex flex-col min-w-0">
           <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">{user.fullName}</span>
