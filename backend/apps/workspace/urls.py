@@ -4,6 +4,7 @@ from .views import (
     WorkspaceListCreateView,
     WorkspaceHomeView,
     WorkspaceDetailView,
+    SendWorkspaceInvitationView,
 )
 
 urlpatterns = [
@@ -11,4 +12,5 @@ urlpatterns = [
     path("session/", WorkspaceSessionView.as_view()),
     path("<slug:workspace_slug>/", WorkspaceDetailView.as_view()),
     path("<slug:workspace_slug>/home/", WorkspaceHomeView.as_view()),
+    path("<slug:workspace_slug>/invite/", SendWorkspaceInvitationView.as_view()),
 ]

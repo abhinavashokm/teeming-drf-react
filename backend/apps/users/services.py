@@ -4,6 +4,7 @@ from allauth.socialaccount.models import SocialAccount
 from rest_framework_simplejwt.exceptions import TokenError
 
 from .helpers import otp_helper, signup_helper, password_reset_helper
+from core.utils.token_utils import generate_token
 from django.contrib.auth.hashers import make_password
 from .models import User
 from . import exceptions
@@ -84,7 +85,7 @@ def login_user(request, email, password):
 def send_password_reset_link(email):
 
     # generate reset token
-    reset_token = password_reset_helper.generate_reset_token()
+    reset_token = password_reset_helper.generate_token()
 
     # save token to redis
     password_reset_helper.save_reset_session(reset_token=reset_token, email=email)

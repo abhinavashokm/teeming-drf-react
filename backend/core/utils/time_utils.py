@@ -1,3 +1,8 @@
+from datetime import timedelta
+from django.utils import timezone
+
+from django.conf import settings
+
 
 def seconds_to_human(seconds):
     
@@ -18,3 +23,11 @@ def seconds_to_human(seconds):
     
     secs_str = f" and {secs} second{'s' if secs != 1 else ''}" if secs else ""
     return f"{minutes} minute{'s' if minutes != 1 else ''}{secs_str}"
+
+
+def get_expiry_datetime(ttl_seconds):
+    return timezone.now() + timedelta(seconds=ttl_seconds)
+
+
+def format_expiry_date(expires_at):
+    return expires_at.strftime("%B %d, %Y")  # → "May 29, 2026"

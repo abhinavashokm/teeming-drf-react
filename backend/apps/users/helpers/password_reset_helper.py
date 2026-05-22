@@ -5,10 +5,7 @@ from core.services.email_service import send_email as _send_email
 from core import redis_store
 from django.conf import settings
 from core.utils.time_utils import seconds_to_human
-
-
-def generate_reset_token():
-    return secrets.token_urlsafe(32)
+from core.utils.token_utils import generate_token
 
 
 def _make_key(reset_token):

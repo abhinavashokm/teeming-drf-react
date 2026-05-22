@@ -193,10 +193,13 @@ SIMPLE_JWT = {
 
 REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60  # 7days (in seconds)
 
-# expiry time for otp verification
+# expiry time's configuration
 OTP_EXPIRY = 60 * 3  # in seconds. 3min
 SIGNUP_SESSION_EXPIRY = 60 * 15  # 15 minutes
 PASSWORD_RESET_LINK_EXPIRY = 60 * 30  # 30 minutes
+
+#Expiry snaps to end of calculated day. (so always keep the meausre in days to avoid inconsistent behaviours)
+INVITATION_EXPIRY = 60 * 60 * 24 * 7  # 7 days. 
 
 
 # Google OAuth configs
