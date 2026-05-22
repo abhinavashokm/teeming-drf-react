@@ -6,7 +6,8 @@ import ProtectedRoute from "./guards/ProtectedRoute";
 import authRoutes from "./authRoutes";
 import dashboardRoutes from "./dashboardRoutes";
 import CreateWorkspacePage from "../pages/workspace/CreateWorkspacePage";
-
+import AcceptInvitationPage from "../pages/invite/AcceptInvitePage";
+import SetupLayout from "../layouts/SetupLayout";
 
 
 const router = createBrowserRouter([
@@ -18,17 +19,29 @@ const router = createBrowserRouter([
                 children: [{
                     path: "auth",
                     ...authRoutes
+                }, {
+                    element: <SetupLayout />,
+                    children: [
+                        {
+                            element: <AcceptInvitationPage />,
+                            path: "invite"
+                        }]
                 }]
             },
             {
                 element: <ProtectedRoute />,
                 children: [{
                     ...dashboardRoutes,
-                },{
-                     element: <CreateWorkspacePage/>,
-                     path: "create-workspace"
+                }, {
+                    element: <SetupLayout />,
+                    children: [
+                        {
+                            element: <CreateWorkspacePage />,
+                            path: "create-workspace"
+                        }
+                    ]
                 }
-                   
+
                 ]
             }
 

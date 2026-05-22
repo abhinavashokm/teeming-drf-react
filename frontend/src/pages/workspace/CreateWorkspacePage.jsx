@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import AuthLogo from "../../components/auth/AuthLogo";
-import useLogout from "../../hooks/auth/useLogout";
-import { toSlug } from "../../utils/slugUtils";
-import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
+import SetupHeader from "../../components/setup/SetupHeader";
 import useAuth from "../../hooks/auth/useAuth";
+import useLogout from "../../hooks/auth/useLogout";
+import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
+import { toSlug } from "../../utils/slugUtils";
 
 
 function CreateWorkspacePage() {
     const { data: user } = useAuth()
-    
+
     const navigate = useNavigate();
 
     const { register, handleSubmit, setValue } = useForm()
@@ -39,34 +38,16 @@ function CreateWorkspacePage() {
 
     const { mutate: createWorkspace } = useCreateWorkspace()
 
-    const handleCreateWorkspace = ({name, slug}) => {
-        createWorkspace({name, slug})
-     
+    const handleCreateWorkspace = ({ name, slug }) => {
+        createWorkspace({ name, slug })
+
     }
 
     return (
-        <div className="h-screen w-full flex flex-col relative overflow-hidden font-sans auth-body">
-
-            {/* Header */}
-            <header className="w-full flex justify-between items-center px-8 md:px-12 py-6 z-10">
-                <button
-                    onClick={logoutHandle}
-                    className="text-teeming-gray hover:text-teeming-text-dark text-[14px] font-medium transition-colors"
-                >
-                    Log out
-                </button>
-                <div className="flex items-center gap-1.5 text-[14px]">
-                    <span className="text-teeming-gray">Logged in as</span>
-                    <span className="text-teeming-text-dark font-semibold">{user?.email}</span>
-                </div>
-            </header>
-
-            {/* Main */}
-            <div className="flex-1 w-full flex flex-col mt-4 items-center px-6 z-10">
-                <div className="w-full max-w-[440px] flex flex-col items-center">
+        <>
 
                     {/* Logo */}
-                    <AuthLogo className="mb-4" />
+                    {/* <AuthLogo className="mb-4" /> */}
 
                     {/* Title */}
                     <h1 className="text-teeming-text-dark font-bold text-[28px] leading-[42px] -tracking-[0.025em] text-center mb-1">
@@ -139,10 +120,8 @@ function CreateWorkspacePage() {
                             Ask your admin to send you an invite link.
                         </span>
                     </p>
-
-                </div>
-            </div>
-        </div>
+      
+        </>
     );
 }
 

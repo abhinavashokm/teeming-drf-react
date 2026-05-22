@@ -5,14 +5,17 @@ import authService from "../../services/authService";
 import { showApiError } from "../../utils/toast";
 import { getErrorCode, getErrorMsg } from "../../utils/errorHandler";
 import { errorCodes } from "../../constants/errorCodes";
+import useInviteToken from "../../hooks/invite/useInviteToken"
 
 
 export function useVerifyOtp({ onError = null } = {}) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
+    const token = useInviteToken()
+
     return useMutation({
-        mutationFn: (data) => authService.verifyOTP(data),
+        mutationFn: (data) => authService.verifyOTP(data, token),
         onSuccess: (res) => {
             sessionStorage.removeItem('verificationEmail')
             navigate('/auth/login', { state: { toast: "Email verified successfully, you can now login" }, replace: true })

@@ -13,9 +13,14 @@ const authService = {
         return res.data
     },
 
-    verifyOTP: async (data) => {
+    verifyOTP: async (data, inviteToken) => {
+        let res
+        if (!token) {
+            res = await api.post('/auth/verify-otp/', data)
+        } else {
+            res = await api.post(`/auth/verify-otp?token=${inviteToken}/`, data)
+        }
 
-        const res = await api.post('/auth/verify-otp/', data)
         return res.data
     },
 
@@ -61,7 +66,7 @@ const authService = {
         return res.data
     },
 
-    validateResetToken: async ({token}) => {
+    validateResetToken: async ({ token }) => {
         const res = await api.get(`/auth/validate-reset-token/?token=${token}`)
         return res.data
     }

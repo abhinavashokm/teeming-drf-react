@@ -5,9 +5,23 @@ export const authResponseInterceptor =
     async (store, api, error) => {
         console.log(error.response?.data)
 
-        const isRefreshCall = error.config?.url === REFRESH_URL
+        // prevent infinite retry loop
+        if (error.config?._retry) {
+            return Promise.reject(error)
+        }
+
+        // only handle 401, reject everything else immediately
+        if (status !== 401) {
+
+            return Promise.reject(error)
+        }
+
+        const isRefreshCall = error.config?.url?.includes(REFRESH_URL)
 
         if (error.response?.status === 401 && !isRefreshCall) {
+
+            error.config._retry = true
+
             try {
 
                 // call refresh endpoint → get new access token
@@ -19,9 +33,14 @@ export const authResponseInterceptor =
 
                 // retry original request
                 error.config.headers.Authorization = `Bearer ${accessToken}`
-                return api(error.config)
+                console.log("no error")
+                return api({
+                    ...error.config,
+                    _retry: true  // ← explicitly carry it into the new request
+                })
 
             } catch (refreshError) {
+                console.log("refresh error")
 
                 // Refresh token itself expired → log user out
                 store.dispatch(clearAuth())

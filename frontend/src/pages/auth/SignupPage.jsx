@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import AuthButton from '../../components/auth/AuthButton'
 import AuthDivider from '../../components/auth/AuthDivider'
 import AuthFormError from '../../components/auth/AuthFormError'
@@ -10,11 +10,18 @@ import PasswordInput from '../../components/auth/PasswordInput'
 import { useSignup } from '../../hooks/auth/useSignup'
 import { getErrorMsg } from '../../utils/errorHandler'
 import { validations } from '../../utils/validations'
+import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
+import FullPageLoader from '../../components/ui/FullPageLoader'
 
 
 function SignupPage() {
 
-    const testMode = true
+    const { data: invitationDetails, isPending:isResolveTokenPending } = useResolveInvitation()
+    
+    const [searchParams] = useSearchParams()
+    const token = searchParams.get('token')
+
+    const testMode = false
 
     const { handleSubmit, register, formState: { errors } } = useForm(testMode && {
         defaultValues: {
@@ -24,12 +31,13 @@ function SignupPage() {
         }
     })
 
-    const { mutate: signup, isPending, error:signupError, isError } = useSignup()
+    const { mutate: signup, isPending, error: signupError, isError } = useSignup()
 
     const handleSignup = async (data) => {
-        signup(data)
+            signup(data)
     }
-    
+
+    if(!!token && isResolveTokenPending) return <FullPageLoader />
 
     return (
         <>
@@ -82,7 +90,7 @@ function SignupPage() {
                                 {...register('fullName', validations.fullName)} error={errors.fullName} />
 
                             {/* Email Input */}
-                            <AuthInput type={"email"} placeholder={"Work email"} autoComplete={'email'}
+                            <AuthInput value={invitationDetails?.invitedEmail} readOnly={!!invitationDetails} type={"email"} placeholder={"Work email"} autoComplete={'email'}
                                 {...register('email', validations.email)} error={errors.email}
                             />
 
@@ -96,7 +104,7 @@ function SignupPage() {
                                     {
                                         isPending ? "Sending OTP..." : "Sign up with Email"
                                     }
-                                    
+
                                 </AuthButton>
                             </div>
 

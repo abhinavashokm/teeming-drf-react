@@ -1,19 +1,26 @@
 import { useMutation } from "@tanstack/react-query";
 import authService from "../../services/authService";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 
-export function useSignup(){
+export function useSignup() {
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    
+
+    const [searchParams] = useSearchParams()
+    const token = searchParams.get('token')
+
     return useMutation({
         mutationFn: (data) => authService.signup(data),
         onSuccess: (res) => {
-            
+
             sessionStorage.setItem('verificationEmail', res.data.email)
-            navigate('/auth/verify-otp')
+            if(token){
+                navigate(`/auth/verify-otp?token=${token}`)
+            }else{
+                navigate('/auth/verify-otp')
+            }
         }
     })
 

@@ -1,7 +1,15 @@
 import { Check, Users, X } from 'lucide-react';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import { showSuccess } from '../../utils/toast';
+import useInviteMembers from '../../hooks/invite/useInviteMembers'
 
+
+const initialState = {
+    inputValue: '',
+    isDropdownOpen: false,
+    selectedEmails: []
+}
 
 const reducer = (state, action) => {
     switch (action.type) {
@@ -34,28 +42,41 @@ const reducer = (state, action) => {
                 isDropdownOpen: action.payload
             }
 
+        case 'RESET':
+            return initialState
+
         default: return state
 
     }
 }
 
-const initialState = {
-    inputValue: '',
-    isDropdownOpen: false,
-    selectedEmails: []
-}
+
 
 
 export default function InviteModal({ isOpen, onClose }) {
 
-    const dropdownRef = useRef(null);
-
     const { data: currentWorkspace } = useWorkspace()
 
-    const [selectedEmails, setSelectedEmails] = useState([])
+    const { mutate: inviteMembers, isPending: isInvitePending } = useInviteMembers()
+
+    const handleClose = () => {
+        inviteDispatch({ type: 'RESET' })
+        onClose()
+    }
+
+    const handleInviteMember = () => {
+
+        inviteMembers({ emails: state.selectedEmails }, {
+            onSuccess: () => {
+                handleClose()
+            }
+        })
+
+    }
 
 
     const [state, inviteDispatch] = useReducer(reducer, initialState)
+    const dropdownRef = useRef(null);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -80,7 +101,7 @@ export default function InviteModal({ isOpen, onClose }) {
                         <Users className="w-3.5 h-3.5" strokeWidth={2.5} />
                         <span className=" tracking-wide mt-[1px]">Invite team</span>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1 rounded-md hover:bg-gray-50 transition-colors">
+                    <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1 rounded-md hover:bg-gray-50 transition-colors">
                         <X className="w-5 h-5" strokeWidth={2} />
                     </button>
                 </div>
@@ -184,14 +205,30 @@ export default function InviteModal({ isOpen, onClose }) {
                     {/* Button group */}
                     <div className="flex flex-col sm:flex-row gap-2">
                         <button
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="text-[13px] font-medium px-5 py-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 min-h-[44px] w-full sm:w-auto text-gray-700 transition-colors shadow-sm"
                         >
                             Cancel
                         </button>
-                        <button className="text-[13px] font-medium px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 min-h-[44px] w-full sm:w-auto transition-colors shadow-sm">
-                            Send invites →
+
+                        <button
+                            onClick={handleInviteMember}
+                            disabled={isInvitePending}
+                            className="text-[13px] font-medium px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white flex items-center justify-center gap-1.5 min-h-[44px] w-full sm:w-auto transition-colors shadow-sm"
+                        >
+                            {isInvitePending ? (
+                                <>
+                                    <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                    </svg>
+                                    Sending...
+                                </>
+                            ) : (
+                                <>Send invites →</>
+                            )}
                         </button>
+
                     </div>
 
                 </div>

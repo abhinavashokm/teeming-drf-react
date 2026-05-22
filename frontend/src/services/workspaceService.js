@@ -24,5 +24,5 @@ export const workspaceService = {
         const res = await api.get(`/workspaces/${slug}/home/`)
         return res.data
     },
-
+    
 }

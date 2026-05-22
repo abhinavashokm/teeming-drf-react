@@ -2,8 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
-import { showError, showSuccess } from "../../utils/toast";
-import { getErrorMsg } from "../../utils/errorHandler";
+import { showApiError, showSuccess } from "../../utils/toast";
 
 
 export function useResendOtp() {
