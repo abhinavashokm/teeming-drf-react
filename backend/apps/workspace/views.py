@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from core.responses.api_response import success_response, error_response
 from rest_framework import status
 from . import services
-from .serializers import CreateWorkspaceSerilaizer, WorkspaceSerializer, SendWorkspaceInvitationSerializer
+from .serializers import CreateWorkspaceSerilaizer, WorkspaceSerializer
 from .models import WorkspaceMember
 
 
@@ -13,7 +13,7 @@ class WorkspaceSessionView(APIView):
     """
 
     def get(self, request):
-        print(request.user)
+
 
         membership_workspaces, last_workspace = services.fetch_user_workspace_list(
             request.user
@@ -104,17 +104,3 @@ class WorkspaceHomeView(APIView):
         )
     
 
-class SendWorkspaceInvitationView(APIView):
-
-    def post(self, request, **kwargs):
-        serializer = SendWorkspaceInvitationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-
-        services.send_workspace_invitations(serializer.validated_data['emails'], request.workspace, invited_by=request.user)
-
-
-        return success_response(
-            message="good",
-            status_code=status.HTTP_200_OK
-        )

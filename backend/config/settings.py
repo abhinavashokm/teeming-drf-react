@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     # myapps
     "apps.users",
-    "apps.workspace"
+    "apps.workspace",
+    "apps.invitation",
 ]
 
 MIDDLEWARE = [

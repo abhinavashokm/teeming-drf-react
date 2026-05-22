@@ -17,6 +17,3 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         fields = ["name", "slug", "id"]
 
 
-class SendWorkspaceInvitationSerializer(serializers.Serializer):
-    emails = serializers.ListField()
-

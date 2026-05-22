@@ -8,9 +8,7 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 
-from core.responses.api_response import (
-    success_response, error_response
-)
+from core.responses.api_response import success_response, error_response
 from .serializers import (
     RegisterSerializer,
     VerifyOTPSerializer,
@@ -56,9 +54,12 @@ class VerifyOTPView(APIView):
         serializer = VerifyOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        services.verify_otp_and_create_user(
+        invitation_token = request.query_params.get("token")
+
+        services.verify_otp(
             email=serializer.validated_data["email"],
             otp=serializer.validated_data["otp"],
+            invitation_token=invitation_token
         )
 
         return success_response(
@@ -189,8 +190,7 @@ class CookieTokenBlacklistView(TokenBlacklistView):
 
         if not refresh_token:
             return error_response(
-                message= "No refresh token.",
-                status_code=status.HTTP_400_BAD_REQUEST
+                message="No refresh token.", status_code=status.HTTP_400_BAD_REQUEST
             )
 
         # Inject into request data so parent handles blacklisting

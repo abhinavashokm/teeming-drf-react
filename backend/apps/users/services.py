@@ -2,12 +2,14 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from allauth.socialaccount.models import SocialAccount
 from rest_framework_simplejwt.exceptions import TokenError
+from django.db import transaction
 
 from .helpers import otp_helper, signup_helper, password_reset_helper
 from core.utils.token_utils import generate_token
 from django.contrib.auth.hashers import make_password
 from .models import User
 from . import exceptions
+from apps.invitation import services as invitation_services
 
 
 def register_user(full_name, email, password):
@@ -25,6 +27,16 @@ def register_user(full_name, email, password):
 
     # send otp to user's mail
     otp_helper.send_verification_otp_email(email=email, otp=otp)
+
+
+def verify_otp(email, otp, invitation_token=None):
+    with transaction.atomic():
+        user = verify_otp_and_create_user(email=email, otp=otp)
+
+        if invitation_token:
+            invitation_services.verify_token_and_accept_invitation(
+                invitation_token, user
+            )
 
 
 def verify_otp_and_create_user(email, otp):
@@ -46,7 +58,7 @@ def verify_otp_and_create_user(email, otp):
 
     # create new user (password is already hashed. so use 'create' instead of 'create_user',
     # else it will double hash password)
-    User.objects.create(
+    user = User.objects.create(
         email=User.objects.normalize_email(email),
         password=signup_data["password"],  # already hashed password
         full_name=signup_data["full_name"],
@@ -54,6 +66,8 @@ def verify_otp_and_create_user(email, otp):
 
     # delete signup record
     signup_helper.delete_signup_data(email)
+
+    return user
 
 
 def resend_otp(email):
@@ -76,7 +90,7 @@ def login_user(request, email, password):
 
     if not authenticated_user:
         raise exceptions.InvalidCredentials()
-    
+
     refresh_token = RefreshToken.for_user(authenticated_user)
 
     return authenticated_user, refresh_token
@@ -116,10 +130,10 @@ def verify_token_and_update_password(reset_token, new_password):
 
 def validate_reset_token(token):
     reset_session = password_reset_helper.get_reset_session(token)
-    
+
     if not reset_session:
         raise exceptions.InvalidPasswordResetToken()
-    
+
     return reset_session
 
 
@@ -164,5 +178,3 @@ def rotate_refresh_token(refresh_token):
         "access_token": new_access_token,
         "refresh_token": new_refresh_token,
     }
-
-

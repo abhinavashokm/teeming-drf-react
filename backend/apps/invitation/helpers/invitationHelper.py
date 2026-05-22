@@ -12,10 +12,12 @@ def get_invitation_expiry():
     return expiry.replace(hour=23, minute=59, second=59, microsecond=0)
 
 
-def send_invite_mail(to, expires_at):
-    subject = f"You're invited to join acme corp"
+def generate_invite_link(token):
+    return f"{settings.FRONTEND_URL}/invite?token={token}"
 
-    invite_link = "http://sample-test.com"
+
+def send_invite_mail(to, expires_at, invite_link):
+    subject = f"You're invited to join acme corp"
 
     plain_message = f"""
 You've been invited to join acme corp on Brototype.
