@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from .views import (
     RegisterView,
-    VerifyOTPView,
+    CompleteSignupView,
     LoginView,
     ForgotPasswordView,
     ResetPasswordView,
@@ -16,7 +16,7 @@ from .views import (
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
-    path("verify-otp/", VerifyOTPView.as_view()),
+    path("verify-otp/", CompleteSignupView.as_view()),
     path("resend-otp/", ResendOTPView.as_view()),
     path("login/", LoginView.as_view()),
     path("forgot-password/", ForgotPasswordView.as_view()),

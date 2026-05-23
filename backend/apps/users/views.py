@@ -11,7 +11,7 @@ from dj_rest_auth.registration.views import SocialLoginView
 from core.responses.api_response import success_response, error_response
 from .serializers import (
     RegisterSerializer,
-    VerifyOTPSerializer,
+    CompleteSignupSerializer,
     ResendOTPSerializer,
     LoginSerializer,
     UserSerializer,
@@ -19,7 +19,7 @@ from .serializers import (
     ResetPasswordSerializer,
 )
 from django.conf import settings
-from . import services, exceptions
+from . import exceptions, user_services
 from .helpers import cookie_helper
 from core.throttles import AuthThrottle, SensitiveThrottle
 
@@ -32,7 +32,7 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        services.register_user(
+        user_services.register_user(
             email=serializer.validated_data["email"],
             full_name=serializer.validated_data["full_name"],
             password=serializer.validated_data["password"],
@@ -45,22 +45,29 @@ class RegisterView(APIView):
         )
 
 
-class VerifyOTPView(APIView):
+class CompleteSignupView(APIView):
+
     permission_classes = [AllowAny]
     throttle_classes = [SensitiveThrottle]
 
     def post(self, request):
 
-        serializer = VerifyOTPSerializer(data=request.data)
+        serializer = CompleteSignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         invitation_token = request.query_params.get("token")
 
-        services.verify_otp(
+        user_services.verify_otp_and_complete_signup(
             email=serializer.validated_data["email"],
             otp=serializer.validated_data["otp"],
-            invitation_token=invitation_token
+            invitation_token=invitation_token,
         )
+
+        if invitation_token:
+            return success_response(
+                message="Signup successful. You have joined the workspace.",
+                status_code=status.HTTP_201_CREATED,
+            )
 
         return success_response(
             message="verification successfull", status_code=status.HTTP_200_OK
@@ -74,7 +81,7 @@ class ResendOTPView(APIView):
         serializer = ResendOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        services.resend_otp(email=serializer.validated_data["email"])
+        user_services.resend_otp(email=serializer.validated_data["email"])
 
         return Response(
             {"message": "OTP resent successfully"},
@@ -83,6 +90,7 @@ class ResendOTPView(APIView):
 
 
 class LoginView(APIView):
+
     permission_classes = [AllowAny]
     throttle_classes = [AuthThrottle]
 
@@ -90,18 +98,31 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user, refresh_token = services.login_user(
+        invitation_token = request.query_params.get("token")
+
+        user, refresh_token = user_services.login_user(
             request=request,
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
+            invitation_token=invitation_token,
         )
+
+        response = None
+        response_data = {
+            "user": UserSerializer(user).data,
+            "access_token": str(refresh_token.access_token),
+        }
+
+        if invitation_token:
+            response = success_response(
+                message="Login successful. You have joined the workspace.",
+                data=response_data,
+                status_code=status.HTTP_201_CREATED,
+            )
 
         response = success_response(
             message="Login successfull",
-            data={
-                "user": UserSerializer(user).data,
-                "access_token": str(refresh_token.access_token),
-            },
+            data=response_data,
             status_code=status.HTTP_200_OK,
         )
 
@@ -123,7 +144,7 @@ class RefreshTokenView(APIView):
         if not refresh_token:
             raise exceptions.InvalidRefreshToken()
 
-        token = services.rotate_refresh_token(refresh_token)
+        token = user_services.rotate_refresh_token(refresh_token)
 
         res = success_response(data={"access_token": token["access_token"]})
         res = cookie_helper.set_refresh_cookie(
@@ -156,7 +177,7 @@ class ForgotPasswordView(APIView):
         serializer.is_valid(raise_exception=True)
 
         # send password reset link to mail
-        services.send_password_reset_link(email=serializer.validated_data["email"])
+        user_services.send_password_reset_link(email=serializer.validated_data["email"])
 
         return success_response(
             message="reset password link sent to mail", status_code=status.HTTP_200_OK
@@ -172,7 +193,7 @@ class ResetPasswordView(APIView):
         serializer = ResetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        services.verify_token_and_update_password(
+        user_services.verify_token_and_update_password(
             reset_token=serializer.validated_data["token"],
             new_password=serializer.validated_data["password"],
         )
@@ -215,7 +236,7 @@ class GoogleLoginView(SocialLoginView):
         access_token = response.data.get("access")
         refresh_token = response.data.get("refresh")
 
-        user = services.get_or_update_google_user(self.request.user)
+        user = user_services.get_or_update_google_user(self.request.user)
 
         res = success_response(
             data={
@@ -244,7 +265,7 @@ class ValidateResetTokenView(APIView):
         if not token:
             raise exceptions.InvalidPasswordResetToken()
 
-        services.validate_reset_token(token)
+        user_services.validate_reset_token(token)
 
         return success_response(
             message="password reset token verified", status_code=status.HTTP_200_OK

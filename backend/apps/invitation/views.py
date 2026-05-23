@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from . import services
+from . import invitation_services
 from .serializers import SendWorkspaceInvitationSerializer
 from core.responses.api_response import success_response
 from rest_framework import status
@@ -11,7 +11,7 @@ class SendWorkspaceInvitationView(APIView):
         serializer = SendWorkspaceInvitationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        services.send_workspace_invitations(
+        invitation_services.send_workspace_invitations(
             serializer.validated_data["emails"],
             request.workspace,
             invited_by=request.user,
@@ -25,8 +25,8 @@ class ResolveInvitationTokenView(APIView):
 
     def get(self, request, token):
 
-        invitation_record = services.resolve_invitation_token(token)
-        is_account_exists = services.check_account_exists(invitation_record.email)
+        invitation_record = invitation_services.resolve_invitation_token(token)
+        is_account_exists = invitation_services.check_account_exists(invitation_record.email)
 
 
         workspace = invitation_record.workspace
@@ -47,3 +47,16 @@ class ResolveInvitationTokenView(APIView):
                 "is_authenticated": request.user.is_authenticated,
             },
         )
+    
+
+class AcceptInvitationView(APIView):
+
+    def post(self, request, token):
+        
+        invitation_services.verify_token_and_accept_invitation(token, request.user)
+
+        return success_response(
+            message="good",
+            status_code=status.HTTP_201_CREATED
+        )
+        

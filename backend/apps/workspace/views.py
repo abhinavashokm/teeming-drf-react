@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from core.responses.api_response import success_response, error_response
 from rest_framework import status
-from . import services
+from . import workspace_services
 from .serializers import CreateWorkspaceSerilaizer, WorkspaceSerializer
 from .models import WorkspaceMember
 
@@ -15,7 +15,7 @@ class WorkspaceSessionView(APIView):
     def get(self, request):
 
 
-        membership_workspaces, last_workspace = services.fetch_user_workspace_list(
+        membership_workspaces, last_workspace = workspace_services.fetch_user_workspace_list(
             request.user
         )
 

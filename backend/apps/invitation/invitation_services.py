@@ -5,7 +5,7 @@ from .models import Invitation
 from . import exceptions
 from django.utils import timezone
 from apps.users.models import User
-from apps.workspace import services as workspace_services
+from apps.workspace import workspace_services as workspace_services
 
 
 def send_workspace_invitations(emails, workspace, invited_by):
@@ -41,18 +41,21 @@ def send_workspace_invitations(emails, workspace, invited_by):
 
 def resolve_invitation_token(token):
 
-    invitation = Invitation.objects.select_related('workspace', 'invited_by').filter(token=token).first()
+    invitation = (
+        Invitation.objects.select_related("workspace", "invited_by")
+        .filter(token=token)
+        .first()
+    )
 
     if not invitation:
         raise exceptions.InvalidInviteToken()
-    
+
     if invitation.expires_at < timezone.now():
         raise exceptions.InvalidInviteToken()
 
     if invitation.status == Invitation.StatusChoices.ACCEPTED:
         raise exceptions.InvalidInviteToken()
 
-    
     return invitation
 
 
@@ -64,8 +67,7 @@ def verify_token_and_accept_invitation(invitation_token, user):
 
     invitation = resolve_invitation_token(invitation_token)
 
-    #put role as default for now
-    workspace_services.add_workspace_member(user=user, workspace=invitation.workspace, role=None)
-    
-
-
+    # put role as default for now
+    workspace_services.add_workspace_member(
+        user=user, workspace=invitation.workspace
+    )

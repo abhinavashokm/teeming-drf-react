@@ -33,7 +33,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
-class VerifyOTPSerializer(serializers.Serializer):
+class CompleteSignupSerializer(serializers.Serializer):
 
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)

@@ -9,10 +9,15 @@ from core.utils.token_utils import generate_token
 from django.contrib.auth.hashers import make_password
 from .models import User
 from . import exceptions
-from apps.invitation import services as invitation_services
+from apps.invitation import invitation_services as invitation_services
 
 
 def register_user(full_name, email, password):
+    """
+    1] generate otp
+    2] store users singup session in redis cache
+    3] send verification otp to user's mail
+    """
 
     # generate otp
     otp = otp_helper.generate_otp()
@@ -29,17 +34,24 @@ def register_user(full_name, email, password):
     otp_helper.send_verification_otp_email(email=email, otp=otp)
 
 
-def verify_otp(email, otp, invitation_token=None):
+def verify_otp_and_complete_signup(email, otp, invitation_token=None):
+    """
+    1] verify otp
+    2] create user account
+    3] if invitation token exists, verify and add accept it
+    """
+
     with transaction.atomic():
-        user = verify_otp_and_create_user(email=email, otp=otp)
+        user = _verify_otp_and_create_user(email=email, otp=otp)
 
         if invitation_token:
             invitation_services.verify_token_and_accept_invitation(
                 invitation_token, user
             )
+        return user
 
 
-def verify_otp_and_create_user(email, otp):
+def _verify_otp_and_create_user(email, otp):
 
     # get signup data from redis storage
     signup_data = signup_helper.get_signup_data(email)
@@ -85,15 +97,20 @@ def resend_otp(email):
     otp_helper.send_verification_otp_email(email=email, otp=otp)
 
 
-def login_user(request, email, password):
-    authenticated_user = authenticate(request, username=email, password=password)
+def login_user(request, email, password, invitation_token=None):
 
-    if not authenticated_user:
-        raise exceptions.InvalidCredentials()
+    with transaction.atomic():
+        authenticated_user = authenticate(request, username=email, password=password)
 
-    refresh_token = RefreshToken.for_user(authenticated_user)
+        if not authenticated_user:
+            raise exceptions.InvalidCredentials()
 
-    return authenticated_user, refresh_token
+        if invitation_token:
+            invitation_services.verify_token_and_accept_invitation(invitation_token, authenticated_user)
+
+        refresh_token = RefreshToken.for_user(authenticated_user)
+
+        return authenticated_user, refresh_token
 
 
 def send_password_reset_link(email):
