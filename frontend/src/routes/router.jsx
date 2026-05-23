@@ -4,7 +4,7 @@ import AppLayout from "../layouts/AppLayout";
 import PublicRoute from "./guards/PublicRoute";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import authRoutes from "./authRoutes";
-import dashboardRoutes from "./dashboardRoutes";
+import workspaceRoutes from "./workspaceRoutes";
 import CreateWorkspacePage from "../pages/workspace/CreateWorkspacePage";
 import AcceptInvitationPage from "../pages/invite/AcceptInvitePage";
 import SetupLayout from "../layouts/SetupLayout";
@@ -31,7 +31,7 @@ const router = createBrowserRouter([
             {
                 element: <ProtectedRoute />,
                 children: [{
-                    ...dashboardRoutes,
+                    ...workspaceRoutes,
                 }, {
                     element: <SetupLayout />,
                     children: [

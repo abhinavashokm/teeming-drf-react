@@ -1,12 +1,12 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { inviteService } from '../../services/inviteService'
-import useInviteToken from './useInviteToken'
+import useInvitationToken from './useInvitationToken'
 
 
 function useResolveInvitation() {
 
-    const token = useInviteToken()
+    const token = useInvitationToken()
 
     return useQuery({
         queryKey: ['resolveInvite', token],

@@ -10,7 +10,7 @@ export default function useWorkspace() {
 
   return useQuery({
 
-    queryKey: ['workspaceInitialize', workspaceSlug],
+    queryKey: ['workspace', workspaceSlug],
 
     queryFn: async () => {
 

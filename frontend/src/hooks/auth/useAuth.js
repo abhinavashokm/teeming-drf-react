@@ -10,8 +10,9 @@ export default function useAuth() {
     return useQuery({
         queryKey: ['auth'],
         queryFn: async () => {
+            console.log("useauth aane..")
             const refreshRes = await authService.refresh()
-            dispatch(setAccessToken(refreshRes.data.accessToken))
+            dispatch(setAccessToken(refreshRes?.data?.accessToken))
             const userRes = await authService.getCurrentUser()
             // dispatch(setUser(userRes.data.user))
             return userRes.data.user

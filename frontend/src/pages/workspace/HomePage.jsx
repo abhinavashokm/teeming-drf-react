@@ -8,10 +8,8 @@ import {
   Users
 } from 'lucide-react';
 import { useState } from 'react';
-import FullPageLoader from '../../components/ui/FullPageLoader';
-import useWorkspace from '../../hooks/workspace/useWorkspace';
-import useWorkspaceHome from '../../hooks/workspace/useWorkspaceHome';
 import InviteModal from '../../components/workspace/InviteModal';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 
 function HomePage() {
@@ -19,11 +17,8 @@ function HomePage() {
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
 
-
-  const { data: currentWorkspace, isPending } = useWorkspace()
-
-
-  if (isPending) return <FullPageLoader />
+  const { data: currentWorkspace } = useWorkspace()
+  //const currentWorkspace = null
 
   return (
 
@@ -42,7 +37,7 @@ function HomePage() {
                   onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
                   className="flex items-center gap-2 mb-1 hover:opacity-80 transition-opacity"
                 >
-                  <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none">{currentWorkspace.name}</h1>
+                  <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none">{currentWorkspace?.name}</h1>
                   <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
                 </button>
 
@@ -81,7 +76,7 @@ function HomePage() {
               <div className="flex items-center gap-2 text-[13px]">
                 <span className="text-gray-500">Free plan</span>
                 <span className="text-gray-300">•</span>
-                <span className="text-teeming-green font-medium">{currentWorkspace.role}</span>
+                <span className="text-teeming-green font-medium">{currentWorkspace?.role}</span>
               </div>
             </div>
           </div>

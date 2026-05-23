@@ -32,3 +32,7 @@ export const getErrorCode = (errorRes) => {
     return code ?? errorCodes.UNKNOWN_ERROR
 }
 
+
+export const getSuccessMsg = (successRes, fallbackMsg = "Operation completed successfully.") => {
+    return successRes?.data?.message || fallbackMsg
+}

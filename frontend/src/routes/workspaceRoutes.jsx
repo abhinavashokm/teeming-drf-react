@@ -3,7 +3,7 @@ import HomePage from "../pages/workspace/HomePage";
 
 
 
-const dashboardRoutes = {
+const workspaceRoutes = {
     path: '/w/:workspaceSlug',
     element: <WorkspaceLayout />,
     children: [
@@ -14,4 +14,4 @@ const dashboardRoutes = {
     ]
 }
 
-export default dashboardRoutes
+export default workspaceRoutes

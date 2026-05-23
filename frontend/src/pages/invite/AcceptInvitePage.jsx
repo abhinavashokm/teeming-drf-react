@@ -1,9 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
-import SetupHeader from "../../components/setup/SetupHeader";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import FullPageLoader from "../../components/ui/FullPageLoader";
+import useInvitationToken from "../../hooks/invite/useInvitationToken";
 import useResolveInvitation from "../../hooks/invite/useResolveInvitation";
-import { renderContent } from "./RenderContent";
-import FullPageLoader from "../../components/ui/FullPageLoader"
-import { useNavigate, useSearchParams } from "react-router-dom";
+import useAuth from "../../hooks/auth/useAuth";
+import useLogout from "../../hooks/auth/useLogout"
+import useAcceptInvitation from "../../hooks/invite/useAcceptInvitation";
 
 
 const AcceptInvitationPage = () => {
@@ -15,10 +17,13 @@ const AcceptInvitationPage = () => {
 
 
   const { data: invitationDetails, isPending, isSuccess } = useResolveInvitation()
+  const { data: currentUser } = useAuth()
+  const { mutate: logout } = useLogout()
+  const { mutate: acceptInvitation } = useAcceptInvitation()
+
   const navigate = useNavigate()
 
-  const [searchParams] = useSearchParams()
-  const token = searchParams.get('token')
+  const token = useInvitationToken()
 
   const [currentState, setCurrentState] = useState(1);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -26,8 +31,6 @@ const AcceptInvitationPage = () => {
 
   const dropdownRef = useRef(null);
 
-  const inviteEmail = "john@example.com";
-  const loggedInWrongEmail = "user@example.com";
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -57,13 +60,41 @@ const AcceptInvitationPage = () => {
   }, [currentState]);
 
 
-  const handleInvitationSignup = () => {
-    navigate(`/auth/signup?token=${token}`)
+  const getButtonLabel = () => {
+    if (!currentUser) {
+        return invitationDetails.accountExists ? "Login" : "Create Account"
+    }
+    if (currentUser.email === invitationDetails.invitedEmail) return "Accept Invitation"
+    return "Log out and continue as"
+}
+
+
+  const handleAcceptInvitation = () => {
+
+
+    const SameEmail = currentUser?.email === invitationDetails.invitedEmail
+
+    if (SameEmail) {
+
+       acceptInvitation()
+       return
+      
+    }else{
+      logout()
+    }
+
+    if (invitationDetails.accountExists) {
+      navigate(`/auth/login?token=${token}`)
+    } else {
+      navigate(`/auth/signup?token=${token}`)
+    }
+   
   }
 
 
   if (isPending) return <FullPageLoader />
 
+  console.log(currentUser)
   return (
     <>
 
@@ -99,28 +130,53 @@ const AcceptInvitationPage = () => {
 
 
         {/* Dynamic Content */}
+
+        {/* email warning message */}
+        {currentUser?.email !== invitationDetails.invitedEmail && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-900">
+              You’re signed in with a different account
+            </p>
+
+            <p className="mt-1 text-sm text-amber-700">
+              This invitation was sent to{" "}
+              <span className="font-medium">
+                {invitationDetails.invitedEmail}
+              </span>
+            </p>
+          </div>
+        )}
+
+        {/* Accept invitation button */}
         <div
           className={`w-full flex flex-col gap-4 transition-opacity duration-300 ${fade ? "opacity-100" : "opacity-0"
             }`}
         >
 
+          <button onClick={handleAcceptInvitation} className={`w-full py-3 mt-1 rounded-lg shadow-sm transition-colors flex flex-col justify-center items-center gap-0.5 ${currentUser?.email !== invitationDetails.invitedEmail
+            ? "bg-gray-900 hover:bg-black"
+            : "bg-emerald-600 hover:bg-emerald-700"
+            }`}>
 
-          {/* case 4 */}
-          <button onClick={handleInvitationSignup} className="w-full py-3 mt-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors flex flex-col justify-center items-center gap-0.5">
             <span className="text-white font-bold text-[15px] leading-5">
-              Create account
+            {getButtonLabel()}
             </span>
-            <span className="text-emerald-100 text-[13px] font-medium leading-4">
+
+            <span
+              className={`text-xs mt-1 ${currentUser?.email !== invitationDetails.invitedEmail
+                ? "text-gray-300"
+                : "text-emerald-100"
+                }`}
+            >
               {invitationDetails.invitedEmail}
             </span>
+
           </button>
-
-
 
         </div>
 
 
-      </div>
+      </div >
 
 
       {/* Testing Controls */}

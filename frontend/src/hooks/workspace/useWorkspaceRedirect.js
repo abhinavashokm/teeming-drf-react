@@ -1,7 +1,6 @@
 import { useDispatch } from "react-redux";
 import { workspaceService } from "../../services/workspaceService";
 import { showApiError } from "../../utils/toast";
-import { setWorkspaces } from "../../store/slices/workspaceSlice";
 import { useNavigate } from "react-router-dom";
 import { getWorkspaceRedirectPath } from "../../utils/routeUtils";
 
@@ -13,13 +12,10 @@ export default function useWorkspaceRedirect() {
     return async () => {
         try {
             const res = await workspaceService.fetchMyWorkspaces()
-            dispatch(setWorkspaces(res.data))
-
+            //dispatch(setWorkspaces(res.data))
 
             const { workspaces, last_workspace } = res.data
-
             navigate(getWorkspaceRedirectPath(res.data))
-
 
         } catch (err) {
             showApiError(err)

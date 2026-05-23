@@ -13,5 +13,10 @@ export const inviteService = {
     resolveInvite: async (token) => {
         const res = await api.get(`/invitations/${token}/`)
         return res.data
+    },
+
+    acceptInvitation: async (token) => {
+        const res = await api.post(`/invitations/${token}/accept/`)
+        return res.data
     }
 }

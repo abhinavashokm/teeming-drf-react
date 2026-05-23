@@ -1,6 +1,5 @@
 import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
 import AuthButton from "../../components/auth/AuthButton";
@@ -48,7 +47,7 @@ function verifyOtpPage() {
       navigate("/auth/signup/", { state: { toast: "Signup session expired or not found!", error: true }, replace: true })
     }
 
-  }, [verificationEmail])
+  }, [])
 
 
   if (!verificationEmail) return null

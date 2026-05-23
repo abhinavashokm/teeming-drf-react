@@ -7,20 +7,22 @@ import { Outlet } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Sidebar from '../components/layout/Sidebar';
 import useWorkspace from '../hooks/workspace/useWorkspace';
+import FullPageLoader from '../components/ui/FullPageLoader';
 
 function WorkspaceLayout() {
 
-  const { data, isPending } = useWorkspace()
+  const { data, isPending, isError } = useWorkspace()
+  //const isPending = null
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
 
-
+  if (isPending) return <FullPageLoader />
 
   return (
     <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"
-      >
+    >
 
       {/* Sidebar */}
       {isSidebarVisible && (

@@ -9,19 +9,24 @@ import AuthLogo from '../../components/auth/AuthLogo'
 import GoogleLogin from '../../components/auth/GoogleLogin'
 import PasswordInput from '../../components/auth/PasswordInput'
 import { useLogin } from '../../hooks/auth/useLogin'
-import { getErrorMsg } from '../../utils/errorHandler'
+import { getErrorMsg } from '../../utils/apiParser.js'
 import { showSuccess } from '../../utils/toast'
 import { validations } from '../../utils/validations'
+import useInviteToken from '../../hooks/invite/useInvitationToken'
+import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
+import FullPageLoader from '../../components/ui/FullPageLoader'
 
 
 function LoginPage() {
+
+    const { data: invitationDetails, isPending: isResolveTokenPending } = useResolveInvitation()
+    const invitationToken = useInviteToken()
 
     //form handling
     const testMode = true
     const { register, handleSubmit, formState: { errors } } = useForm(testMode && {
         defaultValues: {
-            email: 'pihoxay220@hidevak.com',
-            password: '55555Abhi'
+            password: 'passwordA1'
         }
     })
 
@@ -31,7 +36,7 @@ function LoginPage() {
         login(data)
     }
 
-    
+
     //success msg after signup (when redirecting after signup)
     // const toastShown = useRef(false)
     // const location = useLocation()
@@ -44,6 +49,7 @@ function LoginPage() {
     //     }
     // }, [])
 
+    if (!!invitationToken && isResolveTokenPending) return <FullPageLoader />
 
     return (
         <>
@@ -89,7 +95,7 @@ function LoginPage() {
                             )}
 
                             {/* Email Input */}
-                            <AuthInput type={"email"} placeholder={"Work email"} autoComplete={'email'}
+                            <AuthInput value={invitationDetails?.invitedEmail} readOnly={!!invitationDetails} type={"email"} placeholder={"Work email"} autoComplete={'email'}
                                 {...register('email', validations.email)} error={errors.email} />
 
 

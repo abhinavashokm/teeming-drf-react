@@ -10,7 +10,7 @@ import authService from "../../services/authService"
 import { validations } from "../../utils/validations"
 import { useValidateResetToken } from "../../hooks/auth/useValidateResetToken"
 import FullPageLoader from "../../components/ui/FullPageLoader"
-import { getErrorMsg } from "../../utils/errorHandler"
+import { getErrorMsg } from "../../utils/apiParser.js"
 
 
 function ResetPasswordPage() {

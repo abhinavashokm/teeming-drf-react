@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import authService from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 import { showApiError } from "../../utils/toast";
-import { getErrorMsg } from "../../utils/errorHandler";
+import { getErrorMsg } from "../../utils/apiParser.js";
 
 
 export function useResetPassword() {

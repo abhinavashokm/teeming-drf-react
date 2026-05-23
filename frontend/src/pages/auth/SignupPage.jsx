@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import AuthButton from '../../components/auth/AuthButton'
 import AuthDivider from '../../components/auth/AuthDivider'
 import AuthFormError from '../../components/auth/AuthFormError'
@@ -7,26 +7,25 @@ import AuthInput from '../../components/auth/AuthInput'
 import AuthLogo from '../../components/auth/AuthLogo'
 import GoogleLogin from '../../components/auth/GoogleLogin'
 import PasswordInput from '../../components/auth/PasswordInput'
-import { useSignup } from '../../hooks/auth/useSignup'
-import { getErrorMsg } from '../../utils/errorHandler'
-import { validations } from '../../utils/validations'
-import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
 import FullPageLoader from '../../components/ui/FullPageLoader'
+import { useSignup } from '../../hooks/auth/useSignup'
+import useInvitationToken from '../../hooks/invite/useInvitationToken'
+import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
+import { getErrorMsg } from '../../utils/apiParser.js'
+import { validations } from '../../utils/validations'
 
 
 function SignupPage() {
 
     const { data: invitationDetails, isPending:isResolveTokenPending } = useResolveInvitation()
     
-    const [searchParams] = useSearchParams()
-    const token = searchParams.get('token')
+    const invitationToken = useInvitationToken()
 
-    const testMode = false
+    const testMode = true
 
     const { handleSubmit, register, formState: { errors } } = useForm(testMode && {
         defaultValues: {
             fullName: 'Arjun Kumar',
-            email: 'arjunraj@gmail.com',
             password: 'passwordA1'
         }
     })
@@ -37,7 +36,7 @@ function SignupPage() {
             signup(data)
     }
 
-    if(!!token && isResolveTokenPending) return <FullPageLoader />
+    if(!!invitationToken && isResolveTokenPending) return <FullPageLoader />
 
     return (
         <>

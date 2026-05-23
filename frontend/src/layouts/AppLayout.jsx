@@ -9,7 +9,13 @@ import { showApiError, showError, showSuccess } from '../utils/toast'
 
 function AppLayout() {
 
+    console.log("applayout aane...")
     const { isLoading, isError, error } = useAuth() // runs on mount automatically
+    // const isLoading = null
+    // const isError = null
+    // const error = null
+    
+    
 
     //global errors
     useEffect(() => {

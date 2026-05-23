@@ -3,30 +3,37 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
 import { showApiError } from "../../utils/toast";
-import { getErrorCode, getErrorMsg } from "../../utils/errorHandler";
+import { getErrorCode, getErrorMsg } from "../../utils/apiParser.js";
 import { errorCodes } from "../../constants/errorCodes";
-import useInviteToken from "../../hooks/invite/useInviteToken"
+import useInvitationToken from "../../hooks/invite/useInvitationToken"
 
 
 export function useVerifyOtp({ onError = null } = {}) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const token = useInviteToken()
+    const invitationToken = useInvitationToken()
 
     return useMutation({
-        mutationFn: (data) => authService.verifyOTP(data, token),
+        mutationFn: (data) => authService.verifyOTP(data, invitationToken),
         onSuccess: (res) => {
+
             sessionStorage.removeItem('verificationEmail')
-            navigate('/auth/login', { state: { toast: "Email verified successfully, you can now login" }, replace: true })
+            navigate('/auth/login', {
+                state:
+                    { toast: "Email verified successfully, you can now login" },
+                replace: true
+            })
         },
         onError: (error) => {
             onError?.()
 
             if (getErrorCode(error) === errorCodes.SIGNUP_SESSION_EXPIRED) {
-                navigate('/auth/login', { state: { 
-                    toast: "Signup session expired. Please sign up again.", error: true }, 
-                    replace: true 
+                navigate('/auth/login', {
+                    state: {
+                        toast: "Signup session expired. Please sign up again.", error: true
+                    },
+                    replace: true
                 })
             } else {
                 showApiError(error)
