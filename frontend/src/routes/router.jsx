@@ -1,13 +1,12 @@
 import { createBrowserRouter } from "react-router-dom";
-import HomePage from "../pages/home/HomePage";
 import AppLayout from "../layouts/AppLayout";
-import PublicRoute from "./guards/PublicRoute";
-import ProtectedRoute from "./guards/ProtectedRoute";
-import authRoutes from "./authRoutes";
-import workspaceRoutes from "./workspaceRoutes";
-import CreateWorkspacePage from "../pages/workspace/CreateWorkspacePage";
-import AcceptInvitationPage from "../pages/invite/AcceptInvitePage";
 import SetupLayout from "../layouts/SetupLayout";
+import AcceptInvitationPage from "../pages/invite/AcceptInvitePage";
+import CreateWorkspacePage from "../pages/workspace/CreateWorkspacePage";
+import authRoutes from "./authRoutes";
+import ProtectedRoute from "./guards/ProtectedRoute";
+import PublicRoute from "./guards/PublicRoute";
+import workspaceRoutes from "./workspaceRoutes";
 
 
 const router = createBrowserRouter([

@@ -4,18 +4,22 @@ import {
   LogOut,
   MoreHorizontal,
   Plus,
-  Settings,
-  Users
+  Star
 } from 'lucide-react';
 import { useState } from 'react';
 import InviteModal from '../../components/workspace/InviteModal';
+import SwitchWorkspaceModal from '../../components/workspace/SwitchWorkspaceModal';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import CreateGoalModal from '../../components/goal/CreateGoalModal';
 
 
 function HomePage() {
 
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
+  const [isSwitchWorkspaceModalOpen, setIsSwitchWorkspaceModalOpen] = useState(false);
+  const [favoriteGoals, setFavoriteGoals] = useState(['Checkout Drop-off', 'Launch V2']);
+  const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false);
 
   const { data: currentWorkspace } = useWorkspace()
   //const currentWorkspace = null
@@ -25,67 +29,7 @@ function HomePage() {
     <>
       <div className="max-w-5xl mx-auto space-y-14 pb-20">
 
-        {/* Workspace Header Minimal */}
-        <div className="flex items-end justify-between border-b border-gray-200 pb-6">
-          <div className="flex items-center gap-5">
-            <div className="w-14 h-14 bg-gray-900 rounded-xl flex items-center justify-center shadow-sm">
-              <span className="text-white font-semibold text-2xl">{currentWorkspace?.name?.[0]}</span>
-            </div>
-            <div>
-              <div className="relative">
-                <button
-                  onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
-                  className="flex items-center gap-2 mb-1 hover:opacity-80 transition-opacity"
-                >
-                  <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none">{currentWorkspace?.name}</h1>
-                  <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
-                </button>
 
-                {isWorkspaceDropdownOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsWorkspaceDropdownOpen(false)}></div>
-                    <div className="absolute left-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1.5 z-50 transition-all duration-150 ease-out">
-                      <div className="px-3 py-2 border-b border-gray-100 mb-1">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <div className="w-4 h-4 bg-gray-900 rounded-[4px] flex items-center justify-center">
-                            <span className="text-white font-medium text-[9px] leading-none">A</span>
-                          </div>
-                          <span className="text-[13px] font-semibold text-gray-900 leading-none">Acme Corp</span>
-                        </div>
-                        <div className="text-[11px] text-gray-500 pl-6 leading-none">
-                          Free plan · Admin
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-gray-600 hover:bg-gray-50 rounded-lg mx-1 transition-colors cursor-pointer">
-                        <Settings className="h-4 w-4 text-gray-400" />
-                        Settings
-                      </div>
-                      <div className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-gray-600 hover:bg-gray-50 rounded-lg mx-1 transition-colors cursor-pointer">
-                        <Users className="h-4 w-4 text-gray-400" />
-                        Manage Team
-                      </div>
-                      <div className="border-t border-gray-100 mt-1 pt-1 mx-1"></div>
-                      <div className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-red-500 hover:bg-red-50 rounded-lg mx-1 transition-colors cursor-pointer">
-                        <LogOut className="h-4 w-4" />
-                        Leave Workspace
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center gap-2 text-[13px]">
-                <span className="text-gray-500">Free plan</span>
-                <span className="text-gray-300">•</span>
-                <span className="text-teeming-green font-medium">{currentWorkspace?.role}</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <button onClick={() => setIsInviteModalOpen(true)} className="px-3 py-1.5 bg-gray-900 border border-transparent rounded-md text-[13px] font-medium text-white hover:bg-gray-800 transition-colors shadow-sm">
-              + Invite Members
-            </button>
-          </div>
-        </div>
 
         {/* Goals */}
         <section>
@@ -94,7 +38,7 @@ function HomePage() {
               <Layers className="h-5 w-5 text-gray-900" strokeWidth={1.5} />
               Goals
             </h2>
-            <button className="text-[13px] font-medium text-white bg-[#1D9E75] hover:bg-[#15825f] transition-colors flex items-center gap-1 px-4 py-1.5 rounded-[20px]">
+            <button onClick={() => setIsCreateGoalModalOpen(true)} className="text-[13px] font-medium text-white bg-[#1D9E75] hover:bg-[#15825f] transition-colors flex items-center gap-1 px-4 py-1.5 rounded-[20px]">
               <Plus className="h-3.5 w-3.5" strokeWidth={2} />
               New Goal
             </button>
@@ -113,8 +57,11 @@ function HomePage() {
                   <div className="w-6 h-6 rounded-full bg-purple-500 ring-2 ring-[#378ADD] flex items-center justify-center text-[9px] text-white font-medium">SM</div>
                 </div>
               </div>
-              <div className="p-4 flex-1 flex flex-col justify-center">
-                <h3 className="font-medium text-[14px] text-gray-900 leading-none">Checkout Drop-off</h3>
+              <div className="p-4 flex-1 flex flex-col justify-center relative">
+                <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">Checkout Drop-off</h3>
+                <button onClick={(e) => toggleFavorite(e, 'Checkout Drop-off')} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
+                  <Star className={`h-4 w-4 ${favoriteGoals.includes('Checkout Drop-off') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
+                </button>
               </div>
             </div>
 
@@ -132,8 +79,11 @@ function HomePage() {
                   <div className="w-6 h-6 rounded-full bg-white ring-2 ring-[#1D9E75] flex items-center justify-center text-[9px] text-gray-500 font-medium">+2</div>
                 </div>
               </div>
-              <div className="p-4 flex-1 flex flex-col justify-center">
-                <h3 className="font-medium text-[14px] text-gray-900 leading-none">Reduce Churn</h3>
+              <div className="p-4 flex-1 flex flex-col justify-center relative">
+                <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">Reduce Churn</h3>
+                <button onClick={(e) => toggleFavorite(e, 'Reduce Churn')} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
+                  <Star className={`h-4 w-4 ${favoriteGoals.includes('Reduce Churn') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
+                </button>
               </div>
             </div>
 
@@ -149,8 +99,11 @@ function HomePage() {
                   <div className="w-6 h-6 rounded-full bg-teal-500 ring-2 ring-[#EF9F27] flex items-center justify-center text-[9px] text-white font-medium">TR</div>
                 </div>
               </div>
-              <div className="p-4 flex-1 flex flex-col justify-center">
-                <h3 className="font-medium text-[14px] text-gray-900 leading-none">Launch V2</h3>
+              <div className="p-4 flex-1 flex flex-col justify-center relative">
+                <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">Launch V2</h3>
+                <button onClick={(e) => toggleFavorite(e, 'Launch V2')} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
+                  <Star className={`h-4 w-4 ${favoriteGoals.includes('Launch V2') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
+                </button>
               </div>
             </div>
 
@@ -165,8 +118,11 @@ function HomePage() {
                   <div className="w-6 h-6 rounded-full bg-indigo-500 ring-2 ring-[#8B5CF6] flex items-center justify-center text-[9px] text-white font-medium">AJ</div>
                 </div>
               </div>
-              <div className="p-4 flex-1 flex flex-col justify-center">
-                <h3 className="font-medium text-[14px] text-gray-900 leading-none">Personal Goals</h3>
+              <div className="p-4 flex-1 flex flex-col justify-center relative">
+                <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">Personal Goals</h3>
+                <button onClick={(e) => toggleFavorite(e, 'Personal Goals')} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
+                  <Star className={`h-4 w-4 ${favoriteGoals.includes('Personal Goals') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
+                </button>
               </div>
             </div>
           </div>
@@ -275,7 +231,8 @@ function HomePage() {
       </div>
 
       <InviteModal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} />
-
+      <SwitchWorkspaceModal isOpen={isSwitchWorkspaceModalOpen} onClose={() => setIsSwitchWorkspaceModalOpen(false)} />
+      <CreateGoalModal isOpen={isCreateGoalModalOpen} onClose={() => setIsCreateGoalModalOpen(false)} />
     </>
   )
 }

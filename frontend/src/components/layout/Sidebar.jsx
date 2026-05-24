@@ -1,15 +1,23 @@
 import {
   ChevronDown, ChevronRight,
   Home,
+  Layers,
+  LogOut,
   Mail,
   PanelLeft,
-  Plus,
   Search,
-  Settings
+  Settings,
+  Target,
+  Users,
+  Zap
 } from 'lucide-react';
 import { useState } from 'react';
 import useAuth from '../../hooks/auth/useAuth';
 import useLogout from '../../hooks/auth/useLogout';
+import { Link } from 'react-router-dom';
+import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
+import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
+
 
 
 function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
@@ -17,36 +25,85 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
   //const user = null
   const [activeWorkspace, setActiveWorkspace] = useState(true);
 
-  const {mutate: logout} = useLogout()
+  const { mutate: logout } = useLogout()
+
+  const [currentView, setCurrentView] = useState('home');
+  const [favoriteGoals, setFavoriteGoals] = useState(['Checkout Drop-off', 'Launch V2']);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isSwitchWorkspaceModalOpen, setIsSwitchWorkspaceModalOpen] = useState(false);
+
+  const userRole = 'Owner';
+  const roleColors = {
+    Owner: 'text-emerald-600',
+    Admin: 'text-blue-600',
+    Member: 'text-gray-500'
+  };
 
   return (
-    <aside className={`bg-gray-50 flex flex-col flex shrink-0 h-screen
-    transition-all duration-200 
-    fixed md:sticky top-0 left-0 z-40
-    ${isSidebarVisible ? 'w-64 border-r border-gray-200' : 'w-0 border-transparent overflow-hidden'}`}>
+    <>
+      <aside className={`bg-white md:bg-gray-50/50 flex flex-col shrink-0 h-screen absolute md:relative top-0 left-0 z-40 transition-all duration-200 ${isSidebarVisible ? 'w-64 border-r border-gray-200' : 'w-0 border-transparent overflow-hidden'}`}>
 
-      {/* Brand logo in sidebar top */}
-      <div className="h-14 flex items-center justify-between px-5 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-teeming-green rounded-lg flex items-center justify-center shadow-sm">
-            <span className="text-white font-semibold text-sm leading-none">T</span>
-          </div>
-          <span className="font-semibold text-base text-teeming-green tracking-tight">Teeming</span>
+        {/* Workspace Dropdown in sidebar top */}
+        <div className="h-14 flex items-center justify-between px-3 shrink-0 relative border-b border-gray-200 z-50">
+          <button
+            onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
+            className="flex-1 flex items-center justify-between p-1.5 rounded-lg hover:bg-gray-100/50 transition-colors group text-left min-w-0"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 bg-gray-900 rounded-[8px] flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
+                A
+              </div>
+              <div className="flex flex-col min-w-0 text-left">
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                  <span className="font-semibold text-[14px] text-gray-900 tracking-tight truncate leading-tight">Acme Corp</span>
+                  <ChevronDown className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 shrink-0" />
+                </div>
+                <div className="flex items-center text-[11px] mt-0.5">
+                  <span className="text-gray-500 truncate">Free plan</span>
+                  <span className="text-gray-300 mx-1">·</span>
+                  <span className={`truncate ${roleColors[userRole] || 'text-gray-500'}`}>{userRole}</span>
+                </div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+            className="text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors ml-1 shrink-0"
+          >
+            <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.5} />
+          </button>
+
+          {isWorkspaceDropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setIsWorkspaceDropdownOpen(false)}></div>
+              <div className="absolute left-4 top-full mt-1 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden transform origin-top-left transition-all duration-200">
+
+                <div className="border-t border-gray-100/80 mb-1.5"></div>
+                <button className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
+                  <Zap className="h-[15px] w-[15px] text-gray-400 group-hover:text-yellow-500" />
+                  Upgrade Plan
+                </button>
+                <button onClick={() => { setIsSwitchWorkspaceModalOpen(true); setIsWorkspaceDropdownOpen(false); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
+                  <Layers className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
+                  Switch Workspace
+                </button>
+                <div className="border-t border-gray-100/80 my-1.5"></div>
+                <button onClick={() => { setIsWorkspaceDropdownOpen(false); setIsLeaveModalOpen(true); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group">
+                  <LogOut className="h-[15px] w-[15px] text-red-500 group-hover:text-red-600" />
+                  Leave Workspace
+                </button>
+              </div>
+            </>
+          )}
         </div>
-        <button
-          onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-          className="text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
-        >
-          <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.5} />
-        </button>
-      </div>
-      <div className="mx-4 border-b border-gray-200 shrink-0"></div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-8">
+        <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-4">
 
-        {/* Top Nav */}
-        <div>
-          <div className="flex gap-1 pb-3 border-b border-gray-100">
+          {/* Search & Inbox */}
+          <div className="flex gap-1 pb-4 border-b border-gray-200">
             <button
               onClick={() => console.log('Search clicked')}
               className="flex-1 flex items-center justify-center gap-1.5 py-1.5 border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors"
@@ -65,97 +122,99 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
               </span>
             </button>
           </div>
-          <div className="pt-3 space-y-2">
-            <a href="#" className="flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md border-l-2 border-teeming-green bg-teeming-green/10 text-teeming-green transition-colors">
-              <Home className="h-4 w-4 text-teeming-green" strokeWidth={1.5} />
+
+          {/* Home */}
+          <div className="pb-4 border-b border-gray-200">
+            <Link to={''} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'home' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
+              <Home className={`h-4 w-4 ${currentView === 'home' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
               Home
-            </a>
-            <a href="#" className="flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md text-gray-600 hover:bg-gray-100/50 transition-colors">
-              <Settings className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
-              My Account
-            </a>
+            </Link>
           </div>
-        </div>
 
-        {/* My Workspaces */}
-        <div>
-          <div className="flex items-center justify-between px-2.5 mb-2">
-            <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">My Workspaces</h3>
-            <button className="text-gray-400 hover:text-gray-600">
-              <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-            </button>
-          </div>
-          <div className="space-y-0.5">
-            <a href="#" className="flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100/50 transition-colors">
-              <Plus className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
-              Add a workspace
-            </a>
-          </div>
-        </div>
-
-        {/* Joined Workspaces */}
-        <div>
-          <div className="flex items-center justify-between px-2.5 mb-2">
-            <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Joined Workspaces</h3>
-          </div>
-          <div className="space-y-1">
-            {/* Active Workspace */}
+          {/* Goals */}
+          <div className="pb-4 border-b border-gray-200">
+            <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-2.5 mb-2">Starred Goals</h3>
             <div className="space-y-0.5">
-              <button
-                onClick={() => setActiveWorkspace(!activeWorkspace)}
-                className="w-full flex items-center justify-between px-2.5 py-1.5 text-[13px] font-medium rounded-md hover:bg-gray-100/50 text-gray-900 transition-colors"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 rounded-[4px] bg-gray-900 flex items-center justify-center text-white text-[10px] font-medium">
-                    A
-                  </div>
-                  Acme Corp
-                </div>
-                {activeWorkspace ? (
-                  <ChevronDown className="h-3.5 w-3.5 text-gray-400" strokeWidth={2} />
-                ) : (
-                  <ChevronRight className="h-3.5 w-3.5 text-gray-400" strokeWidth={2} />
-                )}
-              </button>
-              {/* Sub-menu */}
-              {activeWorkspace && (
-                <div className="pl-10 pr-2 py-0.5 space-y-0.5">
-                  <a href="#" className="block px-2 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors">Checkout drop off</a>
-                  <a href="#" className="block px-2 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors">Reduce churn</a>
-                  <a href="#" className="block px-2 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors">Launch v2</a>
-                </div>
+              {favoriteGoals.map(goal => (
+                <a key={goal} href="#" className="flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors">
+                  <Target className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
+                  {goal}
+                </a>
+              ))}
+              {favoriteGoals.length === 0 && (
+                <div className="px-2.5 py-1.5 text-[12px] text-gray-400 italic">No starred goals</div>
               )}
             </div>
+          </div>
 
-            {/* Inactive Workspace */}
-            <button className="w-full flex items-center justify-between px-2.5 py-1.5 text-[13px] font-medium rounded-md text-gray-600 hover:bg-gray-100/50 hover:text-gray-900 transition-colors">
-              <div className="flex items-center gap-2.5">
-                <div className="w-5 h-5 rounded-[4px] bg-indigo-500 flex items-center justify-center text-white text-[10px] font-medium">
-                  C
-                </div>
-                Client TechFlow
+          {/* Settings & Manage Team */}
+          <div className="space-y-0.5">
+
+            <Link to={'manage-team'} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
+              <Users className={`h-4 w-4 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
+              Manage Team
+            </Link>
+
+            <Link to={'settings'} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
+              <Settings className={`h-4 w-4 ${currentView === 'workspace_settings' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
+              Settings
+            </Link>
+
+          </div>
+
+        </nav>
+
+        {/* User Profile Strip */}
+        <div className="shrink-0 border-t border-gray-200 p-4 relative">
+          <button
+            onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+            className="w-full flex items-center justify-between p-2 -mx-2 rounded-xl hover:bg-gray-100/50 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
+                AK
               </div>
-            </button>
-          </div>
-        </div>
+              <div className="flex flex-col min-w-0 text-left">
+                <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">Arjun Kumar</span>
+                <span className="text-[12px] text-gray-500 mt-0.5">arjukumar99@gmail.com</span>
+              </div>
+            </div>
+            {isProfileDropdownOpen ? (
+              <ChevronDown className="h-4 w-4 text-gray-400" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
+            )}
+          </button>
 
-      </nav>
+          {isProfileDropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setIsProfileDropdownOpen(false)}></div>
+              <div className="absolute bottom-full left-4 mb-3 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden transform origin-bottom-left transition-all duration-200 opacity-100 scale-100">
 
-      {/* User Profile Strip */}
-      <div className="shrink-0 border-t border-gray-200 px-4 py-3 flex items-center gap-3">
-        <div onClick={logout} className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
-          { user?.fullName?.slice(0, 2) }
+                <Link to={'my-account'}>
+                  <button
+                    className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group"
+                  >
+                    <Settings className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
+                    My Account
+                  </button>
+                </Link>
+
+                <div className="border-t border-gray-100 my-1.5"></div>
+                <button className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group">
+                  <LogOut className="h-[15px] w-[15px] text-red-500 group-hover:text-red-600" />
+                  Sign Out
+                </button>
+              </div>
+            </>
+          )}
         </div>
-        <div className="flex flex-col min-w-0">
-          <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">{user?.fullName}</span>
-          <div className="flex items-center text-[12px] mt-0.5">
-            <span className="text-gray-500 truncate">Free plan</span>
-            <span className="text-gray-400 mx-1.5">·</span>
-            <button className="text-teeming-green font-medium hover:underline truncate">Upgrade</button>
-          </div>
-        </div>
-      </div>
-    </aside>
+      </aside>
+
+      <LeaveWorkspaceModal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} />
+      <SwitchWorkspaceModal isOpen={isSwitchWorkspaceModalOpen} onClose={() => setIsSwitchWorkspaceModalOpen(false)} />
+
+    </>
   )
 }
 
