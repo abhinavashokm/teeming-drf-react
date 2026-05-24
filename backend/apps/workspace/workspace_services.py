@@ -30,3 +30,7 @@ def add_workspace_member(user, workspace):
     WorkspaceMember.objects.create(user=user, workspace=workspace)
 
 
+def fetch_workspace_members(workspace):
+    return WorkspaceMember.objects.filter(workspace=workspace)
+
+

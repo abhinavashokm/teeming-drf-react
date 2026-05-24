@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Workspace
+from .models import Workspace, WorkspaceMember
 
 
 class CreateWorkspaceSerilaizer(serializers.ModelSerializer):
@@ -17,3 +17,11 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         fields = ["name", "slug", "id"]
 
 
+class WorkspaceMemberSerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(source='user.id')
+    full_name = serializers.CharField(source='user.full_name')
+    email = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = WorkspaceMember
+        fields = ['id', 'user_id', 'full_name', 'email', 'role', 'joined_at']

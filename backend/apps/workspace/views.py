@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from core.responses.api_response import success_response, error_response
 from rest_framework import status
 from . import workspace_services
-from .serializers import CreateWorkspaceSerilaizer, WorkspaceSerializer
+from .serializers import CreateWorkspaceSerilaizer, WorkspaceSerializer, WorkspaceMemberSerializer
 from .models import WorkspaceMember
 
 
@@ -103,4 +103,17 @@ class WorkspaceHomeView(APIView):
             status_code=status.HTTP_200_OK,
         )
     
+
+class WorkspaceMemberListView(APIView):
+
+    def get(self, request, **kwargs):
+
+        members = workspace_services.fetch_workspace_members(workspace=request.workspace)
+
+        serializer = WorkspaceMemberSerializer(members, many=True)
+        
+        return success_response(
+            data={"members": serializer.data},
+            status_code=status.HTTP_200_OK
+        )
 
