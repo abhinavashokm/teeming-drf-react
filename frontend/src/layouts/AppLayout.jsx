@@ -9,20 +9,14 @@ import { showApiError, showError, showSuccess } from '../utils/toast'
 
 function AppLayout() {
 
-    console.log("applayout aane...")
-    const { isLoading, isError, error } = useAuth() // runs on mount automatically
-    // const isLoading = null
-    // const isError = null
-    // const error = null
-    
-    
+    const { isLoading, isSuccess, isError, error } = useAuth('app layout') // runs on mount automaticallyz
 
     //global errors
     useEffect(() => {
 
         //hide refresh token errors for now
-        if(isError && error?.response?.data?.error?.code !== errorCodes.REFRESH_TOKEN_INVALID){
-           //showApiError(error) 
+        if (isError && error?.response?.data?.error?.code !== errorCodes.REFRESH_TOKEN_INVALID) {
+            //showApiError(error) 
         }
 
     }, [isError])
@@ -32,7 +26,7 @@ function AppLayout() {
 
     //show redirecton toast messages if any
     useEffect(() => {
-  
+
         if (location.state?.toast) {
 
             if (location.state.error) {
@@ -48,6 +42,7 @@ function AppLayout() {
 
 
     if (isLoading) return <FullPageLoader />
+
 
     return (
         <>

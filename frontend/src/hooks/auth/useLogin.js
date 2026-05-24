@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
@@ -12,19 +12,20 @@ export function useLogin() {
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const redirectToWorkspace = useWorkspaceRedirect()
+    const { mutate: redirectToWorkspace } = useWorkspaceRedirect()
 
     const invitationToken = useInvitationToken()
+    const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: (data) => authService.login(data, invitationToken),
         onSuccess: async (res) => {
 
-            //dispatch(setUser(res.data.user))
             dispatch(setAccessToken(res.data.accessToken))
 
-            //navigate('/')
-            await redirectToWorkspace()
+            queryClient.setQueryData(['auth'], res.data.user)  // ← set user directly to pass protect route
+
+            redirectToWorkspace()
             showApiSuccess(res)
         }
     })

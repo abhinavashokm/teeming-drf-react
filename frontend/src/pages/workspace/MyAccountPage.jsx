@@ -1,7 +1,11 @@
 import React from 'react';
 import { User, Mail, Lock, Shield, Bell, Camera, UserMinus, LogOut } from 'lucide-react';
+import useAuth from "../../hooks/auth/useAuth"
 
 function MyAccountPage() {
+
+    const { data:currentUser } = useAuth()
+
     return (
         <div className="max-w-5xl mx-auto space-y-10 pb-20">
 
@@ -44,13 +48,13 @@ function MyAccountPage() {
                         <div className="space-y-5">
                             <div className="space-y-1.5">
                                 <label className="text-[13px] font-medium text-gray-700">Full Name</label>
-                                <input type="text" defaultValue="Arjun Ravi" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
+                                <input type="text" defaultValue={currentUser.fullName} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-[13px] font-medium text-gray-700">Email Address</label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                    <input type="email" defaultValue="arjun@acmecorp.com" disabled className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-500 cursor-not-allowed" />
+                                    <input type="email" defaultValue={currentUser.email} disabled className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-gray-500 cursor-not-allowed" />
                                 </div>
                                 <p className="text-[12px] text-gray-500 mt-1.5">To change your email address, please contact support.</p>
                             </div>

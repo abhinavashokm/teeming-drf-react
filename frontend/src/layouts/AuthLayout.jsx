@@ -1,13 +1,7 @@
-import { useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Outlet } from "react-router-dom";
 
 
 function AuthLayout() {
-
-    const dispatch = useDispatch()
-    const location = useLocation()
-
     
     return (
         <div className="min-h-screen w-full flex flex-col justify-center items-center relative overflow-hidden font-sans shell-bg">

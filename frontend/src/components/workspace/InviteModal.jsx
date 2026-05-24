@@ -56,7 +56,6 @@ const reducer = (state, action) => {
 export default function InviteModal({ isOpen, onClose }) {
 
     const { data: currentWorkspace } = useWorkspace()
-
     const { mutate: inviteMembers, isPending: isInvitePending } = useInviteMembers()
 
     const handleClose = () => {
@@ -113,9 +112,9 @@ export default function InviteModal({ isOpen, onClose }) {
                 {/* Workspace row */}
                 <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 mb-7">
                     <div className="w-9 h-9 rounded-[10px] bg-emerald-600 text-white font-medium text-sm flex items-center justify-center shrink-0">
-                        A
+                        {currentWorkspace.name[0]}
                     </div>
-                    <span className="text-[14px] font-medium text-gray-900">Acme Corp</span>
+                    <span className="text-[14px] font-medium text-gray-900">{currentWorkspace.name}</span>
                 </div>
 
                 {/* Email section */}

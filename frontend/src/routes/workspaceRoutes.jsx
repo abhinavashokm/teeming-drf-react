@@ -7,7 +7,6 @@ import WorkspaceSettingsPage from "../pages/workspace/WorkspaceSettingsPage";
 
 
 const workspaceRoutes = {
-    path: 'w/:workspaceSlug',
     element: <WorkspaceLayout />,
     children: [
         {

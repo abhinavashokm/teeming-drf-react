@@ -3,20 +3,20 @@ import { REFRESH_URL } from "../../services/authService";
 
 export const authResponseInterceptor =
     async (store, api, error) => {
-        //console.log(error.response?.data)
+        console.log(error.response?.data)
 
-        console.log('interceptor hit', {
-            url: error.config?.url,
-            retry: error.config?._retry,
-            status: error.response?.status,
-            isRefresh: error.config?.url?.includes(REFRESH_URL),
-            skip: error.config?._skipInterceptor
-        })
+        // console.log('interceptor hit', {
+        //     url: error.config?.url,
+        //     retry: error.config?._retry,
+        //     status: error.response?.status,
+        //     isRefresh: error.config?.url?.includes(REFRESH_URL),
+        //     skip: error.config?._skipInterceptor
+        // })
 
-        if (error.config?._skipInterceptor){
-            console.log("skipping...")
-            return Promise.reject(error)
-        } 
+        // if (error.config?._skipInterceptor){
+        //     console.log("skipping...")
+        //     return Promise.reject(error)
+        // } 
 
         // prevent infinite retry loop
         if (error.config?._retry) {

@@ -1,16 +1,13 @@
 import {
-  ChevronDown,
   Layers,
-  LogOut,
   MoreHorizontal,
   Plus,
   Star
 } from 'lucide-react';
 import { useState } from 'react';
+import CreateGoalModal from '../../components/goal/CreateGoalModal';
 import InviteModal from '../../components/workspace/InviteModal';
 import SwitchWorkspaceModal from '../../components/workspace/SwitchWorkspaceModal';
-import useWorkspace from '../../hooks/workspace/useWorkspace';
-import CreateGoalModal from '../../components/goal/CreateGoalModal';
 
 
 function HomePage() {
@@ -21,7 +18,7 @@ function HomePage() {
   const [favoriteGoals, setFavoriteGoals] = useState(['Checkout Drop-off', 'Launch V2']);
   const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false);
 
-  const { data: currentWorkspace } = useWorkspace()
+  
   //const currentWorkspace = null
 
   return (

@@ -4,21 +4,20 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Navbar from '../components/layout/Navbar';
-import Sidebar from '../components/layout/Sidebar';
+import Navbar from '../components/app/Navbar';
+import Sidebar from '../components/app/Sidebar';
 import useWorkspace from '../hooks/workspace/useWorkspace';
 import FullPageLoader from '../components/ui/FullPageLoader';
 
 function WorkspaceLayout() {
 
-  const { data, isPending, isError } = useWorkspace()
-  //const isPending = null
+  const { data, isPending: isWorkspacePending, isError } = useWorkspace()
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  if (isPending) return <FullPageLoader />
+  if (isWorkspacePending) return <FullPageLoader />
 
   return (
     <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"

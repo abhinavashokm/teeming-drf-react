@@ -132,7 +132,7 @@ const AcceptInvitationPage = () => {
         {/* Dynamic Content */}
 
         {/* email warning message */}
-        {currentUser?.email !== invitationDetails.invitedEmail && (
+        {currentUser && currentUser?.email !== invitationDetails.invitedEmail && (
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-semibold text-amber-900">
               You’re signed in with a different account
@@ -177,37 +177,6 @@ const AcceptInvitationPage = () => {
 
 
       </div >
-
-
-      {/* Testing Controls */}
-      {/* <div className="fixed bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 flex flex-col gap-2 text-sm opacity-50 hover:opacity-100 transition-opacity">
-        <div className="font-bold text-gray-500 mb-1 text-xs uppercase tracking-wider">
-          Testing States
-        </div>
-
-        {[1, 2, 3, 4].map((state) => {
-          const labels = {
-            1: "Logged in, match",
-            2: "Logged in, mismatch",
-            3: "Not logged in, has acc",
-            4: "Not logged in, no acc",
-          };
-
-          return (
-            <button
-              key={state}
-              onClick={() => setCurrentState(state)}
-              className={`text-left px-2 py-1.5 rounded transition-colors ${currentState === state
-                ? "bg-gray-100 font-semibold text-emerald-600"
-                : "hover:bg-gray-50"
-                }`}
-            >
-              {state}. {labels[state]}
-            </button>
-          );
-        })}
-      </div> */}
-
 
     </>
   );

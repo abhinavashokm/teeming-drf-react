@@ -1,16 +1,15 @@
-import { useSelector } from "react-redux"
 import { Navigate, Outlet } from "react-router-dom"
+import useAuth from "../../hooks/auth/useAuth"
 
 
 function ProtectedRoute() {
 
-  // const { user } = useSelector(store => store.auth)
+  const { data: user } = useAuth()
 
   return (
-    // true // user //for testing purpose turn off protected routes
-    // ? 
-    <Outlet />
-    // : <Navigate to={'/auth/login'} replace/>
+    user
+      ? <Outlet />
+      : <Navigate to={'/auth/login'} replace />
 
   )
 }

@@ -16,7 +16,6 @@ export default function useLogout(){
             authService.logout()
         },
         onSuccess: () => {
-            //navigate('/auth/login/')
             showSuccess("You have been logged out.")
         },
         onError: (error) => showApiError(error)

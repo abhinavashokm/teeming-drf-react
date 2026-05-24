@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Camera, Building, Globe, Shield, Trash2, ArrowRight, AlertTriangle, Lock, Unlock } from 'lucide-react';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 
 function WorkspaceSettingsPage() {
 
+    const { data:currentWorkspace } = useWorkspace()
+
     const [isSlugUnlocked, setIsSlugUnlocked] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
-
-    const workspaceSlug = "acmecorp";
 
     return (
         <div className="max-w-5xl mx-auto space-y-14 pb-20">
@@ -52,7 +53,7 @@ function WorkspaceSettingsPage() {
                     <div className="space-y-5">
                         <div className="space-y-1.5">
                             <label className="text-[13px] font-medium text-gray-700">Workspace Name</label>
-                            <input type="text" defaultValue="Acme Corp" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
+                            <input type="text" defaultValue={currentWorkspace.name} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
                         </div>
                         <div className="space-y-3">
                             <div className="space-y-1.5">
@@ -64,7 +65,7 @@ function WorkspaceSettingsPage() {
                                     </div>
                                     <input
                                         type="text"
-                                        defaultValue="acmecorp"
+                                        defaultValue={currentWorkspace.slug}
                                         disabled={!isSlugUnlocked}
                                         className={`flex-1 w-full px-3 py-2 text-[13px] focus:outline-none ${isSlugUnlocked ? 'bg-white text-gray-900' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}`}
                                     />
@@ -146,14 +147,14 @@ function WorkspaceSettingsPage() {
                             </div>
                             <div className="mb-2">
                                 <label className="text-[13px] font-medium text-gray-900 mb-1.5 block">
-                                    Please type <span className="font-bold">{workspaceSlug}</span> to confirm.
+                                    Please type <span className="font-bold">{currentWorkspace.slug}</span> to confirm.
                                 </label>
                                 <input
                                     type="text"
                                     value={deleteConfirmationText}
                                     onChange={(e) => setDeleteConfirmationText(e.target.value)}
                                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 transition-colors"
-                                    placeholder={workspaceSlug}
+                                    placeholder={currentWorkspace.slug}
                                 />
                             </div>
                         </div>
@@ -168,7 +169,7 @@ function WorkspaceSettingsPage() {
                                 Cancel
                             </button>
                             <button
-                                disabled={deleteConfirmationText !== workspaceSlug}
+                                disabled={deleteConfirmationText !== currentWorkspace.slug}
                                 className="px-4 py-2 text-[13px] font-medium text-white bg-red-600 hover:bg-red-700 rounded-[10px] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Delete Workspace
