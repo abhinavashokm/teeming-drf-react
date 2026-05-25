@@ -2,7 +2,10 @@ from .models import WorkspaceMember, Workspace
 
 
 def fetch_user_workspace_list(user):
-    memberships = WorkspaceMember.objects.filter(user=user).select_related("workspace")
+    memberships = WorkspaceMember.objects.filter(
+        user=user,
+        workspace__is_deleted=False,
+    ).select_related("workspace")
 
     membership_res = [
         {
@@ -47,4 +50,4 @@ def update_workspace(workspace, data):
 def delete_workspace(workspace):
     """Delete workspace"""
 
-    workspace.delete()
+    workspace.soft_delete()

@@ -210,5 +210,5 @@ def update_user(user, data):
 def delete_user(user):
     """delete user account"""
 
-    user.delete()
+    user.soft_delete()
     

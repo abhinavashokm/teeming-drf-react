@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "apps.user",
     "apps.workspace",
     "apps.invitation",
+    "apps.goal",
 ]
 
 MIDDLEWARE = [

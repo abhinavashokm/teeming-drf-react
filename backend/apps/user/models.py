@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
+from core.models import BaseAbstractModel
 
 
 class UserManager(BaseUserManager):
@@ -15,10 +16,10 @@ class UserManager(BaseUserManager):
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
-        
+
         return user
 
-    #used when python3 manage.py createsuperuser
+    # used when python3 manage.py createsuperuser
     def create_superuser(self, email, password=None, **extra_fields):
 
         extra_fields.setdefault("is_staff", True)
@@ -27,7 +28,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class User(AbstractUser):
+class User(AbstractUser, BaseAbstractModel):
 
     class PlanChoices(models.TextChoices):
         FREE = "FREE", "Free"
@@ -45,7 +46,13 @@ class User(AbstractUser):
         help_text="Pro subscription status",
     )
 
-    last_workspace = models.ForeignKey("workspace.Workspace", on_delete=models.SET_NULL, null=True, blank=True,  related_name='last_active_users')
+    last_workspace = models.ForeignKey(
+        "workspace.Workspace",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="last_active_users",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -55,8 +62,8 @@ class User(AbstractUser):
 
     # Hide AbstractUser's fields
     username = None
-    first_name = None 
-    last_name = None  
+    first_name = None
+    last_name = None
 
     objects = UserManager()
 

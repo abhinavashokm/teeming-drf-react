@@ -1,21 +1,15 @@
-import uuid
-
 from django.db import models
 from apps.user.models import User
+from core.models import BaseAbstractModel
 
 
-class Workspace(models.Model):
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Workspace(BaseAbstractModel):
 
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=255, unique=True)
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="owned_workspaces"
     )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "workspaces"
@@ -24,14 +18,12 @@ class Workspace(models.Model):
         return self.name
 
 
-class WorkspaceMember(models.Model):
+class WorkspaceMember(BaseAbstractModel):
 
     class RoleChoices(models.TextChoices):
         ADMIN = "admin", "Admin"
         MEMBER = "member", "Member"
         OWNER = "owner", "Owner"
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     workspace = models.ForeignKey(
         Workspace, on_delete=models.CASCADE, related_name="workspace_members"
@@ -46,6 +38,9 @@ class WorkspaceMember(models.Model):
 
     joined_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # remove inherited field (instead use joined_at)
+    created_at = None
 
     class Meta:
         db_table = "workspace_members"

@@ -1,0 +1,16 @@
+from rest_framework import serializers
+from .models import Goal
+    
+
+class GoalWriteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Goal
+        fields = ["name", "description", "status", "target_date"]
+
+
+class GoalReadSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Goal
+        fields = ["name", "description", "status", "target_date"]
