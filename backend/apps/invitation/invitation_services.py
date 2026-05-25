@@ -4,7 +4,7 @@ from core.utils.time_utils import format_expiry_date
 from .models import Invitation
 from . import exceptions
 from django.utils import timezone
-from apps.users.models import User
+from apps.user.models import User
 from apps.workspace import workspace_services as workspace_services
 
 

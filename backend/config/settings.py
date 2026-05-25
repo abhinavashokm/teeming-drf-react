@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "dj_rest_auth",
     # myapps
-    "apps.users",
+    "apps.user",
     "apps.workspace",
     "apps.invitation",
 ]
@@ -135,7 +135,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "user.User"
 
 
 # Email service

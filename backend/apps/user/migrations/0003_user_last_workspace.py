@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0002_remove_user_is_verified'),
+        ('user', '0002_remove_user_is_verified'),
         ('workspace', '0002_workspacemember'),
     ]
 
