@@ -86,3 +86,10 @@ class ResetPasswordSerializer(serializers.Serializer):
 
     token = serializers.CharField()
     password = serializers.CharField()
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['full_name']

@@ -195,3 +195,20 @@ def rotate_refresh_token(refresh_token):
         "access_token": new_access_token,
         "refresh_token": new_refresh_token,
     }
+
+
+def update_user(user, data):
+    """update user's profile with given fields"""
+
+    for field, value in data.items():
+        setattr(user, field, value)
+
+    user.save()
+    return user
+
+
+def delete_user(user):
+    """delete user account"""
+
+    user.delete()
+    

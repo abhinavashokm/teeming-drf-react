@@ -25,10 +25,9 @@ urlpatterns = [
     path("me/", MeView.as_view()),
     path("logout/", CookieTokenBlacklistView.as_view(), name="logout"),
     path("validate-reset-token/", ValidateResetTokenView.as_view()),
-
     # google Oauth urls
     path("", include("dj_rest_auth.urls")),
-    path('accounts/', include('allauth.urls')),
+    path("accounts/", include("allauth.urls")),
     path("registration/", include("dj_rest_auth.registration.urls")),
     path("social/google/", GoogleLoginView.as_view()),
 ]

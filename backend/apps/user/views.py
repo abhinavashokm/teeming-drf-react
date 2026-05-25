@@ -19,7 +19,7 @@ from .serializers import (
     ResetPasswordSerializer,
 )
 from django.conf import settings
-from . import exceptions, user_services
+from . import exceptions, user_services, serializers
 from .helpers import cookie_helper
 from core.throttles import AuthThrottle, SensitiveThrottle
 
@@ -154,18 +154,44 @@ class RefreshTokenView(APIView):
 
 
 class MeView(APIView):
+    """retrieve, update, delete authenticated user"""
 
     def get(self, request):
-        user = request.user
+        """retrieve authenticated user"""
 
         return success_response(
             data={
                 "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "full_name": user.full_name,
+                    "id": request.user.id,
+                    "email": request.user.email,
+                    "full_name": request.user.full_name,
                 }
             }
+        )
+
+    def patch(self, request):
+        """update authenticated user"""
+
+        serializer = serializers.UpdateUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_services.update_user(user=request.user, data=serializer.data)
+
+        return success_response(
+            message="User profile updated",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK,
+        )
+    
+    def delete(self, request):
+        """delete authenticated user's account"""
+        
+        user_services.delete_user(
+            user=request.user
+        )
+
+        return success_response(
+            status_code=status.HTTP_204_NO_CONTENT
         )
 
 
