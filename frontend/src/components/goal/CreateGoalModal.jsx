@@ -1,9 +1,21 @@
-import React, { useState } from 'react';
-import { X, Target, Calendar, User } from 'lucide-react';
+import { Calendar, Target, X } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import useCreateGoal from '../../hooks/goal/useCreateGoal';
 
 export default function CreateGoalModal({ isOpen, onClose }) {
-    const [goalName, setGoalName] = useState('');
-    const [description, setDescription] = useState('');
+
+    const { register, handleSubmit, reset } = useForm()
+    const { mutate: createGoal } = useCreateGoal()
+
+    const handleCreateGoal = (data) => {
+        createGoal(data, {
+            onSuccess: (res) => {
+                reset()
+                onClose()
+            }
+        })
+        
+    }
 
     if (!isOpen) return null;
 
@@ -44,8 +56,7 @@ export default function CreateGoalModal({ isOpen, onClose }) {
                             type="text"
                             placeholder="e.g. Launch V2 Platform"
                             className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 focus:outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20 transition-colors shadow-sm placeholder:text-gray-400"
-                            value={goalName}
-                            onChange={(e) => setGoalName(e.target.value)}
+                            {...register('name')}
                             autoFocus
                         />
                     </div>
@@ -60,8 +71,7 @@ export default function CreateGoalModal({ isOpen, onClose }) {
                             placeholder="Add more details about this goal..."
                             rows={3}
                             className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 focus:outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20 transition-colors shadow-sm placeholder:text-gray-400 resize-none"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            {...register('description')}
                         />
                     </div>
 
@@ -102,8 +112,9 @@ export default function CreateGoalModal({ isOpen, onClose }) {
                         Cancel
                     </button>
                     <button
+                        onClick={handleSubmit(handleCreateGoal)}
                         className="px-4 py-2 text-[13px] font-medium text-white bg-[#1D9E75] hover:bg-[#15825f] rounded-[10px] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={!goalName.trim()}
+                        disabled={false}
                     >
                         Create Goal
                     </button>

@@ -34,5 +34,5 @@ export const getErrorCode = (errorRes) => {
 
 
 export const getSuccessMsg = (successRes, fallbackMsg = "Operation completed successfully.") => {
-    return successRes?.data?.message || fallbackMsg
+    return successRes?.data?.message || successRes?.message || fallbackMsg
 }

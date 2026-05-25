@@ -143,7 +143,7 @@ function WorkspaceSettingsPage() {
                                 </div>
                             </div>
                             <div className="text-[13px] text-gray-600 mb-5">
-                                You are about to permanently delete the <span className="font-semibold text-gray-900">Acme Corp</span> workspace. All data, members, and settings will be permanently removed.
+                                You are about to permanently delete the <span className="font-semibold text-gray-900">{currentWorkspace.name}</span> workspace. All data, members, and settings will be permanently removed.
                             </div>
                             <div className="mb-2">
                                 <label className="text-[13px] font-medium text-gray-900 mb-1.5 block">

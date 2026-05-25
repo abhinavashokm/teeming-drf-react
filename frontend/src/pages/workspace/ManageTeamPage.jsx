@@ -8,7 +8,7 @@ import MemberRowSkelton from '../../components/workspace/MemberRowSkelton';
 
 function ManageTeamPage() {
 
-    const { data: teamMembers, isSuccess, isLoading } = useTeamMembers()
+    const { data: teamMembers, isSuccess, isPending } = useTeamMembers()
 
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
@@ -50,7 +50,7 @@ function ManageTeamPage() {
                         <div className="flex items-center gap-3">
                             <h2 className="text-base font-semibold text-gray-900 tracking-tight flex items-center gap-2">
                                 Team Members
-                                <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[10px] font-bold">12</span>
+                                <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[10px] font-bold">{teamMembers?.length ?? ""}</span>
                             </h2>
                             <div className="h-4 w-px bg-gray-200 hidden sm:block"></div>
                             <div className="flex items-center gap-1.5 hidden sm:flex">
@@ -58,7 +58,7 @@ function ManageTeamPage() {
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-teeming-green"></span>
                                 </span>
-                                <span className="text-[12px] font-medium text-gray-500">5 Active</span>
+                                <span className="text-[12px] font-medium text-gray-500">1 Active</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ function ManageTeamPage() {
                         {/* Members List */}
                         <div className="divide-y divide-gray-100">
 
-                            {isLoading
+                            {isPending
                                 ? Array.from({ length: 5 }).map((_, i) => <MemberRowSkelton key={i} />)
                                 : teamMembers.map(member => <MemberRow key={member.id} member={member} />)
                             }

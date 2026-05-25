@@ -8,6 +8,8 @@ import { useState } from 'react';
 import CreateGoalModal from '../../components/goal/CreateGoalModal';
 import InviteModal from '../../components/workspace/InviteModal';
 import SwitchWorkspaceModal from '../../components/workspace/SwitchWorkspaceModal';
+import GoalCard from '../../components/goal/GoalCard';
+import useGoals from '../../hooks/goal/useGoals';
 
 
 function HomePage() {
@@ -15,17 +17,14 @@ function HomePage() {
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [isSwitchWorkspaceModalOpen, setIsSwitchWorkspaceModalOpen] = useState(false);
-  const [favoriteGoals, setFavoriteGoals] = useState(['Checkout Drop-off', 'Launch V2']);
   const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false);
 
-  
-  //const currentWorkspace = null
+  const { data: Goals } = useGoals()
 
   return (
 
     <>
       <div className="max-w-5xl mx-auto space-y-14 pb-20">
-
 
 
         {/* Goals */}
@@ -43,27 +42,15 @@ function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Goal 1 */}
-            <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
-              <div className="h-28 bg-[#378ADD] p-4 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">3 ideas · 1 in progress</span>
-                  <MoreHorizontal className="h-4 w-4 text-white/50 group-hover:text-white transition-colors" strokeWidth={2} />
-                </div>
-                <div className="flex -space-x-1.5 mt-4">
-                  <div className="w-6 h-6 rounded-full bg-blue-500 ring-2 ring-[#378ADD] flex items-center justify-center text-[9px] text-white font-medium">JD</div>
-                  <div className="w-6 h-6 rounded-full bg-purple-500 ring-2 ring-[#378ADD] flex items-center justify-center text-[9px] text-white font-medium">SM</div>
-                </div>
-              </div>
-              <div className="p-4 flex-1 flex flex-col justify-center relative">
-                <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">Checkout Drop-off</h3>
-                <button onClick={(e) => toggleFavorite(e, 'Checkout Drop-off')} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
-                  <Star className={`h-4 w-4 ${favoriteGoals.includes('Checkout Drop-off') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
-                </button>
-              </div>
-            </div>
 
-            {/* Goal 2 */}
-            <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
+            {
+              Goals?.map(goal => {
+                return <GoalCard key={goal.id} goal={goal} />
+              })
+            }
+           
+
+            {/* <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
               <div className="h-28 bg-[#1D9E75] p-4 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                   <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">8 ideas · 5 in progress</span>
@@ -84,7 +71,6 @@ function HomePage() {
               </div>
             </div>
 
-            {/* Goal 3 */}
             <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
               <div className="h-28 bg-[#EF9F27] p-4 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
@@ -104,7 +90,6 @@ function HomePage() {
               </div>
             </div>
 
-            {/* Goal 4 */}
             <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
               <div className="h-28 bg-[#8B5CF6] p-4 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
@@ -121,7 +106,8 @@ function HomePage() {
                   <Star className={`h-4 w-4 ${favoriteGoals.includes('Personal Goals') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
                 </button>
               </div>
-            </div>
+            </div> */}
+            
           </div>
         </section>
 

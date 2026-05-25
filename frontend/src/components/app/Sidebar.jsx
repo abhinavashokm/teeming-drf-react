@@ -45,6 +45,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
     Member: 'text-gray-500'
   };
 
+  if (!currentWorkspace) return null
   return (
     <>
       <aside className={`bg-white md:bg-gray-50/50 flex flex-col shrink-0 h-screen absolute md:relative top-0 left-0 z-40 transition-all duration-200 ${isSidebarVisible ? 'w-64 border-r border-gray-200' : 'w-0 border-transparent overflow-hidden'}`}>
@@ -61,7 +62,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
               </div>
               <div className="flex flex-col min-w-0 text-left">
                 <div className="flex items-center gap-1.5 overflow-hidden">
-                  <span className="font-semibold text-[14px] text-gray-900 tracking-tight truncate leading-tight">{ currentWorkspace.name }</span>
+                  <span className="font-semibold text-[14px] text-gray-900 tracking-tight truncate leading-tight">{currentWorkspace.name}</span>
                   <ChevronDown className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 shrink-0" />
                 </div>
                 <div className="flex items-center text-[11px] mt-0.5">
@@ -176,7 +177,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
-                {currentUser.fullName.slice(0,2).toUpperCase()}
+                {currentUser.fullName.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex flex-col min-w-0 text-left">
                 <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">{currentUser.fullName}</span>
