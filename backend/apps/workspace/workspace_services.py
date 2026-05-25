@@ -34,4 +34,17 @@ def fetch_workspace_members(workspace):
     return WorkspaceMember.objects.filter(workspace=workspace)
 
 
+def update_workspace(workspace, data):
+    """Update workspace with provided fields."""
 
+    for field, value in data.items():
+        setattr(workspace, field, value)
+
+    workspace.save()
+    return workspace
+
+
+def delete_workspace(workspace):
+    """Delete workspace"""
+
+    workspace.delete()

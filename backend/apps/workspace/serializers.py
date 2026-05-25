@@ -17,11 +17,26 @@ class WorkspaceRetrieveSerializer(serializers.ModelSerializer):
         fields = ["name", "slug", "id"]
 
 
+class WorkspaceUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Workspace
+        fields = ["name", "slug"]
+
+    def validate(self, attrs):
+        if not attrs:
+            raise serializers.ValidationError(
+                "At least one field (name or slug) is required."
+            )
+
+        return attrs
+
+
 class WorkspaceMemberSerializer(serializers.ModelSerializer):
-    user_id = serializers.UUIDField(source='user.id')
-    full_name = serializers.CharField(source='user.full_name')
-    email = serializers.EmailField(source='user.email')
+    user_id = serializers.UUIDField(source="user.id")
+    full_name = serializers.CharField(source="user.full_name")
+    email = serializers.EmailField(source="user.email")
 
     class Meta:
         model = WorkspaceMember
-        fields = ['id', 'user_id', 'full_name', 'email', 'role', 'joined_at']
+        fields = ["id", "user_id", "full_name", "email", "role", "joined_at"]

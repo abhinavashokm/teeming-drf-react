@@ -6,10 +6,17 @@ from .serializers import (
     CreateWorkspaceSerilaizer,
     WorkspaceRetrieveSerializer,
     WorkspaceMemberSerializer,
+    WorkspaceUpdateSerializer,
 )
 from .models import WorkspaceMember
 from rest_framework.permissions import IsAuthenticated
-from core.permission_views import MemberBaseView, AdminBaseView, OwnerBaseView
+from core.permission_views import (
+    MemberBaseView,
+    AdminBaseView,
+    OwnerBaseView,
+    WorkspacePermissionBaseView,
+)
+from core.permissions import IsWorkspaceMember, IsWorkspaceAdmin, IsWorkspaceOwner
 
 
 class WorkspaceSessionView(APIView):
@@ -35,8 +42,14 @@ class WorkspaceSessionView(APIView):
         )
 
 
-class WorkspaceRetrieveView(MemberBaseView):
-    """Return current workspace."""
+class WorkspaceDetailView(WorkspacePermissionBaseView):
+    """Retrieve, Update, Delete current workspace."""
+
+    permission_map = {
+        "GET": [IsWorkspaceMember],
+        "PATCH": [IsWorkspaceAdmin],
+        "DELETE": [IsWorkspaceOwner],
+    }
 
     def get(self, request, **kwargs):
 
@@ -49,6 +62,30 @@ class WorkspaceRetrieveView(MemberBaseView):
                 "slug": workspace_data["slug"],
                 "role": request.member.get_role_display(),
             }
+        )
+
+    def patch(self, request, **kwargs):
+
+        serializer = WorkspaceUpdateSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        workspace_services.update_workspace(
+            workspace=request.workspace,
+            data=serializer.validated_data,
+        )
+
+        return success_response(
+            message="Workspace updated",
+            data=serializer.validated_data,
+            status_code=status.HTTP_200_OK,
+        )
+
+    def delete(self, request, **kwargs):
+
+        workspace_services.delete_workspace(workspace=request.workspace)
+
+        return success_response(
+            message="Workspace deleted", status_code=status.HTTP_204_NO_CONTENT
         )
 
 
