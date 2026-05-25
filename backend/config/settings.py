@@ -54,7 +54,9 @@ MIDDLEWARE = [
     # google Oauth
     "allauth.account.middleware.AccountMiddleware",
     # tenant/workspace resolution
-    "apps.workspace.middleware.WorkspaceMiddleware",
+    "core.middleware.WorkspaceMiddleware",
+
+
 ]
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")

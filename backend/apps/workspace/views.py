@@ -2,8 +2,14 @@ from rest_framework.views import APIView
 from core.responses.api_response import success_response, error_response
 from rest_framework import status
 from . import workspace_services
-from .serializers import CreateWorkspaceSerilaizer, WorkspaceSerializer, WorkspaceMemberSerializer
+from .serializers import (
+    CreateWorkspaceSerilaizer,
+    WorkspaceRetrieveSerializer,
+    WorkspaceMemberSerializer,
+)
 from .models import WorkspaceMember
+from rest_framework.permissions import IsAuthenticated
+from core.permission_views import MemberBaseView, AdminBaseView, OwnerBaseView
 
 
 class WorkspaceSessionView(APIView):
@@ -12,11 +18,12 @@ class WorkspaceSessionView(APIView):
     including user workspaces and last visited workspace.
     """
 
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
 
-
-        membership_workspaces, last_workspace = workspace_services.fetch_user_workspace_list(
-            request.user
+        membership_workspaces, last_workspace = (
+            workspace_services.fetch_user_workspace_list(request.user)
         )
 
         return success_response(
@@ -28,39 +35,25 @@ class WorkspaceSessionView(APIView):
         )
 
 
-class WorkspaceDetailView(APIView):
-    """
-    fetch details of current workspace
-    """
+class WorkspaceRetrieveView(MemberBaseView):
+    """Return current workspace."""
 
     def get(self, request, **kwargs):
 
-        workspace = request.workspace
-        workspace_data = WorkspaceSerializer(request.workspace).data
-
-        # get user role in this workspace
-        member_q = WorkspaceMember.objects.filter(
-            workspace=workspace, user=request.user
-        )
-
-        if not member_q.exists():
-            return error_response(
-                message="you are not member broh", status_code=status.HTTP_404_NOT_FOUND
-            )
-
-        member = member_q.first()
+        workspace_data = WorkspaceRetrieveSerializer(request.workspace).data
 
         return success_response(
             data={
                 "workspace_id": workspace_data["id"],
                 "name": workspace_data["name"],
                 "slug": workspace_data["slug"],
-                "role": member.get_role_display(),
+                "role": request.member.get_role_display(),
             }
         )
 
 
 class WorkspaceListCreateView(APIView):
+    """Perform workspace CRUD operations"""
 
     def post(self, request):
         serializer = CreateWorkspaceSerilaizer(
@@ -88,12 +81,9 @@ class WorkspaceListCreateView(APIView):
             status_code=status.HTTP_201_CREATED,
         )
 
-    def get(self, request):
-
-        return success_response(message="good")
-
 
 class WorkspaceHomeView(APIView):
+    """Return initial data for the workspace home page."""
 
     def get(self, request, **kwargs):
 
@@ -102,18 +92,21 @@ class WorkspaceHomeView(APIView):
             data={"name": request.workspace.name},
             status_code=status.HTTP_200_OK,
         )
-    
+
 
 class WorkspaceMemberListView(APIView):
+    """
+    Returns all the members of current workspace
+    """
 
     def get(self, request, **kwargs):
 
-        members = workspace_services.fetch_workspace_members(workspace=request.workspace)
-
-        serializer = WorkspaceMemberSerializer(members, many=True)
-        
-        return success_response(
-            data={"members": serializer.data},
-            status_code=status.HTTP_200_OK
+        members = workspace_services.fetch_workspace_members(
+            workspace=request.workspace
         )
 
+        serializer = WorkspaceMemberSerializer(members, many=True)
+
+        return success_response(
+            data={"members": serializer.data}, status_code=status.HTTP_200_OK
+        )

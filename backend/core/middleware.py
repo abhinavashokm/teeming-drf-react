@@ -1,16 +1,15 @@
 from apps.workspace.models import Workspace
 from django.http import JsonResponse
 
-
-# Reserved routes that should not be treated as workspace slugs 
+# Reserved routes that should not be treated as workspace slugs
 # when using with /workspaces/<reserved_word>/
 RESERVED_WORKSPACE_ROUTES = {
     "session",
 }
 
 
-# tenant/workspace resolution
 class WorkspaceMiddleware:
+    """tenant/workspace resolution from slug"""
 
     def __init__(self, get_response):
         self.get_response = get_response

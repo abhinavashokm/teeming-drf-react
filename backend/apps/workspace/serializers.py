@@ -10,7 +10,7 @@ class CreateWorkspaceSerilaizer(serializers.ModelSerializer):
         fields = ["name", "slug", "owner"]
 
 
-class WorkspaceSerializer(serializers.ModelSerializer):
+class WorkspaceRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Workspace
