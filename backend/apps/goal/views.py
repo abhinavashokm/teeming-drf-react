@@ -65,6 +65,7 @@ class GoalDetailView(WorkspacePermissionBaseView):
         serializer.is_valid(raise_exception=True)
 
         updated_goal = goal_services.update_goal(
+            workspace=request.workspace,
             goal_id = kwargs['goal_id'],
             data=serializer.validated_data
         )
@@ -79,6 +80,7 @@ class GoalDetailView(WorkspacePermissionBaseView):
     def delete(self, request, **kwargs):
 
         goal_services.delete_goal(
+            workspace=request.workspace,
             goal_id=kwargs['goal_id']
         )
 
@@ -86,3 +88,35 @@ class GoalDetailView(WorkspacePermissionBaseView):
             message="Goal deleted",
             status_code=status.HTTP_200_OK
         )
+    
+
+class GoalStarView(MemberBaseView):
+    """star or unstar a goal by current user"""
+
+    def post(self, request, **kwargs):
+        """star goal by user"""
+
+        goal_services.star_goal(
+            user=request.user,
+            workspace=request.workspace,
+            goal_id=kwargs['goal_id']
+        )
+        
+        return success_response(
+            status_code=status.HTTP_201_CREATED
+        )
+    
+    def delete(self, request, **kwargs):
+        """unstar goal by user"""
+
+        goal_services.unstar_goal(
+            user=request.user,
+            workspace=request.workspace,
+            goal_id=kwargs["goal_id"]
+        )
+
+        return success_response(
+            status_code=status.HTTP_204_NO_CONTENT
+        )
+
+

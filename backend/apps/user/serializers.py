@@ -18,6 +18,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
 
+        value = value.strip().lower()
+
         if User.objects.filter(email=value).exists():
 
             raise serializers.ValidationError(

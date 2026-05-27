@@ -7,6 +7,8 @@ from apps.workspace.models import WorkspaceMember
 class IsWorkspaceMember(BasePermission):
     """Allow access only to members of the current workspace."""
 
+    message = "You are not a member of this workspace."
+
     def has_permission(self, request, view):
         member = WorkspaceMember.objects.filter(
             workspace=request.workspace,
@@ -23,6 +25,8 @@ class IsWorkspaceMember(BasePermission):
 class IsWorkspaceAdmin(BasePermission):
     "Allow access only to admin or owner of the current workspace."
 
+    message = "Only workspace admins can perform this action."
+
     def has_permission(self, request, view):
         if not IsWorkspaceMember().has_permission(request, view):
             return False
@@ -35,6 +39,8 @@ class IsWorkspaceAdmin(BasePermission):
 
 class IsWorkspaceOwner(BasePermission):
     "Allow access only to owner of the current workspace"
+
+    message = "Only workspace owners can perform this action."
 
     def has_permission(self, request, view):
         if not IsWorkspaceMember().has_permission(request, view):
