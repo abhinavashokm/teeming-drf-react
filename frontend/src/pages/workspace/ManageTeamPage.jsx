@@ -5,11 +5,18 @@ import MemberRow from '../../components/workspace/MemberRow';
 import useTeamMembers from '../../hooks/workspace/useTeamMembers';
 import MemberRowSkelton from '../../components/workspace/MemberRowSkelton';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import { useCan } from '../../hooks/permissions/useCan';
+import { PERMISSIONS } from '../../constants/permissions';
 
 
 function ManageTeamPage() {
 
     const { data: teamMembers, isSuccess, isPending } = useTeamMembers()
+
+    const canInviteMembers = useCan(PERMISSIONS.INVITE_MEMBERS)
+    const canManageTeam = useCan(PERMISSIONS.MANAGE_TEAM)
+
+
 
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const { data: currentWorkspace } = useWorkspace()
@@ -38,7 +45,7 @@ function ManageTeamPage() {
                     </div>
                     <div className="flex gap-3">
                         {
-                            currentWorkspace.role !== 'Member' &&
+                            canInviteMembers &&
                             <button
                                 onClick={() => setIsInviteModalOpen(true)}
                                 className="px-3 py-1.5 bg-gray-900 border border-transparent rounded-md text-[13px] font-medium text-white hover:bg-gray-800 transition-colors shadow-sm"
@@ -69,7 +76,7 @@ function ManageTeamPage() {
                             </div>
                         </div>
 
-                        {/* <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                                 <input
@@ -81,7 +88,7 @@ function ManageTeamPage() {
                             <button className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] font-medium text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors">
                                 Role: All <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
                             </button>
-                        </div> */}
+                        </div>
 
                     </div>
 
@@ -92,7 +99,7 @@ function ManageTeamPage() {
                             <div className="col-span-3 sm:col-span-3">Role</div>
                             <div className="col-span-3 sm:col-span-3 hidden sm:block">Status</div>
                             {
-                                currentWorkspace.role !== 'Member' &&
+                                canManageTeam &&
                                 <div className="col-span-3 sm:col-span-1 text-right">Actions</div>
                             }
 

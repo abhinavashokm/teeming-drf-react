@@ -1,0 +1,32 @@
+import { PERMISSIONS } from "../constants/permissions"
+
+const MEMBER_PERMISSION = [
+  PERMISSIONS.LEAVE_WORKSPACE
+]
+
+const ADMIN_PERMISSION = [
+  ...MEMBER_PERMISSION,
+  PERMISSIONS.MANAGE_GOALS,
+  PERMISSIONS.INVITE_MEMBERS,
+  PERMISSIONS.MANAGE_TEAM,
+  PERMISSIONS.MANAGE_SETTINGS,
+]
+
+const OWNER_PERMISSION = [
+  ...ADMIN_PERMISSION.filter(
+    permission => permission != PERMISSIONS.LEAVE_WORKSPACE
+  ),
+  PERMISSIONS.DELETE_WORKSPACE,
+  PERMISSIONS.UPGRADE_PLAN
+]
+
+
+const ROLE_PERMISSIONS = {
+  Owner: OWNER_PERMISSION,
+  Admin: ADMIN_PERMISSION,
+  Member: MEMBER_PERMISSION
+}
+
+
+export const can = (role, permission) =>
+  ROLE_PERMISSIONS[role]?.includes(permission) ?? false

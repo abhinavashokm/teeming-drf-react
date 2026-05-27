@@ -5,6 +5,8 @@ import { getAvatarColor } from '../../utils/styleUtils';
 import useUpdateMemberRole from '../../hooks/workspace/useUpdateMemberRole';
 import useRemoveMember from '../../hooks/workspace/useRemoveMember';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import { useCan } from '../../hooks/permissions/useCan';
+import { PERMISSIONS } from '../../constants/permissions';
 
 
 function MemberRow({ member }) {
@@ -14,6 +16,8 @@ function MemberRow({ member }) {
     const { mutate: updateRole } = useUpdateMemberRole()
     const { mutate: removeMember } = useRemoveMember()
     const { data: currentWorkspace } = useWorkspace()
+
+    const canManageTeam = useCan(PERMISSIONS.MANAGE_TEAM)
 
     const { bg, text } = getAvatarColor(member.email)
 
@@ -65,7 +69,7 @@ function MemberRow({ member }) {
                 ) : (
                     <>
                         {
-                            currentWorkspace.role !== 'Member' &&  member.role !== 'owner' && member.email !== currentUser.email &&
+                            canManageTeam &&  member.role !== 'owner' && member.email !== currentUser.email &&
                             <button
                                 onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === member.id ? null : member.id); }}
                                 className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"

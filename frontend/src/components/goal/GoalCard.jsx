@@ -5,12 +5,18 @@ import { getGoalCardColorClass } from '../../utils/styleUtils';
 import GoalFormModal from './GoalFormModal';
 import useUnstarGoal from '../../hooks/goal/useUnstarGoal';
 import useStarGoal from '../../hooks/goal/useStarGoal';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
+import { useCan } from '../../hooks/permissions/useCan';
+import { PERMISSIONS } from '../../constants/permissions';
 
 function GoalCard({ goal }) {
 
     const { mutate: deleteGoal } = useDeleteGoal()
     const { mutate: starGoal } = useStarGoal()
     const { mutate: unstarGoal } = useUnstarGoal()
+    const { data: currentWorkspace } = useWorkspace()
+
+    const canManageGoals = useCan(PERMISSIONS.MANAGE_GOALS)
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
@@ -49,12 +55,17 @@ function GoalCard({ goal }) {
 
                         {/* Three dot menu */}
                         <div className="relative" ref={menuRef}>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
-                                className="p-1 rounded-md hover:bg-white/20 transition-colors"
-                            >
-                                <MoreHorizontal className="h-4 w-4 text-white/50 group-hover:text-white transition-colors" strokeWidth={2} />
-                            </button>
+
+                            {
+                                canManageGoals &&
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+                                    className="p-1 rounded-md hover:bg-white/20 transition-colors"
+                                >
+                                    <MoreHorizontal className="h-4 w-4 text-white/50 group-hover:text-white transition-colors" strokeWidth={2} />
+                                </button>
+                            }
+
 
                             {menuOpen && (
                                 <div className="absolute right-0 top-7 w-36 bg-white rounded-[10px] shadow-lg border border-gray-100 z-10 overflow-hidden">

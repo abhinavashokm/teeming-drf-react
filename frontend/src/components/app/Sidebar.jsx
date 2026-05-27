@@ -13,9 +13,11 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { PERMISSIONS } from '../../constants/permissions';
 import useAuth from '../../hooks/auth/useAuth';
 import useLogout from '../../hooks/auth/useLogout';
 import useGoals from '../../hooks/goal/useGoals';
+import { useCan } from '../../hooks/permissions/useCan';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
@@ -28,6 +30,10 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
   const { data: currentWorkspace } = useWorkspace()
   const { mutate: logoutUser } = useLogout()
   const { data: goals } = useGoals()
+
+  const canLeaveWorkspace = useCan(PERMISSIONS.LEAVE_WORKSPACE)
+  const canUpgradePlan = useCan(PERMISSIONS.UPGRADE_PLAN)
+  const canManageSettings = useCan(PERMISSIONS.MANAGE_SETTINGS)
 
 
   const [currentView, setCurrentView] = useState('home');
@@ -67,7 +73,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
                 <div className="flex items-center text-[11px] mt-0.5">
                   <span className="text-gray-500 truncate">Free plan</span>
                   <span className="text-gray-300 mx-1">·</span>
-                  <span className={`truncate ${currentWorkspace.role || 'text-gray-500'}`}>{currentWorkspace.role}</span>
+                  <span className={`truncate ${roleColors[currentWorkspace.role] || 'text-gray-500'}`}>{currentWorkspace.role}</span>
                 </div>
               </div>
             </div>
@@ -86,10 +92,16 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
               <div className="absolute left-4 top-full mt-1 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden transform origin-top-left transition-all duration-200">
 
                 <div className="border-t border-gray-100/80 mb-1.5"></div>
-                <button className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
-                  <Zap className="h-[15px] w-[15px] text-gray-400 group-hover:text-yellow-500" />
-                  Upgrade Plan
-                </button>
+
+                {
+                  canUpgradePlan &&
+                  <button className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
+                    <Zap className="h-[15px] w-[15px] text-gray-400 group-hover:text-yellow-500" />
+                    Upgrade Plan
+                  </button>
+                }
+
+
                 <button onClick={() => { setIsSwitchWorkspaceModalOpen(true); setIsWorkspaceDropdownOpen(false); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
                   <Layers className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
                   Switch Workspace
@@ -97,7 +109,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
                 <div className="border-t border-gray-100/80 my-1.5"></div>
 
                 {
-                  currentWorkspace.role !== 'Owner' &&
+                  canLeaveWorkspace &&
 
                   <button onClick={() => { setIsWorkspaceDropdownOpen(false); setIsLeaveModalOpen(true); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group">
                     <LogOut className="h-[15px] w-[15px] text-red-500 group-hover:text-red-600" />
@@ -163,12 +175,12 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
           <div className="space-y-0.5">
 
             <Link to={'manage-team'} onClick={() => setCurrentView('team')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
-              <Users className={`h-4 w-4 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-               {currentWorkspace.role !== "Member"? "Manage Team" : "View Team"} 
+              <Users clcanManageSettingsassName={`h-4 w-4 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
+              {currentWorkspace.role !== "Member" ? "Manage Team" : "View Team"}
             </Link>
 
             {
-              currentWorkspace.role !== "Member" &&
+              canManageSettings &&
               <Link to={'settings'} onClick={() => setCurrentView('workspace_settings')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
                 <Settings className={`h-4 w-4 ${currentView === 'workspace_settings' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
                 Settings

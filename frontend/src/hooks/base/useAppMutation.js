@@ -41,7 +41,7 @@ function useAppMutation({
 
             if (successMsg) {
                 showSuccess(successMsg)
-            } else if (showApiToastMsg) {
+            } else if (apiSuccessToast) {
                 showApiSuccess(res)
             }
 
@@ -50,7 +50,7 @@ function useAppMutation({
         },
 
         onError: (error, variables, context) => {
-            if (showApiToastMsg) {
+            if (apiErrorToast) {
                 showApiError(error)
             }
 

@@ -11,6 +11,8 @@ import SwitchWorkspaceModal from '../../components/workspace/SwitchWorkspaceModa
 import GoalCard from '../../components/goal/GoalCard';
 import useGoals from '../../hooks/goal/useGoals';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import { useCan } from '../../hooks/permissions/useCan';
+import { PERMISSIONS } from '../../constants/permissions';
 
 
 function HomePage() {
@@ -23,6 +25,8 @@ function HomePage() {
   const { data: currentWorkspace } = useWorkspace()
 
   const { data: Goals } = useGoals()
+
+  const canManageGoals = useCan(PERMISSIONS.MANAGE_GOALS)
 
   return (
 
@@ -39,7 +43,7 @@ function HomePage() {
             </h2>
 
             {
-              currentWorkspace.role !== 'Member' &&
+              canManageGoals &&
               <button onClick={() => setIsGoalFormModalOpen(true)} className="text-[13px] font-medium text-white bg-[#1D9E75] hover:bg-[#15825f] transition-colors flex items-center gap-1 px-4 py-1.5 rounded-[20px]">
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 New Goal
