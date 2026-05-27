@@ -23,4 +23,16 @@ export const goalService = {
         return res.data
     },
 
+    starGoal: async (goalId, slug) => {
+        console.log("bro")
+        const res = await api.post(`/workspaces/${slug}/goals/${goalId}/star/`)
+        return res.data
+    },
+
+    unStarGoal: async (goalId, slug) => {
+        console.log("unbro")
+        const res = await api.delete(`/workspaces/${slug}/goals/${goalId}/star/`)
+        return res.data
+    },
+
 }

@@ -1,16 +1,18 @@
 import {
   Bell
 } from 'lucide-react';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 function Navbar({ isNavbarVisible, isScrolled }) {
 
+  const { data: currentWorkspace } = useWorkspace()
 
   return (
     <header
       className={`bg-white transition-all duration-200 overflow-hidden flex items-center justify-between shrink-0 w-full ${isNavbarVisible ? 'h-[44px]' : 'h-0 opacity-0'} ${isScrolled ? 'border-b border-gray-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)]' : 'border-b border-transparent'}`}
     >
       <div className="flex items-center gap-2 pl-24 flex-1">
-        <span className="text-[13px] font-medium text-gray-500">Acme Corp</span>
+        <span className="text-[13px] font-medium text-gray-500">{ currentWorkspace.name }</span>
         <span className="text-gray-300 mx-1">›</span>
         <span className="text-[13px] font-medium text-gray-900">Home</span>
       </div>

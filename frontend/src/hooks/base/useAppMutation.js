@@ -1,19 +1,35 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { showApiError, showApiSuccess, showSuccess } from '../../utils/toast'
+import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
 
 function useAppMutation({
     mutationFn,
     invalidateKeys = [],
+    passWorkspaceSlug = false,
+    apiSuccessToast = true,
+    apiErrorToast = true,
     successMsg,
     onSuccess,
     onError,
 }) {
 
     const queryClient = useQueryClient()
+    const workspaceSlug = useWorkspaceSlug()
 
     return useMutation({
-        mutationFn,
+
+        mutationFn: (variables) => {
+
+            //include the workspace slug in service fn call
+            if (passWorkspaceSlug) {
+                return mutationFn(variables, workspaceSlug)
+            }
+
+            return mutationFn(variables)
+
+        }
+        ,
 
         onSuccess: async (res, variables, context) => {
 
@@ -25,7 +41,7 @@ function useAppMutation({
 
             if (successMsg) {
                 showSuccess(successMsg)
-            } else {
+            } else if (showApiToastMsg) {
                 showApiSuccess(res)
             }
 
@@ -34,7 +50,10 @@ function useAppMutation({
         },
 
         onError: (error, variables, context) => {
-            showApiError(error)
+            if (showApiToastMsg) {
+                showApiError(error)
+            }
+
             onError?.(error, variables, context)
         }
 

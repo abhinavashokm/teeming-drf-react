@@ -1,18 +1,21 @@
-import { MoreHorizontal, Star, Pencil, Trash2 } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { MoreHorizontal, Pencil, Star, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import useDeleteGoal from '../../hooks/goal/useDeleteGoal';
-import GoalFormModal from './GoalFormModal';
 import { getGoalCardColorClass } from '../../utils/styleUtils';
+import GoalFormModal from './GoalFormModal';
+import useUnstarGoal from '../../hooks/goal/useUnstarGoal';
+import useStarGoal from '../../hooks/goal/useStarGoal';
 
 function GoalCard({ goal }) {
 
     const { mutate: deleteGoal } = useDeleteGoal()
+    const { mutate: starGoal } = useStarGoal()
+    const { mutate: unstarGoal } = useUnstarGoal()
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
     const menuRef = useRef(null);
 
-    const colorClass = getGoalCardColorClass(goal.id)
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -29,14 +32,18 @@ function GoalCard({ goal }) {
     }
 
     const handleToggleStar = () => {
-        toggleStar(goal.id)
+        if (goal.isStarred) {
+            unstarGoal(goal.id)
+        } else {
+            starGoal(goal.id)
+        }
     }
 
-    console.log(colorClass)
+
     return (
         <>
             <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
-                <div className={`h-28 ${colorClass} p-4 flex flex-col justify-between`}>
+                <div className={`h-28 ${getGoalCardColorClass(goal.id)} p-4 flex flex-col justify-between`}>
                     <div className="flex justify-between items-start">
                         <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">no ideas yet</span>
 
@@ -83,7 +90,7 @@ function GoalCard({ goal }) {
                     <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">{goal.name}</h3>
 
                     <button onClick={handleToggleStar} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
-                        <Star className={`h-4 w-4 text-gray-300 hover:text-gray-400'`} />
+                        <Star className={`h-4 w-4 ${goal.isStarred ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
                     </button>
 
                 </div>

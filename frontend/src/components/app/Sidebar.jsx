@@ -15,11 +15,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useAuth from '../../hooks/auth/useAuth';
 import useLogout from '../../hooks/auth/useLogout';
+import useGoals from '../../hooks/goal/useGoals';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
-import useWorkspace from '../../hooks/workspace/useWorkspace';
-import useRemoveMember from '../../hooks/workspace/useRemoveMember';
-import useLeaveWorkspace from '../../hooks/workspace/useLeaveWorkspace';
 
 
 
@@ -28,9 +27,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
   const { data: currentUser } = useAuth()
   const { data: currentWorkspace } = useWorkspace()
   const { mutate: logoutUser } = useLogout()
-
-  const [activeWorkspace, setActiveWorkspace] = useState(true);
-
+  const { data: goals } = useGoals()
 
 
   const [currentView, setCurrentView] = useState('home');
@@ -45,7 +42,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
     Member: 'text-gray-500'
   };
 
-  const favoriteGoals = []
+  const starredGoals = goals?.filter(g => g.isStarred) ?? []
 
   if (!currentWorkspace) return null
   return (
@@ -150,13 +147,13 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
           <div className="pb-4 border-b border-gray-200">
             <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-2.5 mb-2">Starred Goals</h3>
             <div className="space-y-0.5">
-              {favoriteGoals.map(goal => (
+              {starredGoals.map(goal => (
                 <a key={goal} href="#" className="flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors">
                   <Target className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
-                  {goal}
+                  {goal.name}
                 </a>
               ))}
-              {favoriteGoals.length === 0 && (
+              {starredGoals.length === 0 && (
                 <div className="px-2.5 py-1.5 text-[12px] text-gray-400 italic">No starred goals</div>
               )}
             </div>
