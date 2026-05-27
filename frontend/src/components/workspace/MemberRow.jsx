@@ -28,7 +28,7 @@ function MemberRow({ member }) {
     return (
         <div key={member.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-gray-50 transition-colors group cursor-pointer last:rounded-b-[11px]">
             <div className="col-span-6 sm:col-span-5 flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-medium shrink-0 ${bg} ${text}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-medium shrink-0 ${getAvatarColor(member.email)}`}>
                     {member.fullName[0]}
                 </div>
                 <div className="min-w-0">

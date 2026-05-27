@@ -2,6 +2,7 @@ import { MoreHorizontal, Star, Pencil, Trash2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import useDeleteGoal from '../../hooks/goal/useDeleteGoal';
 import GoalFormModal from './GoalFormModal';
+import { getGoalCardColorClass } from '../../utils/styleUtils';
 
 function GoalCard({ goal }) {
 
@@ -10,6 +11,8 @@ function GoalCard({ goal }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
     const menuRef = useRef(null);
+
+    const colorClass = getGoalCardColorClass(goal.id)
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -29,10 +32,11 @@ function GoalCard({ goal }) {
         toggleStar(goal.id)
     }
 
+    console.log(colorClass)
     return (
         <>
             <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
-                <div className="h-28 bg-[#378ADD] p-4 flex flex-col justify-between">
+                <div className={`h-28 ${colorClass} p-4 flex flex-col justify-between`}>
                     <div className="flex justify-between items-start">
                         <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">no ideas yet</span>
 

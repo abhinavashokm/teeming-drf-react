@@ -5,7 +5,7 @@ import useAuth from "../../hooks/auth/useAuth"
 function ProtectedRoute() {
 
   const { data: user } = useAuth()
-  console.log("protected")
+
   return (
     user
       ? <Outlet />

@@ -3,6 +3,8 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { showSuccess } from '../../utils/toast';
 import useInviteMembers from '../../hooks/invite/useInviteMembers'
+import AppButton from '../ui/buttons/AppButton';
+import CancelButton from '../ui/buttons/CancelButton';
 
 
 const initialState = {
@@ -212,50 +214,12 @@ export default function InviteModal({ isOpen, onClose }) {
 
                     {/* Button group */}
                     <div className="flex flex-col sm:flex-row gap-2">
-                        <button
-                            onClick={handleClose}
-                            className="text-[13px] font-medium px-5 py-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 min-h-[44px] w-full sm:w-auto text-gray-700 transition-colors shadow-sm"
-                        >
-                            Cancel
-                        </button>
 
-                        <button
+                        <CancelButton onClick={handleClose} />
+
+                        <AppButton
                             onClick={handleInviteMember}
                             disabled={isInvitePending || state.selectedEmails.length === 0}
-                            className="
-                                        text-[13px] font-medium
-                                        px-4 py-2.5
-                                        rounded-lg
-                                        bg-emerald-600
-                                        text-white
-                                        flex items-center justify-center gap-1.5
-                                        min-h-[44px] w-full sm:w-auto
-
-                                        shadow-sm
-                                        border border-emerald-700/10
-
-                                        transition-all duration-200 ease-out
-
-                                        hover:bg-emerald-700
-                                        hover:shadow-md
-                                        hover:-translate-y-[1px]
-
-                                        active:translate-y-0
-                                        active:scale-[0.99]
-
-                                        focus:outline-none
-                                        focus:ring-4
-                                        focus:ring-emerald-600/15
-
-                                        disabled:bg-emerald-500
-                                        disabled:text-white/75
-                                        disabled:border-emerald-500
-                                        disabled:shadow-none
-                                        disabled:hover:bg-emerald-500
-                                        disabled:hover:translate-y-0
-                                        disabled:cursor-not-allowed
-                                        disabled:opacity-70
-                                    "
                         >
                             {isInvitePending ? (
                                 <>
@@ -284,7 +248,7 @@ export default function InviteModal({ isOpen, onClose }) {
                             ) : (
                                 <>Send invites <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} /></>
                             )}
-                        </button>
+                        </AppButton>
 
                     </div>
 

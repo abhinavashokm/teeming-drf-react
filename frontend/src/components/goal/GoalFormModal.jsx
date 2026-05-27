@@ -3,10 +3,12 @@ import { useForm } from 'react-hook-form';
 import useCreateGoal from '../../hooks/goal/useCreateGoal';
 import { useEffect } from 'react';
 import useUpdateGoal from '../../hooks/goal/useUpdateGoal';
+import AppButton from '../ui/buttons/AppButton';
+import CancelButton from '../ui/buttons/CancelButton';
 
 export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
 
-    const { register, handleSubmit, reset } = useForm({
+    const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
         defaultValues: {
             name: "",
             description: "",
@@ -149,19 +151,16 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
 
                 {/* Footer */}
                 <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-3 rounded-b-[16px]">
-                    <button
-                        onClick={handleCloseModal}
-                        className="px-4 py-2 text-[13px] font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-[10px] transition-colors shadow-sm"
-                    >
-                        Cancel
-                    </button>
-                    <button
+
+                    <CancelButton onClick={handleCloseModal} />
+
+                    <AppButton
                         onClick={handleSubmit(handleGoalFormSubmit)}
-                        className="px-4 py-2 text-[13px] font-medium text-white bg-[#1D9E75] hover:bg-[#15825f] rounded-[10px] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={false}
+                        disabled={!isDirty}
                     >
                         {isEditMode ? "Save Changes" : "Create Goal"}
-                    </button>
+                    </AppButton>
+
                 </div>
 
             </div>

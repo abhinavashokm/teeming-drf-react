@@ -8,9 +8,8 @@ export default function useMyWorkspaces() {
     return useQuery({
         queryKey: ['myWorkspaces'],
         queryFn: async () => {
-            console.log("call here")
             const res = await workspaceService.fetchMyWorkspaces()
-            console.log(res.data)
+
             return res.data
         },
         onError: (error) => showApiError(error)
