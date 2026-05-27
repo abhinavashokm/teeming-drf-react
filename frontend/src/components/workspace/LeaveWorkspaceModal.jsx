@@ -1,10 +1,12 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import useLeaveWorkspace from '../../hooks/workspace/useLeaveWorkspace';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 export default function LeaveWorkspaceModal({ isOpen, onClose }) {
 
     const { mutate: leaveWorkspace } = useLeaveWorkspace()
+    const { data:currentWorkspace } = useWorkspace()
 
     const handleLeaveWorkspace = () => {
         leaveWorkspace()
@@ -31,7 +33,7 @@ export default function LeaveWorkspaceModal({ isOpen, onClose }) {
                         </div>
                     </div>
                     <div className="text-[13px] text-gray-600 mb-2">
-                        You will lose access to <span className="font-semibold text-gray-900">Acme Corp</span> and all of its goals and data. An administrator will need to invite you again if you wish to rejoin.
+                        You will lose access to <span className="font-semibold text-gray-900">{currentWorkspace.name}</span> and all of its goals and data. An administrator will need to invite you again if you wish to rejoin.
                     </div>
                 </div>
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3 rounded-b-[16px]">

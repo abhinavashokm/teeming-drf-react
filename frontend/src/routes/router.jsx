@@ -7,12 +7,15 @@ import authRoutes from "./authRoutes";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import PublicRoute from "./guards/PublicRoute";
 import workspaceRoutes from "./workspaceRoutes";
+import SelectWorkspacePage from "../pages/workspace/SelectWorkspacePage";
+import ErrorPage from "../pages/error/ErrorPage";
+import { errorCodes } from "../constants/errorCodes";
 
 const publicRoutes = {
     element: <PublicRoute />,
     children: [
         { path: "auth", ...authRoutes },
-        { path: "/", element: <Navigate to={'/auth/login'} />}
+        { path: "/", element: <Navigate to={'/auth/login'} /> }
     ]
 }
 
@@ -23,9 +26,12 @@ const protectedRoutes = {
         {
             element: <SetupLayout />,
             children: [
-                { path: "create-workspace", element: <CreateWorkspacePage /> }
+                { path: "create-workspace", element: <CreateWorkspacePage /> },
+                { path: "workspaces", element: <SelectWorkspacePage /> },
             ]
-        }
+        },
+        { path: "error", element: <ErrorPage /> },
+
     ]
 }
 
@@ -36,10 +42,15 @@ const acceptInviteRoute = {
     ]
 }
 
+const catchPageNotFound = {
+    path: "*",
+    element: <ErrorPage type={errorCodes.PAGE_NOT_FOUND} />
+}
+
 const router = createBrowserRouter([
     {
         element: <AppLayout />,
-        children: [publicRoutes, protectedRoutes, acceptInviteRoute]
+        children: [publicRoutes, protectedRoutes, acceptInviteRoute, catchPageNotFound]
     }
 ])
 

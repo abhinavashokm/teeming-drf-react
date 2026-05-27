@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import useAuth from "../../hooks/auth/useAuth"
-import useWorkspaceRedirect from "../../hooks/api/useWorkspaceRedirect"
+import useWorkspaceRedirect from "../../hooks/routes/useWorkspaceRedirect"
 import { Outlet } from "react-router-dom"
 import { useQueryClient } from "@tanstack/react-query"
 

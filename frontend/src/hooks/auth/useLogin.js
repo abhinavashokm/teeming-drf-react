@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
 import { showApiSuccess } from "../../utils/toast";
 import { setAccessToken } from "../../store/slices/authSlice";
-import useWorkspaceRedirect from "../api/useWorkspaceRedirect";
+import useWorkspaceRedirect from "../routes/useWorkspaceRedirect";
 import useInvitationToken from "../invite/useInvitationToken";
 
 

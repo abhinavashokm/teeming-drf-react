@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import React from 'react'
 import { inviteService } from '../../services/inviteService'
 import useInvitationToken from "./useInvitationToken"
-import useWorkspaceRedirect from '../api/useWorkspaceRedirect'
+import useWorkspaceRedirect from '../routes/useWorkspaceRedirect'
 
 function useAcceptInvitation() {
   const invitationToken = useInvitationToken()

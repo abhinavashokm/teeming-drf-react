@@ -5,13 +5,13 @@ export const isPublicRoute = (pathname) =>
 
 
 export const buildWorkspacePath = (slug) => {
-    return slug ? `/w/${slug}` : '/auth/login' 
+    return slug ? `/w/${slug}` : '/auth/login'
 }
 
 
 export const getWorkspaceRedirectPath = ({ workspaces, last_workspace }) => {
     if (workspaces.length === 0) return '/create-workspace'
     if (last_workspace) return buildWorkspacePath(last_workspace?.slug)
-    //if (workspaces.length === 1) return buildWorkspacePath(workspaces[0].slug)
-    return buildWorkspacePath(workspaces[0].slug)
+    if (workspaces.length === 1) return '/workspaces'
+    return '/workspaces'
 }

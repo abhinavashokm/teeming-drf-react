@@ -1,20 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FullPageLoader from "../../components/ui/FullPageLoader";
+import useAuth from "../../hooks/auth/useAuth";
+import useLogout from "../../hooks/auth/useLogout";
+import useAcceptInvitation from "../../hooks/invite/useAcceptInvitation";
 import useInvitationToken from "../../hooks/invite/useInvitationToken";
 import useResolveInvitation from "../../hooks/invite/useResolveInvitation";
-import useAuth from "../../hooks/auth/useAuth";
-import useLogout from "../../hooks/auth/useLogout"
-import useAcceptInvitation from "../../hooks/invite/useAcceptInvitation";
 
 
 const AcceptInvitationPage = () => {
-  // --- State Configuration ---
-  // 1: Logged in, correct email
-  // 2: Logged in, wrong email
-  // 3: Not logged in, has account
-  // 4: Not logged in, no account
-
 
   const { data: invitationDetails, isPending, isSuccess } = useResolveInvitation()
   const { data: currentUser } = useAuth()
@@ -104,7 +98,7 @@ const AcceptInvitationPage = () => {
     <>
 
       {/* Card */}
-      <div className="w-full bg-white border border-gray-200 rounded-xl shadow-sm p-8 transition-all duration-300">
+      <div className="w-full max-w-[440px] bg-white border border-gray-200 rounded-xl shadow-sm p-8 transition-all duration-300">
         {/* Avatar */}
         <div className="mb-5 flex justify-center items-center">
           <div className="w-[60px] h-[60px] bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 shadow-sm flex items-center justify-center text-2xl font-bold">

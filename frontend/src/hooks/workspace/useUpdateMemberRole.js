@@ -11,7 +11,7 @@ function useUpdateMemberRole() {
     const navigate = useNavigate()
 
     return useMutation({
-        mutationFn: ({role, memberId}) => workspaceService.updateMemberRole({role}, memberId, workspaceSlug),
+        mutationFn: ({role, memberId}) => workspaceService.updateMemberRole(workspaceSlug, {role}, memberId),
         onSuccess: (res) => {
             queryClient.invalidateQueries({
                 queryKey: ['team', workspaceSlug]

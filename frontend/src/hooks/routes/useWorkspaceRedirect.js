@@ -15,4 +15,5 @@ export default function useWorkspaceRedirect() {
             navigate(getWorkspaceRedirectPath(res.data))},
         onError: (error) => showApiError(error)
     })
+    
 }

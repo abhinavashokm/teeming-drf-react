@@ -8,7 +8,7 @@ function useUpdateWorkspace() {
     const workspaceSlug = useWorkspaceSlug()
 
     return useAppMutation({
-        mutationFn: (data) => workspaceService.updateWorkspace(data, workspaceSlug),
+        mutationFn: (data) => workspaceService.updateWorkspace(workspaceSlug, data),
         invalidateKeys: [['workspace', workspaceSlug]]
     })
 }

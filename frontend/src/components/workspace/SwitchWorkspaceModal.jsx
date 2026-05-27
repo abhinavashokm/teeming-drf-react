@@ -3,6 +3,7 @@ import { X, Search, Check, Plus } from 'lucide-react';
 import useMyWorkspaces from '../../hooks/workspace/useMyWorkspaces';
 import useWorkspace from "../../hooks/workspace/useWorkspace"
 import useSwitchWorkspace from '../../hooks/workspace/useSwitchWorkspace';
+import { useNavigate } from 'react-router-dom';
 
 export default function SwitchWorkspaceModal({ isOpen, onClose }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,14 +12,9 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
   const { data: myWorkspaces } = useMyWorkspaces()
   const { mutate: switchWorkspace } = useSwitchWorkspace()
 
-  if (!isOpen) return null;
+  const navigate = useNavigate()
 
-  // const workspaces = [
-  //   { id: '1', name: 'Acme Corp', color: 'bg-gray-900', active: true },
-  //   { id: '2', name: 'Client TechFlow', color: 'bg-indigo-500', active: false },
-  //   { id: '3', name: 'Design Studio', color: 'bg-purple-500', active: false },
-  //   { id: '4', name: 'Marketing HQ', color: 'bg-blue-500', active: false },
-  // ];
+  if (!isOpen) return null;
 
   const COLORS = [
     'bg-gray-900', 'bg-indigo-500', 'bg-purple-500',
@@ -40,6 +36,11 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
       return
     }
     switchWorkspace(workspace)
+  }
+
+
+  const handleCreateWorkspace = () => {
+    navigate('/create-workspace')
   }
 
   return (
@@ -96,7 +97,9 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
 
         {/* Footer */}
         <div className="p-2 border-t border-gray-100 bg-gray-50/60">
+
           <button
+            onClick={handleCreateWorkspace}
             className="w-full flex items-center gap-3 p-2.5 rounded-[10px] hover:bg-white transition-all border border-transparent hover:border-gray-200 hover:shadow-sm group"
           >
             <div className="w-8 h-8 rounded-[8px] flex items-center justify-center bg-gray-100 text-gray-600 group-hover:bg-teeming-green/10 group-hover:text-teeming-green transition-colors">
@@ -113,6 +116,7 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
               </span>
             </div>
           </button>
+
         </div>
 
       </div>

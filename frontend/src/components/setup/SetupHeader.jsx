@@ -1,20 +1,18 @@
-import { useState, useRef } from "react";
-import useAuth from "../../hooks/auth/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import useLogout from "../../hooks/auth/useLogout";
+import { getAvatarColor } from "../../utils/styleUtils";
 
 
 function SetupHeader() {
 
     const { mutate: logout } = useLogout()
 
-    const [currentState, setCurrentState] = useState(1);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const queryClient = useQueryClient()
     const currentUser = queryClient.getQueryData(['auth'])
-    const inviteEmail = currentUser?.email
 
     const handleLogout = () => {
         logout()
@@ -22,10 +20,7 @@ function SetupHeader() {
 
     return currentUser && (
         <header
-            className={`w-full flex justify-end items-center px-8 md:px-12 py-8 z-50 min-h-[100px] transition-opacity duration-300 ${currentState === 1 || currentState === 2
-                ? "opacity-100"
-                : "opacity-0 pointer-events-none"
-                }`}
+            className={`w-full flex justify-end items-center px-8 md:px-12 py-8 z-50 min-h-[100px] transition-opacity duration-300 opacity-100`}
         >
             <div className="relative" ref={dropdownRef}>
                 <button
@@ -35,14 +30,12 @@ function SetupHeader() {
                     }}
                     className="flex items-center gap-2 border border-gray-200 rounded-full py-1.5 px-3 pr-2 bg-white shadow-sm hover:shadow-md transition-all focus:outline-none"
                 >
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xs font-bold">
-                        U
+                    <div className={`w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xs font-bold ${getAvatarColor(currentUser?.email)} `}>
+                        {currentUser?.email?.[0]}
                     </div>
 
                     <span className="text-sm font-medium text-gray-900">
-                        {currentState === 1
-                            ? inviteEmail
-                            : loggedInWrongEmail}
+                        {currentUser?.email}
                     </span>
 
                     <svg

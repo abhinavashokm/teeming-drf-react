@@ -20,7 +20,7 @@ export const workspaceService = {
         return res.data
     },
 
-    updateWorkspace: async (data, slug) => {
+    updateWorkspace: async (slug, data) => {
         const res = await api.patch(`/workspaces/${slug}/`, data)
         return res.data
     },
@@ -35,17 +35,18 @@ export const workspaceService = {
         return res.data
     },
 
-    updateMemberRole: async (data, memberId, slug) => {
+    updateMemberRole: async (slug, data, memberId) => {
         const res = await api.patch(`/workspaces/${slug}/members/${memberId}/`, data)
         return res.data
     },
 
-    removeMember: async (memberId, slug) => {
+    removeMember: async (slug, memberId) => {
         const res = await api.delete(`/workspaces/${slug}/members/${memberId}/`)
         return res.data
     },
 
     leaveWorkspace: async (slug) => {
+        console.log(slug)
         const res = await api.delete(`/workspaces/${slug}/members/leave/`)
         return res.data
     },

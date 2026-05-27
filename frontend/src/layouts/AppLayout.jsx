@@ -27,12 +27,15 @@ function AppLayout() {
     //show redirecton toast messages if any
     useEffect(() => {
 
-        if (location.state?.toast) {
+        const toastData = location.state?.toast
 
-            if (location.state.error) {
-                showError(location.state.toast)
+        if (toastData) {
+
+            if (toastData?.type === 'success') {
+                showSuccess(toastData?.message)
+
             } else {
-                showSuccess(location.state.toast)
+                showError(toastData?.message)
             }
 
             window.history.replaceState({}, '')

@@ -5,19 +5,32 @@ import {
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/app/Navbar';
-import Sidebar from "../components/app/Sidebar"
-import useWorkspace from '../hooks/workspace/useWorkspace';
+import Sidebar from "../components/app/Sidebar";
 import FullPageLoader from '../components/ui/FullPageLoader';
+import { errorCodes } from '../constants/errorCodes';
+import useWorkspace from '../hooks/workspace/useWorkspace';
+import ErrorPage from '../pages/error/ErrorPage';
 
 function WorkspaceLayout() {
 
-  const { data, isPending: isWorkspacePending, isError } = useWorkspace()
+  const { data, isPending: isWorkspacePending, isError, error } = useWorkspace()
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
 
   if (isWorkspacePending) return <FullPageLoader />
+
+  if (error?.response?.status === 404) {
+    if (error.response.data?.error?.code === errorCodes.WORKSPACE_NOT_FOUND) {
+      return <ErrorPage
+        type={errorCodes.WORKSPACE_NOT_FOUND}
+      />
+    }
+    return <ErrorPage
+      type={errorCodes.GENERAL}
+    />
+  }
 
   return (
     <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"

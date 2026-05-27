@@ -2,6 +2,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { showApiError, showApiSuccess, showSuccess } from '../../utils/toast'
 import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
+import { useNavigate } from 'react-router-dom'
+import { getSuccessMsg } from '../../utils/apiParser'
 
 function useAppMutation({
     mutationFn,
@@ -9,6 +11,7 @@ function useAppMutation({
     passWorkspaceSlug = false,
     apiSuccessToast = true,
     apiErrorToast = true,
+    navigateAfterSuccess,
     successMsg,
     onSuccess,
     onError,
@@ -16,6 +19,7 @@ function useAppMutation({
 
     const queryClient = useQueryClient()
     const workspaceSlug = useWorkspaceSlug()
+    const navigate = useNavigate()
 
     return useMutation({
 
@@ -23,7 +27,7 @@ function useAppMutation({
 
             //include the workspace slug in service fn call
             if (passWorkspaceSlug) {
-                return mutationFn(variables, workspaceSlug)
+                return mutationFn(workspaceSlug, variables)
             }
 
             return mutationFn(variables)
@@ -39,11 +43,30 @@ function useAppMutation({
                 )
             )
 
-            if (successMsg) {
-                showSuccess(successMsg)
-            } else if (apiSuccessToast) {
-                showApiSuccess(res)
+            if (navigateAfterSuccess) {
+                const toastMsg = apiSuccessToast ? getSuccessMsg(res) : successMsg
+
+                if (toastMsg) {
+                    navigate(navigateAfterSuccess, {
+                        state: {
+                            toast: {
+                                type: 'success',
+                                message: toastMsg
+                            }
+                        }
+                    })
+                } else {
+                    navigate(navigateAfterSuccess)
+                }
+            } else {
+                if (successMsg) {
+                    showSuccess(successMsg)
+                } else if (apiSuccessToast) {
+                    showApiSuccess(res)
+                }
             }
+
+
 
             onSuccess?.(res, variables, context)
 

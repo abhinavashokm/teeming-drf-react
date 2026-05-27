@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import SetupHeader from "../../components/setup/SetupHeader";
 import useAuth from "../../hooks/auth/useAuth";
 import useLogout from "../../hooks/auth/useLogout";
 import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
 import { toSlug } from "../../utils/slugUtils";
+import { LayoutGrid } from "lucide-react";
+import useMyWorkspaces from "../../hooks/workspace/useMyWorkspaces";
 
 
 function CreateWorkspacePage() {
@@ -36,7 +37,10 @@ function CreateWorkspacePage() {
         navigate("/auth/login/")
     }
 
-    const { mutate: createWorkspace } = useCreateWorkspace()
+    const { mutate: createWorkspace, isPending } = useCreateWorkspace()
+    const { data: workspaceData } = useMyWorkspaces()
+
+    const haveWorkspaces = workspaceData?.workspaces.length > 0
 
     const handleCreateWorkspace = ({ name, slug }) => {
         createWorkspace({ name, slug })
@@ -46,81 +50,214 @@ function CreateWorkspacePage() {
     return (
         <>
 
-                    {/* Logo */}
-                    {/* <AuthLogo className="mb-4" /> */}
+            {/* Title */}
+            <h1 className="text-teeming-text-dark font-bold text-[28px] leading-[42px] -tracking-[0.025em] text-center mb-1">
+                Create your workspace
+            </h1>
 
-                    {/* Title */}
-                    <h1 className="text-teeming-text-dark font-bold text-[28px] leading-[42px] -tracking-[0.025em] text-center mb-1">
-                        Create your workspace
-                    </h1>
+            {/* Subtitle */}
+            <p className="text-[15px] leading-[24px] text-teeming-gray text-center mb-6">
+                Your workspace is where your team{" "}
+                <br className="hidden sm:block" />
+                collaborates, plans, and ships.
+            </p>
 
-                    {/* Subtitle */}
-                    <p className="text-[15px] leading-[24px] text-teeming-gray text-center mb-6">
-                        Your workspace is where your team{" "}
-                        <br className="hidden sm:block" />
-                        collaborates, plans, and ships.
-                    </p>
+            {/* Card */}
+            {/* Card */}
+            <div
+                className="
+        w-full max-w-[440px]
+        bg-white
+        border border-teeming-border
+        rounded-2xl
+        p-8
+        shadow-[0_8px_30px_rgba(0,0,0,0.04)]
+    "
+            >
 
-                    {/* Card */}
-                    <div className="w-full bg-white border border-teeming-border rounded-xl shadow-sm p-8">
-                        <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-5">
 
-                            {/* Workspace Name */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-teeming-text-dark font-semibold text-[14px] leading-5">
-                                    Workspace Name
-                                </label>
+                    {/* Workspace Name */}
+                    <div className="flex flex-col gap-1.5">
 
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Acme Corp"
-                                    {...register('name')}
-                                    onChange={handleNameChange}
-                                    className="w-full py-[10px] px-4 bg-white border border-teeming-border rounded-lg text-[15px] text-teeming-text-dark placeholder-teeming-light-gray focus:outline-none focus:ring-1 focus:ring-teeming-green focus:border-teeming-green transition-all"
-                                />
-                            </div>
+                        <label className="text-teeming-text-dark font-semibold text-[14px]">
+                            Workspace Name
+                        </label>
 
-                            {/* Workspace URL */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-teeming-text-dark font-semibold text-[14px] leading-5">
-                                    Workspace URL
-                                </label>
-                                <div className="flex items-center w-full border border-teeming-border rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-teeming-green focus-within:border-teeming-green transition-all bg-white">
-                                    <span className="py-[10px] pl-4 pr-0.5 text-teeming-gray text-[14px] leading-5 select-none">
-                                        app.com/
-                                    </span>
-                                    <input
-                                        type="text"
-                                        placeholder="acme-corp"
-                                        {...register('slug')}
-                                        onChange={handleSlugChange}
-                                        className="flex-1 py-[10px] pr-4 pl-0.5 bg-transparent text-[14px] text-teeming-text-dark placeholder-teeming-light-gray focus:outline-none"
-                                    />
-                                </div>
-                            </div>
+                        <input
+                            type="text"
+                            placeholder="e.g. Acme Corp"
+                            {...register("name")}
+                            onChange={handleNameChange}
+                            className="
+                    w-full
+                    py-[11px] px-4
+                    bg-white
+                    border border-teeming-border
+                    rounded-xl
 
-                            {/* Submit */}
-                            <button
-                                type="button"
-                                onClick={handleSubmit(handleCreateWorkspace)}
-                                className="w-full py-[10px] mt-1 bg-teeming-green hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors flex justify-center items-center"
-                            >
-                                <span className="text-white font-bold text-[16px] leading-6 -tracking-[0.024em]">
-                                    Create workspace
-                                </span>
-                            </button>
+                    text-[15px]
+                    text-teeming-text-dark
+                    placeholder-teeming-light-gray
 
-                        </div>
+                    hover:border-gray-300
+
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-emerald-500/10
+                    focus:border-teeming-green
+
+                    transition-all
+                "
+                        />
+
                     </div>
 
-                    {/* Already have an invite? */}
-                    <p className="mt-4 text-[13px] text-teeming-gray text-center">
-                        Joining a team?{" "}
-                        <span className="text-teeming-text-dark font-medium">
-                            Ask your admin to send you an invite link.
+                    {/* Workspace URL */}
+                    <div className="flex flex-col gap-1.5">
+
+                        <label className="text-teeming-text-dark font-semibold text-[14px]">
+                            Workspace URL
+                        </label>
+
+                        <div
+                            className="
+                    flex items-center
+                    w-full
+                    bg-white
+
+                    border border-teeming-border
+                    rounded-xl
+                    overflow-hidden
+
+                    hover:border-gray-300
+
+                    focus-within:ring-2
+                    focus-within:ring-emerald-500/10
+                    focus-within:border-teeming-green
+
+                    transition-all
+                "
+                        >
+
+                            <span
+                                className="
+                        py-[11px]
+                        pl-4 pr-1
+
+                        text-[14px]
+                        font-medium
+                        text-gray-500
+
+                        select-none
+                    "
+                            >
+                                app.com/
+                            </span>
+
+                            <input
+                                type="text"
+                                placeholder="acme-corp"
+                                {...register("slug")}
+                                onChange={handleSlugChange}
+                                className="
+                        flex-1
+                        py-[11px]
+                        pr-4 pl-0.5
+
+                        bg-transparent
+
+                        text-[14px]
+                        text-teeming-text-dark
+                        placeholder-teeming-light-gray
+
+                        focus:outline-none
+                    "
+                            />
+
+                        </div>
+
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={handleSubmit(handleCreateWorkspace)}
+                        className="
+                w-full
+                mt-1
+
+                py-[11px]
+                rounded-xl
+
+                bg-teeming-green
+                hover:bg-emerald-600
+
+                disabled:opacity-60
+                disabled:cursor-not-allowed
+
+                shadow-sm
+                hover:shadow-md
+
+                transition-all duration-200
+
+                flex justify-center items-center
+            "
+                    >
+
+                        <span className="text-white font-semibold text-[15px] tracking-[-0.01em]">
+
+                            {isPending
+                                ? "Creating workspace..."
+                                : "Create workspace"
+                            }
+
                         </span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            {/* footer section */}
+            {
+                !haveWorkspaces
+                    ?
+                    <p className="mt-4 text-[13px] text-teeming-gray text-center">
+                        Joining an existing workspace? You’ll need an invite link to continue.
                     </p>
-      
+
+
+                    :
+                    <div className="mt-6 flex flex-col items-center gap-3">
+
+                        <p className="text-[13px] text-gray-500 text-center">
+                            Switch to an existing workspace?
+                        </p>
+
+                        <button
+                            onClick={() => navigate("/workspaces")}
+                            className="
+                            flex items-center gap-2
+                            text-[14px] font-medium
+                            text-gray-700 hover:text-gray-900
+                            transition-colors
+                            group
+                        "
+                        >
+                            <LayoutGrid className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+
+                            Browse your workspaces
+                        </button>
+
+                    </div>
+            }
+
+
         </>
     );
 }
