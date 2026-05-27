@@ -12,7 +12,6 @@ function useGoals() {
       const resData = await goalService.fetchAllGoals(workspaceSlug)
       return resData.data.goals
     },
-
   })
 }
 

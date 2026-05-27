@@ -18,6 +18,8 @@ import useLogout from '../../hooks/auth/useLogout';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import useRemoveMember from '../../hooks/workspace/useRemoveMember';
+import useLeaveWorkspace from '../../hooks/workspace/useLeaveWorkspace';
 
 
 
@@ -32,18 +34,18 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
 
 
   const [currentView, setCurrentView] = useState('home');
-  const [favoriteGoals, setFavoriteGoals] = useState(['Checkout Drop-off', 'Launch V2']);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isSwitchWorkspaceModalOpen, setIsSwitchWorkspaceModalOpen] = useState(false);
 
-  const userRole = 'Owner';
   const roleColors = {
     Owner: 'text-emerald-600',
     Admin: 'text-blue-600',
     Member: 'text-gray-500'
   };
+
+  const favoriteGoals = []
 
   if (!currentWorkspace) return null
   return (
@@ -68,7 +70,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
                 <div className="flex items-center text-[11px] mt-0.5">
                   <span className="text-gray-500 truncate">Free plan</span>
                   <span className="text-gray-300 mx-1">·</span>
-                  <span className={`truncate ${roleColors[userRole] || 'text-gray-500'}`}>{currentWorkspace.role}</span>
+                  <span className={`truncate ${currentWorkspace.role || 'text-gray-500'}`}>{currentWorkspace.role}</span>
                 </div>
               </div>
             </div>
@@ -96,10 +98,16 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
                   Switch Workspace
                 </button>
                 <div className="border-t border-gray-100/80 my-1.5"></div>
-                <button onClick={() => { setIsWorkspaceDropdownOpen(false); setIsLeaveModalOpen(true); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group">
-                  <LogOut className="h-[15px] w-[15px] text-red-500 group-hover:text-red-600" />
-                  Leave Workspace
-                </button>
+
+                {
+                  currentWorkspace.role !== 'Owner' &&
+
+                  <button onClick={() => { setIsWorkspaceDropdownOpen(false); setIsLeaveModalOpen(true); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group">
+                    <LogOut className="h-[15px] w-[15px] text-red-500 group-hover:text-red-600" />
+                    Leave Workspace
+                  </button>
+                }
+
               </div>
             </>
           )}
@@ -116,6 +124,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
               <Search className="h-3.5 w-3.5 text-gray-400" strokeWidth={1.5} />
               Search
             </button>
+
             <button
               onClick={() => console.log('Inbox clicked')}
               className="flex-1 flex items-center justify-center gap-1.5 py-1.5 border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors"
@@ -126,6 +135,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
                 3
               </span>
             </button>
+
           </div>
 
           {/* Home */}
@@ -157,13 +167,17 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
 
             <Link to={'manage-team'} onClick={() => setCurrentView('team')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
               <Users className={`h-4 w-4 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-              Manage Team
+               {currentWorkspace.role !== "Member"? "Manage Team" : "View Team"} 
             </Link>
 
-            <Link to={'settings'} onClick={() => setCurrentView('workspace_settings')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
-              <Settings className={`h-4 w-4 ${currentView === 'workspace_settings' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-              Settings
-            </Link>
+            {
+              currentWorkspace.role !== "Member" &&
+              <Link to={'settings'} onClick={() => setCurrentView('workspace_settings')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
+                <Settings className={`h-4 w-4 ${currentView === 'workspace_settings' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
+                Settings
+              </Link>
+            }
+
 
           </div>
 

@@ -1,5 +1,4 @@
-// router.jsx
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import AppLayout from "../layouts/AppLayout";
 import SetupLayout from "../layouts/SetupLayout";
 import AcceptInvitationPage from "../pages/invite/AcceptInvitePage";
@@ -13,12 +12,7 @@ const publicRoutes = {
     element: <PublicRoute />,
     children: [
         { path: "auth", ...authRoutes },
-        {
-            element: <SetupLayout />,
-            children: [
-                { path: "invite", element: <AcceptInvitationPage /> }
-            ]
-        }
+        { path: "/", element: <Navigate to={'/auth/login'} />}
     ]
 }
 
@@ -35,10 +29,17 @@ const protectedRoutes = {
     ]
 }
 
+const acceptInviteRoute = {
+    element: <SetupLayout />,
+    children: [
+        { path: "invite", element: <AcceptInvitationPage /> }
+    ]
+}
+
 const router = createBrowserRouter([
     {
         element: <AppLayout />,
-        children: [publicRoutes, protectedRoutes]
+        children: [publicRoutes, protectedRoutes, acceptInviteRoute]
     }
 ])
 

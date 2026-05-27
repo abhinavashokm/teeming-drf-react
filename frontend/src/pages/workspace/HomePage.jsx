@@ -5,11 +5,12 @@ import {
   Star
 } from 'lucide-react';
 import { useState } from 'react';
-import CreateGoalModal from '../../components/goal/CreateGoalModal';
+import GoalFormModal from '../../components/goal/GoalFormModal';
 import InviteModal from '../../components/workspace/InviteModal';
 import SwitchWorkspaceModal from '../../components/workspace/SwitchWorkspaceModal';
 import GoalCard from '../../components/goal/GoalCard';
 import useGoals from '../../hooks/goal/useGoals';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 
 function HomePage() {
@@ -17,7 +18,9 @@ function HomePage() {
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [isSwitchWorkspaceModalOpen, setIsSwitchWorkspaceModalOpen] = useState(false);
-  const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false);
+
+  const [isGoalFormModalOpen, setIsGoalFormModalOpen] = useState(false);
+  const { data: currentWorkspace } = useWorkspace()
 
   const { data: Goals } = useGoals()
 
@@ -34,21 +37,54 @@ function HomePage() {
               <Layers className="h-5 w-5 text-gray-900" strokeWidth={1.5} />
               Goals
             </h2>
-            <button onClick={() => setIsCreateGoalModalOpen(true)} className="text-[13px] font-medium text-white bg-[#1D9E75] hover:bg-[#15825f] transition-colors flex items-center gap-1 px-4 py-1.5 rounded-[20px]">
-              <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-              New Goal
-            </button>
+
+            {
+              currentWorkspace.role !== 'Member' &&
+              <button onClick={() => setIsGoalFormModalOpen(true)} className="text-[13px] font-medium text-white bg-[#1D9E75] hover:bg-[#15825f] transition-colors flex items-center gap-1 px-4 py-1.5 rounded-[20px]">
+                <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+                New Goal
+              </button>
+            }
+
+
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Goal 1 */}
 
             {
-              Goals?.map(goal => {
-                return <GoalCard key={goal.id} goal={goal} />
-              })
+              Goals?.length > 0 ? (
+                Goals.map((goal) => (
+                  <GoalCard key={goal.id} goal={goal} />
+                ))
+              ) : (
+                <div className="col-span-full border border-dashed border-gray-300 rounded-2xl bg-white py-14 px-8 flex flex-col items-center justify-center text-center">
+
+                  <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
+                    <Layers
+                      className="h-7 w-7 text-gray-400"
+                      strokeWidth={1.7}
+                    />
+                  </div>
+
+                  <h3 className="text-[15px] font-semibold text-gray-900 mb-1.5">
+                    No goals yet
+                  </h3>
+
+                  <p className="text-[13px] text-gray-500 max-w-sm leading-relaxed mb-5">
+                    {currentWorkspace.role === 'Member' ?
+                      "No goals in the workspace yet"
+                      :
+
+                      " Create your first goal to organize ideas, track progress, and align your workspace around outcomes."
+                    }
+
+                  </p>
+
+                </div>
+              )
             }
-           
+
 
             {/* <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
               <div className="h-28 bg-[#1D9E75] p-4 flex flex-col justify-between">
@@ -107,12 +143,12 @@ function HomePage() {
                 </button>
               </div>
             </div> */}
-            
+
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* My Assigned Ideas */}
+        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-gray-900 tracking-tight">Assigned Ideas</h2>
@@ -120,7 +156,7 @@ function HomePage() {
             </div>
 
             <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-              {/* Idea 1 */}
+              
               <div className="p-4 flex items-center justify-between border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group cursor-pointer">
                 <div className="flex items-start gap-3">
                   <div>
@@ -136,7 +172,7 @@ function HomePage() {
                 </div>
               </div>
 
-              {/* Idea 2 */}
+              
               <div className="p-4 flex items-center justify-between border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group cursor-pointer">
                 <div className="flex items-start gap-3">
                   <div>
@@ -152,7 +188,7 @@ function HomePage() {
                 </div>
               </div>
 
-              {/* Idea 3 */}
+              
               <div className="p-4 flex items-center justify-between border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group cursor-pointer">
                 <div className="flex items-start gap-3">
                   <div>
@@ -170,7 +206,7 @@ function HomePage() {
             </div>
           </section>
 
-          {/* Recently Active */}
+        
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-gray-900 tracking-tight">Recent Activity</h2>
@@ -209,13 +245,14 @@ function HomePage() {
               </div>
             </div>
           </section>
-        </div>
+        </div> */}
 
       </div>
 
       <InviteModal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} />
       <SwitchWorkspaceModal isOpen={isSwitchWorkspaceModalOpen} onClose={() => setIsSwitchWorkspaceModalOpen(false)} />
-      <CreateGoalModal isOpen={isCreateGoalModalOpen} onClose={() => setIsCreateGoalModalOpen(false)} />
+      <GoalFormModal isOpen={isGoalFormModalOpen} onClose={() => setIsGoalFormModalOpen(false)} />
+
     </>
   )
 }

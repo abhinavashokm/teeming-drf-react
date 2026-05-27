@@ -1,15 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Camera, Building, Globe, Shield, Trash2, ArrowRight, AlertTriangle, Lock, Unlock } from 'lucide-react';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import useUpdateWorkspace from '../../hooks/workspace/useUpdateWorkspace';
+import { useForm } from 'react-hook-form';
+import useDeleteWorkspace from '../../hooks/workspace/useDeleteWorkspace';
 
 
 function WorkspaceSettingsPage() {
 
-    const { data:currentWorkspace } = useWorkspace()
+    const { data: currentWorkspace } = useWorkspace()
+    const { mutate: updateWorkspace } = useUpdateWorkspace()
+    const { mutate: deleteWorkspace } = useDeleteWorkspace()
+
+    const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
+        defaultValues: {
+            name: currentWorkspace?.name || "",
+            slug: currentWorkspace?.slug || "",
+        }
+    })
+
+    // useEffect(() => {
+    //     if (currentWorkspace) {
+    //         reset({
+    //             name: currentWorkspace.name,
+    //             slug: currentWorkspace.slug,
+    //         })
+    //     }
+    // }, [currentWorkspace, reset])
 
     const [isSlugUnlocked, setIsSlugUnlocked] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+
+    const handleUpdateWorkspace = (data) => {
+        updateWorkspace(data, {
+            onSuccess: (res) => {
+                reset()
+            }
+        })
+    }
+
+    const handleDeleteWorkspace = () => {
+        deleteWorkspace()
+    }
 
     return (
         <div className="max-w-5xl mx-auto space-y-14 pb-20">
@@ -32,6 +65,7 @@ function WorkspaceSettingsPage() {
                 </div>
 
                 <div className="p-6 space-y-6">
+
                     {/* Workspace Logo Upload */}
                     <div className="flex items-center gap-6">
                         <div className="h-16 w-16 rounded-xl bg-gray-900 flex items-center justify-center text-white text-xl font-medium shrink-0 relative group cursor-pointer overflow-hidden shadow-sm">
@@ -53,7 +87,7 @@ function WorkspaceSettingsPage() {
                     <div className="space-y-5">
                         <div className="space-y-1.5">
                             <label className="text-[13px] font-medium text-gray-700">Workspace Name</label>
-                            <input type="text" defaultValue={currentWorkspace.name} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
+                            <input type="text"  {...register('name')} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
                         </div>
                         <div className="space-y-3">
                             <div className="space-y-1.5">
@@ -65,7 +99,7 @@ function WorkspaceSettingsPage() {
                                     </div>
                                     <input
                                         type="text"
-                                        defaultValue={currentWorkspace.slug}
+                                        {...register('slug')}
                                         disabled={!isSlugUnlocked}
                                         className={`flex-1 w-full px-3 py-2 text-[13px] focus:outline-none ${isSlugUnlocked ? 'bg-white text-gray-900' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}`}
                                     />
@@ -96,9 +130,21 @@ function WorkspaceSettingsPage() {
                 </div>
 
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end">
-                    <button className="px-4 py-2 bg-gray-900 text-white rounded-lg text-[13px] font-medium hover:bg-gray-800 transition-colors shadow-sm">
+
+                    <button
+                        disabled={!isDirty}
+                        onClick={handleSubmit(handleUpdateWorkspace)}
+                        className={`
+                                px-4 py-2 rounded-lg text-[13px] font-medium transition-colors shadow-sm
+                                ${!isDirty
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                : "bg-gray-900 text-white hover:bg-gray-800"
+                            }
+                                `}
+                    >
                         Save Changes
                     </button>
+
                 </div>
             </section>
 
@@ -169,6 +215,7 @@ function WorkspaceSettingsPage() {
                                 Cancel
                             </button>
                             <button
+                                onClick={handleDeleteWorkspace}
                                 disabled={deleteConfirmationText !== currentWorkspace.slug}
                                 className="px-4 py-2 text-[13px] font-medium text-white bg-red-600 hover:bg-red-700 rounded-[10px] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >

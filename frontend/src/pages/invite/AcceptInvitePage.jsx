@@ -62,39 +62,44 @@ const AcceptInvitationPage = () => {
 
   const getButtonLabel = () => {
     if (!currentUser) {
-        return invitationDetails.accountExists ? "Login" : "Create Account"
+      return invitationDetails.accountExists ? "Login" : "Create Account"
     }
     if (currentUser.email === invitationDetails.invitedEmail) return "Accept Invitation"
     return "Log out and continue as"
-}
+  }
 
 
   const handleAcceptInvitation = () => {
+    const sameEmail = currentUser?.email === invitationDetails.invitedEmail
 
-
-    const SameEmail = currentUser?.email === invitationDetails.invitedEmail
-
-    if (SameEmail) {
-
-       acceptInvitation()
-       return
-      
-    }else{
-      logout()
+    if (sameEmail) {
+      acceptInvitation()
+      return
     }
 
-    if (invitationDetails.accountExists) {
-      navigate(`/auth/login?token=${token}`)
-    } else {
-      navigate(`/auth/signup?token=${token}`)
+    // not logged in at all
+    if (!currentUser) {
+      navigate(invitationDetails.accountExists
+        ? `/auth/login?token=${token}`
+        : `/auth/signup?token=${token}`
+      )
+      return
     }
-   
+
+    // logged in but wrong email — logout first, then navigate
+    logout(undefined, {
+      onSuccess: () => {
+        navigate(invitationDetails.accountExists
+          ? `/auth/login?token=${token}`
+          : `/auth/signup?token=${token}`
+        )
+      }
+    })
   }
 
 
   if (isPending) return <FullPageLoader />
 
-  console.log(currentUser)
   return (
     <>
 
@@ -120,13 +125,32 @@ const AcceptInvitationPage = () => {
             </span>
           </p>
 
+
           <p className="text-[14px] text-gray-400 mt-1">
             This invite was sent to{" "}
             <span className="text-gray-600">
               {invitationDetails.invitedEmail}
             </span>
           </p>
+          <div className="mt-4 flex justify-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
+
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+
+              <span className="text-[12px] font-medium text-emerald-700">
+                Joining as
+              </span>
+
+              <span className="text-[12px] font-semibold text-emerald-900 capitalize">
+                {invitationDetails.role}
+              </span>
+
+            </div>
+          </div>
+
         </div>
+
+
 
 
         {/* Dynamic Content */}
@@ -159,7 +183,7 @@ const AcceptInvitationPage = () => {
             }`}>
 
             <span className="text-white font-bold text-[15px] leading-5">
-            {getButtonLabel()}
+              {getButtonLabel()}
             </span>
 
             <span

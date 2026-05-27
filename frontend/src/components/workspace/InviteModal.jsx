@@ -1,4 +1,4 @@
-import { Check, Users, X } from 'lucide-react';
+import { Check, Users, X, ArrowRight } from 'lucide-react';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { showSuccess } from '../../utils/toast';
@@ -8,7 +8,8 @@ import useInviteMembers from '../../hooks/invite/useInviteMembers'
 const initialState = {
     inputValue: '',
     isDropdownOpen: false,
-    selectedEmails: []
+    selectedEmails: [],
+    role: 'member',
 }
 
 const reducer = (state, action) => {
@@ -42,6 +43,12 @@ const reducer = (state, action) => {
                 isDropdownOpen: action.payload
             }
 
+        case 'SET_ROLE':
+            return {
+                ...state,
+                role: action.payload
+            }
+
         case 'RESET':
             return initialState
 
@@ -65,7 +72,7 @@ export default function InviteModal({ isOpen, onClose }) {
 
     const handleInviteMember = () => {
 
-        inviteMembers({ emails: state.selectedEmails }, {
+        inviteMembers({ emails: state.selectedEmails, role: state.role }, {
             onSuccess: () => {
                 handleClose()
             }
@@ -148,7 +155,7 @@ export default function InviteModal({ isOpen, onClose }) {
                                 placeholder="Add email..."
                                 className="w-full  border-none outline-none bg-transparent text-[13px] text-gray-800 py-0.5 placeholder-gray-400"
                                 value={state.inputValue}
-                                onChange={(e) => inviteDispatch({ type: 'SET_INPUT', payload: e.target.value })}
+                                onChange={(e) => inviteDispatch({ type: 'SET_INPUT', payload: e.target.value.trimStart().toLowerCase() })}
                                 onFocus={(e) => {
                                     if (e.target.value.length > 0) inviteDispatch({ type: 'SET_DROPDOWN_OPEN', payload: true });
                                 }}
@@ -167,7 +174,7 @@ export default function InviteModal({ isOpen, onClose }) {
                             <div className="flex flex-col bg-white max-h-[220px] overflow-y-auto">
                                 {/* Row 1 */}
                                 <div onClick={() => {
-                                    inviteDispatch({ type: 'SELECT_EMAIL', payload: state.inputValue })
+                                    inviteDispatch({ type: 'SELECT_EMAIL', payload: state.inputValue.trim().toLowerCase() })
                                 }
                                 } className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-gray-50 min-h-[44px] transition-colors group">
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 bg-amber-500 text-white">{state.inputValue?.[0]}</div>
@@ -194,10 +201,12 @@ export default function InviteModal({ isOpen, onClose }) {
                     {/* Role group */}
                     <div className="flex items-center gap-2">
                         <span className="text-[13px] text-gray-500 font-medium">Role</span>
-                        <select className="text-[13px] border border-gray-200 rounded-lg bg-white text-gray-800 px-2.5 py-1.5 cursor-pointer sm:flex-none flex-1 outline-none hover:bg-gray-50 transition-colors shadow-sm font-medium focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600">
-                            <option>Member</option>
-                            <option>Admin</option>
-                            <option>Viewer</option>
+                        <select
+                            value={state.role}
+                            onChange={(e) => inviteDispatch({ type: 'SET_ROLE', payload: e.target.value })}
+                            className="text-[13px] border border-gray-200 rounded-lg bg-white text-gray-800 px-2.5 py-1.5 cursor-pointer sm:flex-none flex-1 outline-none hover:bg-gray-50 transition-colors shadow-sm font-medium focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600">
+                            <option value={"member"} >Member</option>
+                            <option value={"admin"} >Admin</option>
                         </select>
                     </div>
 
@@ -212,19 +221,68 @@ export default function InviteModal({ isOpen, onClose }) {
 
                         <button
                             onClick={handleInviteMember}
-                            disabled={isInvitePending}
-                            className="text-[13px] font-medium px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white flex items-center justify-center gap-1.5 min-h-[44px] w-full sm:w-auto transition-colors shadow-sm"
+                            disabled={isInvitePending || state.selectedEmails.length === 0}
+                            className="
+                                        text-[13px] font-medium
+                                        px-4 py-2.5
+                                        rounded-lg
+                                        bg-emerald-600
+                                        text-white
+                                        flex items-center justify-center gap-1.5
+                                        min-h-[44px] w-full sm:w-auto
+
+                                        shadow-sm
+                                        border border-emerald-700/10
+
+                                        transition-all duration-200 ease-out
+
+                                        hover:bg-emerald-700
+                                        hover:shadow-md
+                                        hover:-translate-y-[1px]
+
+                                        active:translate-y-0
+                                        active:scale-[0.99]
+
+                                        focus:outline-none
+                                        focus:ring-4
+                                        focus:ring-emerald-600/15
+
+                                        disabled:bg-emerald-500
+                                        disabled:text-white/75
+                                        disabled:border-emerald-500
+                                        disabled:shadow-none
+                                        disabled:hover:bg-emerald-500
+                                        disabled:hover:translate-y-0
+                                        disabled:cursor-not-allowed
+                                        disabled:opacity-70
+                                    "
                         >
                             {isInvitePending ? (
                                 <>
-                                    <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                    <svg
+                                        className="animate-spin w-3.5 h-3.5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        />
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v8z"
+                                        />
                                     </svg>
+
                                     Sending...
                                 </>
                             ) : (
-                                <>Send invites →</>
+                                <>Send invites <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} /></>
                             )}
                         </button>
 

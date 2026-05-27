@@ -1,7 +1,16 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
+import useLeaveWorkspace from '../../hooks/workspace/useLeaveWorkspace';
 
 export default function LeaveWorkspaceModal({ isOpen, onClose }) {
+
+    const { mutate: leaveWorkspace } = useLeaveWorkspace()
+
+    const handleLeaveWorkspace = () => {
+        leaveWorkspace()
+        onClose()
+    }
+
     if (!isOpen) return null;
 
     return (
@@ -33,7 +42,7 @@ export default function LeaveWorkspaceModal({ isOpen, onClose }) {
                         Cancel
                     </button>
                     <button
-                        onClick={onClose}
+                        onClick={handleLeaveWorkspace}
                         className="px-4 py-2 text-[13px] font-medium text-white bg-red-600 hover:bg-red-700 rounded-[10px] transition-colors shadow-sm"
                     >
                         Leave Workspace

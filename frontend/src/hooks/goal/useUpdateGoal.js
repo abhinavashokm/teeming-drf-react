@@ -6,15 +6,15 @@ import { showApiError, showApiSuccess } from '../../utils/toast'
 import useAppMutation from '../base/useAppMutation'
 
 
-function useCreateGoal() {
+function useUpdateGoal(){
 
   const workspaceSlug = useWorkspaceSlug()
 
   return useAppMutation({
-    mutationFn: (data) => goalService.createGoal(data, workspaceSlug),
+    mutationFn: ({data, goalId}) => goalService.updateGoal(data, goalId, workspaceSlug),
 
-    invalidateKeys:[['goals']]
+    invalidateKeys: [['goals']]
   })
 }
 
-export default useCreateGoal
+export default useUpdateGoal

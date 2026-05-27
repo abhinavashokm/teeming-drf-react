@@ -4,6 +4,7 @@ import InviteModal from '../../components/workspace/InviteModal';
 import MemberRow from '../../components/workspace/MemberRow';
 import useTeamMembers from '../../hooks/workspace/useTeamMembers';
 import MemberRowSkelton from '../../components/workspace/MemberRowSkelton';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 
 function ManageTeamPage() {
@@ -11,9 +12,10 @@ function ManageTeamPage() {
     const { data: teamMembers, isSuccess, isPending } = useTeamMembers()
 
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const { data: currentWorkspace } = useWorkspace()
 
     const onInviteClick = () => {
-        console.log("trust me brohh")
+
     }
 
     return (
@@ -35,12 +37,17 @@ function ManageTeamPage() {
                         </div>
                     </div>
                     <div className="flex gap-3">
-                        <button
-                            onClick={() => setIsInviteModalOpen(true)}
-                            className="px-3 py-1.5 bg-gray-900 border border-transparent rounded-md text-[13px] font-medium text-white hover:bg-gray-800 transition-colors shadow-sm"
-                        >
-                            + Invite Members
-                        </button>
+                        {
+                            currentWorkspace.role !== 'Member' &&
+                            <button
+                                onClick={() => setIsInviteModalOpen(true)}
+                                className="px-3 py-1.5 bg-gray-900 border border-transparent rounded-md text-[13px] font-medium text-white hover:bg-gray-800 transition-colors shadow-sm"
+                            >
+                                + Invite Members
+                            </button>
+                        }
+
+
                     </div>
                 </div>
 
@@ -61,7 +68,8 @@ function ManageTeamPage() {
                                 <span className="text-[12px] font-medium text-gray-500">1 Active</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+
+                        {/* <div className="flex items-center gap-2">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                                 <input
@@ -73,7 +81,8 @@ function ManageTeamPage() {
                             <button className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] font-medium text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors">
                                 Role: All <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
                             </button>
-                        </div>
+                        </div> */}
+
                     </div>
 
                     <div className="border border-gray-200 rounded-xl bg-white">
@@ -82,7 +91,11 @@ function ManageTeamPage() {
                             <div className="col-span-6 sm:col-span-5">Member</div>
                             <div className="col-span-3 sm:col-span-3">Role</div>
                             <div className="col-span-3 sm:col-span-3 hidden sm:block">Status</div>
-                            <div className="col-span-3 sm:col-span-1 text-right">Actions</div>
+                            {
+                                currentWorkspace.role !== 'Member' &&
+                                <div className="col-span-3 sm:col-span-1 text-right">Actions</div>
+                            }
+
                         </div>
 
                         {/* Members List */}
@@ -98,7 +111,7 @@ function ManageTeamPage() {
                 </section>
 
                 {/* Pending Invitations */}
-                <section>
+                {/* <section>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-base font-semibold text-gray-900 tracking-tight flex items-center gap-2">
                             Pending Invitations
@@ -107,7 +120,7 @@ function ManageTeamPage() {
                     </div>
                     <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
                         <div className="divide-y divide-gray-100">
-                            {/* Invite 1 */}
+                           
                             <div className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors group cursor-pointer">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
@@ -130,7 +143,7 @@ function ManageTeamPage() {
                                 </div>
                             </div>
 
-                            {/* Invite 2 */}
+                           
                             <div className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors group cursor-pointer">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
@@ -154,7 +167,8 @@ function ManageTeamPage() {
                             </div>
                         </div>
                     </div>
-                </section>
+                </section> */}
+
             </div>
 
             <InviteModal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} />

@@ -1,9 +1,12 @@
 import { useState, useRef } from "react";
 import useAuth from "../../hooks/auth/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
+import useLogout from "../../hooks/auth/useLogout";
 
 
 function SetupHeader() {
+
+    const { mutate: logout } = useLogout()
 
     const [currentState, setCurrentState] = useState(1);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -13,9 +16,13 @@ function SetupHeader() {
     const currentUser = queryClient.getQueryData(['auth'])
     const inviteEmail = currentUser?.email
 
+    const handleLogout = () => {
+        logout()
+    }
+
     return currentUser && (
         <header
-            className={`w-full flex justify-end items-center px-8 md:px-12 py-8 z-10 min-h-[100px] transition-opacity duration-300 ${currentState === 1 || currentState === 2
+            className={`w-full flex justify-end items-center px-8 md:px-12 py-8 z-50 min-h-[100px] transition-opacity duration-300 ${currentState === 1 || currentState === 2
                 ? "opacity-100"
                 : "opacity-0 pointer-events-none"
                 }`}
@@ -53,16 +60,19 @@ function SetupHeader() {
                     </svg>
                 </button>
 
-                <div
-                    className={`absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200 z-50 origin-top-right ${isDropdownOpen
-                        ? "opacity-100 visible scale-100"
-                        : "opacity-0 invisible scale-95"
-                        }`}
-                >
-                    <button className="w-full text-left px-4 py-2.5 text-[14px] text-red-600 hover:bg-gray-50 rounded-lg transition-colors font-medium">
-                        Log out
-                    </button>
-                </div>
+                {isDropdownOpen && (
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                    >
+                        <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-2.5 text-[14px] text-red-600 hover:bg-gray-50 rounded-lg transition-colors font-medium"
+                        >
+                            Log out
+                        </button>
+                    </div>
+                )}
             </div>
         </header>
     )

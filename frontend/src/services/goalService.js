@@ -8,14 +8,19 @@ export const goalService = {
         return res.data
     },
 
+    updateGoal: async (data, goalId, slug) => {
+        const res = await api.patch(`/workspaces/${slug}/goals/${goalId}/`, data)
+        return res.data
+    },
+
     fetchAllGoals: async (slug) => {
         const res = await api.get(`/workspaces/${slug}/goals/`)
         return res.data
     },
 
-    deleteGoal: async (goal_id, slug) => {
-        const res = await api.delete(`/workspaces/${slug}/goals/${goal_id}/`)
+    deleteGoal: async (goalId, slug) => {
+        const res = await api.delete(`/workspaces/${slug}/goals/${goalId}/`)
         return res.data
-    }
+    },
 
 }

@@ -5,7 +5,7 @@ import {
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/app/Navbar';
-import Sidebar from '../components/app/Sidebar';
+import Sidebar from "../components/app/Sidebar"
 import useWorkspace from '../hooks/workspace/useWorkspace';
 import FullPageLoader from '../components/ui/FullPageLoader';
 

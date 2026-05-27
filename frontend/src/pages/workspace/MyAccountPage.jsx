@@ -1,10 +1,26 @@
-import React from 'react';
-import { User, Mail, Lock, Shield, Bell, Camera, UserMinus, LogOut } from 'lucide-react';
-import useAuth from "../../hooks/auth/useAuth"
+import { Camera, Lock, Mail, UserMinus } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import useAuth from "../../hooks/auth/useAuth";
+import useUpdateProfile from '../../hooks/profile/useUpdateProfile';
 
 function MyAccountPage() {
 
-    const { data:currentUser } = useAuth()
+    const { data: currentUser } = useAuth()
+    const { mutate: updateProfile } = useUpdateProfile()
+
+    const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
+        defaultValues: {
+            fullName: currentUser?.fullName || "",
+        }
+    })
+
+    const handleUpdateProfile = (data) => {
+        updateProfile(data, {
+            onSuccess: (res) => {
+                reset()
+            }
+        })
+    }
 
     return (
         <div className="max-w-5xl mx-auto space-y-10 pb-20">
@@ -27,6 +43,7 @@ function MyAccountPage() {
                     </div>
 
                     <div className="p-6 space-y-6">
+
                         {/* Avatar Upload */}
                         <div className="flex items-center gap-6">
                             <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-xl font-medium shrink-0 relative group cursor-pointer overflow-hidden">
@@ -48,7 +65,7 @@ function MyAccountPage() {
                         <div className="space-y-5">
                             <div className="space-y-1.5">
                                 <label className="text-[13px] font-medium text-gray-700">Full Name</label>
-                                <input type="text" defaultValue={currentUser.fullName} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
+                                <input {...register('fullName')} type="text" defaultValue={currentUser.fullName} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-[13px] font-medium text-gray-700">Email Address</label>
@@ -62,7 +79,17 @@ function MyAccountPage() {
                     </div>
 
                     <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end">
-                        <button className="px-4 py-2 bg-gray-900 text-white rounded-lg text-[13px] font-medium hover:bg-gray-800 transition-colors shadow-sm">
+                        <button
+                            disabled={!isDirty}
+                            onClick={handleSubmit(handleUpdateProfile)}
+                            className={`
+        px-4 py-2 rounded-lg text-[13px] font-medium transition-colors shadow-sm
+        ${!isDirty
+                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                    : "bg-gray-900 text-white hover:bg-gray-800"
+                                }
+    `}
+                        >
                             Save Changes
                         </button>
                     </div>

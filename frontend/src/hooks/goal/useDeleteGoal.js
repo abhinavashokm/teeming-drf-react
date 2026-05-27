@@ -3,24 +3,17 @@ import React from 'react'
 import { goalService } from '../../services/goalService'
 import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
 import { showApiSuccess, showError } from '../../utils/toast'
+import useAppMutation from '../base/useAppMutation'
+
 
 function useDeleteGoal() {
 
     const workspaceSlug = useWorkspaceSlug()
-    const queryClient = useQueryClient()
 
-    return useMutation({
+    return useAppMutation({
         mutationFn: (goal_id) => goalService.deleteGoal(goal_id, workspaceSlug),
-        onSuccess: (res) => {
-            console.log(res)
-           showApiSuccess(res)
-           queryClient.invalidateQueries({
-            queryKey: ['goals']
-           })
-        },
-        onError: (error) => {
-            showError(error)
-        }
+
+        invalidateKeys: [['goals']]
     })
 }
 

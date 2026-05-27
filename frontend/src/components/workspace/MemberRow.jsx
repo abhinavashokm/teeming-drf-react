@@ -2,14 +2,28 @@ import { ArrowDownCircle, ArrowUpCircle, MoreHorizontal, Shield, UserMinus } fro
 import { useState } from 'react';
 import useAuth from '../../hooks/auth/useAuth';
 import { getAvatarColor } from '../../utils/styleUtils';
+import useUpdateMemberRole from '../../hooks/workspace/useUpdateMemberRole';
+import useRemoveMember from '../../hooks/workspace/useRemoveMember';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 
 function MemberRow({ member }) {
 
     const [activeDropdown, setActiveDropdown] = useState(null);
     const { data: currentUser } = useAuth()
+    const { mutate: updateRole } = useUpdateMemberRole()
+    const { mutate: removeMember } = useRemoveMember()
+    const { data: currentWorkspace } = useWorkspace()
 
     const { bg, text } = getAvatarColor(member.email)
+
+    const handleUpdateRole = (role) => {
+        updateRole({ 'role': role, memberId: member.id })
+    }
+
+    const handleRemoveMember = () => {
+        removeMember(member.id)
+    }
 
     return (
         <div key={member.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-gray-50 transition-colors group cursor-pointer last:rounded-b-[11px]">
@@ -51,7 +65,7 @@ function MemberRow({ member }) {
                 ) : (
                     <>
                         {
-                            member.role !== 'owner' &&
+                            currentWorkspace.role !== 'Member' &&  member.role !== 'owner' && member.email !== currentUser.email &&
                             <button
                                 onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === member.id ? null : member.id); }}
                                 className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
@@ -66,18 +80,18 @@ function MemberRow({ member }) {
                                 <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); }}></div>
                                 <div className="absolute right-2 top-8 w-52 bg-white border border-gray-200 rounded-xl shadow-lg py-1.5 z-50">
                                     {member.role === 'admin' && (
-                                        <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-gray-600 hover:bg-gray-50 rounded-lg mx-1 transition-colors cursor-pointer">
+                                        <div onClick={() => handleUpdateRole("member")} className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-gray-600 hover:bg-gray-50 rounded-lg mx-1 transition-colors cursor-pointer">
                                             <ArrowDownCircle className="h-4 w-4 text-gray-400" />
                                             Change to Member
                                         </div>
                                     )} {member.role === 'member' && (
-                                        <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-gray-600 hover:bg-gray-50 rounded-lg mx-1 transition-colors cursor-pointer">
+                                        <div onClick={() => handleUpdateRole("admin")} className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-gray-600 hover:bg-gray-50 rounded-lg mx-1 transition-colors cursor-pointer">
                                             <ArrowUpCircle className="h-4 w-4 text-gray-400" />
                                             Upgrade to Admin
                                         </div>
                                     )}
                                     <div className="border-t border-gray-100 my-1 pt-1 mx-1"></div>
-                                    <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-red-600 hover:bg-red-50 rounded-lg mx-1 transition-colors cursor-pointer">
+                                    <div onClick={handleRemoveMember} className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-red-600 hover:bg-red-50 rounded-lg mx-1 transition-colors cursor-pointer">
                                         <UserMinus className="h-4 w-4" />
                                         Remove from workspace
                                     </div>

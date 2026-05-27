@@ -90,6 +90,11 @@ const authService = {
     validateResetToken: async ({ token }) => {
         const res = await api.get(`/auth/validate-reset-token/?token=${token}`)
         return res.data
+    },
+
+    updateUserProfile: async (data) => {
+        const res = await api.patch(`/auth/me/`, data)
+        return res.data
     }
 }
 

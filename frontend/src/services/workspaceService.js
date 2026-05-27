@@ -20,9 +20,34 @@ export const workspaceService = {
         return res.data
     },
 
+    updateWorkspace: async (data, slug) => {
+        const res = await api.patch(`/workspaces/${slug}/`, data)
+        return res.data
+    },
+
+    deleteWorkspace: async (slug) => {
+        const res = await api.delete(`/workspaces/${slug}/`)
+        return res.data
+    },
+
     getWorkspaceHome: async (slug) => {
         const res = await api.get(`/workspaces/${slug}/home/`)
         return res.data
     },
-    
+
+    updateMemberRole: async (data, memberId, slug) => {
+        const res = await api.patch(`/workspaces/${slug}/members/${memberId}/`, data)
+        return res.data
+    },
+
+    removeMember: async (memberId, slug) => {
+        const res = await api.delete(`/workspaces/${slug}/members/${memberId}/`)
+        return res.data
+    },
+
+    leaveWorkspace: async (slug) => {
+        const res = await api.delete(`/workspaces/${slug}/members/leave/`)
+        return res.data
+    },
+
 }
