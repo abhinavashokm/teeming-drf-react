@@ -24,3 +24,14 @@ class Goal(WorkspaceScopedBaseModel):
 
     class Meta:
         db_table = "goals"
+
+
+class StarredGoal(WorkspaceScopedBaseModel):
+
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, related_name='stars')
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='starred_goals')
+
+    class Meta:
+        db_table = "starred_goals"
+        unique_together = ['goal', 'user']
+

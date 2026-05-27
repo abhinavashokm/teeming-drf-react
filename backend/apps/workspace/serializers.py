@@ -40,3 +40,10 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkspaceMember
         fields = ["id", "user_id", "full_name", "email", "role", "joined_at"]
+
+
+class WorkspaceRoleUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = WorkspaceMember
+        fields = ["role"]

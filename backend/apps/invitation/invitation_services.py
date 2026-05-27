@@ -6,10 +6,11 @@ from . import exceptions
 from django.utils import timezone
 from apps.user.models import User
 from apps.workspace import workspace_services as workspace_services
+from django.conf import settings
 
 
-def send_workspace_invitations(emails, workspace, invited_by):
-    """
+def send_workspace_invitations(emails, role, workspace, invited_by):
+    """542238 
     Invite a list of users to a workspace.
 
     Each email gets a unique token and shared expiry.
@@ -23,6 +24,7 @@ def send_workspace_invitations(emails, workspace, invited_by):
         [
             Invitation(
                 email=email,
+                role=role,
                 workspace=workspace,
                 invited_by=invited_by,
                 token=invitation_token,
@@ -35,7 +37,7 @@ def send_workspace_invitations(emails, workspace, invited_by):
     invite_link = invitationHelper.generate_invite_link(invitation_token)
 
     invitationHelper.send_invite_mail(
-        to=emails, expires_at=format_expiry_date(expires_at), invite_link=invite_link
+        to=emails, expires_at=format_expiry_date(expires_at), invite_link=invite_link, workspace=workspace.name
     )
 
 
@@ -69,5 +71,5 @@ def verify_token_and_accept_invitation(invitation_token, user):
 
     # put role as default for now
     workspace_services.add_workspace_member(
-        user=user, workspace=invitation.workspace
+        user=user, workspace=invitation.workspace, role=invitation.role
     )

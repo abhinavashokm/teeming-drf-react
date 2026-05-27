@@ -18,6 +18,8 @@ class ErrorCode:
     #invitation
     INVALID_INVITATION = "INVALID_INVITATION"
 
+    #workspace
+    WORKSPACE_MEMBER_NOT_FOUND = "WORKSPACE_MEMBER_NOT_FOUND"
 
     #goals
     GOAL_NOT_FOUND = "GOAL_NOT_FOUND"

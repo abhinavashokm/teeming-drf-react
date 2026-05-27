@@ -1,4 +1,5 @@
 from .models import WorkspaceMember, Workspace
+from . import exceptions
 
 
 def fetch_user_workspace_list(user):
@@ -29,8 +30,8 @@ def fetch_user_workspace_list(user):
     return membership_res, last_workspace_res
 
 
-def add_workspace_member(user, workspace):
-    WorkspaceMember.objects.create(user=user, workspace=workspace)
+def add_workspace_member(user, workspace, role):
+    WorkspaceMember.objects.create(user=user, workspace=workspace, role=role)
 
 
 def fetch_workspace_members(workspace):
@@ -51,3 +52,39 @@ def delete_workspace(workspace):
     """Delete workspace"""
 
     workspace.soft_delete()
+
+
+def update_role(workspace, member_id, role):
+    """change workspace role of a member"""
+
+    member = WorkspaceMember.objects.filter(workspace=workspace, id=member_id).first()
+
+    if not member:
+        raise exceptions.WorkspaceMemberNotFound()
+
+    member.role = role
+    member.save()
+
+    return member
+
+
+def remove_member(workspace, member_id):
+    """remove a member from workspace"""
+
+    member = WorkspaceMember.objects.filter(workspace=workspace, id=member_id).first()
+
+    if not member:
+        raise exceptions.WorkspaceMemberNotFound()
+    
+    member.delete()
+
+
+def leave_workspace(user, workspace):
+    """remove current user from workspace member"""
+
+    member = WorkspaceMember.objects.filter(user=user, workspace=workspace).first()
+
+    if not member:
+        raise exceptions.WorkspaceMemberNotFound()
+    
+    member.delete()

@@ -16,8 +16,11 @@ class GoalListCreateView(WorkspacePermissionBaseView):
     permission_map = {"GET": [IsWorkspaceMember], "POST": [IsWorkspaceAdmin]}
 
     def post(self, request, **kwargs):
+
+        print(request.data)
+
         serializer = GoalWriteSerializer(
-            data=request.data, context={"request": request}
+            data=request.data, context={"request": request.data}, partial=True
         )
         serializer.is_valid(raise_exception=True)
 
@@ -71,4 +74,15 @@ class GoalDetailView(WorkspacePermissionBaseView):
             data=GoalReadSerializer(updated_goal).data,
             message="Goal updated"
 
+        )
+    
+    def delete(self, request, **kwargs):
+
+        goal_services.delete_goal(
+            goal_id=kwargs['goal_id']
+        )
+
+        return success_response(
+            message="Goal deleted",
+            status_code=status.HTTP_200_OK
         )

@@ -12,12 +12,13 @@ class SendWorkspaceInvitationView(APIView):
         serializer.is_valid(raise_exception=True)
 
         invitation_services.send_workspace_invitations(
-            serializer.validated_data["emails"],
-            request.workspace,
+            emails=serializer.validated_data["emails"],
+            role=serializer.validated_data["role"],
+            workspace=request.workspace,
             invited_by=request.user,
         )
 
-        return success_response(message="good", status_code=status.HTTP_200_OK)
+        return success_response(message="Invitations sent", status_code=status.HTTP_200_OK)
 
 
 class ResolveInvitationTokenView(APIView):
@@ -26,8 +27,10 @@ class ResolveInvitationTokenView(APIView):
     def get(self, request, token):
 
         invitation_record = invitation_services.resolve_invitation_token(token)
-        is_account_exists = invitation_services.check_account_exists(invitation_record.email)
-
+        is_account_exists = invitation_services.check_account_exists(
+            invitation_record.email
+        )
+        
 
         workspace = invitation_record.workspace
         invited_user = invitation_record.invited_by
@@ -43,20 +46,16 @@ class ResolveInvitationTokenView(APIView):
                 "invited_email": invitation_record.email,
                 "account_exists": is_account_exists,
                 "invited_by": invited_user.full_name,
-                "role": "Member",
+                "role": invitation_record.get_role_display(),
                 "is_authenticated": request.user.is_authenticated,
             },
         )
-    
+
 
 class AcceptInvitationView(APIView):
 
     def post(self, request, token):
-        
+
         invitation_services.verify_token_and_accept_invitation(token, request.user)
 
-        return success_response(
-            message="good",
-            status_code=status.HTTP_201_CREATED
-        )
-        
+        return success_response(message="Invitation accepted", status_code=status.HTTP_201_CREATED)

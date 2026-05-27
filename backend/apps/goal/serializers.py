@@ -13,4 +13,4 @@ class GoalReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Goal
-        fields = ["name", "description", "status", "target_date"]
+        fields = ["id", "name", "description", "status", "target_date"]

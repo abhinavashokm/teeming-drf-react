@@ -228,7 +228,7 @@ REST_AUTH = {
     "USE_JWT": True,
 }
 
-SOCIALACCOUNT_ADAPTER = "apps.users.adapters.CustomSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.user.adapters.CustomSocialAccountAdapter"
 
 # disable signup redirect — handle via API only
 SOCIALACCOUNT_AUTO_SIGNUP = True  # auto create user, no signup page

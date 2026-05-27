@@ -7,6 +7,7 @@ from .serializers import (
     WorkspaceRetrieveSerializer,
     WorkspaceMemberSerializer,
     WorkspaceUpdateSerializer,
+    WorkspaceRoleUpdateSerializer,
 )
 from .models import WorkspaceMember
 from rest_framework.permissions import IsAuthenticated
@@ -66,7 +67,9 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
 
     def patch(self, request, **kwargs):
 
-        serializer = WorkspaceUpdateSerializer(data=request.data, partial=True)
+        serializer = WorkspaceUpdateSerializer(
+            request.workspace, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
         workspace_services.update_workspace(
@@ -85,7 +88,7 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
         workspace_services.delete_workspace(workspace=request.workspace)
 
         return success_response(
-            message="Workspace deleted", status_code=status.HTTP_204_NO_CONTENT
+            message="Workspace deleted", status_code=status.HTTP_200_OK
         )
 
 
@@ -146,4 +149,55 @@ class WorkspaceMemberListView(APIView):
 
         return success_response(
             data={"members": serializer.data}, status_code=status.HTTP_200_OK
+        )
+
+
+class WorkspaceMemberDetailView(WorkspacePermissionBaseView):
+    permission_map = {"PATCH": [IsWorkspaceAdmin], "DELETE": [IsWorkspaceAdmin]}
+
+    def patch(self, request, **kwargs):
+        """change member role"""
+
+        serializer = WorkspaceRoleUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        workspace_services.update_role(
+            workspace=request.workspace,
+            member_id=kwargs["member_id"],
+            role=serializer.validated_data['role'],
+        )
+
+        return success_response(
+            message="Role Updated",
+            data=serializer.validated_data,
+            status_code=status.HTTP_200_OK,
+        )
+    
+    def delete(self, request, **kwargs):
+        """remove member from workspace"""
+        
+        workspace_services.remove_member(
+            workspace=request.workspace,
+            member_id=kwargs['member_id'],
+        )
+
+        return success_response(
+            message="removed user from workspace",
+            status_code=status.HTTP_200_OK,
+        )
+
+
+class LeaveWorkspaceView(MemberBaseView):
+
+    def delete(self, request, **kwargs):
+        """remove current user's workspace membership"""
+
+        workspace_services.leave_workspace(
+            user=request.user,
+            workspace=request.workspace,
+        )
+
+        return success_response(
+            message="you left from workspace",
+            status_code=status.HTTP_200_OK
         )

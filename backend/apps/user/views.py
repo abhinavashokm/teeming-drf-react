@@ -178,7 +178,7 @@ class MeView(APIView):
         user_services.update_user(user=request.user, data=serializer.data)
 
         return success_response(
-            message="User profile updated",
+            message="Profile updated",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
         )

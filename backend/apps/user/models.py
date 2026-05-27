@@ -28,7 +28,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class User(AbstractUser, BaseAbstractModel):
+class User(BaseAbstractModel, AbstractUser):
 
     class PlanChoices(models.TextChoices):
         FREE = "FREE", "Free"

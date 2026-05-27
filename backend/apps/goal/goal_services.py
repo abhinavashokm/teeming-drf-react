@@ -27,3 +27,18 @@ def update_goal(goal_id, data):
     
     goal.save()
     return goal
+
+
+def delete_goal(goal_id):
+    "delete goal using id"
+
+    print(goal_id)
+    goal = Goal.objects.filter(id=goal_id).first()
+
+    if not goal:
+        raise exceptions.GoalNotFound()
+    
+    print(goal)
+
+    goal.soft_delete()
+
