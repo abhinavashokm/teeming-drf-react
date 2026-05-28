@@ -1,13 +1,16 @@
+import { LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { ROUTE_PATHS } from "../../constants/routePaths";
 import useAuth from "../../hooks/auth/useAuth";
 import useLogout from "../../hooks/auth/useLogout";
 import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
-import { toSlug } from "../../utils/slugUtils";
-import { LayoutGrid } from "lucide-react";
 import useMyWorkspaces from "../../hooks/workspace/useMyWorkspaces";
-import { ROUTE_PATHS } from "../../constants/routePaths";
+import { toSlug } from "../../utils/slugUtils";
+import FormField from "../../components/ui/form/FormField";
+import InputField from "../../components/ui/form/InputField";
+import PrefixInput from "../../components/ui/form/PrefixInput";
 
 
 function CreateWorkspacePage() {
@@ -79,7 +82,10 @@ function CreateWorkspacePage() {
                 <div className="flex flex-col gap-5">
 
                     {/* Workspace Name */}
-                    <div className="flex flex-col gap-1.5">
+                    <FormField label="Workspace Name" >
+                        <InputField size="lg" {...register('name')} onChange={handleNameChange} placeholder="e.g. Acme Corp" />
+                    </FormField>
+                    {/* <div className="flex flex-col gap-1.5">
 
                         <label className="text-teeming-text-dark font-semibold text-[14px]">
                             Workspace Name
@@ -112,10 +118,16 @@ function CreateWorkspacePage() {
                 "
                         />
 
-                    </div>
+                    </div> */}
+
+                    <FormField label="Workspace URL" >
+                        <PrefixInput prefix="app.com/">
+                            <InputField size="lg" {...register('slug')} className="border-0" focusRing={false}/>
+                        </PrefixInput>
+                    </FormField>
 
                     {/* Workspace URL */}
-                    <div className="flex flex-col gap-1.5">
+                    {/* <div className="flex flex-col gap-1.5">
 
                         <label className="text-teeming-text-dark font-semibold text-[14px]">
                             Workspace URL
@@ -178,7 +190,7 @@ function CreateWorkspacePage() {
 
                         </div>
 
-                    </div>
+                    </div> */}
 
                     {/* Submit */}
                     <button

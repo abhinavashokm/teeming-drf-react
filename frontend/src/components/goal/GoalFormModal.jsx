@@ -5,6 +5,8 @@ import { useEffect } from 'react';
 import useUpdateGoal from '../../hooks/goal/useUpdateGoal';
 import AppButton from '../ui/buttons/AppButton';
 import CancelButton from '../ui/buttons/CancelButton';
+import FormField from '../ui/form/FormField';
+import InputField from '../ui/form/InputField';
 
 export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
 
@@ -94,39 +96,25 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
 
                 {/* Content */}
                 <div className="p-6 space-y-5">
+
                     {/* Goal Name */}
-                    <div>
-                        <label className="text-[13px] font-medium text-gray-900 mb-1.5 block">Goal Name</label>
-                        <input
-                            type="text"
-                            placeholder="e.g. Launch V2 Platform"
-                            className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 focus:outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20 transition-colors shadow-sm placeholder:text-gray-400"
-                            {...register('name')}
-                            autoFocus
-                        />
-                    </div>
+                    <FormField label="Goal Name" >
+                        <InputField size="md" {...register('name')} placeholder="e.g. Launch V2" />
+                    </FormField>
 
                     {/* Description */}
-                    <div>
-                        <label className="text-[13px] font-medium text-gray-900 mb-1.5 flex items-center justify-between">
-                            Description
-                            <span className="text-gray-400 font-normal text-[12px]">Optional</span>
-                        </label>
+                    <FormField label="Description" optional >
                         <textarea
                             placeholder="Add more details about this goal..."
                             rows={3}
                             className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 focus:outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20 transition-colors shadow-sm placeholder:text-gray-400 resize-none"
                             {...register('description')}
                         />
-                    </div>
+                    </FormField>
 
                     {/* Target Date and Status (Row) */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-[13px] font-medium text-gray-900 mb-1.5 flex items-center justify-between">
-                                Target Date
-                                <span className="text-gray-400 font-normal text-[12px]">Optional</span>
-                            </label>
+                        <FormField label={"Target Date"} optional >
                             <div className="relative">
                                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                 <input
@@ -135,9 +123,9 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
                                     className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 cursor-pointer focus:outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20 transition-colors shadow-sm"
                                 />
                             </div>
-                        </div>
-                        <div>
-                            <label className="text-[13px] font-medium text-gray-900 mb-1.5 block">Status</label>
+                        </FormField>
+
+                        <FormField label={"Status"} >
                             <select {...register("status")} className="w-full px-3 py-2.5 text-[13px] border border-gray-200 rounded-[10px] bg-white text-gray-900 cursor-pointer outline-none hover:bg-gray-50 transition-colors shadow-sm focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20">
                                 <option value="draft">Draft</option>
                                 <option value="active">Active</option>
@@ -145,7 +133,7 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
                                 <option value="completed">Completed</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>
-                        </div>
+                        </FormField>
                     </div>
                 </div>
 

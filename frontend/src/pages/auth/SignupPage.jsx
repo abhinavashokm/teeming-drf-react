@@ -6,7 +6,7 @@ import AuthFormError from '../../components/auth/AuthFormError'
 import AuthInput from '../../components/auth/AuthInput'
 import AuthLogo from '../../components/auth/AuthLogo'
 import GoogleLogin from '../../components/auth/GoogleLogin'
-import PasswordInput from '../../components/auth/PasswordInput'
+import PasswordInput from '../../components/ui/form/PasswordInput.jsx'
 import FullPageLoader from '../../components/ui/FullPageLoader'
 import { useSignup } from '../../hooks/auth/useSignup'
 import useInvitationToken from '../../hooks/invite/useInvitationToken'
@@ -14,12 +14,14 @@ import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
 import { getErrorMsg } from '../../utils/apiParser.js'
 import { validations } from '../../utils/validations'
 import { ROUTE_PATHS } from '../../constants/routePaths.js'
+import FormField from '../../components/ui/form/FormField.jsx'
+import InputField from '../../components/ui/form/InputField.jsx'
 
 
 function SignupPage() {
 
-    const { data: invitationDetails, isPending:isResolveTokenPending } = useResolveInvitation()
-    
+    const { data: invitationDetails, isPending: isResolveTokenPending } = useResolveInvitation()
+
     const invitationToken = useInvitationToken()
 
     const testMode = true
@@ -34,10 +36,10 @@ function SignupPage() {
     const { mutate: signup, isPending, error: signupError, isError } = useSignup()
 
     const handleSignup = async (data) => {
-            signup(data)
+        signup(data)
     }
 
-    if(!!invitationToken && isResolveTokenPending) return <FullPageLoader />
+    if (!!invitationToken && isResolveTokenPending) return <FullPageLoader />
 
     return (
         <>
@@ -86,13 +88,25 @@ function SignupPage() {
 
 
                             {/* Full Name Input */}
-                            <AuthInput type="text" placeholder={"Full name"} autoComplete={'name'}
-                                {...register('fullName', validations.fullName)} error={errors.fullName} />
+                            {/* <AuthInput type="text" placeholder={"Full name"} autoComplete={'name'}
+                                {...register('fullName', validations.fullName)} error={errors.fullName} /> */}
+
+                            <FormField error={errors.fullName} >
+                                <InputField size="lg" placeholder={"Full name"} autoComplete={'name'}
+                                    {...register('fullName', validations.fullName)}
+                                />
+                            </FormField>
 
                             {/* Email Input */}
-                            <AuthInput value={invitationDetails?.invitedEmail} readOnly={!!invitationDetails} type={"email"} placeholder={"Work email"} autoComplete={'email'}
+                            <FormField error={errors.email} >
+                                <InputField size="lg" value={invitationDetails?.invitedEmail} readOnly={!!invitationDetails}
+                                    type={"email"} placeholder={"Work email"} autoComplete={'email'}
+                                    {...register('email', validations.email)}
+                                />
+                            </FormField>
+                            {/* <AuthInput value={invitationDetails?.invitedEmail} readOnly={!!invitationDetails} type={"email"} placeholder={"Work email"} autoComplete={'email'}
                                 {...register('email', validations.email)} error={errors.email}
-                            />
+                            /> */}
 
                             {/* Password Input */}
                             <PasswordInput placeholder={"Password"} autoComplete={'new-password'}

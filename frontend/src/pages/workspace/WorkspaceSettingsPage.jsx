@@ -4,6 +4,8 @@ import useWorkspace from '../../hooks/workspace/useWorkspace';
 import useUpdateWorkspace from '../../hooks/workspace/useUpdateWorkspace';
 import { useForm } from 'react-hook-form';
 import useDeleteWorkspace from '../../hooks/workspace/useDeleteWorkspace';
+import FormField from '../../components/ui/form/FormField';
+import InputField from '../../components/ui/form/InputField';
 
 
 function WorkspaceSettingsPage() {
@@ -85,10 +87,11 @@ function WorkspaceSettingsPage() {
                     </div>
 
                     <div className="space-y-5">
-                        <div className="space-y-1.5">
-                            <label className="text-[13px] font-medium text-gray-700">Workspace Name</label>
-                            <input type="text"  {...register('name')} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors" />
-                        </div>
+
+                        <FormField label={"Workspace Name"} >
+                            <InputField {...register('name')} />
+                        </FormField>
+
                         <div className="space-y-3">
                             <div className="space-y-1.5">
                                 <label className="text-[13px] font-medium text-gray-700">Workspace URL</label>
@@ -126,6 +129,7 @@ function WorkspaceSettingsPage() {
                                 </div>
                             )}
                         </div>
+                        
                     </div>
                 </div>
 

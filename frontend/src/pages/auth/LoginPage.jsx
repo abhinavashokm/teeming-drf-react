@@ -7,7 +7,7 @@ import AuthFormError from '../../components/auth/AuthFormError'
 import AuthInput from '../../components/auth/AuthInput'
 import AuthLogo from '../../components/auth/AuthLogo'
 import GoogleLogin from '../../components/auth/GoogleLogin'
-import PasswordInput from '../../components/auth/PasswordInput'
+import PasswordInput from '../../components/ui/form/PasswordInput.jsx'
 import { useLogin } from '../../hooks/auth/useLogin'
 import { getErrorMsg } from '../../utils/apiParser.js'
 import { showSuccess } from '../../utils/toast'
@@ -16,6 +16,8 @@ import useInviteToken from '../../hooks/invite/useInvitationToken'
 import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
 import FullPageLoader from '../../components/ui/FullPageLoader'
 import { ROUTE_PATHS } from '../../constants/routePaths.js'
+import FormField from '../../components/ui/form/FormField.jsx'
+import InputField from '../../components/ui/form/InputField.jsx'
 
 
 function LoginPage() {
@@ -96,8 +98,11 @@ function LoginPage() {
                             )}
 
                             {/* Email Input */}
-                            <AuthInput value={invitationDetails?.invitedEmail} readOnly={!!invitationDetails} type={"email"} placeholder={"Work email"} autoComplete={'email'}
-                                {...register('email', validations.email)} error={errors.email} />
+                            <FormField error={errors.email} >
+                                <InputField size='lg' value={invitationDetails?.invitedEmail} readOnly={!!invitationDetails}
+                                    type={"email"} placeholder={"Work email"} autoComplete={'email'}
+                                    {...register('email', validations.email)} error={errors.email} />
+                            </FormField>
 
 
                             {/* Password Input */}

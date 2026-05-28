@@ -1,7 +1,7 @@
-import InputField from "../ui/InputField";
+import InputField from "./InputField";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import InputFieldError from "../ui/InputFieldError";
+import InputFieldError from "./InputFieldError";
 
 
 function PasswordInput({ error, ...props }) {
@@ -11,7 +11,7 @@ function PasswordInput({ error, ...props }) {
         <div className="w-full">
             
             <div className="relative">
-                <InputField type={showPassword ? "text" : "password"} {...props} />
+                <InputField size="lg" type={showPassword ? "text" : "password"} {...props} />
 
                 <button
                     type="button"
