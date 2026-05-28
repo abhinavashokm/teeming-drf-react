@@ -175,7 +175,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
           <div className="space-y-0.5">
 
             <Link to={'manage-team'} onClick={() => setCurrentView('team')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
-              <Users clcanManageSettingsassName={`h-4 w-4 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
+              <Users className={`h-4 w-4 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
               {currentWorkspace.role !== "Member" ? "Manage Team" : "View Team"}
             </Link>
 

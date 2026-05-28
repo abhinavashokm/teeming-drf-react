@@ -9,6 +9,11 @@ export const inviteService = {
         return res.data
     },
 
+    fetchPendingInvitations: async (slug) => {
+        const res = await api.get(`/workspaces/${slug}/invitations/?status=pending`)
+        return res.data
+    },
+
     //Resolve an invite token and return invitation details.
     resolveInvite: async (token) => {
         const res = await api.get(`/invitations/${token}/`)
@@ -18,5 +23,6 @@ export const inviteService = {
     acceptInvitation: async (token) => {
         const res = await api.post(`/invitations/${token}/accept/`)
         return res.data
-    }
+    },
+
 }

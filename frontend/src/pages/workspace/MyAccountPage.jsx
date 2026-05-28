@@ -5,11 +5,12 @@ import useUpdateProfile from '../../hooks/profile/useUpdateProfile';
 import { useEffect } from 'react';
 import FormField from '../../components/ui/form/FormField';
 import InputField from '../../components/ui/form/InputField';
+import AppButton from '../../components/ui/buttons/AppButton';
 
 function MyAccountPage() {
 
     const { data: currentUser } = useAuth()
-    const { mutate: updateProfile } = useUpdateProfile()
+    const { mutate: updateProfile, isPending } = useUpdateProfile()
 
     const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
         defaultValues: {
@@ -20,7 +21,9 @@ function MyAccountPage() {
     useEffect(() => {
 
         if (currentUser) {
-            reset()
+            reset({
+                'fullName': currentUser?.fullName
+            })
         }
 
     }, [currentUser, reset])
@@ -76,7 +79,7 @@ function MyAccountPage() {
                         <div className="space-y-5">
 
                             <FormField label="Full Name" >
-                                <InputField  size="md" {...register('fullName')} />
+                                <InputField size="md" {...register('fullName')} />
                             </FormField>
 
                             <div className="space-y-1.5">
@@ -91,19 +94,16 @@ function MyAccountPage() {
                     </div>
 
                     <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end">
-                        <button
+
+                        <AppButton
+                            variant="dark"
                             disabled={!isDirty}
+                            loading={isPending}
                             onClick={handleSubmit(handleUpdateProfile)}
-                            className={`
-        px-4 py-2 rounded-lg text-[13px] font-medium transition-colors shadow-sm
-        ${!isDirty
-                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                    : "bg-gray-900 text-white hover:bg-gray-800"
-                                }
-    `}
                         >
-                            Save Changes
-                        </button>
+                            {isPending ? "Saving..." : "Save Changes"}
+                        </AppButton>
+
                     </div>
                 </section>
 

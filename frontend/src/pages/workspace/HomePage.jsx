@@ -15,6 +15,7 @@ import { useCan } from '../../hooks/permissions/useCan';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import useWelcomeBanner from '../../hooks/invite/useWelcomeBanner';
 import useAuth from '../../hooks/auth/useAuth';
+import AppButton from '../../components/ui/buttons/AppButton';
 
 
 function HomePage() {
@@ -77,10 +78,11 @@ function HomePage() {
 
             {
               canManageGoals &&
-              <button onClick={() => setIsGoalFormModalOpen(true)} className="text-[13px] font-medium text-white bg-[#1D9E75] hover:bg-[#15825f] transition-colors flex items-center gap-1 px-4 py-1.5 rounded-[20px]">
+
+              <AppButton onClick={() => setIsGoalFormModalOpen(true)} >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 New Goal
-              </button>
+              </AppButton>
             }
 
 

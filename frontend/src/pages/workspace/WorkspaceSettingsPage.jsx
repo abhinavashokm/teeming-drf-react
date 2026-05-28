@@ -6,12 +6,13 @@ import { useForm } from 'react-hook-form';
 import useDeleteWorkspace from '../../hooks/workspace/useDeleteWorkspace';
 import FormField from '../../components/ui/form/FormField';
 import InputField from '../../components/ui/form/InputField';
+import AppButton from '../../components/ui/buttons/AppButton';
 
 
 function WorkspaceSettingsPage() {
 
     const { data: currentWorkspace } = useWorkspace()
-    const { mutate: updateWorkspace } = useUpdateWorkspace()
+    const { mutate: updateWorkspace, isPending } = useUpdateWorkspace()
     const { mutate: deleteWorkspace } = useDeleteWorkspace()
 
     const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
@@ -135,19 +136,14 @@ function WorkspaceSettingsPage() {
 
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end">
 
-                    <button
-                        disabled={!isDirty}
-                        onClick={handleSubmit(handleUpdateWorkspace)}
-                        className={`
-                                px-4 py-2 rounded-lg text-[13px] font-medium transition-colors shadow-sm
-                                ${!isDirty
-                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                : "bg-gray-900 text-white hover:bg-gray-800"
-                            }
-                                `}
+                    <AppButton
+                    variant="dark" 
+                    disabled={!isDirty} 
+                    loading={isPending} 
+                    onClick={handleSubmit(handleUpdateWorkspace)}
                     >
-                        Save Changes
-                    </button>
+                        {isPending ? "Saving..." : "Save Changes"}
+                    </AppButton>
 
                 </div>
             </section>

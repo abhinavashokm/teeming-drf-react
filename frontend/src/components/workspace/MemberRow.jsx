@@ -2,11 +2,12 @@ import { ArrowDownCircle, ArrowUpCircle, MoreHorizontal, Shield, UserMinus } fro
 import { useState } from 'react';
 import useAuth from '../../hooks/auth/useAuth';
 import { getAvatarColor } from '../../utils/styleUtils';
-import useUpdateMemberRole from '../../hooks/workspace/useUpdateMemberRole';
-import useRemoveMember from '../../hooks/workspace/useRemoveMember';
+import useUpdateMemberRole from '../../hooks/team/useUpdateMemberRole';
+import useRemoveMember from '../../hooks/team/useRemoveMember';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { useCan } from '../../hooks/permissions/useCan';
 import { PERMISSIONS } from '../../constants/permissions';
+import RoleBadge from '../team/RoleBadge';
 
 
 function MemberRow({ member }) {
@@ -23,6 +24,7 @@ function MemberRow({ member }) {
 
     const handleUpdateRole = (role) => {
         updateRole({ 'role': role, memberId: member.id })
+        setActiveDropdown(false)
     }
 
     const handleRemoveMember = () => {
@@ -46,17 +48,14 @@ function MemberRow({ member }) {
                 </div>
             </div>
 
+
             <div className="col-span-3 sm:col-span-3">
-                {member.role === 'owner' || member.role === 'admin' ? (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gray-50 text-gray-700 text-[12px] font-medium border border-gray-200">
-                        <Shield className="h-3 w-3 text-gray-400" /> {member.role}
-                    </span>
-                ) : (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-gray-600 text-[12px]">
-                        {member.role}
-                    </span>
-                )}
+
+                <RoleBadge role={member.role} />
+
             </div>
+
+
 
             <div className="col-span-3 sm:col-span-3 hidden sm:flex items-center gap-2">
                 <span className={`w-1.5 h-1.5 rounded-full ${member.status === 'Online now' ? 'bg-teeming-green' : 'bg-gray-300'}`}></span>
@@ -69,7 +68,7 @@ function MemberRow({ member }) {
                 ) : (
                     <>
                         {
-                            canManageTeam &&  member.role !== 'owner' && member.email !== currentUser.email &&
+                            canManageTeam && member.role !== 'owner' && member.email !== currentUser.email &&
                             <button
                                 onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === member.id ? null : member.id); }}
                                 className="p-1 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
@@ -105,6 +104,7 @@ function MemberRow({ member }) {
                     </>
                 )}
             </div>
+
         </div>
     )
 }
