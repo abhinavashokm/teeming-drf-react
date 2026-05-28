@@ -19,14 +19,14 @@ function WorkspaceSettingsPage() {
         }
     })
 
-    // useEffect(() => {
-    //     if (currentWorkspace) {
-    //         reset({
-    //             name: currentWorkspace.name,
-    //             slug: currentWorkspace.slug,
-    //         })
-    //     }
-    // }, [currentWorkspace, reset])
+    useEffect(() => {
+        if (currentWorkspace) {
+            reset({
+                name: currentWorkspace.name,
+                slug: currentWorkspace.slug,
+            })
+        }
+    }, [currentWorkspace, reset])
 
     const [isSlugUnlocked, setIsSlugUnlocked] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

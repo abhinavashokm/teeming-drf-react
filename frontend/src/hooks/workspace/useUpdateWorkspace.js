@@ -1,4 +1,5 @@
 import { workspaceService } from '../../services/workspaceService'
+import { buildWorkspacePath } from '../../utils/routeUtils'
 import useAppMutation from '../base/useAppMutation'
 import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
 
@@ -9,7 +10,8 @@ function useUpdateWorkspace() {
 
     return useAppMutation({
         mutationFn: (data) => workspaceService.updateWorkspace(workspaceSlug, data),
-        invalidateKeys: [['workspace', workspaceSlug]]
+        invalidateKeys: [['workspace', workspaceSlug]],
+        navigateAfterSuccess: buildWorkspacePath(workspaceSlug)
     })
 }
 

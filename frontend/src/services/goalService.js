@@ -23,13 +23,13 @@ export const goalService = {
         return res.data
     },
 
-    starGoal: async (goalId, slug) => {
+    starGoal: async (slug, goalId) => {
         console.log("bro")
         const res = await api.post(`/workspaces/${slug}/goals/${goalId}/star/`)
         return res.data
     },
 
-    unStarGoal: async (goalId, slug) => {
+    unStarGoal: async (slug, goalId) => {
         console.log("unbro")
         const res = await api.delete(`/workspaces/${slug}/goals/${goalId}/star/`)
         return res.data

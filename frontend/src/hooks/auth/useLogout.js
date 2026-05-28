@@ -1,9 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
-import { clearAuth } from "../../store/slices/authSlice";
-import authService from "../../services/authService";
-import { showApiError, showSuccess } from "../../utils/toast";
 import { useNavigate } from "react-router-dom";
+import { ROUTE_PATHS } from "../../constants/routePaths";
+import authService from "../../services/authService";
+import { clearAuth } from "../../store/slices/authSlice";
+import useAppMutation from "../base/useAppMutation";
 
 
 export default function useLogout() {
@@ -11,14 +12,14 @@ export default function useLogout() {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
 
-    return useMutation({
-        mutationFn: () => authService.logout(),
+    return useAppMutation({
+        mutationFn: authService.logout,
         onSuccess: () => {
             dispatch(clearAuth())
             queryClient.clear() // removes ALL cached queries
-            navigate('/auth/login')
-            showSuccess("You have been logged out.")
+            navigate(ROUTE_PATHS.LOGIN)
         },
-        onError: (error) => showApiError(error)
+        successMsg: "You have been logged out.",
     })
 }
+

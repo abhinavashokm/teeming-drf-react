@@ -1,19 +1,17 @@
-import { useDispatch } from "react-redux";
-import { workspaceService } from "../../services/workspaceService";
-import { showApiError } from "../../utils/toast";
 import { useNavigate } from "react-router-dom";
+import { workspaceService } from "../../services/workspaceService";
 import { getWorkspaceRedirectPath } from "../../utils/routeUtils";
-import { useMutation } from "@tanstack/react-query";
+import useAppMutation from "../base/useAppMutation";
 
 
-export default function useWorkspaceRedirect() {
+export default function useWorkspaceRedirect(){
     const navigate = useNavigate()
 
-    return useMutation({
-        'mutationFn': () => workspaceService.fetchMyWorkspaces(),
+    return useAppMutation({
+        mutationFn: workspaceService.fetchMyWorkspaces,
         onSuccess: (res) => {
-            navigate(getWorkspaceRedirectPath(res.data))},
-        onError: (error) => showApiError(error)
+            navigate(getWorkspaceRedirectPath(res.data))
+        },
+        apiSuccessToast: false,
     })
-    
 }

@@ -10,12 +10,13 @@ import workspaceRoutes from "./workspaceRoutes";
 import SelectWorkspacePage from "../pages/workspace/SelectWorkspacePage";
 import ErrorPage from "../pages/error/ErrorPage";
 import { errorCodes } from "../constants/errorCodes";
+import { ROUTE_PATHS } from "../constants/routePaths";
 
 const publicRoutes = {
     element: <PublicRoute />,
     children: [
         { path: "auth", ...authRoutes },
-        { path: "/", element: <Navigate to={'/auth/login'} /> }
+        { path: "/", element: <Navigate to={ROUTE_PATHS.LOGIN} /> }
     ]
 }
 

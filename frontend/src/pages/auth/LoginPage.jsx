@@ -15,6 +15,7 @@ import { validations } from '../../utils/validations'
 import useInviteToken from '../../hooks/invite/useInvitationToken'
 import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
 import FullPageLoader from '../../components/ui/FullPageLoader'
+import { ROUTE_PATHS } from '../../constants/routePaths.js'
 
 
 function LoginPage() {
@@ -73,7 +74,7 @@ function LoginPage() {
                         {/* Subtitle */}
                         <div className="text-[14px] leading-relaxed text-teeming-gray text-center px-4">
                             Don't have an account?{" "}
-                            <Link to={'/auth/signup'} className="text-teeming-green font-medium hover:underline">
+                            <Link to={ROUTE_PATHS.SIGNUP} className="text-teeming-green font-medium hover:underline">
                                 Sign up
                             </Link>
                         </div>

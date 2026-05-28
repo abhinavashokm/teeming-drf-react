@@ -1,31 +1,20 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
-import { workspaceService } from '../../services/workspaceService'
-import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
-import { showApiSuccess, showError } from '../../utils/toast'
 import { useNavigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '../../constants/routePaths'
+import { workspaceService } from '../../services/workspaceService'
+import useAppMutation from '../base/useAppMutation'
+import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
+
 
 function useDeleteWorkspace() {
 
     const workspaceSlug = useWorkspaceSlug()
-    const queryClient = useQueryClient()
     const navigate = useNavigate()
 
-    return useMutation({
-        mutationFn: () => workspaceService.deleteWorkspace(workspaceSlug),
-        onSuccess: async (res) => {
-
-            await showApiSuccess(res)
-            navigate('/auth/login/')
-
-            queryClient.invalidateQueries({
-                queryKey: ['workspace', workspaceSlug]
-            })
-
-        },
-        onError: (error) => {
-            showError(error)
-        }
+    return useAppMutation({
+        mutationFn: workspaceService.deleteWorkspace,
+        passWorkspaceSlug: true,
+        invalidateKeys: [['workspace', workspaceSlug]],
+        onSuccess: async (res) => navigate(ROUTE_PATHS.LOGIN),
     })
 }
 

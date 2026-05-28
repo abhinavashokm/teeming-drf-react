@@ -17,6 +17,7 @@ import useAuth from '../../hooks/auth/useAuth';
 import { errorCodes } from '../../constants/errorCodes';
 import useMyWorkspaces from '../../hooks/workspace/useMyWorkspaces';
 import { useNavigate } from 'react-router-dom';
+import { ROUTE_PATHS } from '../../constants/routePaths';
 
 export default function ErrorPage({
   type = errorCodes.GENERAL,
@@ -88,9 +89,9 @@ export default function ErrorPage({
 
   const handlePrimaryAction = () => {
     if (workspaceNotFound) {
-      navigate('/workspaces')
+      navigate(ROUTE_PATHS.WORKSPACES)
     }else if(pageNotFound) {
-      navigate('/auth/login')
+      navigate(ROUTE_PATHS.LOGIN)
     }else {
       onPrimaryAction()
     }
@@ -98,7 +99,7 @@ export default function ErrorPage({
 
   const handleSecondaryAction = () => {
     if (workspaceNotFound) {
-      navigate('/create-workspace')
+      navigate(ROUTE_PATHS.CREATE_WORKSPACE)
     }else {
       onSecondaryAction()
     }

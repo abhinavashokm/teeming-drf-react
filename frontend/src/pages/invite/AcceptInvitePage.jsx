@@ -6,6 +6,7 @@ import useLogout from "../../hooks/auth/useLogout";
 import useAcceptInvitation from "../../hooks/invite/useAcceptInvitation";
 import useInvitationToken from "../../hooks/invite/useInvitationToken";
 import useResolveInvitation from "../../hooks/invite/useResolveInvitation";
+import { ROUTE_PATHS } from "../../constants/routePaths";
 
 
 const AcceptInvitationPage = () => {
@@ -74,8 +75,8 @@ const AcceptInvitationPage = () => {
     // not logged in at all
     if (!currentUser) {
       navigate(invitationDetails.accountExists
-        ? `/auth/login?token=${token}`
-        : `/auth/signup?token=${token}`
+        ? `${ROUTE_PATHS.LOGIN}?token=${token}`
+        : `${ROUTE_PATHS.SIGNUP}?token=${token}`
       )
       return
     }
@@ -84,8 +85,8 @@ const AcceptInvitationPage = () => {
     logout(undefined, {
       onSuccess: () => {
         navigate(invitationDetails.accountExists
-          ? `/auth/login?token=${token}`
-          : `/auth/signup?token=${token}`
+          ? `${ROUTE_PATHS.LOGIN}?token=${token}`
+          : `${ROUTE_PATHS.SIGNUP}?token=${token}`
         )
       }
     })

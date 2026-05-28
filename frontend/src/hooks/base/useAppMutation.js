@@ -1,9 +1,9 @@
 
+import.meta.env.DEV // boolean, true in dev automatically
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { showApiError, showApiSuccess, showSuccess } from '../../utils/toast'
 import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
-import { useNavigate } from 'react-router-dom'
-import { getSuccessMsg } from '../../utils/apiParser'
 
 function useAppMutation({
     mutationFn,
@@ -11,7 +11,6 @@ function useAppMutation({
     passWorkspaceSlug = false,
     apiSuccessToast = true,
     apiErrorToast = true,
-    navigateAfterSuccess,
     successMsg,
     onSuccess,
     onError,
@@ -19,7 +18,6 @@ function useAppMutation({
 
     const queryClient = useQueryClient()
     const workspaceSlug = useWorkspaceSlug()
-    const navigate = useNavigate()
 
     return useMutation({
 
@@ -37,36 +35,27 @@ function useAppMutation({
 
         onSuccess: async (res, variables, context) => {
 
-            await Promise.all(
+            const results = await Promise.allSettled(
                 invalidateKeys.map(queryKey =>
                     queryClient.invalidateQueries({ queryKey })
                 )
             )
 
-            if (navigateAfterSuccess) {
-                const toastMsg = apiSuccessToast ? getSuccessMsg(res) : successMsg
+            // dev mode only: log failures without crashing
+            results.forEach((result, index) => {
+                if (import.meta.env.DEV) {
+                    console.error(`Failed to invalidate key: ${invalidateKeys[index]}`, result.reason)
+                }
+            })
 
-                if (toastMsg) {
-                    navigate(navigateAfterSuccess, {
-                        state: {
-                            toast: {
-                                type: 'success',
-                                message: toastMsg
-                            }
-                        }
-                    })
-                } else {
-                    navigate(navigateAfterSuccess)
-                }
-            } else {
-                if (successMsg) {
-                    showSuccess(successMsg)
-                } else if (apiSuccessToast) {
-                    showApiSuccess(res)
-                }
+            // if successMsg is passed, treat it as opting out of apiSuccessToast automatically
+            const shouldShowApiToast = apiSuccessToast && !successMsg
+
+            if (successMsg) {
+                showSuccess(successMsg)
+            } else if (shouldShowApiToast) {
+                showApiSuccess(res)
             }
-
-
 
             onSuccess?.(res, variables, context)
 

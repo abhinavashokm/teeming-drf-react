@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AuthLogo from '../../components/auth/AuthLogo'
 import { useEffect } from 'react'
+import { ROUTE_PATHS } from '../../constants/routePaths'
 
 function PasswordResetSuccessPage() {
     const location = useLocation()
@@ -8,7 +9,7 @@ function PasswordResetSuccessPage() {
 
     useEffect(() => {
         if (!location.state?.fromResetPassword) {
-            navigate('/auth/login', { replace: true })
+            navigate(ROUTE_PATHS.LOGIN, { replace: true })
         }
     }, [])
 
@@ -35,7 +36,7 @@ function PasswordResetSuccessPage() {
                     {/* Subtitle */}
                     <div className="text-[13px] text-[#64748B] text-center mt-1">
                         Your password has been changed.{" "}
-                        <Link to={'/auth/login/'} className="text-[#3B82F6] font-medium hover:underline" >
+                        <Link to={ROUTE_PATHS.LOGIN} className="text-[#3B82F6] font-medium hover:underline" >
                             Sign in
                         </Link>
                     </div>

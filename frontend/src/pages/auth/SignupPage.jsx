@@ -13,6 +13,7 @@ import useInvitationToken from '../../hooks/invite/useInvitationToken'
 import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
 import { getErrorMsg } from '../../utils/apiParser.js'
 import { validations } from '../../utils/validations'
+import { ROUTE_PATHS } from '../../constants/routePaths.js'
 
 
 function SignupPage() {
@@ -61,7 +62,7 @@ function SignupPage() {
                         {/* Subtitle */}
                         <div className="text-[14px] leading-relaxed text-teeming-gray text-center px-4">
                             Already have an account?{" "}
-                            <Link to={'/auth/login'} className="text-teeming-green font-medium hover:underline">
+                            <Link to={ROUTE_PATHS.LOGIN} className="text-teeming-green font-medium hover:underline">
                                 Sign in
                             </Link>
                         </div>

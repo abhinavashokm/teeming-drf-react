@@ -7,6 +7,7 @@ import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
 import { toSlug } from "../../utils/slugUtils";
 import { LayoutGrid } from "lucide-react";
 import useMyWorkspaces from "../../hooks/workspace/useMyWorkspaces";
+import { ROUTE_PATHS } from "../../constants/routePaths";
 
 
 function CreateWorkspacePage() {
@@ -34,7 +35,7 @@ function CreateWorkspacePage() {
 
     const logoutHandle = () => {
         logout()
-        navigate("/auth/login/")
+        navigate(ROUTE_PATHS.LOGIN)
     }
 
     const { mutate: createWorkspace, isPending } = useCreateWorkspace()

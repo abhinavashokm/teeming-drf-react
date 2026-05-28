@@ -5,6 +5,7 @@ import AuthInput from "../../components/auth/AuthInput"
 import AuthLogo from "../../components/auth/AuthLogo"
 import { useForgotPassword } from "../../hooks/auth/useForgotPassword"
 import { validations } from "../../utils/validations"
+import { ROUTE_PATHS } from "../../constants/routePaths"
 
 
 function ForgotPasswordPage() {
@@ -46,7 +47,7 @@ function ForgotPasswordPage() {
                         >
 
                         </a>
-                        <Link to={'/auth/login'} className="text-teeming-green font-medium hover:underline">Sign in</Link>
+                        <Link to={ROUTE_PATHS.LOGIN} className="text-teeming-green font-medium hover:underline">Sign in</Link>
                     </div>
                 </div>
 

@@ -6,6 +6,7 @@ import AuthButton from "../../components/auth/AuthButton";
 import AuthLogo from "../../components/auth/AuthLogo";
 import { useResendOtp } from "../../hooks/auth/useResendOtp";
 import { useVerifyOtp } from "../../hooks/auth/useVerifyOtp";
+import { ROUTE_PATHS } from "../../constants/routePaths";
 
 
 function verifyOtpPage() {
@@ -44,7 +45,7 @@ function verifyOtpPage() {
   useEffect(() => {
 
     if (!verificationEmail) {
-      navigate("/auth/signup/", { state: { toast: "Signup session expired or not found!", error: true }, replace: true })
+      navigate(ROUTE_PATHS.SIGNUP, { state: { toast: "Signup session expired or not found!", error: true }, replace: true })
     }
 
   }, [])
@@ -136,7 +137,7 @@ function verifyOtpPage() {
             </span>
 
             <Link
-              to={"/auth/login"}
+              to={ROUTE_PATHS.LOGIN}
               className="text-teeming-green font-medium text-[14px] leading-[21px] hover:underline focus:outline-none"
             >
               Logout
