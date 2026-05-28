@@ -42,7 +42,10 @@ class GoalListCreateView(WorkspacePermissionBaseView):
 
     def get(self, request, **kwargs):
 
-        goals = goal_services.list_workspace_goals(workspace=request.workspace)
+        goals = goal_services.list_workspace_goals(
+            workspace=request.workspace,
+            user=request.user,
+        )
 
         goals_data = GoalReadSerializer(goals, many=True).data
 

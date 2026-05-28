@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import SendWorkspaceInvitationView
+from .views import InvitationListCreateView
 
 urlpatterns = [
-    path('', SendWorkspaceInvitationView.as_view()),
+    path('', InvitationListCreateView.as_view()),
 ]

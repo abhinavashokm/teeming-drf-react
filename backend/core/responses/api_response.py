@@ -5,7 +5,7 @@ from core.constants.error_codes import ErrorCode
 
 
 def success_response(
-    data=None, message="Success", status_code=status.HTTP_200_OK, meta=None
+    data=None, message=None, status_code=status.HTTP_200_OK, meta=None
 ):
     """
     Standardized success response wrapper.

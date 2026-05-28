@@ -22,6 +22,7 @@ from django.conf import settings
 from . import exceptions, user_services, serializers
 from .helpers import cookie_helper
 from core.throttles import AuthThrottle, SensitiveThrottle
+from apps.invitation.serializers import JoinedWorkspaceSerializer
 
 
 class RegisterView(APIView):
@@ -57,7 +58,7 @@ class CompleteSignupView(APIView):
 
         invitation_token = request.query_params.get("token")
 
-        user_services.verify_otp_and_complete_signup(
+        user, joined_workspace = user_services.verify_otp_and_complete_signup(
             email=serializer.validated_data["email"],
             otp=serializer.validated_data["otp"],
             invitation_token=invitation_token,
@@ -66,6 +67,9 @@ class CompleteSignupView(APIView):
         if invitation_token:
             return success_response(
                 message="Signup successful. You have joined the workspace.",
+                data={
+                    "joined_workspace": JoinedWorkspaceSerializer(joined_workspace).data
+                },
                 status_code=status.HTTP_201_CREATED,
             )
 
@@ -100,7 +104,7 @@ class LoginView(APIView):
 
         invitation_token = request.query_params.get("token")
 
-        user, refresh_token = user_services.login_user(
+        user, refresh_token, joined_workspace = user_services.login_user(
             request=request,
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
@@ -114,6 +118,10 @@ class LoginView(APIView):
         }
 
         if invitation_token:
+            response_data["joined_workspace"] = JoinedWorkspaceSerializer(
+                joined_workspace
+            ).data
+
             response = success_response(
                 message="Login successful. You have joined the workspace.",
                 data=response_data,
@@ -182,17 +190,13 @@ class MeView(APIView):
             data=serializer.data,
             status_code=status.HTTP_200_OK,
         )
-    
+
     def delete(self, request):
         """delete authenticated user's account"""
-        
-        user_services.delete_user(
-            user=request.user
-        )
 
-        return success_response(
-            status_code=status.HTTP_204_NO_CONTENT
-        )
+        user_services.delete_user(user=request.user)
+
+        return success_response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 class ForgotPasswordView(APIView):

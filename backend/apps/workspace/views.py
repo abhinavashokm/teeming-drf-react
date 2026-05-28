@@ -141,7 +141,7 @@ class WorkspaceMemberListView(APIView):
 
     def get(self, request, **kwargs):
 
-        members = workspace_services.fetch_workspace_members(
+        members = workspace_services.fetch_workspace_members_ordered(
             workspace=request.workspace
         )
 

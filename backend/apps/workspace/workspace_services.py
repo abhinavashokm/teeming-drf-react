@@ -1,4 +1,5 @@
 from .models import WorkspaceMember, Workspace
+from django.db.models import Case, When, Value, IntegerField
 from . import exceptions
 
 
@@ -13,7 +14,7 @@ def fetch_user_workspace_list(user):
             "id": m.workspace.id,
             "name": m.workspace.name,
             "slug": m.workspace.slug,
-            "role": m.role,
+            "role": m.get_role_display(),
         }
         for m in memberships
     ]
@@ -34,8 +35,21 @@ def add_workspace_member(user, workspace, role):
     WorkspaceMember.objects.create(user=user, workspace=workspace, role=role)
 
 
-def fetch_workspace_members(workspace):
-    return WorkspaceMember.objects.filter(workspace=workspace)
+def fetch_workspace_members_ordered(workspace):
+    return (
+        WorkspaceMember.objects
+        .in_workspace(workspace)
+        .annotate(
+            role_priority=Case(
+                When(role=WorkspaceMember.RoleChoices.OWNER, then=Value(0)),
+                When(role=WorkspaceMember.RoleChoices.ADMIN, then=Value(1)),
+                When(role=WorkspaceMember.RoleChoices.MEMBER, then=Value(2)),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("role_priority", "-joined_at")
+    )
+
 
 
 def update_workspace(workspace, data):

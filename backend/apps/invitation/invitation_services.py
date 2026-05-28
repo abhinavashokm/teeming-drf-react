@@ -6,7 +6,7 @@ from . import exceptions
 from django.utils import timezone
 from apps.user.models import User
 from apps.workspace import workspace_services as workspace_services
-from django.conf import settings
+from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 
 
 def send_workspace_invitations(emails, role, workspace, invited_by):
@@ -69,7 +69,23 @@ def verify_token_and_accept_invitation(invitation_token, user):
 
     invitation = resolve_invitation_token(invitation_token)
 
+    # verify workspace still exists
+    workspace = get_workspace_or_raise(
+        workspace_id=invitation.workspace.id
+    )
+
     # put role as default for now
     workspace_services.add_workspace_member(
-        user=user, workspace=invitation.workspace, role=invitation.role
+        user=user, workspace=workspace, role=invitation.role
     )
+
+    return invitation.workspace
+
+
+def fetch_invitations(workspace, invitation_status):
+    invitations = Invitation.objects.in_workspace(workspace).select_related('invited_by')
+
+    if invitation_status:
+        invitations = invitations.filter(status=invitation_status)
+
+    return invitations

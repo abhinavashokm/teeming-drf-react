@@ -3,11 +3,15 @@ from . import invitation_services
 from .serializers import SendWorkspaceInvitationSerializer
 from core.responses.api_response import success_response
 from rest_framework import status
+from .serializers import JoinedWorkspaceSerializer, InvitationsReadSerializer
+from core.permission_views import AdminBaseView
 
 
-class SendWorkspaceInvitationView(APIView):
+class InvitationListCreateView(AdminBaseView):
 
     def post(self, request, **kwargs):
+        """create and send workspace invitations"""
+
         serializer = SendWorkspaceInvitationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -18,7 +22,27 @@ class SendWorkspaceInvitationView(APIView):
             invited_by=request.user,
         )
 
-        return success_response(message="Invitations sent", status_code=status.HTTP_200_OK)
+        return success_response(
+            message="Invitations sent", status_code=status.HTTP_200_OK
+        )
+
+    def get(self, request, **kwargs):
+        """fetch all the invitations of current workspace"""
+
+        invitation_status = request.query_params.get("status")
+
+        invitations = invitation_services.fetch_invitations(
+            workspace=request.workspace, invitation_status=invitation_status
+        )
+
+        return success_response(
+            status_code=status.HTTP_200_OK,
+            data={
+                "pending_invitations": InvitationsReadSerializer(
+                    invitations, many=True
+                ).data
+            },
+        )
 
 
 class ResolveInvitationTokenView(APIView):
@@ -30,7 +54,6 @@ class ResolveInvitationTokenView(APIView):
         is_account_exists = invitation_services.check_account_exists(
             invitation_record.email
         )
-        
 
         workspace = invitation_record.workspace
         invited_user = invitation_record.invited_by
@@ -56,6 +79,12 @@ class AcceptInvitationView(APIView):
 
     def post(self, request, token):
 
-        invitation_services.verify_token_and_accept_invitation(token, request.user)
+        joined_workspace = invitation_services.verify_token_and_accept_invitation(
+            token, request.user
+        )
 
-        return success_response(message="Invitation accepted", status_code=status.HTTP_201_CREATED)
+        return success_response(
+            message="Invitation accepted",
+            data={"joined_workspace": JoinedWorkspaceSerializer(joined_workspace).data},
+            status_code=status.HTTP_201_CREATED,
+        )

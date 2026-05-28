@@ -10,7 +10,8 @@ class GoalWriteSerializer(serializers.ModelSerializer):
 
 
 class GoalReadSerializer(serializers.ModelSerializer):
+    is_starred = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Goal
-        fields = ["id", "name", "description", "status", "target_date"]
+        fields = ["id", "name", "description", "status", "target_date", "is_starred"]

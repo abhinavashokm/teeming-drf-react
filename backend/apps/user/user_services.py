@@ -44,11 +44,13 @@ def verify_otp_and_complete_signup(email, otp, invitation_token=None):
     with transaction.atomic():
         user = _verify_otp_and_create_user(email=email, otp=otp)
 
+        joined_workspace = None
+
         if invitation_token:
-            invitation_services.verify_token_and_accept_invitation(
+            joined_workspace = invitation_services.verify_token_and_accept_invitation(
                 invitation_token, user
             )
-        return user
+        return user, joined_workspace
 
 
 def _verify_otp_and_create_user(email, otp):
@@ -104,13 +106,15 @@ def login_user(request, email, password, invitation_token=None):
 
         if not authenticated_user:
             raise exceptions.InvalidCredentials()
+        
+        joined_workspace = None
 
         if invitation_token:
-            invitation_services.verify_token_and_accept_invitation(invitation_token, authenticated_user)
+            joined_workspace = invitation_services.verify_token_and_accept_invitation(invitation_token, authenticated_user)
 
         refresh_token = RefreshToken.for_user(authenticated_user)
 
-        return authenticated_user, refresh_token
+        return authenticated_user, refresh_token, joined_workspace
 
 
 def send_password_reset_link(email):

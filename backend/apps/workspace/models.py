@@ -1,7 +1,6 @@
 from django.db import models
 from apps.user.models import User
-from core.models import BaseAbstractModel
-
+from core.models import BaseAbstractModel, WorkspaceScopedBaseModel
 
 class Workspace(BaseAbstractModel):
 
@@ -18,7 +17,7 @@ class Workspace(BaseAbstractModel):
         return self.name
 
 
-class WorkspaceMember(BaseAbstractModel):
+class WorkspaceMember(WorkspaceScopedBaseModel):
 
     class RoleChoices(models.TextChoices):
         ADMIN = "admin", "Admin"

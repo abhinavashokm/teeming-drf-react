@@ -2,12 +2,12 @@ import uuid
 
 from django.db import models
 from django.conf import settings
-from core.models import BaseAbstractModel
+from core.models import WorkspaceScopedBaseModel
 from apps.workspace.models import WorkspaceMember
 
 
 # Create your models here.
-class Invitation(BaseAbstractModel):
+class Invitation(WorkspaceScopedBaseModel):
 
     class StatusChoices(models.TextChoices):
         PENDING = ("pending", 'Pending')

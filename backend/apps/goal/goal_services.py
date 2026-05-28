@@ -1,6 +1,6 @@
 from .models import Goal, StarredGoal
-from . import exceptions
 from .helpers.goalHelper import get_goal_or_raise
+from django.db.models import Exists, OuterRef
 
 
 def create_goal(data):
@@ -9,10 +9,17 @@ def create_goal(data):
     return Goal.objects.create(**data)
 
 
-def list_workspace_goals(workspace):
-    """return all goals in the current workspace"""
+def list_workspace_goals(workspace, user):
+    """return all goals in the current workspace with is starred field annotated"""
 
-    return Goal.objects.in_workspace(workspace)
+    starred_goals = StarredGoal.objects.in_workspace(workspace).filter(
+        user=user,
+        goal = OuterRef("pk")
+    )
+
+    return Goal.objects.in_workspace(workspace).annotate(
+        is_starred = Exists(starred_goals)
+    )
 
 
 def update_goal(workspace, goal_id, data):
