@@ -1,18 +1,20 @@
 import {
   Layers,
-  MoreHorizontal,
+  PartyPopper,
   Plus,
-  Star
+  X
 } from 'lucide-react';
 import { useState } from 'react';
+import GoalCard from '../../components/goal/GoalCard';
 import GoalFormModal from '../../components/goal/GoalFormModal';
 import InviteModal from '../../components/workspace/InviteModal';
 import SwitchWorkspaceModal from '../../components/workspace/SwitchWorkspaceModal';
-import GoalCard from '../../components/goal/GoalCard';
-import useGoals from '../../hooks/goal/useGoals';
-import useWorkspace from '../../hooks/workspace/useWorkspace';
-import { useCan } from '../../hooks/permissions/useCan';
 import { PERMISSIONS } from '../../constants/permissions';
+import useGoals from '../../hooks/goal/useGoals';
+import { useCan } from '../../hooks/permissions/useCan';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
+import useWelcomeBanner from '../../hooks/invite/useWelcomeBanner';
+import useAuth from '../../hooks/auth/useAuth';
 
 
 function HomePage() {
@@ -23,16 +25,47 @@ function HomePage() {
 
   const [isGoalFormModalOpen, setIsGoalFormModalOpen] = useState(false);
   const { data: currentWorkspace } = useWorkspace()
+  const { data: currentUser } = useAuth()
 
   const { data: Goals } = useGoals()
 
   const canManageGoals = useCan(PERMISSIONS.MANAGE_GOALS)
+
+  const { getWelcome, removeWelcome } = useWelcomeBanner()
+
+  const [showWelcome, setShowWelcome] = useState(() => getWelcome(currentWorkspace.slug))
+
+  const handleRemoveWelcome = () => {
+    removeWelcome(currentWorkspace.slug)
+    setShowWelcome(false)
+  }
 
   return (
 
     <>
       <div className="max-w-5xl mx-auto space-y-14 pb-20">
 
+        {showWelcome && (
+        
+            <div className="flex items-center gap-3.5 bg-[#E1F5EE] border border-[#5DCAA5] rounded-2xl px-4 py-3.5">
+              <div className="w-10 h-10 rounded-xl bg-[#1D9E75] flex items-center justify-center shrink-0">
+                <PartyPopper className="h-5 w-5 text-white" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <p className="text-[14px] font-medium text-[#085041]">Welcome to {currentWorkspace.name}!</p>
+                <p className="text-[12px] text-[#0F6E56] leading-relaxed mt-0.5">
+                  {currentWorkspace.role === 'Admin'
+                    ? `Hey ${currentUser.fullName.split(' ')[0]}! You've been added as an admin. You can manage goals, invite members, and configure settings.`
+                    : `Hey ${currentUser.fullName.split(' ')[0]}! You've been added as a member. Explore goals and start contributing to ideas.`
+                  }
+                </p>
+              </div>
+              <button onClick={handleRemoveWelcome} className="p-1 rounded-md hover:bg-[#9FE1CB] transition-colors">
+                <X className="h-4 w-4 text-[#0F6E56]" strokeWidth={2} />
+              </button>
+            </div>
+  
+        )}
 
         {/* Goals */}
         <section>

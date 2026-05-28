@@ -63,7 +63,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 bg-gray-900 rounded-[8px] flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
-                {currentWorkspace.name[0]}
+                {currentWorkspace.name[0]?.toUpperCase()}
               </div>
               <div className="flex flex-col min-w-0 text-left">
                 <div className="flex items-center gap-1.5 overflow-hidden">
