@@ -1,19 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import React from 'react'
 import { goalService } from '../../services/goalService'
-import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
-import { showApiSuccess, showError } from '../../utils/toast'
 import useAppMutation from '../base/useAppMutation'
+import useWorkspaceQueryKeys from '../helper/useWorkspaceQueryKeys'
 
 
 function useDeleteGoal() {
 
-    const workspaceSlug = useWorkspaceSlug()
+    const workspaceKeys = useWorkspaceQueryKeys()
 
     return useAppMutation({
-        mutationFn: (goal_id) => goalService.deleteGoal(goal_id, workspaceSlug),
-
-        invalidateKeys: [['goals']]
+        mutationFn: goalService.deleteGoal,
+        passWorkspaceSlug: true,
+        invalidateKeys: [workspaceKeys.goals],
     })
 }
 

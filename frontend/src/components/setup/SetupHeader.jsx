@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import useLogout from "../../hooks/auth/useLogout";
 import { getAvatarColor } from "../../utils/styleUtils";
+import { globalQueryKeys } from "../../constants/queryKeys";
 
 
 function SetupHeader() {
@@ -12,7 +13,7 @@ function SetupHeader() {
     const dropdownRef = useRef(null);
 
     const queryClient = useQueryClient()
-    const currentUser = queryClient.getQueryData(['auth'])
+    const currentUser = queryClient.getQueryData(globalQueryKeys.auth)
 
     const handleLogout = () => {
         logout()

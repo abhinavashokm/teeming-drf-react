@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setAccessToken } from "../../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import ErrorPage from "../../pages/error/ErrorPage";
+import { globalQueryKeys } from "../../constants/queryKeys";
 
 
 export default function useAuth(caller) {
@@ -11,7 +12,7 @@ export default function useAuth(caller) {
     const navigate = useNavigate()
 
     return useQuery({
-        queryKey: ['auth'],
+        queryKey: globalQueryKeys.auth,
         queryFn: async () => {
             try {
                 const refreshRes = await authService.refresh()

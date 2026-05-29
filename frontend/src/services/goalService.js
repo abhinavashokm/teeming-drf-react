@@ -3,12 +3,12 @@ import api from "../api/axios";
 
 export const goalService = {
 
-    createGoal: async (data, slug) => {
+    createGoal: async (slug, data) => {
         const res = await api.post(`/workspaces/${slug}/goals/`, data)
         return res.data
     },
 
-    updateGoal: async (data, goalId, slug) => {
+    updateGoal: async (slug, goalId, data) => {
         const res = await api.patch(`/workspaces/${slug}/goals/${goalId}/`, data)
         return res.data
     },
@@ -18,7 +18,7 @@ export const goalService = {
         return res.data
     },
 
-    deleteGoal: async (goalId, slug) => {
+    deleteGoal: async (slug, goalId) => {
         const res = await api.delete(`/workspaces/${slug}/goals/${goalId}/`)
         return res.data
     },

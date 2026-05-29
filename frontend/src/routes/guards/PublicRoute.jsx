@@ -3,12 +3,13 @@ import useAuth from "../../hooks/auth/useAuth"
 import useWorkspaceRedirect from "../../hooks/routes/useWorkspaceRedirect"
 import { Outlet } from "react-router-dom"
 import { useQueryClient } from "@tanstack/react-query"
+import { globalQueryKeys } from "../../constants/queryKeys"
 
 
 function PublicRoute() {
     //const { data: currentUser } = useAuth('public route')
     const queryClient = useQueryClient()
-    const currentUser = queryClient.getQueryData(['auth'])
+    const currentUser = queryClient.getQueryData(globalQueryKeys.auth)
 
     const { mutate: redirectToWorkspace } = useWorkspaceRedirect()
 

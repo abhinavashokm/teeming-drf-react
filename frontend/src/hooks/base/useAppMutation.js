@@ -43,8 +43,14 @@ function useAppMutation({
 
             // dev mode only: log failures without crashing
             results.forEach((result, index) => {
-                if (import.meta.env.DEV) {
-                    console.error(`Failed to invalidate key: ${invalidateKeys[index]}`, result.reason)
+                if (
+                    import.meta.env.DEV &&
+                    result.status === 'rejected'
+                ) {
+                    console.error(
+                        `Failed to invalidate key: ${invalidateKeys[index]}`,
+                        result.reason
+                    )
                 }
             })
 

@@ -1,27 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { workspaceService } from '../../services/workspaceService'
-import { showApiError, showApiSuccess } from '../../utils/toast'
-import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
-import { useNavigate } from 'react-router-dom'
+import useAppMutation from '../base/useAppMutation'
+import useWorkspaceQueryKeys from '../helper/useWorkspaceQueryKeys'
 
 function useUpdateMemberRole() {
 
-    const workspaceSlug = useWorkspaceSlug()
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
+    const workspaceKeys = useWorkspaceQueryKeys()
 
-    return useMutation({
-        mutationFn: ({role, memberId}) => workspaceService.updateMemberRole(workspaceSlug, {role}, memberId),
-        onSuccess: (res) => {
-            queryClient.invalidateQueries({
-                queryKey: ['team', workspaceSlug]
-            })
-
-            showApiSuccess(res)
-        },
-        onError: (error) => {
-            showApiError(error)
-        }
+    return useAppMutation({
+        //here workspace slug is attached to this callback fn by useAppMutation
+        mutationFn: (workspaceSlug, { role, memberId }) => workspaceService.updateMemberRole(workspaceSlug, { role }, memberId),
+        passWorkspaceSlug: true,
+        invalidateKeys: [workspaceKeys.members]
     })
 }
 
