@@ -2,10 +2,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import authService from "../../services/authService";
 import { useDispatch } from "react-redux";
 import { setAccessToken } from "../../store/slices/authSlice";
+import { useNavigate } from "react-router-dom";
+import ErrorPage from "../../pages/error/ErrorPage";
 
 
 export default function useAuth(caller) {
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     return useQuery({
         queryKey: ['auth'],
@@ -16,12 +19,9 @@ export default function useAuth(caller) {
                 const userRes = await authService.getCurrentUser()
 
                 return userRes.data.user
-            }catch{
+            } catch (error) {
                 return null
             }
-
-            
-
         },
 
         retry: false, // don't retry on 401

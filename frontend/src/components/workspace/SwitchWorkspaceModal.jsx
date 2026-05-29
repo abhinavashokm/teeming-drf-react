@@ -6,11 +6,11 @@ import useSwitchWorkspace from '../../hooks/workspace/useSwitchWorkspace';
 import { useNavigate } from 'react-router-dom';
 
 export default function SwitchWorkspaceModal({ isOpen, onClose }) {
-  const [searchQuery, setSearchQuery] = useState('');
+
   const { data: currentWorkspace } = useWorkspace()
 
-  const { data: myWorkspaces } = useMyWorkspaces()
-  const { mutate: switchWorkspace } = useSwitchWorkspace()
+  const { data: myWorkspacesData } = useMyWorkspaces()
+  const switchWorkspace = useSwitchWorkspace()
 
   const navigate = useNavigate()
 
@@ -26,16 +26,11 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
     return COLORS[index]
   }
 
-  const filteredWorkspaces = myWorkspaces?.workspaces?.filter(w =>
-    w.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) ?? [];
+  const myWorkspaces = myWorkspacesData?.workspaces
 
   const handleSwitchWorkspace = (workspace) => {
-    if (currentWorkspace.slug === workspace.slug) {
-      onClose()
-      return
-    }
     switchWorkspace(workspace)
+    onClose()
   }
 
 
@@ -68,7 +63,7 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
         {/* Workspace List */}
         <div className="px-2 pb-3 max-h-[300px] overflow-y-auto">
           <div className="space-y-0.5">
-            {filteredWorkspaces.map(workspace => (
+            {myWorkspaces.map(workspace => (
               <button
                 key={workspace.id}
                 className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded-[10px] transition-colors group"
@@ -87,7 +82,7 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
                 )}
               </button>
             ))}
-            {filteredWorkspaces.length === 0 && (
+            {myWorkspaces.length === 0 && (
               <div className="py-8 text-center text-gray-400 text-[13px]">
                 No workspaces found
               </div>

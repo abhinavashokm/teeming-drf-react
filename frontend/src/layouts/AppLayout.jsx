@@ -5,11 +5,12 @@ import FullPageLoader from "../components/ui/FullPageLoader"
 import { errorCodes } from "../constants/errorCodes"
 import useAuth from "../hooks/auth/useAuth"
 import { showApiError, showError, showSuccess } from '../utils/toast'
+import ErrorPage from "../pages/error/ErrorPage"
 
 
 function AppLayout() {
 
-    const { isLoading, isSuccess, isError, error } = useAuth('app layout') // runs on mount automaticallyz
+    const { data, isLoading, isSuccess, isError, error } = useAuth() // runs on mount automaticallyz
 
     //global errors
     useEffect(() => {
@@ -45,7 +46,6 @@ function AppLayout() {
 
 
     if (isLoading) return <FullPageLoader />
-
 
     return (
         <>

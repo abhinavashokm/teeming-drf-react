@@ -2,7 +2,7 @@
 import.meta.env.DEV // boolean, true in dev automatically
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { showApiError, showApiSuccess, showSuccess } from '../../utils/toast'
+import { showApiError, showApiSuccess, showError, showSuccess } from '../../utils/toast'
 import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
 
 function useAppMutation({

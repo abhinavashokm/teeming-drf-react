@@ -1,5 +1,6 @@
 import { setAccessToken, clearAuth } from "../../store/slices/authSlice";
 import { REFRESH_URL } from "../../services/authService";
+import { showError } from "../../utils/toast";
 
 export const authResponseInterceptor =
     async (store, api, error) => {
@@ -17,6 +18,15 @@ export const authResponseInterceptor =
         //     console.log("skipping...")
         //     return Promise.reject(error)
         // } 
+
+        // Server unreachable
+        if (!error.response) {
+            console.log("Server unreachable");
+            return Promise.reject({
+                ...error,
+                isServerUnreachable: true,
+            });
+        }
 
         // prevent infinite retry loop
         if (error.config?._retry) {

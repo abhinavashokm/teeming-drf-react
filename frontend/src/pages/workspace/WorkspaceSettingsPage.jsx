@@ -39,6 +39,7 @@ function WorkspaceSettingsPage() {
         updateWorkspace(data, {
             onSuccess: (res) => {
                 reset()
+                setIsSlugUnlocked(false)
             }
         })
     }

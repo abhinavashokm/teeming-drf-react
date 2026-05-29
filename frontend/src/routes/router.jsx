@@ -30,8 +30,7 @@ const protectedRoutes = {
                 { path: "create-workspace", element: <CreateWorkspacePage /> },
                 { path: "workspaces", element: <SelectWorkspacePage /> },
             ]
-        },
-        { path: "error", element: <ErrorPage /> },
+        }
 
     ]
 }
