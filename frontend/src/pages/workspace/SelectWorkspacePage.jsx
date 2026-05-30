@@ -1,14 +1,25 @@
 import { ArrowRight, LayoutGrid, Plus } from 'lucide-react';
 import useMyWorkspaces from "../../hooks/workspace/useMyWorkspaces";
 import WorkspaceRow from '../../components/setup/WorkspaceRow';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
+import { useEffect } from 'react';
 
 
 function SelectWorkspacePage({ onEnterWorkspace, onCreateNewWorkspace }) {
 
     const { data: workspacesData } = useMyWorkspaces()
+    const { setCenterContent } = useOutletContext()
 
     const myWorkspaces = workspacesData?.workspaces
+
+    //for removing vertical centering style of parent layout
+    useEffect(() => {
+        setCenterContent(false)
+
+        return () => {
+            setCenterContent(true)
+        }
+    }, [])
 
     return (
         <>

@@ -23,6 +23,6 @@ export const workspaceQueryKeys = {
 //can be used directly, no hooks needed
 export const globalQueryKeys = {
     auth: ['auth'],
-    workspaces: ['workspaces'],
+    workspaces: ['userWorkspaces'],
 }
 

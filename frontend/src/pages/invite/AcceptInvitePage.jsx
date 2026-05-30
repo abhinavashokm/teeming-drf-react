@@ -1,99 +1,86 @@
-import { useEffect, useRef, useState } from "react";
+import { CircleAlert } from "lucide-react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import StatusCard from "../../components/error/StatusCard";
+import AppButton from "../../components/ui/buttons/AppButton";
 import FullPageLoader from "../../components/ui/FullPageLoader";
+import { ROUTE_PATHS } from "../../constants/routePaths";
 import useAuth from "../../hooks/auth/useAuth";
 import useLogout from "../../hooks/auth/useLogout";
 import useAcceptInvitation from "../../hooks/invite/useAcceptInvitation";
 import useInvitationToken from "../../hooks/invite/useInvitationToken";
 import useResolveInvitation from "../../hooks/invite/useResolveInvitation";
-import { ROUTE_PATHS } from "../../constants/routePaths";
+import { getInvitationActionState } from "../../utils/invitationUtils";
 
 
 const AcceptInvitationPage = () => {
 
-  const { data: invitationDetails, isPending, isSuccess } = useResolveInvitation()
+  const { data: invitationDetails, isPending, isError, error } = useResolveInvitation()
   const { data: currentUser } = useAuth()
   const { mutate: logout } = useLogout()
   const { mutate: acceptInvitation } = useAcceptInvitation()
 
   const navigate = useNavigate()
-
   const token = useInvitationToken()
 
-  const [currentState, setCurrentState] = useState(1);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [fade, setFade] = useState(true);
 
-  const dropdownRef = useRef(null);
+  const {
+    handleAcceptInvitation, buttonLabel, buttonVariant, isInvitationAccepted,
+    isInvitedUser, showWrongUserBanner, showAlreadyUsedBanner, emailColor
+  } = getInvitationActionState({
+    invitationDetails,
+    currentUser,
+    token,
+    navigate,
+    logout,
+    acceptInvitation,
+  });
 
-
+  //invitation already accepted and same user session, then redirect to workspace
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    setFade(false);
-
-    const timer = setTimeout(() => {
-      setFade(true);
-    }, 250);
-
-    return () => clearTimeout(timer);
-  }, [currentState]);
-
-
-  const getButtonLabel = () => {
-    if (!currentUser) {
-      return invitationDetails.accountExists ? "Login" : "Create Account"
-    }
-    if (currentUser.email === invitationDetails.invitedEmail) return "Accept Invitation"
-    return "Log out and continue as"
-  }
-
-
-  const handleAcceptInvitation = () => {
-    const sameEmail = currentUser?.email === invitationDetails.invitedEmail
-
-    if (sameEmail) {
-      acceptInvitation()
-      return
-    }
-
-    // not logged in at all
-    if (!currentUser) {
-      navigate(invitationDetails.accountExists
-        ? `${ROUTE_PATHS.LOGIN}?token=${token}`
-        : `${ROUTE_PATHS.SIGNUP}?token=${token}`
+    if (
+      isInvitationAccepted && isInvitedUser
+    ) {
+      navigate(
+        ROUTE_PATHS.WORKSPACE(invitationDetails.workspace.slug),
+        { replace: true }
       )
-      return
     }
-
-    // logged in but wrong email — logout first, then navigate
-    logout(undefined, {
-      onSuccess: () => {
-        navigate(invitationDetails.accountExists
-          ? `${ROUTE_PATHS.LOGIN}?token=${token}`
-          : `${ROUTE_PATHS.SIGNUP}?token=${token}`
-        )
-      }
-    })
-  }
+  }, [isInvitationAccepted, isInvitedUser, invitationDetails, navigate])
 
 
   if (isPending) return <FullPageLoader />
+
+  if (isError) {
+    if (error?.response?.data?.error?.code === 'INVALID_INVITATION') {
+      return (<StatusCard
+        icon={CircleAlert}
+        title="Invitation Unavailable"
+        description="This invitation is invalid, expired, or no longer available."
+        helperText="Ask the workspace owner to send you a new invitation."
+        badge="Invitation unavailable"
+        action={
+          <button
+            onClick={() => navigate("/")}
+            className="w-full py-3 rounded-lg bg-gray-900 hover:bg-black text-white font-semibold transition-colors"
+          >
+            Return Home
+          </button>
+        }
+      />)
+    }
+
+    return (
+      <StatusCard
+        icon={CircleAlert}
+        title="Something went wrong"
+        description="We couldn't process this invitation."
+        badge="Error"
+      />
+    )
+  }
+
+
 
   return (
     <>
@@ -103,7 +90,7 @@ const AcceptInvitationPage = () => {
         {/* Avatar */}
         <div className="mb-5 flex justify-center items-center">
           <div className="w-[60px] h-[60px] bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 shadow-sm flex items-center justify-center text-2xl font-bold">
-            {invitationDetails.workspace.name[0]}
+            {invitationDetails.workspace.name[0].toUpperCase()}
           </div>
         </div>
 
@@ -128,30 +115,41 @@ const AcceptInvitationPage = () => {
             </span>
           </p>
           <div className="mt-4 flex justify-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
 
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            {isInvitationAccepted
+              ?
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5">
+                <div className="w-2 h-2 rounded-full bg-amber-500" />
 
-              <span className="text-[12px] font-medium text-emerald-700">
-                Joining as
-              </span>
+                <span className="text-[12px] font-medium text-amber-700">
+                  Joined as
+                </span>
 
-              <span className="text-[12px] font-semibold text-emerald-900 capitalize">
-                {invitationDetails.role}
-              </span>
+                <span className="text-[12px] font-semibold text-amber-900 capitalize">
+                  {invitationDetails.role}
+                </span>
 
-            </div>
+              </div>
+              :
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-[12px] font-medium text-emerald-700">
+                  Joining as
+                </span>
+
+                <span className="text-[12px] font-semibold text-emerald-900 capitalize">
+                  {invitationDetails.role}
+                </span>
+              </div>
+            }
+
           </div>
 
         </div>
 
-
-
-
-        {/* Dynamic Content */}
-
-        {/* email warning message */}
-        {currentUser && currentUser?.email !== invitationDetails.invitedEmail && (
+        {/* wrong user, warning bannner */}
+        {
+          currentUser && showWrongUserBanner &&
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-semibold text-amber-900">
               You’re signed in with a different account
@@ -164,37 +162,48 @@ const AcceptInvitationPage = () => {
               </span>
             </p>
           </div>
-        )}
+        }
+
+        {/* invitation already used, warning bannner */}
+        {
+          showAlreadyUsedBanner &&
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-900">
+              This invitation has already been used
+            </p>
+
+            <p className="mt-1 text-sm text-amber-700">
+              The invited user has already joined this workspace.
+            </p>
+          </div>
+
+        }
+
 
         {/* Accept invitation button */}
         <div
-          className={`w-full flex flex-col gap-4 transition-opacity duration-300 ${fade ? "opacity-100" : "opacity-0"
-            }`}
+          className={`w-full flex flex-col gap-4 transition-opacity duration-300`}
         >
-
-          <button onClick={handleAcceptInvitation} className={`w-full py-3 mt-1 rounded-lg shadow-sm transition-colors flex flex-col justify-center items-center gap-0.5 ${currentUser?.email !== invitationDetails.invitedEmail
-            ? "bg-gray-900 hover:bg-black"
-            : "bg-emerald-600 hover:bg-emerald-700"
-            }`}>
+          <AppButton
+            variant={buttonVariant}
+            size="lg"
+            onClick={handleAcceptInvitation}
+            className="flex-col"
+          >
 
             <span className="text-white font-bold text-[15px] leading-5">
-              {getButtonLabel()}
+              {buttonLabel}
             </span>
 
             <span
-              className={`text-xs mt-1 ${currentUser?.email !== invitationDetails.invitedEmail
-                ? "text-gray-300"
-                : "text-emerald-100"
-                }`}
+              className={`text-xs mt-1 ${emailColor}`}
             >
               {invitationDetails.invitedEmail}
             </span>
 
-          </button>
+          </AppButton>
 
         </div>
-
-
       </div >
 
     </>

@@ -1,9 +1,16 @@
 import { Clock, Mail } from "lucide-react"
 import { formatDateTime } from "../../utils/timeUtils"
+import useCancelnvitation from "../../hooks/invite/useCancelnvitation"
 
 function PendingInvitation({ invitation }) {
 
+    const { mutate: cancelInvitation } = useCancelnvitation()
+
     const invitedTime = formatDateTime(invitation.createdAt)
+
+    const handleCancelInvitation = () => {
+        cancelInvitation(invitation.id)
+    }
 
     return (
         <div className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors group">
@@ -42,12 +49,12 @@ function PendingInvitation({ invitation }) {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-
+{/* 
                 <button className="px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[11px] font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
                     Resend
-                </button>
+                </button> */}
 
-                <button className="px-2.5 py-1.5 border border-transparent rounded-lg text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors">
+                <button onClick={handleCancelInvitation} className="px-2.5 py-1.5 border border-transparent rounded-lg text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors">
                     Cancel
                 </button>
 

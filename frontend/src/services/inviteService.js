@@ -10,7 +10,12 @@ export const inviteService = {
     },
 
     fetchPendingInvitations: async (slug) => {
-        const res = await api.get(`/workspaces/${slug}/invitations/?status=pending`)
+        const res = await api.get(`/workspaces/${slug}/invitations/`)
+        return res.data
+    },
+
+    cancelInvitation: async (slug, invitation_id) => {
+        const res = await api.delete(`/workspaces/${slug}/invitations/${invitation_id}/`)
         return res.data
     },
 
