@@ -6,7 +6,7 @@ urlpatterns = [
         path('auth/', include('apps.user.urls')),
         path('workspaces/', include('apps.workspace.urls')),
         path('workspaces/<slug:slug>/invitations/', include('apps.invitation.workspace_urls')),
-        path('invitations/', include('apps.invitation.urls')),
+        path('invitations/', include('apps.invitation.public_urls')),
         path('workspaces/<slug:slug>/goals/', include('apps.goal.urls')),
     ])),
 ]

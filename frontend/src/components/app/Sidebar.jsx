@@ -134,7 +134,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
               Search
             </button>
 
-            <button
+            {/* <button
               onClick={() => console.log('Inbox clicked')}
               className="flex-1 flex items-center justify-center gap-1.5 py-1.5 border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors"
             >
@@ -143,7 +143,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
               <span className="flex items-center justify-center h-3.5 bg-teeming-green text-white text-[9px] rounded-full px-1.5 ml-0.5">
                 3
               </span>
-            </button>
+            </button> */}
 
           </div>
 

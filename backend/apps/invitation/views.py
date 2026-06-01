@@ -6,6 +6,10 @@ from rest_framework import status
 from .serializers import JoinedWorkspaceSerializer, InvitationsReadSerializer
 from core.permission_views import AdminBaseView
 
+#
+#  Private Views
+#
+
 
 class InvitationListCreateView(AdminBaseView):
 
@@ -27,12 +31,10 @@ class InvitationListCreateView(AdminBaseView):
         )
 
     def get(self, request, **kwargs):
-        """fetch all the invitations of current workspace"""
+        """fetch all pending invitations of current workspace"""
 
-        invitation_status = request.query_params.get("status")
-
-        invitations = invitation_services.fetch_invitations(
-            workspace=request.workspace, invitation_status=invitation_status
+        invitations = invitation_services.fetch_pending_invitations(
+            workspace=request.workspace
         )
 
         return success_response(
@@ -43,6 +45,24 @@ class InvitationListCreateView(AdminBaseView):
                 ).data
             },
         )
+
+
+class CancelInvitationView(AdminBaseView):
+
+    def delete(self, request, **kwargs):
+
+        invitation_services.cancel_invitation(
+            workspace=request.workspace, invitation_id=kwargs["invitation_id"]
+        )
+
+        return success_response(
+            message="Invitation cancelled", status_code=status.HTTP_200_OK
+        )
+
+
+#
+#  Public Views
+#
 
 
 class ResolveInvitationTokenView(APIView):
@@ -71,6 +91,7 @@ class ResolveInvitationTokenView(APIView):
                 "invited_by": invited_user.full_name,
                 "role": invitation_record.get_role_display(),
                 "is_authenticated": request.user.is_authenticated,
+                "invitation_status": invitation_record.status,
             },
         )
 
@@ -80,7 +101,8 @@ class AcceptInvitationView(APIView):
     def post(self, request, token):
 
         joined_workspace = invitation_services.verify_token_and_accept_invitation(
-            token, request.user
+            user=request.user,
+            invitation_token=token,
         )
 
         return success_response(

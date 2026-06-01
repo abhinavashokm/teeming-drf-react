@@ -1,8 +1,10 @@
 from django.template.loader import render_to_string
 
 from core.services.email_service import send_email
-from core.utils.time_utils import get_expiry_datetime, seconds_to_human
+from core.utils.time_utils import get_expiry_datetime
 from django.conf import settings
+from core.exceptions.helpers import get_object_or_raise
+from ..models import Invitation
 
 
 def get_invitation_expiry():
@@ -39,3 +41,14 @@ This invite link will expire in 48 hours.
         to=to,
         html_message=html_message,
     )
+
+
+def get_invitation_or_raise(workspace, invitation_id):
+    invitation = get_object_or_raise(
+        workspace=workspace,
+        id= invitation_id,
+        model=Invitation,
+        error_message="Invitation not found"
+    )
+
+    return invitation

@@ -5,15 +5,17 @@ import useAppMutation from '../base/useAppMutation'
 import useNavigateWithToast from '../routes/useNavigateWithToast'
 import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
 import { ROUTE_PATHS } from '../../constants/routePaths'
+import useWorkspaceQueryKeys from '../helper/useWorkspaceQueryKeys'
 
 
 function useUpdateWorkspace() {
 
     const workspaceSlug = useWorkspaceSlug()
     const navigate = useNavigate()
+    const workspaceKeys = useWorkspaceQueryKeys()
 
     return useAppMutation({
-        mutationFn: (data) => workspaceService.updateWorkspace(workspaceSlug, data),
+        mutationFn: workspaceService.updateWorkspace,
         onSuccess: (res) => {
 
             //if slug updated, redirect to new slug
@@ -21,7 +23,9 @@ function useUpdateWorkspace() {
                 navigate(ROUTE_PATHS.WORKSPACE_SETTINGS(res.data.slug), { replace: true })
             }
 
-        }
+        },
+        passWorkspaceSlug: true,
+        invalidateKeys: [workspaceKeys.root]
     })
 }
 
