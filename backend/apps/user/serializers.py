@@ -4,6 +4,12 @@ from .models import User
 from core.constants.error_codes import ErrorCode
 
 
+class UserBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'full_name', 'email')
+        
+
 class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:

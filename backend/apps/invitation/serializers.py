@@ -2,6 +2,7 @@ from rest_framework import serializers
 from apps.workspace.models import WorkspaceMember, Workspace
 from .models import Invitation
 from apps.user.models import User
+from apps.user.serializers import UserBasicSerializer
 
 
 class SendWorkspaceInvitationSerializer(serializers.Serializer):
@@ -25,15 +26,8 @@ class JoinedWorkspaceSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug']
 
 
-class InvitationInvitedBySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = ["id", "full_name", "email"]
-
-
 class InvitationsReadSerializer(serializers.ModelSerializer):
-    invited_by = InvitationInvitedBySerializer(read_only=True)
+    invited_by = UserBasicSerializer(read_only=True)
 
     class Meta:
         model = Invitation

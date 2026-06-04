@@ -16,7 +16,7 @@ class Idea(WorkspaceScopedBaseModel):
 
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    deadline = models.DateField(null=True, blank=True)
+    target_date = models.DateField(null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=StatusChoices.choices, default=StatusChoices.SUGGESTION
     )

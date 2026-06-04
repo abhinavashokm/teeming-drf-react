@@ -1,5 +1,5 @@
 from .models import Goal, StarredGoal
-from .helpers.goalHelper import get_goal_or_raise
+from .helpers.goal_helper import get_goal_or_raise
 from django.db.models import Exists, OuterRef
 
 
