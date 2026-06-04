@@ -79,7 +79,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
       )}
 
       <aside className={`
-        bg-white min-[865px]:bg-gray-50/50 flex flex-col shrink-0 h-screen
+        bg-white min-[865px]:bg-gray-50/50 flex flex-col shrink-0 h-[100dvh]
         fixed min-[865px]:relative top-0 left-0 z-50
         transition-all duration-200
         min-[865px]:translate-x-0
@@ -174,18 +174,6 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
               {sidebarContentExpanded && 'Search'}
             </button>
 
-            <button
-              className={`flex items-center justify-center ${sidebarContentExpanded ? 'flex-1 gap-1.5 py-1.5' : 'w-8 h-8 mx-auto relative'} border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors`}
-              title={!sidebarContentExpanded ? 'Inbox' : ''}
-            >
-              <Mail className="h-3.5 w-3.5 text-gray-400" strokeWidth={1.5} />
-              {sidebarContentExpanded && 'Inbox'}
-              {sidebarContentExpanded ? (
-                <span className="flex items-center justify-center h-3.5 bg-teeming-green text-white text-[9px] rounded-full px-1.5 ml-0.5">3</span>
-              ) : (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center h-3.5 w-3.5 bg-teeming-green text-white text-[9px] rounded-full">3</span>
-              )}
-            </button>
           </div>
 
           {/* Home */}

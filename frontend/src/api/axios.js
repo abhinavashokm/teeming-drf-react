@@ -6,7 +6,8 @@ import { authResponseInterceptor } from "./interceptors/authResponseInterceptor"
 const api = applyCaseMiddleware(axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
-        "Content-Type": 'application/json'
+        "Content-Type": 'application/json',
+        ...(import.meta.env.DEV && { "ngrok-skip-browser-warning": "true" }), //for tunneling use
     },
     withCredentials: true, //Send cookies with cross-origin requests.
 }))

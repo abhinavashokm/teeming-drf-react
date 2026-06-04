@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Target, Calendar, MessageSquare, Plus, CheckCircle2, Circle, MoreHorizontal, User, Users, Paperclip, Send, X, Activity, ChevronDown, ChevronUp, Search, ListFilter, ChevronRight, ChevronLeft, Info, AlertCircle, ThumbsUp, KanbanSquare, BarChart2, TrendingUp, Flag, Lock, RefreshCw, TableProperties, Check, TrendingDown, Sparkles, Wand2, Zap, Lightbulb } from 'lucide-react';
+import { Activity, AlertCircle, BarChart2, Calendar, Check, CheckCircle2, ChevronLeft, ChevronRight, Flag, Info, KanbanSquare, Lightbulb, ListFilter, Lock, MessageSquare, MoreHorizontal, Paperclip, Plus, RefreshCw, Search, Sparkles, TableProperties, Target, ThumbsUp, TrendingDown, TrendingUp, Wand2, X, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import useGoal from '../../hooks/goal/useGoal';
-import GoalInfoModal from '../../components/goal/GoalInfoModal';
 
 const initialIdeasCards = [
   { id: 'i1', title: 'Add one-click Apple Pay option', assignee: { initials: 'AJ', name: 'Arjun', bgClass: 'bg-blue-100', textClass: 'text-blue-700' }, thumbsUp: 5, date: '2026-05-30T10:00:00Z' },
@@ -289,9 +288,9 @@ const KanbanColumn = ({ id, title, theme, initialCards, showAddIdea, onAddIdea, 
   );
 };
 
-export default function GoalDashboard({ goalTitle, isRightPanelOpen, setIsRightPanelOpen, isGoalInfoModalOpen, setIsGoalInfoModalOpen }) {
+export default function GoalDashboard({ goalTitle, isRightPanelOpen, setIsRightPanelOpen, isGoalInfoModalOpen }) {
 
-  const { setIsFullBleed } = useOutletContext()
+  const { setIsFullBleed, setIsGoalInfoModalOpen } = useOutletContext()
 
   useEffect(() => {
     setIsFullBleed(true)
@@ -302,110 +301,8 @@ export default function GoalDashboard({ goalTitle, isRightPanelOpen, setIsRightP
 
   const [activeRightPanelTab, setActiveRightPanelTab] = useState('discussion'); // 'discussion' or 'activities'
 
-  // Sheet drag state
-  const [sheetState, setSheetState] = useState('half'); // 'half', 'full'
-  const [sheetOffset, setSheetOffset] = useState(0);
-  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
-  const dragStartY = useRef(0);
-  const lastDragTime = useRef(0);
-  const lastDragY = useRef(0);
 
-  useEffect(() => {
-    if (isRightPanelOpen) {
-      setSheetState('half');
-      setSheetOffset(0);
-    }
-  }, [isRightPanelOpen]);
 
-  const handleDragStart = (clientY) => {
-    setIsDraggingSheet(true);
-    dragStartY.current = clientY;
-    lastDragY.current = clientY;
-    lastDragTime.current = Date.now();
-    document.body.style.userSelect = 'none';
-  };
-
-  const handleDragMove = (clientY) => {
-    if (!isDraggingSheet) return;
-    lastDragY.current = clientY;
-    lastDragTime.current = Date.now();
-
-    const deltaY = clientY - dragStartY.current;
-    if (sheetState === 'full' && deltaY < 0) {
-      setSheetOffset(deltaY * 0.3); // rubber band
-    } else {
-      setSheetOffset(deltaY);
-    }
-  };
-
-  const handleDragEnd = () => {
-    if (!isDraggingSheet) return;
-    setIsDraggingSheet(false);
-    document.body.style.userSelect = '';
-
-    const deltaY = lastDragY.current - dragStartY.current;
-    const timeDelta = Date.now() - lastDragTime.current;
-    const velocity = timeDelta > 0 ? deltaY / timeDelta : 0;
-
-    const viewportHeight = window.innerHeight;
-    const halfVh = viewportHeight * 0.45;
-
-    if (sheetState === 'half') {
-      if (deltaY < -50 || velocity < -0.5) {
-        setSheetState('full');
-      } else if (deltaY > 50 || velocity > 0.5) {
-        setIsRightPanelOpen(false);
-      }
-    } else if (sheetState === 'full') {
-      if (deltaY > halfVh / 2 || velocity > 0.5) {
-        setSheetState('half');
-      }
-    }
-    setSheetOffset(0);
-  };
-
-  useEffect(() => {
-    const onMouseMove = (e) => handleDragMove(e.clientY);
-    const onMouseUp = () => handleDragEnd();
-    const onTouchMove = (e) => handleDragMove(e.touches[0].clientY);
-    const onTouchEnd = () => handleDragEnd();
-
-    if (isDraggingSheet) {
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-      document.addEventListener('touchmove', onTouchMove, { passive: false });
-      document.addEventListener('touchend', onTouchEnd);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      document.removeEventListener('touchmove', onTouchMove);
-      document.removeEventListener('touchend', onTouchEnd);
-    };
-  }, [isDraggingSheet, sheetState]);
-
-  const handleSheetTouchStart = (e) => handleDragStart(e.touches[0].clientY);
-  const handleSheetMouseDown = (e) => handleDragStart(e.clientY);
-
-  const getBackdropOpacity = () => {
-    let baseOpacity = sheetState === 'half' ? 0.4 : 0.7;
-    if (isDraggingSheet && typeof window !== 'undefined') {
-      if (sheetState === 'half' && sheetOffset < 0) {
-        const progress = Math.min(Math.abs(sheetOffset) / (window.innerHeight * 0.45), 1);
-        baseOpacity = 0.4 + (0.3 * progress);
-      } else if (sheetState === 'full' && sheetOffset > 0) {
-        const progress = Math.min(sheetOffset / (window.innerHeight * 0.45), 1);
-        baseOpacity = 0.7 - (0.3 * progress);
-      } else if (sheetState === 'half' && sheetOffset > 0) {
-        const progress = Math.min(sheetOffset / (window.innerHeight * 0.5), 1);
-        baseOpacity = 0.4 - (0.4 * progress);
-      }
-    }
-    return baseOpacity;
-  };
-
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [activeView, setActiveView] = useState('board');
   const [isBaselineModalOpen, setIsBaselineModalOpen] = useState(false);
   const [baselineMode, setBaselineMode] = useState('create');
@@ -887,7 +784,7 @@ export default function GoalDashboard({ goalTitle, isRightPanelOpen, setIsRightP
           <div
             className="lg:hidden fixed min-[865px]:absolute inset-0 bg-gray-900 z-40"
             style={{
-              opacity: getBackdropOpacity(),
+              opacity: "fixed inset-0 bg-gray-900/40",
               transition: isDraggingSheet ? 'none' : 'opacity 300ms ease-out'
             }}
             onClick={() => setIsRightPanelOpen(false)}
@@ -898,12 +795,6 @@ export default function GoalDashboard({ goalTitle, isRightPanelOpen, setIsRightP
               transform: typeof window !== 'undefined' && window.innerWidth < 1024 ? `translateY(calc(${sheetState === 'half' ? '45vh' : '0px'} + ${sheetOffset}px))` : 'none'
             }}
           >
-            {/* Invisible Mobile Drag Zone */}
-            <div
-              className="lg:hidden absolute top-0 inset-x-0 h-4 cursor-ns-resize z-50"
-              onTouchStart={handleSheetTouchStart}
-              onMouseDown={handleSheetMouseDown}
-            ></div>
 
             {/* Tabs */}
             <div className="flex items-center px-5 pt-4 border-b border-gray-200 bg-white shrink-0 relative pr-12">
