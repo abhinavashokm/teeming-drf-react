@@ -8,6 +8,7 @@ import useStarGoal from '../../hooks/goal/useStarGoal';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { useCan } from '../../hooks/permissions/useCan';
 import { PERMISSIONS } from '../../constants/permissions';
+import { useNavigate } from 'react-router-dom';
 
 function GoalCard({ goal }) {
 
@@ -21,6 +22,8 @@ function GoalCard({ goal }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
     const menuRef = useRef(null);
+
+    const navigate = useNavigate()
 
 
     useEffect(() => {
@@ -45,10 +48,14 @@ function GoalCard({ goal }) {
         }
     }
 
+    const handleOpenGoal = () => {
+        navigate('goals')
+    }
+
 
     return (
         <>
-            <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
+            <div onClick={handleOpenGoal} className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
                 <div className={`h-28 ${getGoalCardColorClass(goal.id)} p-4 flex flex-col justify-between`}>
                     <div className="flex justify-between items-start">
                         <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">no ideas yet</span>

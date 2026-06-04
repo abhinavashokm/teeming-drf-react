@@ -1,4 +1,5 @@
 import WorkspaceLayout from "../layouts/WorkspaceLayout";
+import GoalDashboard from "../pages/goal/GoalDashboard";
 import HomePage from "../pages/workspace/HomePage";
 import ManageTeamPage from "../pages/workspace/ManageTeamPage";
 import MyAccountPage from "../pages/workspace/MyAccountPage";
@@ -21,6 +22,9 @@ const workspaceRoutes = {
         },{
             path: 'settings',
             element: <WorkspaceSettingsPage/>
+        },{
+            path: 'goals',
+            element: <GoalDashboard />
         }
     ]
 }

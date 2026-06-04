@@ -4,10 +4,11 @@ import {
   Layers,
   LogOut,
   Mail,
+  Menu,
   PanelLeft,
   Search,
   Settings,
-  Target,
+  Star,
   Users,
   Zap
 } from 'lucide-react';
@@ -22,9 +23,22 @@ import useWorkspace from '../../hooks/workspace/useWorkspace';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
 
+const getGoalColors = (goalName) => {
+  const colorSets = [
+    { bg: 'bg-blue-100', text: 'text-blue-700' },
+    { bg: 'bg-green-100', text: 'text-green-700' },
+    { bg: 'bg-amber-100', text: 'text-amber-700' },
+    { bg: 'bg-pink-100', text: 'text-pink-700' },
+    { bg: 'bg-teal-100', text: 'text-teal-700' },
+  ];
+  let hash = 0;
+  for (let i = 0; i < goalName.length; i++) {
+    hash = goalName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colorSets[Math.abs(hash) % colorSets.length];
+};
 
-
-function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
+function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setIsMobileMenuOpen }) {
 
   const { data: currentUser } = useAuth()
   const { data: currentWorkspace } = useWorkspace()
@@ -34,7 +48,6 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
   const canLeaveWorkspace = useCan(PERMISSIONS.LEAVE_WORKSPACE)
   const canUpgradePlan = useCan(PERMISSIONS.UPGRADE_PLAN)
   const canManageSettings = useCan(PERMISSIONS.MANAGE_SETTINGS)
-
 
   const [currentView, setCurrentView] = useState('home');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -50,200 +63,275 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible }) {
 
   const starredGoals = goals?.filter(g => g.isStarred) ?? []
 
+  // True when sidebar content (labels etc) should be visible
+  const sidebarContentExpanded = isMobileMenuOpen || isSidebarVisible;
+
   if (!currentWorkspace) return null
+
   return (
     <>
-      <aside className={`bg-white md:bg-gray-50/50 flex flex-col shrink-0 h-screen absolute md:relative top-0 left-0 z-40 transition-all duration-200 ${isSidebarVisible ? 'w-64 border-r border-gray-200' : 'w-0 border-transparent overflow-hidden'}`}>
+      {/* Mobile backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="min-[865px]:hidden fixed inset-0 bg-gray-900/40 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-        {/* Workspace Dropdown in sidebar top */}
-        <div className="h-14 flex items-center justify-between px-3 shrink-0 relative border-b border-gray-200 z-50">
+      <aside className={`
+        bg-white min-[865px]:bg-gray-50/50 flex flex-col shrink-0 h-screen
+        fixed min-[865px]:relative top-0 left-0 z-50
+        transition-all duration-200
+        min-[865px]:translate-x-0
+        ${isMobileMenuOpen ? 'translate-x-0 w-64 shadow-2xl min-[865px]:shadow-none' : '-translate-x-full'}
+        ${isSidebarVisible ? 'min-[865px]:w-64' : 'min-[865px]:w-11'}
+        border-r border-gray-200
+      `}>
+
+        {/* Workspace Dropdown */}
+        <div className={`h-14 flex items-center ${sidebarContentExpanded ? 'justify-between px-3' : 'justify-center px-0'} shrink-0 relative border-b border-gray-200 z-50`}>
           <button
             onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
-            className="flex-1 flex items-center justify-between p-1.5 rounded-lg hover:bg-gray-100/50 transition-colors group text-left min-w-0"
+            className={`flex items-center ${sidebarContentExpanded ? 'flex-1 justify-between p-1.5' : 'justify-center p-1.5 w-full'} rounded-lg hover:bg-gray-100/50 transition-colors group text-left min-w-0`}
+            title={!sidebarContentExpanded ? currentWorkspace.name : ''}
           >
-            <div className="flex items-center gap-2.5 min-w-0">
+            <div className={`flex items-center gap-2.5 min-w-0 ${!sidebarContentExpanded ? 'mx-auto' : ''}`}>
               <div className="w-8 h-8 bg-gray-900 rounded-[8px] flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
                 {currentWorkspace.name[0]?.toUpperCase()}
               </div>
-              <div className="flex flex-col min-w-0 text-left">
-                <div className="flex items-center gap-1.5 overflow-hidden">
-                  <span className="font-semibold text-[14px] text-gray-900 tracking-tight truncate leading-tight">{currentWorkspace.name}</span>
-                  <ChevronDown className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 shrink-0" />
+              {sidebarContentExpanded && (
+                <div className="flex flex-col min-w-0 text-left">
+                  <div className="flex items-center gap-1.5 overflow-hidden">
+                    <span className="font-semibold text-[14px] text-gray-900 tracking-tight truncate leading-tight">{currentWorkspace.name}</span>
+                    <ChevronDown className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 shrink-0" />
+                  </div>
+                  <div className="flex items-center text-[11px] mt-0.5">
+                    <span className="text-gray-500 truncate">Free plan</span>
+                    <span className="text-gray-300 mx-1">·</span>
+                    <span className={`truncate ${roleColors[currentWorkspace.role] || 'text-gray-500'}`}>{currentWorkspace.role}</span>
+                  </div>
                 </div>
-                <div className="flex items-center text-[11px] mt-0.5">
-                  <span className="text-gray-500 truncate">Free plan</span>
-                  <span className="text-gray-300 mx-1">·</span>
-                  <span className={`truncate ${roleColors[currentWorkspace.role] || 'text-gray-500'}`}>{currentWorkspace.role}</span>
-                </div>
-              </div>
+              )}
             </div>
           </button>
 
-          <button
-            onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-            className="text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors ml-1 shrink-0"
-          >
-            <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.5} />
-          </button>
+          {sidebarContentExpanded && (
+            <button
+              onClick={() => isMobileMenuOpen ? setIsMobileMenuOpen(false) : setIsSidebarVisible(!isSidebarVisible)}
+              className="text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors ml-1 shrink-0"
+              title="Collapse Sidebar"
+            >
+              <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.5} />
+            </button>
+          )}
 
           {isWorkspaceDropdownOpen && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setIsWorkspaceDropdownOpen(false)}></div>
-              <div className="absolute left-4 top-full mt-1 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden transform origin-top-left transition-all duration-200">
+              <div className="fixed inset-0 z-40" onClick={() => setIsWorkspaceDropdownOpen(false)} />
+              <div className="absolute left-4 top-full mt-1 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden">
+                <div className="border-t border-gray-100/80 mb-1.5" />
 
-                <div className="border-t border-gray-100/80 mb-1.5"></div>
-
-                {
-                  canUpgradePlan &&
+                {canUpgradePlan && (
                   <button className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
                     <Zap className="h-[15px] w-[15px] text-gray-400 group-hover:text-yellow-500" />
                     Upgrade Plan
                   </button>
-                }
+                )}
 
-
-                <button onClick={() => { setIsSwitchWorkspaceModalOpen(true); setIsWorkspaceDropdownOpen(false); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
+                <button
+                  onClick={() => { setIsSwitchWorkspaceModalOpen(true); setIsWorkspaceDropdownOpen(false); }}
+                  className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group"
+                >
                   <Layers className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
                   Switch Workspace
                 </button>
-                <div className="border-t border-gray-100/80 my-1.5"></div>
 
-                {
-                  canLeaveWorkspace &&
+                <div className="border-t border-gray-100/80 my-1.5" />
 
-                  <button onClick={() => { setIsWorkspaceDropdownOpen(false); setIsLeaveModalOpen(true); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group">
+                {canLeaveWorkspace && (
+                  <button
+                    onClick={() => { setIsWorkspaceDropdownOpen(false); setIsLeaveModalOpen(true); }}
+                    className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group"
+                  >
                     <LogOut className="h-[15px] w-[15px] text-red-500 group-hover:text-red-600" />
                     Leave Workspace
                   </button>
-                }
-
+                )}
               </div>
             </>
           )}
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-4">
+        <nav className={`flex-1 overflow-y-auto ${sidebarContentExpanded ? 'px-3' : 'px-1.5'} py-5 space-y-4`}>
 
           {/* Search & Inbox */}
-          <div className="flex gap-1 pb-4 border-b border-gray-200">
+          <div className={`flex ${sidebarContentExpanded ? 'gap-1' : 'flex-col gap-2'} pb-4 border-b border-gray-200`}>
             <button
-              onClick={() => console.log('Search clicked')}
-              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors"
+              className={`flex items-center justify-center ${sidebarContentExpanded ? 'flex-1 gap-1.5 py-1.5' : 'w-8 h-8 mx-auto'} border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors`}
+              title={!sidebarContentExpanded ? 'Search' : ''}
             >
               <Search className="h-3.5 w-3.5 text-gray-400" strokeWidth={1.5} />
-              Search
+              {sidebarContentExpanded && 'Search'}
             </button>
 
-            {/* <button
-              onClick={() => console.log('Inbox clicked')}
-              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors"
+            <button
+              className={`flex items-center justify-center ${sidebarContentExpanded ? 'flex-1 gap-1.5 py-1.5' : 'w-8 h-8 mx-auto relative'} border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors`}
+              title={!sidebarContentExpanded ? 'Inbox' : ''}
             >
               <Mail className="h-3.5 w-3.5 text-gray-400" strokeWidth={1.5} />
-              Inbox
-              <span className="flex items-center justify-center h-3.5 bg-teeming-green text-white text-[9px] rounded-full px-1.5 ml-0.5">
-                3
-              </span>
-            </button> */}
-
+              {sidebarContentExpanded && 'Inbox'}
+              {sidebarContentExpanded ? (
+                <span className="flex items-center justify-center h-3.5 bg-teeming-green text-white text-[9px] rounded-full px-1.5 ml-0.5">3</span>
+              ) : (
+                <span className="absolute -top-1 -right-1 flex items-center justify-center h-3.5 w-3.5 bg-teeming-green text-white text-[9px] rounded-full">3</span>
+              )}
+            </button>
           </div>
 
           {/* Home */}
           <div className="pb-4 border-b border-gray-200">
-            <Link to={''} onClick={() => setCurrentView('home')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'home' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
-              <Home className={`h-4 w-4 ${currentView === 'home' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-              Home
+            <Link
+              to=""
+              onClick={() => setCurrentView('home')}
+              className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'home' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
+              title={!sidebarContentExpanded ? 'Home' : ''}
+            >
+              <Home className={`h-4 w-4 shrink-0 ${currentView === 'home' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
+              {sidebarContentExpanded && <span>Home</span>}
             </Link>
           </div>
 
-          {/* Goals */}
+          {/* Starred Goals */}
           <div className="pb-4 border-b border-gray-200">
-            <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-2.5 mb-2">Starred Goals</h3>
+            {sidebarContentExpanded && (
+              <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-2.5 mb-2">Starred Goals</h3>
+            )}
             <div className="space-y-0.5">
-              {starredGoals.map(goal => (
-                <a key={goal} href="#" className="flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors">
-                  <Target className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
-                  {goal.name}
-                </a>
-              ))}
-              {starredGoals.length === 0 && (
+              {starredGoals.map(goal => {
+                const colors = getGoalColors(goal.name);
+                return (
+                  <Link
+                    key={goal.id}
+                    to={`goals/${goal.slug}`}
+                    className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors`}
+                    title={!sidebarContentExpanded ? goal.name : ''}
+                  >
+                    <div className="relative shrink-0">
+                      <div className={`flex items-center justify-center text-[9px] font-semibold rounded-full ${colors.bg} ${colors.text} ${sidebarContentExpanded ? 'w-[22px] h-[22px]' : 'w-[26px] h-[26px]'}`}>
+                        {goal.name.substring(0, 2).toUpperCase()}
+                      </div>
+                      {!sidebarContentExpanded && (
+                        <div className="absolute -top-[3px] -right-[3px] bg-white rounded-full ring-[2px] ring-white">
+                          <Star className="h-[9px] w-[9px] text-amber-400 fill-amber-400" strokeWidth={1.5} />
+                        </div>
+                      )}
+                    </div>
+                    {sidebarContentExpanded && (
+                      <div className="flex items-center justify-between flex-1 min-w-0 pr-1">
+                        <span className="truncate">{goal.name}</span>
+                        <Star className="h-3 w-3 text-amber-400 fill-amber-400 opacity-60 shrink-0" strokeWidth={1} />
+                      </div>
+                    )}
+                  </Link>
+                );
+              })}
+              {sidebarContentExpanded && starredGoals.length === 0 && (
                 <div className="px-2.5 py-1.5 text-[12px] text-gray-400 italic">No starred goals</div>
               )}
             </div>
           </div>
 
-          {/* Settings & Manage Team */}
+          {/* Manage Team & Settings */}
           <div className="space-y-0.5">
-
-            <Link to={'manage-team'} onClick={() => setCurrentView('team')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
-              <Users className={`h-4 w-4 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-              {currentWorkspace.role !== "Member" ? "Manage Team" : "View Team"}
+            <Link
+              to="manage-team"
+              onClick={() => setCurrentView('team')}
+              className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
+              title={!sidebarContentExpanded ? (currentWorkspace.role !== 'Member' ? 'Manage Team' : 'View Team') : ''}
+            >
+              <Users className={`h-4 w-4 shrink-0 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
+              {sidebarContentExpanded && <span>{currentWorkspace.role !== 'Member' ? 'Manage Team' : 'View Team'}</span>}
             </Link>
 
-            {
-              canManageSettings &&
-              <Link to={'settings'} onClick={() => setCurrentView('workspace_settings')} className={`flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}>
-                <Settings className={`h-4 w-4 ${currentView === 'workspace_settings' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-                Settings
+            {canManageSettings && (
+              <Link
+                to="settings"
+                onClick={() => setCurrentView('workspace_settings')}
+                className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
+                title={!sidebarContentExpanded ? 'Settings' : ''}
+              >
+                <Settings className={`h-4 w-4 shrink-0 ${currentView === 'workspace_settings' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
+                {sidebarContentExpanded && <span>Settings</span>}
               </Link>
-            }
-
-
+            )}
           </div>
 
         </nav>
 
         {/* User Profile Strip */}
-        <div className="shrink-0 border-t border-gray-200 p-4 relative">
+        <div className={`shrink-0 border-t border-gray-200 relative ${sidebarContentExpanded ? 'p-4' : 'p-2 flex flex-col items-center'}`}>
           <button
             onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-            className="w-full flex items-center justify-between p-2 -mx-2 rounded-xl hover:bg-gray-100/50 transition-colors group"
+            className={`w-full flex items-center p-2 rounded-xl hover:bg-gray-100/50 transition-colors group ${sidebarContentExpanded ? 'justify-between -mx-2' : 'justify-center mx-0'}`}
+            title={!sidebarContentExpanded ? 'Profile' : ''}
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
                 {currentUser.fullName.slice(0, 2).toUpperCase()}
               </div>
-              <div className="flex flex-col min-w-0 text-left">
-                <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">{currentUser.fullName}</span>
-                <span className="text-[12px] text-gray-500 mt-0.5">{currentUser.email}</span>
-              </div>
+              {sidebarContentExpanded && (
+                <div className="flex flex-col min-w-0 text-left">
+                  <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">{currentUser.fullName}</span>
+                  <span className="text-[12px] text-gray-500 mt-0.5">{currentUser.email}</span>
+                </div>
+              )}
             </div>
-            {isProfileDropdownOpen ? (
-              <ChevronDown className="h-4 w-4 text-gray-400" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
+            {sidebarContentExpanded && (
+              isProfileDropdownOpen
+                ? <ChevronDown className="h-4 w-4 text-gray-400 shrink-0" />
+                : <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 shrink-0" />
             )}
           </button>
 
           {isProfileDropdownOpen && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setIsProfileDropdownOpen(false)}></div>
-              <div className="absolute bottom-full left-4 mb-3 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden transform origin-bottom-left transition-all duration-200 opacity-100 scale-100">
-
-                <Link to={'my-account'} onClick={() => { setCurrentView('account'); setIsProfileDropdownOpen(false); }}>
-                  <button
-                    className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group"
-                  >
+              <div className="fixed inset-0 z-40" onClick={() => setIsProfileDropdownOpen(false)} />
+              <div className="absolute bottom-full left-4 mb-3 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden">
+                <Link to="my-account" onClick={() => { setCurrentView('account'); setIsProfileDropdownOpen(false); }}>
+                  <button className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
                     <Settings className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
                     My Account
                   </button>
                 </Link>
-
-                <div className="border-t border-gray-100 my-1.5"></div>
-
-                <button onClick={logoutUser} className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group">
+                <div className="border-t border-gray-100 my-1.5" />
+                <button
+                  onClick={logoutUser}
+                  className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group"
+                >
                   <LogOut className="h-[15px] w-[15px] text-red-500 group-hover:text-red-600" />
                   Sign Out
                 </button>
-
               </div>
             </>
+          )}
+
+          {/* Expand button when collapsed */}
+          {!sidebarContentExpanded && (
+            <div className="mt-2 border-t border-gray-200/50 pt-2 flex w-full justify-center">
+              <button
+                onClick={() => setIsSidebarVisible(true)}
+                className="text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
+                title="Expand Sidebar"
+              >
+                <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              </button>
+            </div>
           )}
         </div>
       </aside>
 
       <LeaveWorkspaceModal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} />
       <SwitchWorkspaceModal isOpen={isSwitchWorkspaceModalOpen} onClose={() => setIsSwitchWorkspaceModalOpen(false)} />
-
     </>
   )
 }

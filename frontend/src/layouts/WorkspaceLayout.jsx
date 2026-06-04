@@ -1,8 +1,7 @@
 import {
-  PanelLeft,
-  PanelTop
+  Menu
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/app/Navbar';
 import Sidebar from "../components/app/Sidebar";
@@ -16,8 +15,19 @@ function WorkspaceLayout() {
   const { data, isPending: isWorkspacePending, isError, error } = useWorkspace()
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isFullBleed, setIsFullBleed] = useState(false); //for goal dashboard
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 865) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (isWorkspacePending) return <FullPageLoader />
 
@@ -32,48 +42,42 @@ function WorkspaceLayout() {
     />
   }
 
+
   return (
     <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"
     >
 
       {/* Sidebar */}
-      {isSidebarVisible && (
-        <div
-          className="fixed inset-0 bg-black/20 z-30 md:hidden"
-          onClick={() => setIsSidebarVisible(false)}
-        />
-      )}
-      <Sidebar isSidebarVisible={isSidebarVisible} setIsSidebarVisible={setIsSidebarVisible} />
+      <Sidebar
+        isSidebarVisible={isSidebarVisible}
+        setIsSidebarVisible={setIsSidebarVisible}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+      />
 
       {/* Main Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
 
         {/* Toggle Navbar & Sidebar Buttons - Pinned to top */}
         <div className="absolute top-0 left-0 h-[44px] flex items-center gap-1 pl-4 z-30 pointer-events-none">
-          {!isSidebarVisible && (
+          {!isMobileMenuOpen && (
             <button
-              onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-              className="pointer-events-auto text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="pointer-events-auto min-[865px]:hidden text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
             >
-              <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              <Menu className="h-[20px] w-[20px]" strokeWidth={1.5} />
             </button>
           )}
-          <button
-            onClick={() => setIsNavbarVisible(!isNavbarVisible)}
-            className="pointer-events-auto text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
-          >
-            <PanelTop className="h-[18px] w-[18px]" strokeWidth={1.5} />
-          </button>
         </div>
 
         {/* Navbar */}
-        <Navbar isNavbarVisible={isNavbarVisible} isScrolled={isScrolled} />
+        <Navbar setIsMobileMenuOpen={setIsMobileMenuOpen} isScrolled={isScrolled} />
 
         <main
-          className="flex-1  overflow-y-auto p-8 md:p-12 lg:px-16"
+          className={`flex-1  ${isFullBleed ? "flex flex-col overflow-hidden" : "overflow-y-auto p-8 md:p-12 lg:px-16"}`}
           onScroll={(e) => setIsScrolled(e.target.scrollTop > 10)}
         >
-          <Outlet />
+          <Outlet context={{ setIsFullBleed }} />
         </main>
 
       </div>
