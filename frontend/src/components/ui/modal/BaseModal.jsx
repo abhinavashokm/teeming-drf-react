@@ -103,7 +103,7 @@ function BaseModal({
         {/* Mobile drag handle */}
         {mobileSheet && (
           <div
-            className="md:hidden w-full flex justify-center pt-3 pb-1 shrink-0 cursor-grab active:cursor-grabbing touch-none"
+            className="md:hidden w-full flex justify-center py-4 shrink-0 cursor-grab active:cursor-grabbing touch-none"
             onTouchStart={handleDragStart}
             onTouchMove={handleDragMove}
             onTouchEnd={handleDragEnd}

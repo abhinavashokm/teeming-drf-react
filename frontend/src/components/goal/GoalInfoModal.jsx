@@ -16,7 +16,7 @@ function GoalInfoModal({ isOpen, onClose }) {
                 <div className="w-10 h-10 rounded-lg bg-[#378ADD] flex items-center justify-center text-white shadow-sm shrink-0">
                     <Target className="w-5 h-5" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 truncate">{currentGoal.title}</h2>
+                <h2 className="text-lg font-bold text-gray-900 truncate">{currentGoal.name}</h2>
             </BaseModal.Header>
 
             <BaseModal.Body>
