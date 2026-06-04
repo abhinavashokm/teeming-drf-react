@@ -63,35 +63,41 @@ class GoalDetailView(WorkspacePermissionBaseView):
         "DELETE": [IsWorkspaceAdmin],
     }
 
+    def get(self, request, **kwargs):
+
+        goal = goal_services.get_goal(
+            workspace=request.workspace, goal_id=kwargs["goal_id"]
+        )
+
+        serializer = GoalReadSerializer(goal)
+
+        return success_response(status_code=status.HTTP_200_OK, data=serializer.data)
+    
+
     def patch(self, request, **kwargs):
         serializer = GoalWriteSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         updated_goal = goal_services.update_goal(
             workspace=request.workspace,
-            goal_id = kwargs['goal_id'],
-            data=serializer.validated_data
+            goal_id=kwargs["goal_id"],
+            data=serializer.validated_data,
         )
 
         return success_response(
             status_code=status.HTTP_200_OK,
             data=GoalReadSerializer(updated_goal).data,
-            message="Goal updated"
-
+            message="Goal updated",
         )
-    
+
     def delete(self, request, **kwargs):
 
         goal_services.delete_goal(
-            workspace=request.workspace,
-            goal_id=kwargs['goal_id']
+            workspace=request.workspace, goal_id=kwargs["goal_id"]
         )
 
-        return success_response(
-            message="Goal deleted",
-            status_code=status.HTTP_200_OK
-        )
-    
+        return success_response(message="Goal deleted", status_code=status.HTTP_200_OK)
+
 
 class GoalStarView(MemberBaseView):
     """star or unstar a goal by current user"""
@@ -100,26 +106,16 @@ class GoalStarView(MemberBaseView):
         """star goal by user"""
 
         goal_services.star_goal(
-            user=request.user,
-            workspace=request.workspace,
-            goal_id=kwargs['goal_id']
+            user=request.user, workspace=request.workspace, goal_id=kwargs["goal_id"]
         )
-        
-        return success_response(
-            status_code=status.HTTP_201_CREATED
-        )
-    
+
+        return success_response(status_code=status.HTTP_201_CREATED)
+
     def delete(self, request, **kwargs):
         """unstar goal by user"""
 
         goal_services.unstar_goal(
-            user=request.user,
-            workspace=request.workspace,
-            goal_id=kwargs["goal_id"]
+            user=request.user, workspace=request.workspace, goal_id=kwargs["goal_id"]
         )
 
-        return success_response(
-            status_code=status.HTTP_204_NO_CONTENT
-        )
-
-
+        return success_response(status_code=status.HTTP_204_NO_CONTENT)

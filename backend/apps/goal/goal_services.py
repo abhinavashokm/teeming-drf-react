@@ -9,6 +9,17 @@ def create_goal(data):
     return Goal.objects.create(**data)
 
 
+def get_goal(workspace, goal_id):
+    """return a single goal by id"""
+    
+    goal = get_goal_or_raise(
+        workspace=workspace,
+        goal_id=goal_id
+    )
+
+    return goal
+
+
 def list_workspace_goals(workspace, user):
     """return all goals in the current workspace with is starred field annotated"""
 

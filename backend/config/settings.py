@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "apps.workspace",
     "apps.invitation",
     "apps.goal",
+    "apps.idea",
 ]
 
 MIDDLEWARE = [
