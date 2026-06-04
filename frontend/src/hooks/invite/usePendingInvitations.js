@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { inviteService } from '../../services/inviteService'
 import useWorkspaceQueryKeys from '../helper/useWorkspaceQueryKeys'
-import useWorkspaceSlug from "../workspace/useWorkspaceSlug"
+import useWorkspaceSlug from "../params/useWorkspaceSlug"
 
 export default function usePendingInvitations() {
 

@@ -10,4 +10,5 @@ export const ROUTE_PATHS = {
     LOGIN_WITH_INVITE: (token) => `/auth/login?token=${token}`,
     SIGNUP_WITH_INVITE: (token) => `/auth/signup?token=${token}`,
     WORKSPACE_SETTINGS: (slug) => `${workspacePath(slug)}/settings`,
+    GOAL_DASHBOARD: (slug, goal_id) => `${workspacePath(slug)}/goals/${goal_id}`,
 }

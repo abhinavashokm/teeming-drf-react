@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
+import useWorkspaceSlug from '../params/useWorkspaceSlug'
 import { teamService } from '../../services/teamService'
 import { sortCurrentUserToFirst } from '../../utils/workspaceUtils'
 import useAuth from '../auth/useAuth'

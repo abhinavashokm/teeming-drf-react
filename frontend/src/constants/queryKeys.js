@@ -18,6 +18,11 @@ export const workspaceQueryKeys = {
         ...root(slug),
         'goals'
     ],
+    goal: (slug, goal_id) => [
+        ...root(slug),
+        'goal',
+        goal_id
+    ]
 }
 
 //can be used directly, no hooks needed

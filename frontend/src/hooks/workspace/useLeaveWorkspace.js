@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { workspaceService } from '../../services/workspaceService'
 import useAppMutation from '../base/useAppMutation'
-import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
+import useWorkspaceSlug from '../params/useWorkspaceSlug'
 import { getSuccessMsg } from '../../utils/apiParser'
 
 

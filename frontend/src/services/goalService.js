@@ -8,13 +8,18 @@ export const goalService = {
         return res.data
     },
 
-    updateGoal: async (slug, goalId, data) => {
-        const res = await api.patch(`/workspaces/${slug}/goals/${goalId}/`, data)
+    fetchAllGoals: async (slug) => {
+        const res = await api.get(`/workspaces/${slug}/goals/`)
         return res.data
     },
 
-    fetchAllGoals: async (slug) => {
-        const res = await api.get(`/workspaces/${slug}/goals/`)
+    fetchGoal: async (slug, goalId) => {
+        const res = await api.get(`/workspaces/${slug}/goals/${goalId}`)
+        return res.data
+    },
+
+    updateGoal: async (slug, goalId, data) => {
+        const res = await api.patch(`/workspaces/${slug}/goals/${goalId}/`, data)
         return res.data
     },
 
@@ -30,7 +35,6 @@ export const goalService = {
     },
 
     unStarGoal: async (slug, goalId) => {
-        console.log("unbro")
         const res = await api.delete(`/workspaces/${slug}/goals/${goalId}/star/`)
         return res.data
     },

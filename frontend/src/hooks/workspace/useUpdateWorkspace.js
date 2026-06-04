@@ -3,7 +3,7 @@ import { workspaceService } from '../../services/workspaceService'
 import { buildWorkspacePath } from '../../utils/routeUtils'
 import useAppMutation from '../base/useAppMutation'
 import useNavigateWithToast from '../routes/useNavigateWithToast'
-import useWorkspaceSlug from '../workspace/useWorkspaceSlug'
+import useWorkspaceSlug from '../params/useWorkspaceSlug'
 import { ROUTE_PATHS } from '../../constants/routePaths'
 import useWorkspaceQueryKeys from '../helper/useWorkspaceQueryKeys'
 

@@ -7,12 +7,12 @@
     --default-font-family: 'DM Sans', sans-serif;
 
 
-  --color-teeming-green: #1D9E75;
-  --color-teeming-gray: #4B5563;
-  --color-teeming-light-gray: #9CA3AF;
-  --color-teeming-border: #E5E7EB;
-  --color-teeming-text-dark: #111827;
-  --color-teeming-text-light: #6B7280;
+    --color-teeming-green: #1D9E75;
+    --color-teeming-gray: #4B5563;
+    --color-teeming-light-gray: #9CA3AF;
+    --color-teeming-border: #E5E7EB;
+    --color-teeming-text-dark: #111827;
+    --color-teeming-text-light: #6B7280;
 
     --color-grad-orange: rgba(255, 237, 213, 0.4);
     --color-grad-purple: rgba(233, 213, 255, 0.4);
@@ -26,6 +26,10 @@
         radial-gradient(circle at 100% 0%, rgba(233, 213, 255, 0.4) 0%, rgba(233, 213, 255, 0) 40%),
         radial-gradient(circle at 50% 100%, rgba(204, 251, 241, 0.4) 0%, rgba(204, 251, 241, 0) 50%);
 }
+
+/* * {
+    scrollbar-gutter: stable;
+} */
 
 body {
     font-family: var(--font-sans);

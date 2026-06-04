@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { workspaceService } from "../../services/workspaceService";
 import useAuth from "../auth/useAuth";
 import useWorkspaceQueryKeys from "../helper/useWorkspaceQueryKeys";
-import useWorkspaceSlug from "./useWorkspaceSlug";
+import useWorkspaceSlug from "../params/useWorkspaceSlug";
 
 
 export default function useWorkspace() {

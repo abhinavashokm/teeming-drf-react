@@ -12,18 +12,22 @@ const workspaceRoutes = {
     children: [
         {
             index: true,
-            element: <HomePage />
+            element: <HomePage />,
+            handle: {breadcrumb: 'Home'}
         },{
             path:'manage-team',
-            element: <ManageTeamPage/>
+            element: <ManageTeamPage/>,
+            handle: {breadcrumb: 'Manage Team'}
         },{
             path: 'my-account',
-            element: <MyAccountPage/>
+            element: <MyAccountPage/>,
+            handle: {breadcrumb: 'My Account'}
         },{
             path: 'settings',
-            element: <WorkspaceSettingsPage/>
+            element: <WorkspaceSettingsPage/>,
+            handle: {breadcrumb: 'Settings'}
         },{
-            path: 'goals',
+            path: 'goals/:goalId',
             element: <GoalDashboard />
         }
     ]

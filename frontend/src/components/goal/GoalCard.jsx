@@ -1,14 +1,16 @@
 import { MoreHorizontal, Pencil, Star, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PERMISSIONS } from '../../constants/permissions';
+import { ROUTE_PATHS } from '../../constants/routePaths';
 import useDeleteGoal from '../../hooks/goal/useDeleteGoal';
+import useStarGoal from '../../hooks/goal/useStarGoal';
+import useUnstarGoal from '../../hooks/goal/useUnstarGoal';
+import { useCan } from '../../hooks/permissions/useCan';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
+import useWorkspaceSlug from '../../hooks/params/useWorkspaceSlug';
 import { getGoalCardColorClass } from '../../utils/styleUtils';
 import GoalFormModal from './GoalFormModal';
-import useUnstarGoal from '../../hooks/goal/useUnstarGoal';
-import useStarGoal from '../../hooks/goal/useStarGoal';
-import useWorkspace from '../../hooks/workspace/useWorkspace';
-import { useCan } from '../../hooks/permissions/useCan';
-import { PERMISSIONS } from '../../constants/permissions';
-import { useNavigate } from 'react-router-dom';
 
 function GoalCard({ goal }) {
 
@@ -24,6 +26,7 @@ function GoalCard({ goal }) {
     const menuRef = useRef(null);
 
     const navigate = useNavigate()
+    const workspaceSlug = useWorkspaceSlug()
 
 
     useEffect(() => {
@@ -49,9 +52,8 @@ function GoalCard({ goal }) {
     }
 
     const handleOpenGoal = () => {
-        navigate('goals')
+        navigate(ROUTE_PATHS.GOAL_DASHBOARD(workspaceSlug, goal.id))
     }
-
 
     return (
         <>
