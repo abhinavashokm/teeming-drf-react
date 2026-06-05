@@ -22,7 +22,7 @@ createRoot(document.getElementById('root')).render(
 
           <RouterProvider router={router} />
 
-          <ReactQueryDevtools />
+          {import.meta.env.DEV && window.innerWidth > 768 && <ReactQueryDevtools />}
 
         </GoogleOAuthProvider>
 

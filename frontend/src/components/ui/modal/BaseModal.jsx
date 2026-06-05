@@ -95,7 +95,7 @@ function BaseModal({
         style={mobileSheet ? { transform: `translateY(${dragY}px)`, transition: isDragging ? 'none' : 'transform 0.2s ease' } : {}}
         className={`
           relative bg-white w-full overflow-hidden flex flex-col
-          ${mobileSheet ? 'rounded-t-2xl md:rounded-2xl max-h-[90vh] md:max-h-[85vh]' : 'rounded-2xl max-h-[85vh]'}
+          ${mobileSheet ? 'rounded-t-2xl md:rounded-2xl max-h-[90dvh] md:max-h-[85dvh]' : 'rounded-2xl max-h-[85dvh]'}
           ${sizeMap[size]}
           shadow-xl
         `}

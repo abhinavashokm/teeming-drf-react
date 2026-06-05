@@ -10,5 +10,10 @@ export const ideaService = {
     fetchIdeas: async (slug, goalId) => {
         const res = await api.get(`/workspaces/${slug}/goals/${goalId}/ideas/`)
         return res.data
+    },
+
+    deleteIdea: async (slug, ideaId) => {
+        const res = await api.delete(`/workspaces/${slug}/ideas/${ideaId}/`)
+        return res.data
     }
 }

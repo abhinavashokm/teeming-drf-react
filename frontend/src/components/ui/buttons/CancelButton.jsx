@@ -1,7 +1,7 @@
 import AppButton from "./AppButton"
 import { cn } from "../../../utils/cn"
 
-export default function CancelButton({ onClick, className = '', ...props }) {
+export default function CancelButton({ text, onClick, className = '', ...props }) {
     return (
         <AppButton
             variant="secondary"
@@ -9,7 +9,7 @@ export default function CancelButton({ onClick, className = '', ...props }) {
             onClick={onClick}
             {...props}
         >
-            Cancel
+            {text ?? "Cancel"}
         </AppButton>
     )
 }

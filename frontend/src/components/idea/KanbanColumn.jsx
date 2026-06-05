@@ -1,8 +1,9 @@
-import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, ListFilter, MoreHorizontal, Plus, Search, ThumbsUp } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, ListFilter, MoreHorizontal, Plus, Search, ThumbsUp, Lightbulb, Clock } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import useIdeas from '../../hooks/idea/useIdeas';
 import IdeaCard from './IdeaCard';
-import AddIdeaModal from '../goal/AddIdeaModal';
+import AddIdeaModal from './AddIdeaModal.jsx';
+import { IDEA_STATUS } from '../../constants/ideaConstants.js';
 
 
 const COLUMN_CONFIGS = {
@@ -40,7 +41,25 @@ const COLUMN_CONFIGS = {
     },
 }
 
-export default function KanbanColumn({ state, initialCards, onCardClick }) {
+const EMPTY_STATES = {
+    [IDEA_STATUS.DRAFT]: {
+        icon: <Lightbulb className="w-5 h-5 text-gray-400" />,
+        title: 'No ideas yet',
+        description: 'Add an idea to get started',
+    },
+    [IDEA_STATUS.IN_PROGRESS]: {
+        icon: <Clock className="w-5 h-5 text-gray-400" />,
+        title: 'Nothing in progress',
+        description: 'Move an idea here to start working on it',
+    },
+    [IDEA_STATUS.DONE]: {
+        icon: <CheckCircle2 className="w-5 h-5 text-gray-400" />,
+        title: 'Nothing completed yet',
+        description: 'Finished ideas will appear here',
+    },
+}
+
+export default function KanbanColumn({ state, onCardClick }) {
 
     const { data: ideas = [], isSuccess } = useIdeas()
 
@@ -99,7 +118,7 @@ export default function KanbanColumn({ state, initialCards, onCardClick }) {
                 title={`Expand ${title}`}
             >
                 <div className="flex flex-col items-center gap-4 h-full w-full">
-                    <span className={`py-0.5 px-2 rounded-full text-xs font-semibold ${theme.countBg} ${theme.countText}`}>{displayCards.length}</span>
+                    <span className={`py-0.5 px-2 rounded-full text-xs font-semibold ${theme.countBg} ${theme.countText}`}>{currentIdeas.length}</span>
                     <div className="flex-1 flex justify-center items-start w-full mt-2 overflow-hidden">
                         <h3 className="text-[14px] font-semibold text-gray-700 tracking-wider [writing-mode:vertical-rl]">
                             {title}
@@ -113,7 +132,7 @@ export default function KanbanColumn({ state, initialCards, onCardClick }) {
 
     return (
         <>
-            <div key={state} className={`w-[85vw] md:w-auto md:flex-1 shrink-0 snap-start min-w-[216px] flex flex-col rounded-2xl border max-h-[calc(100vh-220px)] ${theme.bg} ${theme.border} overflow-hidden`}>
+            <div key={state} className={`w-[85vw] md:w-auto md:flex-1 shrink-0 snap-start min-w-[216px] flex flex-col rounded-2xl border h-full md:max-h-[calc(100dvh-220px)] ${theme.bg} ${theme.border} overflow-hidden`}>
                 {/* Header */}
                 <div className="shrink-0 p-3 pb-2 border-b border-transparent" ref={searchContainerRef}>
                     <div className="flex items-center justify-between mb-1 px-1">
@@ -166,13 +185,27 @@ export default function KanbanColumn({ state, initialCards, onCardClick }) {
                 </div>
 
                 {/* Cards */}
-                <div className="flex-1 h-full overflow-y-auto scrollbar-hide px-3 pb-3">
-                    <div className="flex flex-col gap-3">
-                        {currentIdeas && currentIdeas?.map(idea => (
-                            <IdeaCard key={idea.id} currentIdea={idea} state={state} theme={theme} onClick={() => onCardClick(id)} />
-                        ))}
+
+                {currentIdeas.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                            {EMPTY_STATES[state].icon}
+                        </div>
+                        <p className="text-[13px] font-medium text-gray-500">No {COLUMN_CONFIGS[state].title}</p>
+                        <p className="text-[12px] text-gray-400 mt-1">Ideas added here will show up</p>
                     </div>
-                </div>
+                ) : (
+
+                    <div className="flex-1 h-full overflow-y-auto scrollbar-hide px-3 pb-3">
+                        <div className="flex flex-col gap-3">
+
+                            {currentIdeas.map(idea => (
+                                <IdeaCard key={idea.id} currentIdea={idea} state={state} theme={theme} />
+                            ))}
+
+                        </div>
+                    </div>
+                )}
 
                 {showAddIdea && (
                     <div className="shrink-0 px-3 pb-3 pt-1 mt-auto">
@@ -181,6 +214,7 @@ export default function KanbanColumn({ state, initialCards, onCardClick }) {
                         </button>
                     </div>
                 )}
+
             </div>
 
             <AddIdeaModal isOpen={isAddIdeaModalOpen} onClose={() => setIsAddIdeaModalOpen(false)} />
