@@ -1,4 +1,4 @@
-import { Activity, AlertCircle, Calendar, Check, CheckCircle2, ChevronRight, Flag, Info, Lightbulb, Lock, MessageSquare, RefreshCw, Sparkles, TableProperties, Target, ThumbsUp, TrendingDown, TrendingUp, Wand2, X, Zap } from 'lucide-react';
+import { Activity, AlertCircle, Calendar, Check, CheckCircle2, ChevronRight, Flag, Info, Lightbulb, Lock, MessageSquare, RefreshCw, TableProperties, Target, ThumbsUp, TrendingDown, TrendingUp, X, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import BaseModal from '../../components/ui/modal/BaseModal';
@@ -7,6 +7,7 @@ import BoardView from './components/BoardView';
 import GoalTabs from './components/GoalTabs';
 import OutcomeView from './components/OutcomeView';
 import RightPanel from './components/RightPanel';
+import AddIdeaModal from '../../components/goal/AddIdeaModal';
 
 
 export default function GoalDashboard({ goalTitle }) {
@@ -56,13 +57,6 @@ export default function GoalDashboard({ goalTitle }) {
   const [selectedIdeaCard, setSelectedIdeaCard] = useState(null);
   const [selectedIdeaStatus, setSelectedIdeaStatus] = useState(null);
 
-  const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
-  const [ideaTitle, setIdeaTitle] = useState('');
-  const [ideaDesc, setIdeaDesc] = useState('');
-  const [suggestWithAi, setSuggestWithAi] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState([]);
-  const [isAiLoading, setIsAiLoading] = useState(false);
-
   const [isMoveToProgressModalOpen, setIsMoveToProgressModalOpen] = useState(false);
   const [selectedAssignees, setSelectedAssignees] = useState([]);
   const [isAssigneeDropdownOpen, setIsAssigneeDropdownOpen] = useState(false);
@@ -78,32 +72,6 @@ export default function GoalDashboard({ goalTitle }) {
     { id: 'm4', name: 'Tom Riddle', role: 'Marketing', initials: 'TR', bgClass: 'bg-amber-100', textClass: 'text-amber-700' },
     { id: 'm5', name: 'Alice Wang', role: 'Engineering', initials: 'AW', bgClass: 'bg-pink-100', textClass: 'text-pink-700' }
   ];
-
-  // Mock function to simulate calling the Anthropic API
-  const fetchAISuggestions = async () => {
-    setIsAiLoading(true);
-    setAiSuggestions([]);
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const suggestions = [
-          "Add guest checkout option",
-          "Implement one-click Apple Pay",
-          "Show progress indicator during checkout",
-          "Auto-fill address via Google Maps",
-          "Offer Buy Now, Pay Later options"
-        ];
-        setAiSuggestions(suggestions);
-        setIsAiLoading(false);
-        resolve(suggestions);
-      }, 1500);
-    });
-  };
-
-  React.useEffect(() => {
-    if (suggestWithAi && aiSuggestions.length === 0 && !isAiLoading) {
-      fetchAISuggestions();
-    }
-  }, [suggestWithAi]);
 
   const calculateChange = (baseline, current) => {
     if (!current || isNaN(current)) return null;
@@ -511,137 +479,6 @@ export default function GoalDashboard({ goalTitle }) {
                   onClick={() => setIsCheckinModalOpen(false)}
                 >
                   Save check-in
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Idea Modal */}
-      {isAddIdeaModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-0 md:p-4" onClick={() => setIsAddIdeaModalOpen(false)}>
-          <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full md:max-w-lg overflow-hidden flex flex-col fixed md:relative bottom-0 md:bottom-auto inset-x-0 md:inset-x-auto h-[85vh] md:h-auto md:max-h-[90vh]" onClick={e => e.stopPropagation()}>
-            {/* Mobile Drag Handle */}
-            <div className="md:hidden w-full flex justify-center pt-3 pb-1 shrink-0 bg-white" onClick={() => setIsAddIdeaModalOpen(false)}>
-              <div className="w-10 h-1.5 bg-gray-300 rounded-full"></div>
-            </div>
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 pb-4 shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  New Idea
-                </span>
-              </div>
-              <button className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-100" onClick={() => setIsAddIdeaModalOpen(false)}>
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="px-6 overflow-y-auto scrollbar-hide pb-6">
-              <h2 className="text-[20px] font-bold text-gray-900 mb-6">Add a new idea</h2>
-
-              {/* Title */}
-              <div className="mb-5">
-                <label className="block text-[12px] font-bold text-gray-700 uppercase tracking-wider mb-2">Title *</label>
-                <input
-                  type="text"
-                  value={ideaTitle}
-                  onChange={(e) => setIdeaTitle(e.target.value)}
-                  placeholder="What's the idea? Keep it short..."
-                  className="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-[13px] outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD] transition-shadow shadow-sm"
-                />
-              </div>
-
-              {/* Description */}
-              <div className="mb-6 relative">
-                <label className="block text-[12px] font-bold text-gray-700 uppercase tracking-wider mb-2">Description <span className="text-gray-400 normal-case font-medium">(optional)</span></label>
-                <textarea
-                  value={ideaDesc}
-                  onChange={(e) => setIdeaDesc(e.target.value)}
-                  maxLength={300}
-                  placeholder="Add more context about this idea..."
-                  className="w-full bg-white border border-gray-200 rounded-xl p-3.5 pb-8 text-[13px] outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD] transition-shadow shadow-sm min-h-[100px] resize-y"
-                ></textarea>
-                <span className="absolute bottom-3 right-3 text-[11px] text-gray-400 font-medium">
-                  {ideaDesc.length} / 300
-                </span>
-              </div>
-
-              {/* AI Section */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <div className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
-                      <Wand2 className="w-4 h-4 text-indigo-600" />
-                    </div>
-                    <span className="text-[13px] font-bold text-gray-900">Suggest ideas with AI</span>
-                  </div>
-                  {/* Toggle Switch */}
-                  <button
-                    onClick={() => setSuggestWithAi(!suggestWithAi)}
-                    className={`relative w-10 h-5 rounded-full transition-colors ${suggestWithAi ? 'bg-green-500' : 'bg-gray-300'}`}
-                  >
-                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${suggestWithAi ? 'transform translate-x-5' : ''}`}></div>
-                  </button>
-                </div>
-
-                {suggestWithAi && (
-                  <div className="p-4 pt-0 border-t border-gray-100 bg-white">
-                    <div className="flex items-center gap-3 mb-4 mt-4">
-                      <div className="h-px bg-gray-100 flex-1"></div>
-                      <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">AI SUGGESTIONS BASED ON YOUR GOAL:</span>
-                      <div className="h-px bg-gray-100 flex-1"></div>
-                    </div>
-
-                    {isAiLoading ? (
-                      <div className="flex items-center justify-center py-6 gap-2 text-indigo-600">
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span className="text-[13px] font-medium animate-pulse">Generating suggestions...</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-1.5">
-                        {aiSuggestions.map((sug, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setIdeaTitle(sug)}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-[13px] transition-colors flex items-center gap-2 ${i === 0 ? 'bg-green-50 text-green-700 font-medium hover:bg-green-100' : 'text-gray-700 hover:bg-gray-50'}`}
-                          >
-                            <span className={i === 0 ? 'text-green-500 font-bold text-[14px]' : 'text-gray-400 font-bold text-[14px]'}>+</span> {sug}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-5 border-t border-gray-100 bg-gray-50 flex items-center justify-between mt-auto shrink-0">
-              <div className="flex items-center gap-2 text-gray-500">
-                <Target className="w-4 h-4" />
-                <span className="text-[13px] font-medium truncate max-w-[200px]">Adding to: {goalTitle || 'Checkout Drop-off'}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg text-[13px] hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
-                  onClick={() => setIsAddIdeaModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="px-5 py-2 bg-[#1D9E75] text-white font-medium rounded-lg text-[13px] hover:bg-[#15825f] transition-colors shadow-sm"
-                  onClick={() => {
-                    setIsAddIdeaModalOpen(false);
-                    setIdeaTitle('');
-                    setIdeaDesc('');
-                    setSuggestWithAi(false);
-                  }}
-                >
-                  Add idea
                 </button>
               </div>
             </div>

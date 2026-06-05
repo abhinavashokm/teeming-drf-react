@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '../../../utils/cn';
 
 /**
  * Modal
@@ -164,7 +165,7 @@ BaseModal.Body = function ModalBody({ children, className = '' }) {
 
 BaseModal.Footer = function ModalFooter({ children, className = '' }) {
   return (
-    <div className={`shrink-0 px-5 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-2 ${className}`}>
+    <div className={cn(`shrink-0 px-5 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-2 ${className}`)}>
       {children}
     </div>
   )

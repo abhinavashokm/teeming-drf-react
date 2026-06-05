@@ -1,5 +1,5 @@
-
 import { Loader2 } from "lucide-react";
+import { cn } from "../../../utils/cn";
 
 function AppButton({
     children,
@@ -7,14 +7,12 @@ function AppButton({
     onClick,
     loading = false,
     disabled = false,
-
     variant = "primary",
     size = "md",
-
     fullWidth = false,
+    shadow = false,
     className = "",
 }) {
-
     const isDisabled = loading || disabled;
 
     const baseStyles = `
@@ -35,46 +33,23 @@ function AppButton({
 
     const variantStyles = {
         primary: `
-            bg-[#1D9E75]
-            text-white
-            border border-[#188764]
-
-            hover:bg-[#15825f]
-            hover:-translate-y-[1px]
-            hover:shadow-md
-
-            disabled:bg-[#1D9E75]/70
-            disabled:border-[#1D9E75]/40
-            disabled:text-white/80
+            bg-[#1D9E75] text-white border border-[#188764]
+            hover:bg-[#15825f] hover:-translate-y-[1px] hover:shadow-md
+            disabled:bg-[#1D9E75]/70 disabled:border-[#1D9E75]/40 disabled:text-white/80
         `,
-
         dark: `
-            bg-gray-900
-            text-white
-
+            bg-gray-900 text-white
             hover:bg-gray-800
-
-            disabled:bg-gray-200
-            disabled:text-gray-400
+            disabled:bg-gray-200 disabled:text-gray-400
         `,
-
         secondary: `
-            bg-white
-            text-gray-700
-            border border-gray-200
-
+            bg-white text-gray-700 border border-gray-200
             hover:bg-gray-50
-
-            disabled:bg-gray-100
-            disabled:text-gray-400
+            disabled:bg-gray-100 disabled:text-gray-400
         `,
-
         danger: `
-            bg-red-600
-            text-white
-
+            bg-red-600 text-white
             hover:bg-red-700
-
             disabled:bg-red-300
         `,
     };
@@ -84,25 +59,19 @@ function AppButton({
             type={type}
             onClick={onClick}
             disabled={isDisabled}
-            className={`
-                ${baseStyles}
-                ${sizeStyles[size]}
-                ${variantStyles[variant]}
-                ${fullWidth ? "w-full" : ""}
-                ${className}
-            `}
-        >
-            {loading && (
-                <Loader2
-                    className="h-4 w-4 animate-spin"
-                    strokeWidth={2.5}
-                />
+            className={cn(
+                baseStyles,
+                sizeStyles[size],
+                variantStyles[variant],
+                fullWidth && "w-full",
+                shadow && "shadow-sm",
+                className
             )}
-
+        >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} />}
             {children}
         </button>
     );
 }
 
 export default AppButton;
-

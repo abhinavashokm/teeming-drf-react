@@ -27,7 +27,7 @@ api.interceptors.response.use(
 
     //response - success case
     (response) => {
-        console.log(response.data)
+        //console.log(response.data)
         return response
     },
 

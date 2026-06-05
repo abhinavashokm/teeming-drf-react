@@ -1,6 +1,7 @@
 
 import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, ListFilter, MoreHorizontal, Plus, Search, ThumbsUp } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
+import AddIdeaModal from '../../../components/goal/AddIdeaModal';
 
 
 const initialIdeasCards = [
@@ -43,87 +44,87 @@ const initialActivities = [
 ];
 
 const CardRenderer = ({ card, theme, onClick }) => {
-  if (card.isDone) {
-    return (
-      <div onClick={onClick} className={`bg-white/80 border ${theme.cardBorder || 'border-gray-200'} rounded-xl p-4 shadow-sm hover:border-gray-300 hover:shadow transition-all cursor-pointer relative group`}>
-        <div className="flex items-start justify-between mb-3">
-          <p className="text-[14px] font-medium text-gray-500 line-through decoration-gray-400">
-            {card.title}
-          </p>
-          <button className="text-gray-400 hover:text-gray-600 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="flex items-center justify-between opacity-75 group-hover:opacity-100 transition-opacity">
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
-            <div className={`w-5 h-5 rounded-full ${card.assignee?.bgClass || 'bg-gray-100'} flex items-center justify-center text-[9px] font-medium ${card.assignee?.textClass || 'text-gray-600'}`}>
-              {card.assignee?.initials}
+    if (card.isDone) {
+        return (
+            <div onClick={onClick} className={`bg-white/80 border ${theme.cardBorder || 'border-gray-200'} rounded-xl p-4 shadow-sm hover:border-gray-300 hover:shadow transition-all cursor-pointer relative group`}>
+                <div className="flex items-start justify-between mb-3">
+                    <p className="text-[14px] font-medium text-gray-500 line-through decoration-gray-400">
+                        {card.title}
+                    </p>
+                    <button className="text-gray-400 hover:text-gray-600 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                        <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                </div>
+                <div className="flex items-center justify-between opacity-75 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        <div className={`w-5 h-5 rounded-full ${card.assignee?.bgClass || 'bg-gray-100'} flex items-center justify-center text-[9px] font-medium ${card.assignee?.textClass || 'text-gray-600'}`}>
+                            {card.assignee?.initials}
+                        </div>
+                        <span className="text-[11.5px] font-medium text-gray-600">{card.assignee?.name}</span>
+                    </div>
+                    <span className="text-[11px] text-gray-400">2d ago</span>
+                </div>
             </div>
-            <span className="text-[11.5px] font-medium text-gray-600">{card.assignee?.name}</span>
-          </div>
-          <span className="text-[11px] text-gray-400">2d ago</span>
-        </div>
-      </div>
-    );
-  }
+        );
+    }
 
-  if (card.isProgress) {
+    if (card.isProgress) {
+        return (
+            <div onClick={onClick} className={`bg-white border ${theme.cardBorder || 'border-gray-200'} rounded-xl p-4 shadow-sm hover:border-gray-300 hover:shadow transition-all cursor-pointer relative overflow-hidden group`}>
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#378ADD]"></div>
+                <div className="flex items-start justify-between mb-4">
+                    <p className="text-[14px] font-medium text-gray-900 group-hover:text-[#378ADD] transition-colors pr-2">
+                        {card.title}
+                    </p>
+                    <button className="text-gray-400 hover:text-gray-600 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div className="flex -space-x-1.5">
+                        {card.assignees?.map((a, i) => (
+                            <div key={i} className={`w-6 h-6 rounded-full ${a.bgClass} flex items-center justify-center text-[10px] font-medium ${a.textClass} ring-2 ring-white`}>
+                                {a.initials}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex items-center gap-1 text-amber-600 text-[11.5px] font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        Due Jun 5
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Ideas to try (isIdea)
     return (
-      <div onClick={onClick} className={`bg-white border ${theme.cardBorder || 'border-gray-200'} rounded-xl p-4 shadow-sm hover:border-gray-300 hover:shadow transition-all cursor-pointer relative overflow-hidden group`}>
-        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#378ADD]"></div>
-        <div className="flex items-start justify-between mb-4">
-          <p className="text-[14px] font-medium text-gray-900 group-hover:text-[#378ADD] transition-colors pr-2">
-            {card.title}
-          </p>
-          <button className="text-gray-400 hover:text-gray-600 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
+        <div onClick={onClick} className={`bg-white border ${theme.cardBorder || 'border-gray-200'} rounded-xl p-4 shadow-sm hover:border-gray-300 hover:shadow transition-all cursor-pointer relative group`}>
+            <div className="flex items-start gap-2.5 mb-3">
+                <div className={`w-6 h-6 rounded-full ${card.assignee?.bgClass || 'bg-gray-100'} flex items-center justify-center text-[10px] font-medium shrink-0 mt-0.5 ${card.assignee?.textClass || 'text-gray-600'}`}>
+                    {card.assignee?.initials}
+                </div>
+                <div className="flex-1 min-w-0 pr-1">
+                    <p className="text-[14px] font-medium text-gray-900 group-hover:text-teeming-green transition-colors leading-snug">
+                        {card.title}
+                    </p>
+                </div>
+                <button className="text-gray-400 hover:text-gray-600 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <MoreHorizontal className="w-4 h-4" />
+                </button>
+            </div>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-gray-400 text-[12px] font-medium">
+                    <ThumbsUp className="w-3.5 h-3.5" /> {card.thumbsUp || 0}
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <span className="text-[11.5px] font-medium text-gray-600">{card.assignee?.name}</span>
+                    <span className="text-[11px] text-gray-400">· 2h ago</span>
+                </div>
+            </div>
         </div>
-        <div className="flex items-center justify-between">
-          <div className="flex -space-x-1.5">
-            {card.assignees?.map((a, i) => (
-              <div key={i} className={`w-6 h-6 rounded-full ${a.bgClass} flex items-center justify-center text-[10px] font-medium ${a.textClass} ring-2 ring-white`}>
-                {a.initials}
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center gap-1 text-amber-600 text-[11.5px] font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
-            <AlertCircle className="w-3.5 h-3.5" />
-            Due Jun 5
-          </div>
-        </div>
-      </div>
     );
-  }
-
-  // Ideas to try (isIdea)
-  return (
-    <div onClick={onClick} className={`bg-white border ${theme.cardBorder || 'border-gray-200'} rounded-xl p-4 shadow-sm hover:border-gray-300 hover:shadow transition-all cursor-pointer relative group`}>
-      <div className="flex items-start gap-2.5 mb-3">
-        <div className={`w-6 h-6 rounded-full ${card.assignee?.bgClass || 'bg-gray-100'} flex items-center justify-center text-[10px] font-medium shrink-0 mt-0.5 ${card.assignee?.textClass || 'text-gray-600'}`}>
-          {card.assignee?.initials}
-        </div>
-        <div className="flex-1 min-w-0 pr-1">
-          <p className="text-[14px] font-medium text-gray-900 group-hover:text-teeming-green transition-colors leading-snug">
-            {card.title}
-          </p>
-        </div>
-        <button className="text-gray-400 hover:text-gray-600 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-          <MoreHorizontal className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-gray-400 text-[12px] font-medium">
-          <ThumbsUp className="w-3.5 h-3.5" /> {card.thumbsUp || 0}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11.5px] font-medium text-gray-600">{card.assignee?.name}</span>
-          <span className="text-[11px] text-gray-400">· 2h ago</span>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 
@@ -290,6 +291,9 @@ const KanbanColumn = ({ id, title, theme, initialCards, showAddIdea, onAddIdea, 
 };
 
 function BoardView({ isRightPanelOpen }) {
+
+    const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false)
+
     return (
         <div className="mb-12 pb-4 -mx-4 px-4 md:mx-0 md:px-0">
 
@@ -325,6 +329,9 @@ function BoardView({ isRightPanelOpen }) {
                     onCardClick={(card, status) => { setSelectedIdeaCard(card); setSelectedIdeaStatus(status); }}
                 />
             </div>
+
+            <AddIdeaModal isOpen={isAddIdeaModalOpen} onClose={() => setIsAddIdeaModalOpen(false)} />
+
         </div>
     )
 }

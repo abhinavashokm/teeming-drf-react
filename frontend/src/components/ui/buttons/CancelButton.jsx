@@ -1,13 +1,15 @@
+import AppButton from "./AppButton"
+import { cn } from "../../../utils/cn"
 
-function CancelButton({ children, onClick }) {
+export default function CancelButton({ onClick, className = '', ...props }) {
     return (
-        <button
+        <AppButton
+            variant="secondary"
+            className={cn('flex-1 sm:flex-none', className)}
             onClick={onClick}
-            className="text-[13px] font-medium px-5 py-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 min-h-[44px] w-full sm:w-auto text-gray-700 transition-colors shadow-sm"
+            {...props}
         >
-            {children || "Cancel"}
-        </button>
+            Cancel
+        </AppButton>
     )
 }
-
-export default CancelButton
