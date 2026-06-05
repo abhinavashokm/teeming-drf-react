@@ -22,6 +22,12 @@ export const workspaceQueryKeys = {
         ...root(slug),
         'goal',
         goal_id
+    ],
+    
+    ideas: (slug, goal_id) => [
+        ...root(slug),
+        goal_id,
+        'ideas'
     ]
 }
 

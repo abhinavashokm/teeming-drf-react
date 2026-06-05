@@ -13,7 +13,7 @@ import useGoalId from "../../hooks/params/useGoalId"
 function AddIdeaModal({ isOpen, onClose }) {
 
     const { register, handleSubmit, reset } = useForm()
-    const { mutate: addIdea } = useAddIdea()
+    const { mutate: addIdea, isPending } = useAddIdea()
     const goalId = useGoalId()
 
     const handleAddIdea = (data) => {
@@ -164,6 +164,7 @@ function AddIdeaModal({ isOpen, onClose }) {
                         variant="primary"
                         className="flex-1 sm:flex-none"
                         onClick={handleSubmit(handleAddIdea)}
+                        loading={isPending}
                     >
                         Add idea
                     </AppButton>

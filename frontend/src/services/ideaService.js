@@ -6,4 +6,9 @@ export const ideaService = {
         const res = await api.post(`/workspaces/${slug}/goals/${goalId}/ideas/`, data)
         return res.data
     },
+
+    fetchIdeas: async (slug, goalId) => {
+        const res = await api.get(`/workspaces/${slug}/goals/${goalId}/ideas/`)
+        return res.data
+    }
 }

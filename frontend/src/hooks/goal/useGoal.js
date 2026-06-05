@@ -10,7 +10,7 @@ function useGoal() {
   const workspaceKeys = useWorkspaceQueryKeys()
 
   return useQuery({
-    queryKey: workspaceKeys.goal(goalId),
+    queryKey: workspaceKeys.goal,
     queryFn: async () => {
       const resData = await goalService.fetchGoal(workspaceSlug, goalId)
       return resData.data

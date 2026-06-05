@@ -2,10 +2,28 @@ import { formatDistanceToNow } from "date-fns"
 
 
 export const formatDateTime = (dateTime) => {
-    return formatDistanceToNow(
-        new Date(dateTime),
-        { addSuffix: true }
-    )
+    const distance = formatDistanceToNow(new Date(dateTime), {
+        locale: {
+            formatDistance: (token, count) => {
+                const map = {
+                    xMinutes: `${count}min`,
+                    aboutXMinutes: `${count}min`,
+                    xHours: `${count}h`,
+                    aboutXHours: `${count}h`,
+                    xDays: `${count}d`,
+                    aboutXMonths: `${count}mo`,
+                    xMonths: `${count}mo`,
+                    aboutXYears: `${count}y`,
+                    xYears: `${count}y`,
+                    lessThanXMinutes: 'just now',
+                    halfAMinute: 'just now',
+                }
+                return map[token] ?? `${count}`
+            }
+        }
+    })
+
+    return distance === 'just now' ? 'just now' : `${distance} ago`
 }
 
 export const dateToHuman = (date) => {
