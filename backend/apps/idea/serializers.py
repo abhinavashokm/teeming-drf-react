@@ -8,10 +8,9 @@ class CreateIdeaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Idea
-        fields = 'title', 'description', 'target_date', 
+        fields = 'title', 'description', 
         extra_kwargs={
             'description': {'required': False},
-            'target_date': {'required': False},
         }
 
 
@@ -20,4 +19,4 @@ class IdeaReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Idea
-        fields = 'id', 'title', 'description', 'target_date', 'created_by'
+        fields = 'id', 'title', 'description', 'deadline', 'created_by', 'status', 'created_at'

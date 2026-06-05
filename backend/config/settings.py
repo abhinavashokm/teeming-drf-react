@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "simplistic-pokier-melania.ngrok-free.dev", "127.0.0.1"]
 
 
 # Application definition
@@ -57,13 +57,22 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     # tenant/workspace resolution
     "core.middleware.WorkspaceMiddleware",
-
-
 ]
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")
+LOCAL_IP = os.getenv("LOCAL_IP")  # for tunneling
 
-CORS_ALLOWED_ORIGINS = [FRONTEND_URL, "http://localhost:5173"]
+CORS_ALLOWED_ORIGINS = [
+    FRONTEND_URL,
+    "http://localhost:5173",
+    LOCAL_IP,
+]
+
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "ngrok-skip-browser-warning",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -203,8 +212,8 @@ OTP_EXPIRY = 60 * 3  # in seconds. 3min
 SIGNUP_SESSION_EXPIRY = 60 * 15  # 15 minutes
 PASSWORD_RESET_LINK_EXPIRY = 60 * 30  # 30 minutes
 
-#Expiry snaps to end of calculated day. (so always keep the meausre in days to avoid inconsistent behaviours)
-INVITATION_EXPIRY = 60 * 60 * 24 * 7  # 7 days. 
+# Expiry snaps to end of calculated day. (so always keep the meausre in days to avoid inconsistent behaviours)
+INVITATION_EXPIRY = 60 * 60 * 24 * 7  # 7 days.
 
 
 # Google OAuth configs

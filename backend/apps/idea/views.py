@@ -34,7 +34,7 @@ class IdeaListCreateView(MemberBaseView):
         )
 
         return success_response(
-            data={"goals": serializers.IdeaReadSerializer(ideas, many=True).data},
+            data={"ideas": serializers.IdeaReadSerializer(ideas, many=True).data},
             status_code=status.HTTP_200_OK,
         )
 
