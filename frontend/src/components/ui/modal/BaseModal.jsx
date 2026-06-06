@@ -137,7 +137,7 @@ function BaseModal({
 
 BaseModal.Header = function ModalHeader({ children, onClose }) {
   return (
-    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+    <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
       <div className="flex items-center gap-3 min-w-0">
         {children}
       </div>

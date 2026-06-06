@@ -48,9 +48,9 @@ function AppButton({
             disabled:bg-gray-100 disabled:text-gray-400
         `,
         danger: `
-            bg-red-600 text-white
-            hover:bg-red-700
-            disabled:bg-red-300
+            bg-red-50 text-red-700 border border-red-200
+            hover:bg-red-100
+            disabled:bg-red-50 disabled:text-red-300 disabled:border-red-100
         `,
     };
 
