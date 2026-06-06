@@ -2,6 +2,8 @@ from .models import Idea
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from apps.goal.helpers.goal_helper import get_goal_or_raise
 from .helpers.idea_helper import get_idea_or_raise
+from .models import Idea, IdeaStatusHistory, IdeaAssignment
+from django.db import transaction
 
 
 def create_idea(created_by, workspace, goal_id, data):
@@ -35,3 +37,49 @@ def delete_idea(workspace, idea_id):
     idea = get_idea_or_raise(workspace=workspace, idea_id=idea_id)
     idea.soft_delete()
     return True
+
+
+def move_idea_to_progress(current_user, workspace, idea_id, assignees, deadline):
+    """
+    move idea to progress
+    1] update idea
+    2] add status change history
+    3] assign members
+    """
+
+    with transaction.atomic():
+
+        idea = get_idea_or_raise(
+            workspace=workspace, idea_id=idea_id, select_for_update=True
+        )
+        previous_status = idea.status
+
+        idea.status = Idea.StatusChoices.IN_PROGRESS
+        if deadline:
+            idea.deadline = deadline
+
+        idea.save(update_fields=["status", "deadline"])
+
+        IdeaStatusHistory.objects.create(
+            workspace=workspace,
+            idea=idea,
+            changed_by=current_user,
+            from_status=previous_status,
+            to_status=Idea.StatusChoices.IN_PROGRESS,
+        )
+
+        IdeaAssignment.objects.bulk_create(
+            [
+                IdeaAssignment(
+                    workspace=workspace,
+                    idea=idea,
+                    assigned_by=current_user,
+                    assignee_id=assignee,
+                )
+                for assignee in assignees
+            ]
+        )
+
+        return idea
+
+        

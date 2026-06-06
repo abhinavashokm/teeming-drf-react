@@ -28,6 +28,16 @@ class Idea(WorkspaceScopedBaseModel):
     class Meta:
         db_table = "ideas"
 
+    @property
+    def moved_to_progress_history(self):
+        return self.status_history.filter(
+            to_status=self.StatusChoices.IN_PROGRESS
+        ).first()
+
+    @property
+    def moved_to_done_history(self):
+        return self.status_history.filter(to_status=self.StatusChoices.DONE).first()
+
 
 class IdeaStatusHistory(WorkspaceScopedBaseModel):
     """
@@ -70,3 +80,7 @@ class IdeaAssignment(WorkspaceScopedBaseModel):
     assigned_by = models.ForeignKey(
         "user.User", on_delete=models.PROTECT, related_name="idea_assignments_made"
     )
+
+    class Meta:
+        db_table = "idea_assignments"
+        unique_together = ("idea", "assignee")
