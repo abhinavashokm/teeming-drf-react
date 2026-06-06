@@ -1,12 +1,12 @@
-import { ArrowDownCircle, ArrowUpCircle, MoreHorizontal, Shield, UserMinus } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, MoreHorizontal, UserMinus } from 'lucide-react';
 import { useState } from 'react';
-import useAuth from '../../hooks/auth/useAuth';
-import { getAvatarColor } from '../../utils/styleUtils';
-import useUpdateMemberRole from '../../hooks/team/useUpdateMemberRole';
-import useRemoveMember from '../../hooks/team/useRemoveMember';
-import useWorkspace from '../../hooks/workspace/useWorkspace';
-import { useCan } from '../../hooks/permissions/useCan';
 import { PERMISSIONS } from '../../constants/permissions';
+import useAuth from '../../hooks/auth/useAuth';
+import { useCan } from '../../hooks/permissions/useCan';
+import useRemoveMember from '../../hooks/team/useRemoveMember';
+import useUpdateMemberRole from '../../hooks/team/useUpdateMemberRole';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
+import MemberAvatar from '../team/MemberAvatar';
 import RoleBadge from '../team/RoleBadge';
 
 
@@ -20,8 +20,6 @@ function MemberRow({ member }) {
 
     const canManageTeam = useCan(PERMISSIONS.MANAGE_TEAM)
 
-    const { bg, text } = getAvatarColor(member.email)
-
     const handleUpdateRole = (role) => {
         updateRole({ 'role': role, memberId: member.id })
         setActiveDropdown(false)
@@ -34,9 +32,11 @@ function MemberRow({ member }) {
     return (
         <div key={member.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-gray-50 transition-colors group cursor-pointer last:rounded-b-[11px]">
             <div className="col-span-6 sm:col-span-5 flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-medium shrink-0 ${getAvatarColor(member.email)}`}>
-                    {member.fullName[0]}
-                </div>
+                <MemberAvatar
+                    name={member.fullName}
+                    email={member.email}
+                    showYou={member.email === currentUser.email}
+                />
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">
                         <p className="text-[13px] font-medium text-gray-900 truncate">{member.fullName}</p>

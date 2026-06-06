@@ -1,27 +1,41 @@
-import { Calendar, ChevronRight, Lightbulb, Target, X, Zap, Check } from 'lucide-react'
-import BaseModal from '../ui/modal/BaseModal'
-import CancelButton from '../ui/buttons/CancelButton'
-import AppButton from '../ui/buttons/AppButton'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
 import { Command } from 'cmdk'
+import { Check, ChevronRight, Lightbulb, Target, X, Zap } from 'lucide-react'
+import { useState } from 'react'
+import useTeamMembers from '../../hooks/team/useTeamMembers'
+import MemberAvatar from '../team/MemberAvatar'
+import AppButton from '../ui/buttons/AppButton'
+import CancelButton from '../ui/buttons/CancelButton'
+import BaseModal from '../ui/modal/BaseModal'
+import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress'
 
 
-function MoveToProgressModal({ isOpen, onClose, onMove, onBack, currentIdea }) {
+function MoveToProgressModal({ isOpen, onClose, onBack, currentIdea }) {
 
-    const { register, handleSubmit } = useForm()
-    const [memberSearch, setMemberSearch] = useState('')
 
-    const [selectedAssignees, setSelectedAssignees] = useState([])
-    const [isAssigneeDropdownOpen, setIsAssigneeDropdownOpen] = useState(false)
-    const [moveDeadline, setMoveDeadline] = useState('')
+    const { data: availableMembers = [] } = useTeamMembers()
+    const { mutate: moveToProgress, isPending } = useMoveIdeaToProgress()
 
-    const availableMembers = [
-        { id: 1, name: 'Arjun', initials: 'AJ', role: 'Designer', bgClass: 'bg-blue-100', textClass: 'text-blue-700' },
-        { id: 2, name: 'Sarah', initials: 'SM', role: 'Developer', bgClass: 'bg-purple-100', textClass: 'text-purple-700' },
-        { id: 3, name: 'Kevin', initials: 'KL', role: 'PM', bgClass: 'bg-teal-100', textClass: 'text-teal-700' },
-        { id: 4, name: 'Tom', initials: 'TR', role: 'Developer', bgClass: 'bg-amber-100', textClass: 'text-amber-700' },
-    ]
+
+    const [selectedMembers, setSelectedMembers] = useState([])
+    const [deadline, setDeadline] = useState(null)
+
+
+    const handleMoveToProgress = () => {
+
+        const data =  {'assignees': selectedMembers.map(member => member.userId)}
+
+        if(deadline){
+            data.deadline = deadline
+        }
+
+        moveToProgress({data: data, ideaId: currentIdea.id}, {
+            onSuccess: () => {
+                setSelectedMembers([])
+                setDeadline(null)
+                onClose()
+            }
+        })
+    }
 
     return (
         <BaseModal isOpen={isOpen} onClose={onClose}>
@@ -49,74 +63,75 @@ function MoveToProgressModal({ isOpen, onClose, onMove, onBack, currentIdea }) {
                 </div>
 
                 {/* Assign To */}
-<div className="mb-6">
-    <div className="flex items-center justify-between mb-2">
-        <label className="block text-[12px] font-bold text-gray-700 uppercase tracking-wider">Assign to *</label>
-        {selectedAssignees.length > 0 && (
-            <span className="text-[12px] text-gray-500 font-medium">{selectedAssignees.length} selected</span>
-        )}
-    </div>
-
-    {/* Selected chips */}
-    {selectedAssignees.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-2">
-            {selectedAssignees.map(user => (
-                <div key={user.id} className="flex items-center gap-1.5 bg-blue-50 border border-[#378ADD]/30 rounded-md py-1 px-1.5">
-                    <div className={`w-4 h-4 rounded-full ${user.bgClass} flex items-center justify-center text-[8px] font-bold ${user.textClass}`}>
-                        {user.initials}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="block text-[12px] font-bold text-gray-700 uppercase tracking-wider">Assign to *</label>
+                        {selectedMembers.length > 0 && (
+                            <span className="text-[12px] text-gray-500 font-medium">{selectedMembers.length} selected</span>
+                        )}
                     </div>
-                    <span className="text-[12px] font-medium text-gray-700">{user.name}</span>
-                    <button onClick={() => setSelectedAssignees(prev => prev.filter(u => u.id !== user.id))}>
-                        <X className="w-3 h-3 text-gray-400 hover:text-red-500" />
-                    </button>
-                </div>
-            ))}
-        </div>
-    )}
 
-    {/* Combobox */}
-    <Command className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-        <Command.Input
-            placeholder="Search members..."
-            className="w-full px-3.5 py-2.5 text-[13px] outline-none border-b border-gray-100"
-        />
-        <Command.List className="max-h-[108px] sm:max-h-[180px] overflow-y-auto">
-            <Command.Empty className="py-6 text-center text-[13px] text-gray-400">
-                No members found
-            </Command.Empty>
-            {availableMembers.map(user => {
-                const isSelected = selectedAssignees.some(u => u.id === user.id)
-                return (
-                    <Command.Item
-                        key={user.id}
-                        value={user.name}
-                        onSelect={() => {
-                            if (isSelected) {
-                                setSelectedAssignees(prev => prev.filter(u => u.id !== user.id))
-                            } else {
-                                setSelectedAssignees(prev => [...prev, user])
-                            }
-                        }}
-                        className={`flex items-center justify-between px-3 py-2.5 cursor-pointer transition-colors ${
-                            isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`w-7 h-7 rounded-full ${user.bgClass} flex items-center justify-center text-[10px] font-bold ${user.textClass}`}>
-                                {user.initials}
-                            </div>
-                            <div>
-                                <div className="text-[13px] font-semibold text-gray-900">{user.name}</div>
-                                <div className="text-[11px] text-gray-500">{user.role}</div>
-                            </div>
+                    {/* Selected chips */}
+                    {selectedMembers.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                            {selectedMembers.map(member => (
+                                <div key={member.id} className="flex items-center gap-1.5 bg-blue-50 border border-[#378ADD]/30 rounded-md py-1 px-1.5">
+                                    
+                                    <MemberAvatar name={member.fullName} email={member.email} size="sm" />
+
+                                    <span className="text-[12px] font-medium text-gray-700">{member.fullName}</span>
+                                    <button onClick={() => setSelectedMembers(prev => prev.filter(u => u.id !== member.id))}>
+                                        <X className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                                    </button>
+                                </div>
+                            ))}
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-[#378ADD]" />}
-                    </Command.Item>
-                )
-            })}
-        </Command.List>
-    </Command>
-</div>
+                    )}
+
+                    {/* Combobox */}
+                    <Command className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <Command.Input
+                            placeholder="Search members..."
+                            className="w-full px-3.5 py-2.5 text-[13px] outline-none border-b border-gray-100"
+                        />
+                        <Command.List className="max-h-[108px] sm:max-h-[180px] overflow-y-auto">
+                            <Command.Empty className="py-6 text-center text-[13px] text-gray-400">
+                                No members found
+                            </Command.Empty>
+                            {availableMembers.map(member => {
+                                const isSelected = selectedMembers.some(u => u.id === member.id)
+                                return (
+                                    <Command.Item
+                                        key={member.id}
+                                        value={member.fullName}
+                                        onSelect={() => {
+                                            if (isSelected) {
+                                                setSelectedMembers(prev => prev.filter(u => u.id !== member.id))
+                                            } else {
+                                                setSelectedMembers(prev => [...prev, member])
+                                            }
+                                        }}
+                                        className={`flex items-center justify-between px-3 py-2.5 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+
+                                            <MemberAvatar
+                                                name={member.fullName} email={member.email} size="sm"
+                                            />
+
+                                            <div>
+                                                <div className="text-[13px] font-semibold text-gray-900">{member.fullName}</div>
+                                                <div className="text-[11px] text-gray-500">{member.role}</div>
+                                            </div>
+                                        </div>
+                                        {isSelected && <Check className="w-4 h-4 text-[#378ADD]" />}
+                                    </Command.Item>
+                                )
+                            })}
+                        </Command.List>
+                    </Command>
+                </div>
 
                 {/* Deadline */}
                 <div>
@@ -126,13 +141,13 @@ function MoveToProgressModal({ isOpen, onClose, onMove, onBack, currentIdea }) {
                     <div className="relative">
                         <input
                             type="date"
-                            value={moveDeadline}
-                            onChange={(e) => setMoveDeadline(e.target.value)}
-                            className={`w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-[13px] outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD] transition-shadow shadow-sm ${!moveDeadline ? 'text-gray-400' : 'text-gray-900'}`}
+                            value={deadline}
+                            onChange={(e) => setDeadline(e.target.value)}
+                            className={`w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-[13px] outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD] transition-shadow shadow-sm ${!deadline ? 'text-gray-400' : 'text-gray-900'}`}
                         />
-                        <Calendar className={`w-4 h-4 absolute right-3.5 top-3 pointer-events-none ${moveDeadline ? 'text-[#378ADD]' : 'text-gray-400'}`} />
                     </div>
                 </div>
+
             </BaseModal.Body>
 
             <BaseModal.Footer className="flex-col gap-3 sm:flex-row sm:justify-between">
@@ -150,10 +165,11 @@ function MoveToProgressModal({ isOpen, onClose, onMove, onBack, currentIdea }) {
                     <AppButton
                         shadow
                         variant="primary"
-                        disabled={selectedAssignees.length === 0}
-                        onClick={onMove}
+                        disabled={selectedMembers.length === 0}
+                        onClick={handleMoveToProgress}
+                        loading={isPending}
                     >
-                       Move to In Progress <ChevronRight className="w-4 h-4" />
+                        Move to In Progress <ChevronRight className="w-4 h-4" />
                     </AppButton>
                 </div>
 

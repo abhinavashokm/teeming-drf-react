@@ -15,5 +15,16 @@ export const ideaService = {
     deleteIdea: async (slug, ideaId) => {
         const res = await api.delete(`/workspaces/${slug}/ideas/${ideaId}/`)
         return res.data
-    }
+    },
+
+    moveIdeaToProgress: async (slug, ideaId, data) => {
+        const res = await api.post(`/workspaces/${slug}/ideas/${ideaId}/move-progress/`, data)
+        return res.data
+    },
+
+    moveIdeaToDone: async (slug, ideaId, data) => {
+        const res = await api.post(`/workspaces/${slug}/ideas/${ideaId}/move-done/`, data)
+        return res.data
+    },
+
 }

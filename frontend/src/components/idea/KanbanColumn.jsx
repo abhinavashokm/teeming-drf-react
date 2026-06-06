@@ -62,7 +62,7 @@ const EMPTY_STATES = {
 export default function KanbanColumn({ state, onCardClick }) {
 
     const { data: ideas = [], isSuccess } = useIdeas()
-
+    console.log(ideas)
     const currentIdeas = ideas.filter(c => c.status === state)
 
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false)

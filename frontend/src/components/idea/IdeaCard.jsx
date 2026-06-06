@@ -3,6 +3,8 @@ import { formatDateTime } from "../../utils/timeUtils"
 import IdeaDetailModal from './IdeaDetailModal'
 import { useState } from 'react'
 import MoveToProgressModal from './MoveToProgressModal'
+import MoveToDoneModal from './MoveToDoneModal'
+import { IDEA_STATUS } from '../../constants/ideaConstants.js'
 
 const STATE_STYLES = {
     draft: {
@@ -31,7 +33,6 @@ export default function IdeaCard({ currentIdea, state, theme }) {
 
     const closeAll = () => {
         setActiveModal(null)
-
     }
 
     return (
@@ -60,7 +61,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
 
                 {/* Footer row */}
                 <div className="flex items-center justify-between">
-                    {state === 'draft' && (
+                    {state === IDEA_STATUS.DRAFT && (
                         <>
                             <div className="flex items-center gap-1.5 text-gray-400 text-[12px] font-medium">
                                 <ThumbsUp className="w-3.5 h-3.5" /> {0}
@@ -72,7 +73,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                         </>
                     )}
 
-                    {state === 'in_progress' && (
+                    {state === IDEA_STATUS.IN_PROGRESS && (
                         <>
                             <div className="flex -space-x-1.5">
                                 {currentIdea.assignees?.map((a, i) => (
@@ -86,7 +87,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                         </>
                     )}
 
-                    {state === 'done' && (
+                    {state === IDEA_STATUS.DONE && (
                         <>
                             <div className="flex items-center gap-1.5 opacity-75 group-hover:opacity-100 transition-opacity">
                                 <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -98,16 +99,22 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                     )}
                 </div>
             </div>
-            
+
             <IdeaDetailModal
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'detail'}
                 onClose={closeAll}
-                onMove={() => setActiveModal('moveToProgress')}
+                onMove={() => setActiveModal( state === IDEA_STATUS.DRAFT ? 'moveToProgress' :  state === IDEA_STATUS.IN_PROGRESS ? 'moveToDone' : 'detail')}
             />
             <MoveToProgressModal
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'moveToProgress'}
+                onClose={closeAll}
+                onBack={() => setActiveModal('detail')}
+            />
+            <MoveToDoneModal
+                currentIdea={currentIdea}
+                isOpen={activeModal === 'moveToDone'}
                 onClose={closeAll}
                 onBack={() => setActiveModal('detail')}
             />

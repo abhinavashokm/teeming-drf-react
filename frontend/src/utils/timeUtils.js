@@ -2,6 +2,7 @@ import { formatDistanceToNow } from "date-fns"
 
 
 export const formatDateTime = (dateTime) => {
+    if(!dateTime) return ""
     const distance = formatDistanceToNow(new Date(dateTime), {
         locale: {
             formatDistance: (token, count) => {
