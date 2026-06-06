@@ -71,7 +71,7 @@ function WorkspaceSettingsPage() {
                 <div className="p-6 space-y-6">
 
                     {/* Workspace Logo Upload */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                         <div className="h-16 w-16 rounded-xl bg-gray-900 flex items-center justify-center text-white text-xl font-medium shrink-0 relative group cursor-pointer overflow-hidden shadow-sm">
                             A
                             <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -93,29 +93,33 @@ function WorkspaceSettingsPage() {
                         <FormField label={"Workspace Name"} >
                             <InputField {...register('name')} />
                         </FormField>
-
                         <div className="space-y-3">
                             <div className="space-y-1.5">
                                 <label className="text-[13px] font-medium text-gray-700">Workspace URL</label>
-                                <div className={`flex items-center rounded-lg overflow-hidden border transition-colors ${isSlugUnlocked ? 'border-amber-300 focus-within:border-amber-400 focus-within:ring-1 focus-within:ring-amber-300 bg-white' : 'border-gray-200 bg-gray-50'}`}>
-                                    <div className={`px-3 py-2 border-r text-[13px] flex items-center gap-1.5 whitespace-nowrap ${isSlugUnlocked ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-gray-50 border-gray-200 text-gray-500'}`}>
-                                        <Globe className="h-3.5 w-3.5" />
+                                <div className={`rounded-lg overflow-hidden border transition-colors ${isSlugUnlocked ? 'border-amber-300 focus-within:border-amber-400 focus-within:ring-1 focus-within:ring-amber-300 bg-white' : 'border-gray-200 bg-gray-50'}`}>
+                                    {/* Prefix row */}
+                                    <div className={`flex items-center px-3 py-2 border-b text-[13px] gap-1.5 ${isSlugUnlocked ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-gray-50 border-gray-200 text-gray-500'}`}>
+                                        <Globe className="h-3.5 w-3.5 shrink-0" />
                                         teeming.app/
                                     </div>
-                                    <input
-                                        type="text"
-                                        {...register('slug')}
-                                        disabled={!isSlugUnlocked}
-                                        className={`flex-1 w-full px-3 py-2 text-[13px] focus:outline-none ${isSlugUnlocked ? 'bg-white text-gray-900' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}`}
-                                    />
-                                    <button
-                                        onClick={() => setIsSlugUnlocked(!isSlugUnlocked)}
-                                        className={`px-3 py-2 border-l transition-colors ${isSlugUnlocked ? 'text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100' : 'text-gray-400 bg-white border-transparent hover:bg-gray-100 hover:text-gray-600'}`}
-                                    >
-                                        {isSlugUnlocked ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                                    </button>
+                                    {/* Input + lock row */}
+                                    <div className="flex items-center">
+                                        <input
+                                            type="text"
+                                            {...register('slug')}
+                                            disabled={!isSlugUnlocked}
+                                            className={`flex-1 w-full px-3 py-2 text-[13px] focus:outline-none ${isSlugUnlocked ? 'bg-white text-gray-900' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}`}
+                                        />
+                                        <button
+                                            onClick={() => setIsSlugUnlocked(!isSlugUnlocked)}
+                                            className={`px-3 py-2 border-l transition-colors ${isSlugUnlocked ? 'text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100' : 'text-gray-400 bg-white border-transparent hover:bg-gray-100 hover:text-gray-600'}`}
+                                        >
+                                            {isSlugUnlocked ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+
                             {isSlugUnlocked && (
                                 <div className="bg-amber-50 border border-amber-200/60 rounded-lg p-3">
                                     <div className="flex gap-2.5">
@@ -131,17 +135,17 @@ function WorkspaceSettingsPage() {
                                 </div>
                             )}
                         </div>
-                        
+
                     </div>
                 </div>
 
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end">
 
                     <AppButton
-                    variant="dark" 
-                    disabled={!isDirty} 
-                    loading={isPending} 
-                    onClick={handleSubmit(handleUpdateWorkspace)}
+                        variant="dark"
+                        disabled={!isDirty}
+                        loading={isPending}
+                        onClick={handleSubmit(handleUpdateWorkspace)}
                     >
                         {isPending ? "Saving..." : "Save Changes"}
                     </AppButton>

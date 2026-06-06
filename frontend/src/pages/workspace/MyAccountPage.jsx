@@ -59,7 +59,7 @@ function MyAccountPage() {
                     <div className="p-6 space-y-6">
 
                         {/* Avatar Upload */}
-                        <div className="flex items-center gap-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                             <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-xl font-medium shrink-0 relative group cursor-pointer overflow-hidden">
                                 A
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

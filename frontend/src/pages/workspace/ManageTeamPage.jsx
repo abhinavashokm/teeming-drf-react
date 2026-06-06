@@ -1,16 +1,16 @@
-import { ChevronDown, Clock, Mail, Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import { useState } from 'react';
+import EmptyPendingInvitations from '../../components/team/EmptyPendingInvitation';
+import PendingInvitation from '../../components/team/PendingInvitation';
 import AppButton from '../../components/ui/buttons/AppButton';
 import InviteModal from '../../components/workspace/InviteModal';
 import MemberRow from '../../components/workspace/MemberRow';
 import MemberRowSkelton from '../../components/workspace/MemberRowSkelton';
 import { PERMISSIONS } from '../../constants/permissions';
+import usePendingInvitations from '../../hooks/invite/usePendingInvitations';
 import { useCan } from '../../hooks/permissions/useCan';
 import useTeamMembers from '../../hooks/team/useTeamMembers';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
-import usePendingInvitations from '../../hooks/invite/usePendingInvitations';
-import PendingInvitation from '../../components/team/PendingInvitation';
-import EmptyPendingInvitations from '../../components/team/EmptyPendingInvitation';
 
 
 function ManageTeamPage() {
@@ -26,37 +26,21 @@ function ManageTeamPage() {
     const { data: currentWorkspace } = useWorkspace()
     const { data: pendingInvitations } = usePendingInvitations()
 
-    const onInviteClick = () => {
-
-    }
-
     return (
         <>
             <div className="max-w-5xl mx-auto space-y-14 pb-20">
 
                 {/* Workspace Header Minimal */}
-                <div className="flex items-end justify-between border-b border-gray-200 pb-6">
-                    <div className="flex items-center gap-5">
-                        <div>
-                            <div className="relative">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none">Manage Team</h1>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 text-[13px]">
-                                <span className="text-gray-500">Manage roles and access for your workspace members</span>
-                            </div>
-                        </div>
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 border-b border-gray-200 pb-6">
+                    <div>
+                        <h1 className="text-[22px] font-semibold text-gray-900 tracking-tight leading-none mb-1">Manage Team</h1>
+                        <p className="text-[13px] text-gray-500">Manage roles and access for your workspace members</p>
                     </div>
-                    <div className="flex gap-3">
-                        {
-                            canInviteMembers &&
-                            <AppButton onClick={() => setIsInviteModalOpen(true)} >
-                                + Invite Members
-                            </AppButton>
-                        }
-
-                    </div>
+                    {canInviteMembers && (
+                        <AppButton onClick={() => setIsInviteModalOpen(true)}>
+                            + Invite Members
+                        </AppButton>
+                    )}
                 </div>
 
                 {/* Members Section */}
@@ -92,28 +76,26 @@ function ManageTeamPage() {
                         </div>
 
                     </div>
-
                     <div className="border border-gray-200 rounded-xl bg-white">
-                        {/* Table Header */}
-                        <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-100 bg-gray-50 text-[11px] font-semibold text-gray-500 uppercase tracking-wider rounded-t-[11px]">
-                            <div className="col-span-6 sm:col-span-5">Member</div>
-                            <div className="col-span-3 sm:col-span-3">Role</div>
-                            <div className="col-span-3 sm:col-span-3 hidden sm:block">Status</div>
-                            {
-                                canManageTeam &&
-                                <div className="col-span-3 sm:col-span-1 text-right">Actions</div>
-                            }
-
+                        {/* Header */}
+                        <div className="hidden sm:grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-100 bg-gray-50 text-[11px] font-semibold text-gray-500 uppercase tracking-wider rounded-t-[11px]">
+                            <div className="col-span-5">Member</div>
+                            <div className="col-span-3">Role</div>
+                            <div className="col-span-3">Status</div>
+                            {canManageTeam && <div className="col-span-1 text-right">Actions</div>}
+                        </div>
+                        {/* Mobile header */}
+                        <div className="flex sm:hidden items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50 text-[11px] font-semibold text-gray-500 uppercase tracking-wider rounded-t-[11px]">
+                            <div>Member</div>
+                            {canManageTeam && <div>Actions</div>}
                         </div>
 
                         {/* Members List */}
                         <div className="divide-y divide-gray-100">
-
                             {isPending
                                 ? Array.from({ length: 5 }).map((_, i) => <MemberRowSkelton key={i} />)
                                 : teamMembers.map(member => <MemberRow key={member.id} member={member} />)
                             }
-
                         </div>
                     </div>
                 </section>

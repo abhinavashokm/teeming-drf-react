@@ -180,7 +180,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
           <div className="pb-4 border-b border-gray-200">
             <Link
               to=""
-              onClick={() => setCurrentView('home')}
+              onClick={() => {setCurrentView('home'); setIsMobileMenuOpen(false);}}
               className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'home' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
               title={!sidebarContentExpanded ? 'Home' : ''}
             >
@@ -233,7 +233,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
           <div className="space-y-0.5">
             <Link
               to="manage-team"
-              onClick={() => setCurrentView('team')}
+              onClick={() => {setCurrentView('team'); setIsMobileMenuOpen(false);}}
               className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
               title={!sidebarContentExpanded ? (currentWorkspace.role !== 'Member' ? 'Manage Team' : 'View Team') : ''}
             >
@@ -244,7 +244,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
             {canManageSettings && (
               <Link
                 to="settings"
-                onClick={() => setCurrentView('workspace_settings')}
+                onClick={() => {setCurrentView('workspace_settings'); setIsMobileMenuOpen(false);}}
                 className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
                 title={!sidebarContentExpanded ? 'Settings' : ''}
               >
@@ -285,7 +285,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsProfileDropdownOpen(false)} />
               <div className="absolute bottom-full left-4 mb-3 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden">
-                <Link to="my-account" onClick={() => { setCurrentView('account'); setIsProfileDropdownOpen(false); }}>
+                <Link to="my-account" onClick={() => { setCurrentView('account'); setIsProfileDropdownOpen(false); setIsMobileMenuOpen(false); }}>
                   <button className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
                     <Settings className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
                     My Account
