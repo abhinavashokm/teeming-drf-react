@@ -74,7 +74,7 @@ def move_idea_to_progress(current_user, workspace, idea_id, assignees, deadline)
                     workspace=workspace,
                     idea=idea,
                     assigned_by=current_user,
-                    assignee_id=assignee,
+                    assignee=assignee,
                 )
                 for assignee in assignees
             ]
@@ -82,4 +82,25 @@ def move_idea_to_progress(current_user, workspace, idea_id, assignees, deadline)
 
         return idea
 
-        
+
+def move_idea_to_done(current_user, workspace, idea_id, note):
+
+    with transaction.atomic():
+
+        idea = get_idea_or_raise(
+            workspace=workspace, idea_id=idea_id, select_for_update=True
+        )
+        previous_status = idea.status
+        idea.status = Idea.StatusChoices.DONE
+        idea.save(update_fields=["status"])
+
+        IdeaStatusHistory.objects.create(
+            changed_by=current_user,
+            workspace=workspace,
+            idea=idea,
+            from_status=previous_status,
+            to_status=Idea.StatusChoices.DONE,
+            note=note,
+        )
+
+        return idea

@@ -61,6 +61,7 @@ class IdeaDetailView(MemberBaseView):
 class IdeaMoveToProgressView(AdminBaseView):
 
     def post(self, request, **kwargs):
+        print(request.data)
 
         serializer = serializers.IdeaMoveToProgressSerializer(data=request.data, context={"idea_id": kwargs["idea_id"]})
         serializer.is_valid(raise_exception=True)
@@ -69,12 +70,33 @@ class IdeaMoveToProgressView(AdminBaseView):
             current_user=request.user,
             workspace=request.workspace,
             idea_id=kwargs["idea_id"],
-            assignees=serializer.data.get('assignees'),
-            deadline=serializer.data.get('deadline', None),
+            assignees=serializer.validated_data.get('assignees'),
+            deadline=serializer.validated_data.get('deadline', None),
         )
 
         return success_response(
             message="Idea moved to in progress",
             data=serializers.IdeaReadSerializer(updated_idea).data,
             status_code=status.HTTP_201_CREATED,
+        )
+    
+
+class IdeaMoveToDoneView(MemberBaseView):
+
+    def post(self, request, **kwargs):
+        
+        serializer = serializers.IdeaMoveToDoneSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        updated_idea = idea_services.move_idea_to_done(
+            current_user=request.user,
+            workspace=request.workspace,
+            idea_id=kwargs['idea_id'],
+            note=serializer.validated_data.get('note', None)
+        )
+
+        return success_response(
+            message="Idea moved to done",
+            status_code=status.HTTP_201_CREATED,
+            data=serializers.IdeaReadSerializer(updated_idea).data,
         )

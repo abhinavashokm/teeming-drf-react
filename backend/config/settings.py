@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.invitation",
     "apps.goal",
     "apps.idea",
+    "apps.outcome",
 ]
 
 MIDDLEWARE = [

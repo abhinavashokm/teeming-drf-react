@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
-from .models import Idea, IdeaAssignment
+from .models import Idea, IdeaAssignment, IdeaStatusHistory
 from apps.user.serializers import UserBasicSerializer
 from apps.user.models import User
+from apps.goal.serializers import GoalBasicSerializer
 
 
 class CreateIdeaSerializer(serializers.ModelSerializer):
@@ -29,25 +30,26 @@ class IdeaAssignmentSerializer(serializers.ModelSerializer):
 class IdeaReadSerializer(serializers.ModelSerializer):
     created_by = UserBasicSerializer(read_only=True)
 
-    assignments = IdeaAssignmentSerializer(read_only=True, many=True)
+    assignees = serializers.SerializerMethodField()
 
     assigned_by = serializers.SerializerMethodField()
 
     move_to_progress_by = UserBasicSerializer(
-        source="moved_to_progress_history.changed_by", read_only=True
+        source="moved_to_progress_history.changed_by", read_only=True, allow_null=True
     )
     moved_to_progress_at = serializers.DateTimeField(
-        source="moved_to_progress_history.created_at", read_only=True
+        source="moved_to_progress_history.created_at", read_only=True, allow_null=True
     )
     moved_to_done_by = UserBasicSerializer(
-        source="moved_to_done_history.changed_by", read_only=True
+        source="moved_to_done_history.changed_by", read_only=True, allow_null=True
     )
     moved_to_done_at = serializers.DateTimeField(
-        source="moved_to_done_history.created_at", read_only=True
+        source="moved_to_done_history.created_at", read_only=True, allow_null=True
     )
     completion_note = serializers.CharField(
-        source="moved_to_done_history.note", read_only=True
+        source="moved_to_done_history.note", read_only=True, allow_null=True
     )
+    goal = GoalBasicSerializer()
 
     class Meta:
         model = Idea
@@ -59,13 +61,14 @@ class IdeaReadSerializer(serializers.ModelSerializer):
             "created_by",
             "status",
             "created_at",
-            "assignments",
+            "assignees",
             "assigned_by",
             "move_to_progress_by",
             "moved_to_progress_at",
             "moved_to_done_by",
             "moved_to_done_at",
             "completion_note",
+            "goal",
         )
 
     def get_assigned_by(self, obj):
@@ -73,6 +76,12 @@ class IdeaReadSerializer(serializers.ModelSerializer):
         if assignment:
             return UserBasicSerializer(assignment.assigned_by).data
         return None
+    
+    def get_assignees(self, obj):
+        return UserBasicSerializer(
+            [assignment.assignee for assignment in obj.assignments.all()],
+            many=True,
+        ).data
 
 
 class IdeaMoveToProgressSerializer(serializers.Serializer):
@@ -98,3 +107,10 @@ class IdeaMoveToProgressSerializer(serializers.Serializer):
             )
 
         return assignees
+
+
+class IdeaMoveToDoneSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IdeaStatusHistory
+        fields = ["note"]
