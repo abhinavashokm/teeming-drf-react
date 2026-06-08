@@ -22,4 +22,25 @@ export const outcomeService = {
         return res.data
     },
 
+    createCheckin: async (slug, goalId, data) => {
+        const res = await api.post(`/workspaces/${slug}/goals/${goalId}/outcome/checkins/`, data)
+        return res.data
+    },
+
+    fetchCheckins: async (slug, goalId) => {
+        const res = await api.get(`/workspaces/${slug}/goals/${goalId}/outcome/checkins/`)
+        return res.data
+    },
+
+    fetchCheckin: async (slug, checkinId) => {
+        const res = await api.get(`/workspaces/${slug}/outcome/checkins/${checkinId}/`)
+        return res.data
+    },
+
+    deleteCheckin: async (slug, checkinId) => {
+        const res = await api.delete(`/workspaces/${slug}/outcome/checkins/${checkinId}/`)
+        return res.data
+    },
+
+
 }

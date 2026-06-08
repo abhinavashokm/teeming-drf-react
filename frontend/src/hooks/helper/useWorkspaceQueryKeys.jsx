@@ -15,7 +15,8 @@ function useWorkspaceQueryKeys() {
         goals: workspaceQueryKeys.goals(workspaceSlug),
         goal:  workspaceQueryKeys.goal(workspaceSlug, goalId),
         ideas: workspaceQueryKeys.ideas(workspaceSlug, goalId),
-        metrics: workspaceQueryKeys.metrics(workspaceSlug, goalId)
+        metrics: workspaceQueryKeys.metrics(workspaceSlug, goalId),
+        checkins: workspaceQueryKeys.checkins(workspaceSlug, goalId),
     }
 }
 

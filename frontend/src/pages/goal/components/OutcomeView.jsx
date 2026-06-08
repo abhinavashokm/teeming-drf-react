@@ -1,16 +1,28 @@
-import { AlertCircle, Info, Target, ThumbsUp, TrendingUp } from 'lucide-react';
+import { AlertCircle, Info, ThumbsUp, TrendingUp, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
+import CreateCheckinModal from '../../../components/outcome/CreateCheckinModal';
 import CreateMetricsModal from '../../../components/outcome/CreateMetricsModal';
-import useMetrics from '../../../hooks/outcome/useMetrics';
 import MetricRow from '../../../components/outcome/MetricRow';
-import AppButton from "../../../components/ui/buttons/AppButton"
+import MemberAvatar from "../../../components/team/MemberAvatar";
+import AppButton from "../../../components/ui/buttons/AppButton";
+import { CHECKIN_STATUS_LABELS } from '../../../constants/outcomeConstants';
+import useCheckins from '../../../hooks/outcome/useCheckins';
+import useMetrics from '../../../hooks/outcome/useMetrics';
+import { dateToHuman } from '../../../utils/timeUtils';
+import CheckinDesktopRow from '../../../components/outcome/CheckinDesktopRow';
+import CheckinMobileRow from '../../../components/outcome/CheckinMobileRow';
+import CheckinActions from '../../../components/outcome/CheckinActions';
+import CheckinRow from '../../../components/outcome/CheckinRow';
 
 
 function OutcomeView() {
 
     const { data: metrics } = useMetrics()
+    const { data: checkins = [] } = useCheckins()
+    console.log(checkins)
 
     const [isCreateMetricsModalOpen, setIsCreateMetricsModalOpen] = useState(false)
+    const [isCreateCheckinModalOpen, setIsCreateCheckinModalOpen] = useState(false)
 
     return (
         <>
@@ -26,8 +38,8 @@ function OutcomeView() {
                             <button onClick={() => setIsCreateMetricsModalOpen(true)} className="flex-1 min-[1043px]:flex-none px-4 py-2 border border-gray-200 text-gray-700 font-medium rounded-lg text-[13px] hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center">
                                 Add Metric
                             </button>
-                            <AppButton onClick={() => setIsCheckinModalOpen(true)} >
-                               Add Checkin
+                            <AppButton onClick={() => setIsCreateCheckinModalOpen(true)} >
+                                Add Checkin
                             </AppButton>
                         </div>
                     </div>
@@ -109,177 +121,38 @@ function OutcomeView() {
                         <span className="text-[13px] text-gray-500 font-medium">Latest to oldest</span>
                     </div>
 
-                    {/* Desktop Table */}
-                    <div className="hidden min-[1043px]:block overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[800px]">
-                            <thead>
-                                <tr className="bg-gray-50/50 border-b border-gray-200">
-                                    <th className="px-6 py-3 text-[12px] font-semibold text-gray-500 uppercase tracking-wider w-40">By</th>
-                                    <th className="px-6 py-3 text-[12px] font-semibold text-gray-500 uppercase tracking-wider w-40">Status</th>
-                                    <th className="px-6 py-3 text-[12px] font-semibold text-gray-500 uppercase tracking-wider w-48">Metrics</th>
-                                    <th className="px-6 py-3 text-[12px] font-semibold text-gray-500 uppercase tracking-wider">Findings</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                <tr className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="flex flex-col gap-0.5">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-[9px] font-bold shrink-0">
-                                                    AJ
-                                                </div>
-                                                <span className="text-[13px] font-medium text-gray-900">Arjun</span>
-                                            </div>
-                                            <span className="text-[12px] text-gray-500 ml-8">Dec 7, 2025</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <span className="inline-flex items-center gap-1.5 bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-[12px] font-medium">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                                            Goal Achieved
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="flex flex-col gap-1 text-[13px]">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-gray-500">Checkout:</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium text-gray-900">57%</span>
-                                                    <span className="text-green-600 text-[11px] font-bold">↑15%</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="flex items-start gap-2">
-                                            <div className="bg-green-100 text-green-700 p-1 rounded shrink-0 mt-0.5">
-                                                <ThumbsUp className="w-3 h-3" />
-                                            </div>
-                                            <p className="text-[13px] text-gray-700 leading-relaxed">
-                                                Adding the guest checkout option completely removed the friction point. We hit our target ahead of schedule.
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="flex flex-col gap-0.5">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 text-[9px] font-bold shrink-0">
-                                                    SM
-                                                </div>
-                                                <span className="text-[13px] font-medium text-gray-900">Sarah</span>
-                                            </div>
-                                            <span className="text-[12px] text-gray-500 ml-8">Nov 23, 2025</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full text-[12px] font-medium">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
-                                            Partial Progress
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="flex flex-col gap-1 text-[13px]">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-gray-500">Checkout:</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium text-gray-900">48%</span>
-                                                    <span className="text-green-600 text-[11px] font-bold">↑6%</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 align-top">
-                                        <div className="flex items-start gap-2">
-                                            <div className="bg-amber-100 text-amber-700 p-1 rounded shrink-0 mt-0.5">
-                                                <AlertCircle className="w-3 h-3" />
-                                            </div>
-                                            <p className="text-[13px] text-gray-700 leading-relaxed">
-                                                Simplified fields helped slightly, but mandatory account creation is still a major blocker based on heatmaps.
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Mobile Cards */}
-                    <div className="min-[1043px]:hidden flex flex-col divide-y divide-gray-100">
-                        <div className="p-5 space-y-4 hover:bg-gray-50/50 transition-colors">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[13px] font-bold text-gray-900">Dec 7, 2025</span>
-                                <span className="inline-flex items-center gap-1.5 bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-[12px] font-medium">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                                    Goal Achieved
-                                </span>
+                    {checkins?.length > 0 ? (
+                        checkins.map((checkin, index) => (
+                            <CheckinRow
+                                key={checkin.id}
+                                checkin={checkin}
+                                isLast={index === checkins.length - 1}
+                            />
+                        ))
+                    ) : (
+                        <div className="py-16 px-6 text-center">
+                            <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                <TrendingUp className="w-6 h-6 text-gray-400" />
                             </div>
 
-                            <div className="flex items-center justify-between text-[13px]">
-                                <span className="text-gray-500 font-medium">Checkout:</span>
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold text-gray-900">57%</span>
-                                    <span className="text-green-600 text-[11px] font-bold bg-green-50 px-1.5 py-0.5 rounded">↑15%</span>
-                                </div>
-                            </div>
+                            <h3 className="text-[15px] font-semibold text-gray-900">
+                                No check-ins yet
+                            </h3>
 
-                            <div className="flex items-start gap-2.5 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                <div className="bg-green-100 text-green-700 p-1 rounded shrink-0 mt-0.5">
-                                    <ThumbsUp className="w-3 h-3" />
-                                </div>
-                                <p className="text-[13px] text-gray-700 leading-relaxed">
-                                    Adding the guest checkout option completely removed the friction point. We hit our target ahead of schedule.
-                                </p>
-                            </div>
+                            <p className="mt-2 text-[13px] text-gray-500 max-w-sm mx-auto">
+                                Record progress updates to track whether this idea is creating the outcome you're aiming for.
+                            </p>
 
-                            <div className="flex items-center gap-2 pt-1">
-                                <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-[9px] font-bold shrink-0 shadow-sm border border-blue-200/50">
-                                    AJ
-                                </div>
-                                <span className="text-[12px] font-medium text-gray-500">Arjun</span>
-                            </div>
+                            <AppButton onClick={() => setIsCreateCheckinModalOpen(true)} className='mt-3'>
+                                Create First Check-in
+                            </AppButton>
                         </div>
-
-                        <div className="p-5 space-y-4 hover:bg-gray-50/50 transition-colors">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[13px] font-bold text-gray-900">Nov 23, 2025</span>
-                                <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full text-[12px] font-medium">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
-                                    Partial Progress
-                                </span>
-                            </div>
-
-                            <div className="flex items-center justify-between text-[13px]">
-                                <span className="text-gray-500 font-medium">Checkout:</span>
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold text-gray-900">48%</span>
-                                    <span className="text-green-600 text-[11px] font-bold bg-green-50 px-1.5 py-0.5 rounded">↑6%</span>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-2.5 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                <div className="bg-amber-100 text-amber-700 p-1 rounded shrink-0 mt-0.5">
-                                    <AlertCircle className="w-3 h-3" />
-                                </div>
-                                <p className="text-[13px] text-gray-700 leading-relaxed">
-                                    Simplified fields helped slightly, but mandatory account creation is still a major blocker based on heatmaps.
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-2 pt-1">
-                                <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 text-[9px] font-bold shrink-0 shadow-sm border border-purple-200/50">
-                                    SM
-                                </div>
-                                <span className="text-[12px] font-medium text-gray-500">Sarah</span>
-                            </div>
-                        </div>
-                    </div>
+                    )}
                 </div>
-            </div>
+            </div >
 
             <CreateMetricsModal isOpen={isCreateMetricsModalOpen} onClose={() => setIsCreateMetricsModalOpen(false)} />
+            <CreateCheckinModal isOpen={isCreateCheckinModalOpen} onClose={() => setIsCreateCheckinModalOpen(false)} />
         </>
     )
 }
