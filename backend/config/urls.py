@@ -6,20 +6,32 @@ urlpatterns = [
         include(
             [
                 path("auth/", include("apps.user.urls")),
-                path("workspaces/", include("apps.workspace.urls")),
-                # invitations
-                path(
-                    "workspaces/<slug:slug>/invitations/",
-                    include("apps.invitation.workspace_urls"),
-                ),
                 path("invitations/", include("apps.invitation.public_urls")),
-                # goals
-                path("workspaces/<slug:slug>/goals/", include("apps.goal.urls")),
-                # ideas
-                path("workspaces/<slug:slug>/ideas/", include("apps.idea.detail_urls")),
+                path("workspaces/", include("apps.workspace.urls")),
                 path(
-                    "workspaces/<slug:slug>/goals/<uuid:goal_id>/ideas/",
-                    include("apps.idea.list_urls"),
+                    "workspaces/<slug:slug>/",
+                    include(
+                        [
+                            path(
+                                "invitations/",
+                                include("apps.invitation.workspace_urls"),
+                            ),
+                            path(
+                                "goals/",
+                                include("apps.goal.urls"),
+                            ),
+                            path(
+                                "ideas/",
+                                include("apps.idea.detail_urls"),
+                            ),
+                            path(
+                                "goals/<uuid:goal_id>/ideas/",
+                                include("apps.idea.list_urls"),
+                            ),
+                            path("goals/<uuid:goal_id>/outcome/", include("apps.outcome.list_urls")),
+                            path("outcome/", include("apps.outcome.detail_urls"))
+                        ]
+                    ),
                 ),
             ]
         ),

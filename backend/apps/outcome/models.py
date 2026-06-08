@@ -10,15 +10,24 @@ class OutcomeMetric(WorkspaceScopedBaseModel):
         CURRENCY = ("currency", "Currency")
         HOURS = ("hours", "Hours")
         DAYS = ("days", "Days")
+        MINUTES = ("minutes", "Minutes")
         SCORE = ("score", "Score")
+
+    class DirectionChoices(models.TextChoices):
+        INCREASE = ('increase', 'Increase')
+        DECREASE = ('decrease', 'Decrease')
 
     goal = models.ForeignKey(
         "goal.Goal", on_delete=models.CASCADE, related_name="outcome_metrics"
+    )
+    created_by = models.ForeignKey(
+        "user.User", on_delete=models.PROTECT, related_name="created_metrics"
     )
     name = models.CharField(max_length=255)
     baseline_value = models.FloatField(blank=True, null=True)
     target_value = models.FloatField(blank=True, null=True)
     unit = models.CharField(max_length=20, choices=UnitChoices, default=UnitChoices.NUMBER)
+    direction = models.CharField(max_length=20, choices=DirectionChoices, default=DirectionChoices.INCREASE)
 
     class Meta:
         db_table = "outcome_metrics"
