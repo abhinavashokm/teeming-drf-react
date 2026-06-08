@@ -1,18 +1,13 @@
-import { AlertCircle, Info, ThumbsUp, TrendingUp, MoreHorizontal } from 'lucide-react';
+import { Info, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
+import CheckinRow from '../../../components/outcome/CheckinRow';
 import CreateCheckinModal from '../../../components/outcome/CreateCheckinModal';
 import CreateMetricsModal from '../../../components/outcome/CreateMetricsModal';
 import MetricRow from '../../../components/outcome/MetricRow';
-import MemberAvatar from "../../../components/team/MemberAvatar";
 import AppButton from "../../../components/ui/buttons/AppButton";
-import { CHECKIN_STATUS_LABELS } from '../../../constants/outcomeConstants';
 import useCheckins from '../../../hooks/outcome/useCheckins';
 import useMetrics from '../../../hooks/outcome/useMetrics';
-import { dateToHuman } from '../../../utils/timeUtils';
-import CheckinDesktopRow from '../../../components/outcome/CheckinDesktopRow';
-import CheckinMobileRow from '../../../components/outcome/CheckinMobileRow';
-import CheckinActions from '../../../components/outcome/CheckinActions';
-import CheckinRow from '../../../components/outcome/CheckinRow';
+import MetricChart from './MetricChart';
 
 
 function OutcomeView() {
@@ -57,59 +52,11 @@ function OutcomeView() {
                 </div>
 
                 {/* 2. Metrics Journey Chart */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                        <div className="flex items-center gap-2 border border-gray-200 rounded-lg p-1 bg-gray-50/50 w-full sm:w-auto overflow-x-auto scrollbar-hide">
-                            <button className="px-3 py-1.5 text-[13px] font-medium bg-white border border-gray-200 shadow-sm rounded-md text-gray-900 shrink-0">Checkout rate</button>
-                            <button className="px-3 py-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-700 shrink-0">Drop-off users</button>
-                            <button className="px-3 py-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-700 shrink-0">Conversion</button>
-                        </div>
-                        <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 shrink-0">
-                            <TrendingUp className="w-4 h-4" />
-                            Total improvement: +15% since baseline
-                        </div>
-                    </div>
-
-                    <div className="h-[240px] w-full flex items-end">
-                        <div className="flex flex-col justify-between text-[11px] text-gray-400 pb-6 pr-4 h-full shrink-0">
-                            <span>60%</span>
-                            <span>50%</span>
-                            <span>40%</span>
-                            <span>30%</span>
-                            <span>20%</span>
-                        </div>
-                        <div className="relative flex-1 h-full">
-                            {/* Grid Lines */}
-                            <div className="absolute left-0 right-0 border-t border-gray-100" style={{ top: '0%' }}></div>
-                            <div className="absolute left-0 right-0 border-t border-gray-100" style={{ top: '25%' }}></div>
-                            <div className="absolute left-0 right-0 border-t border-gray-100" style={{ top: '50%' }}></div>
-                            <div className="absolute left-0 right-0 border-t border-gray-100" style={{ top: '75%' }}></div>
-                            <div className="absolute left-0 right-0 border-t border-gray-100" style={{ top: '100%' }}></div>
-
-                            {/* SVG Line & Dots */}
-                            <div className="absolute inset-0 mb-6">
-                                <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-                                    <polyline points="0,80 25,60 50,30 75,40 100,0" fill="none" stroke="#378ADD" strokeWidth="3" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                                {/* Dots */}
-                                <div className="absolute w-3 h-3 bg-white border-[2.5px] border-[#378ADD] rounded-full transform -translate-x-1.5 -translate-y-1.5 z-10 hover:scale-125 transition-transform cursor-pointer" style={{ left: '0%', top: '80%' }}></div>
-                                <div className="absolute w-3 h-3 bg-white border-[2.5px] border-[#378ADD] rounded-full transform -translate-x-1.5 -translate-y-1.5 z-10 hover:scale-125 transition-transform cursor-pointer" style={{ left: '25%', top: '60%' }}></div>
-                                <div className="absolute w-3 h-3 bg-white border-[2.5px] border-[#378ADD] rounded-full transform -translate-x-1.5 -translate-y-1.5 z-10 hover:scale-125 transition-transform cursor-pointer" style={{ left: '50%', top: '30%' }}></div>
-                                <div className="absolute w-3 h-3 bg-white border-[2.5px] border-[#378ADD] rounded-full transform -translate-x-1.5 -translate-y-1.5 z-10 hover:scale-125 transition-transform cursor-pointer" style={{ left: '75%', top: '40%' }}></div>
-                                <div className="absolute w-[14px] h-[14px] bg-[#378ADD] border-2 border-white rounded-full transform -translate-x-1/2 -translate-y-1/2 z-10 shadow-sm ring-2 ring-[#378ADD]/20 hover:scale-125 transition-transform cursor-pointer" style={{ left: '100%', top: '0%' }}></div>
-                            </div>
-
-                            {/* X Axis Labels */}
-                            <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[11px] text-gray-400 font-medium translate-y-full pt-2">
-                                <span>Oct 12</span>
-                                <span>Oct 26</span>
-                                <span>Nov 9</span>
-                                <span>Nov 23</span>
-                                <span className="text-gray-900 font-semibold">Dec 7</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {
+                    metrics?.length > 0 
+                    &&  <MetricChart />
+                }
+               
 
                 {/* 3. Check-ins Section */}
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">

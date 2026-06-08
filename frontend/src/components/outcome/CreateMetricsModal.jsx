@@ -6,8 +6,8 @@ import useCreateMetrics from '../../hooks/outcome/useCreateMetrics';
 
 const EMPTY_METRIC = {
     name: '',
-    baselineValue: '',
-    targetValue: '',
+    baselineValue: null,
+    targetValue: null,
     unit: '%',
     direction: 'increase',
 };
