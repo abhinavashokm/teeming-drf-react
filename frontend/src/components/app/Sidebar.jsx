@@ -22,6 +22,7 @@ import { useCan } from '../../hooks/permissions/useCan';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
+import { ROUTE_PATHS } from '../../constants/routePaths';
 
 const getGoalColors = (goalName) => {
   const colorSets = [
@@ -116,13 +117,43 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
           </button>
 
           {sidebarContentExpanded && (
-            <button
-              onClick={() => isMobileMenuOpen ? setIsMobileMenuOpen(false) : setIsSidebarVisible(!isSidebarVisible)}
-              className="text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors ml-1 shrink-0"
-              title="Collapse Sidebar"
-            >
-              <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.5} />
-            </button>
+            <div className="flex items-center gap-1 ml-1 shrink-0">
+              <button
+                onClick={() => {
+                  // Open search modal / command palette
+                }}
+                className="
+                          text-gray-400
+                          hover:text-gray-900
+                          hover:bg-gray-100
+                          p-1.5
+                          rounded-md
+                          transition-colors
+                        "
+                title="Search"
+              >
+                <Search className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              </button>
+
+              <button
+                onClick={() =>
+                  isMobileMenuOpen
+                    ? setIsMobileMenuOpen(false)
+                    : setIsSidebarVisible(!isSidebarVisible)
+                }
+                className="
+        text-gray-400
+        hover:text-gray-900
+        hover:bg-gray-100
+        p-1.5
+        rounded-md
+        transition-colors
+      "
+                title="Collapse Sidebar"
+              >
+                <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              </button>
+            </div>
           )}
 
           {isWorkspaceDropdownOpen && (
@@ -164,23 +195,13 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
 
         <nav className={`flex-1 overflow-y-auto ${sidebarContentExpanded ? 'px-3' : 'px-1.5'} py-5 space-y-4`}>
 
-          {/* Search & Inbox */}
-          <div className={`flex ${sidebarContentExpanded ? 'gap-1' : 'flex-col gap-2'} pb-4 border-b border-gray-200`}>
-            <button
-              className={`flex items-center justify-center ${sidebarContentExpanded ? 'flex-1 gap-1.5 py-1.5' : 'w-8 h-8 mx-auto'} border border-gray-200 bg-white hover:bg-gray-50 rounded-md shadow-sm text-[12px] font-medium text-gray-500 transition-colors`}
-              title={!sidebarContentExpanded ? 'Search' : ''}
-            >
-              <Search className="h-3.5 w-3.5 text-gray-400" strokeWidth={1.5} />
-              {sidebarContentExpanded && 'Search'}
-            </button>
 
-          </div>
 
           {/* Home */}
           <div className="pb-4 border-b border-gray-200">
             <Link
               to=""
-              onClick={() => {setCurrentView('home'); setIsMobileMenuOpen(false);}}
+              onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}
               className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'home' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
               title={!sidebarContentExpanded ? 'Home' : ''}
             >
@@ -190,50 +211,53 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
           </div>
 
           {/* Starred Goals */}
-          <div className="pb-4 border-b border-gray-200">
-            {sidebarContentExpanded && (
-              <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-2.5 mb-2">Starred Goals</h3>
-            )}
-            <div className="space-y-0.5">
-              {starredGoals.map(goal => {
-                const colors = getGoalColors(goal.name);
-                return (
-                  <Link
-                    key={goal.id}
-                    to={`goals/${goal.slug}`}
-                    className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors`}
-                    title={!sidebarContentExpanded ? goal.name : ''}
-                  >
-                    <div className="relative shrink-0">
-                      <div className={`flex items-center justify-center text-[9px] font-semibold rounded-full ${colors.bg} ${colors.text} ${sidebarContentExpanded ? 'w-[22px] h-[22px]' : 'w-[26px] h-[26px]'}`}>
-                        {goal.name.substring(0, 2).toUpperCase()}
+          {
+            starredGoals.length > 0 &&
+            <div className="pb-4 border-b border-gray-200">
+              {sidebarContentExpanded && (
+                <h3 className="text-[11px] font-semibold text-gray-500 tracking-wider px-2.5 mb-2">Starred Goals</h3>
+              )}
+              <div className="space-y-0.5">
+                {starredGoals.map(goal => {
+                  const colors = getGoalColors(goal.name);
+                  return (
+                    <Link
+                      key={goal.id}
+                      to={ROUTE_PATHS.GOAL_DASHBOARD(currentWorkspace.slug, goal.id)}
+                      className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors`}
+                      title={!sidebarContentExpanded ? goal.name : ''}
+                    >
+                      <div className="relative shrink-0">
+                        <div className={`flex items-center justify-center text-[9px] font-semibold rounded-full ${colors.bg} ${colors.text} ${sidebarContentExpanded ? 'w-[22px] h-[22px]' : 'w-[26px] h-[26px]'}`}>
+                          {goal.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        {!sidebarContentExpanded && (
+                          <div className="absolute -top-[3px] -right-[3px] bg-white rounded-full ring-[2px] ring-white">
+                            <Star className="h-[9px] w-[9px] text-amber-400 fill-amber-400" strokeWidth={1.5} />
+                          </div>
+                        )}
                       </div>
-                      {!sidebarContentExpanded && (
-                        <div className="absolute -top-[3px] -right-[3px] bg-white rounded-full ring-[2px] ring-white">
-                          <Star className="h-[9px] w-[9px] text-amber-400 fill-amber-400" strokeWidth={1.5} />
+                      {sidebarContentExpanded && (
+                        <div className="flex items-center justify-between flex-1 min-w-0 pr-1">
+                          <span className="truncate">{goal.name}</span>
+                          <Star className="h-3 w-3 text-amber-400 fill-amber-400 opacity-60 shrink-0" strokeWidth={1} />
                         </div>
                       )}
-                    </div>
-                    {sidebarContentExpanded && (
-                      <div className="flex items-center justify-between flex-1 min-w-0 pr-1">
-                        <span className="truncate">{goal.name}</span>
-                        <Star className="h-3 w-3 text-amber-400 fill-amber-400 opacity-60 shrink-0" strokeWidth={1} />
-                      </div>
-                    )}
-                  </Link>
-                );
-              })}
-              {sidebarContentExpanded && starredGoals.length === 0 && (
-                <div className="px-2.5 py-1.5 text-[12px] text-gray-400 italic">No starred goals</div>
-              )}
+                    </Link>
+                  );
+                })}
+                {sidebarContentExpanded && starredGoals.length === 0 && (
+                  <div className="px-2.5 py-1.5 text-[12px] text-gray-400 italic">No starred goals</div>
+                )}
+              </div>
             </div>
-          </div>
+          }
 
           {/* Manage Team & Settings */}
           <div className="space-y-0.5">
             <Link
               to="manage-team"
-              onClick={() => {setCurrentView('team'); setIsMobileMenuOpen(false);}}
+              onClick={() => { setCurrentView('team'); setIsMobileMenuOpen(false); }}
               className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
               title={!sidebarContentExpanded ? (currentWorkspace.role !== 'Member' ? 'Manage Team' : 'View Team') : ''}
             >
@@ -244,7 +268,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
             {canManageSettings && (
               <Link
                 to="settings"
-                onClick={() => {setCurrentView('workspace_settings'); setIsMobileMenuOpen(false);}}
+                onClick={() => { setCurrentView('workspace_settings'); setIsMobileMenuOpen(false); }}
                 className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
                 title={!sidebarContentExpanded ? 'Settings' : ''}
               >

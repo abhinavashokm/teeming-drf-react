@@ -15,7 +15,7 @@ function WorkspaceSettingsPage() {
     const { mutate: updateWorkspace, isPending } = useUpdateWorkspace()
     const { mutate: deleteWorkspace } = useDeleteWorkspace()
 
-    const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
+    const { register, handleSubmit, reset, resetField, formState: { isDirty } } = useForm({
         defaultValues: {
             name: currentWorkspace?.name || "",
             slug: currentWorkspace?.slug || "",
@@ -111,7 +111,7 @@ function WorkspaceSettingsPage() {
                                             className={`flex-1 w-full px-3 py-2 text-[13px] focus:outline-none ${isSlugUnlocked ? 'bg-white text-gray-900' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}`}
                                         />
                                         <button
-                                            onClick={() => setIsSlugUnlocked(!isSlugUnlocked)}
+                                            onClick={() => {setIsSlugUnlocked(!isSlugUnlocked), resetField('slug');}}
                                             className={`px-3 py-2 border-l transition-colors ${isSlugUnlocked ? 'text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100' : 'text-gray-400 bg-white border-transparent hover:bg-gray-100 hover:text-gray-600'}`}
                                         >
                                             {isSlugUnlocked ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}

@@ -14,6 +14,7 @@ function useAppMutation({
     successMsg,
     onSuccess,
     onError,
+    onMutate,
 }) {
 
     const queryClient = useQueryClient()
@@ -73,6 +74,10 @@ function useAppMutation({
             }
 
             onError?.(error, variables, context)
+        },
+
+        onMutate: async (variables) => {
+            return await onMutate?.(variables);
         }
 
     })

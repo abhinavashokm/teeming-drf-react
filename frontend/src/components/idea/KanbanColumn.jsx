@@ -4,6 +4,7 @@ import useIdeas from '../../hooks/idea/useIdeas';
 import IdeaCard from './IdeaCard';
 import AddIdeaModal from './AddIdeaModal.jsx';
 import { IDEA_STATUS } from '../../constants/ideaConstants.js';
+import IdeaCardSkeleton from './IdeaCardSkelton.jsx';
 
 
 const COLUMN_CONFIGS = {
@@ -61,8 +62,7 @@ const EMPTY_STATES = {
 
 export default function KanbanColumn({ state, onCardClick }) {
 
-    const { data: ideas = [], isSuccess } = useIdeas()
-    console.log(ideas)
+    const { data: ideas = [], isSuccess , isPending} = useIdeas()
     const currentIdeas = ideas.filter(c => c.status === state)
 
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false)
@@ -186,26 +186,37 @@ export default function KanbanColumn({ state, onCardClick }) {
 
                 {/* Cards */}
 
-                {currentIdeas.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-center">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                            {EMPTY_STATES[state].icon}
+                {
+                    isPending ? (
+                        <div className="px-3 pb-3 overflow-hidden ">
+                            <div className="flex flex-col gap-3">
+                                {[...Array(4)].map((_, i) => (
+                                    <IdeaCardSkeleton key={i} state={state} />
+                                ))}
+                            </div>
                         </div>
-                        <p className="text-[13px] font-medium text-gray-500">No {COLUMN_CONFIGS[state].title}</p>
-                        <p className="text-[12px] text-gray-400 mt-1">Ideas added here will show up</p>
-                    </div>
-                ) : (
+                    ) :
 
-                    <div className="flex-1 h-full overflow-y-auto scrollbar-hide px-3 pb-3">
-                        <div className="flex flex-col gap-3">
+                        currentIdeas.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-10 text-center">
+                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                                    {EMPTY_STATES[state].icon}
+                                </div>
+                                <p className="text-[13px] font-medium text-gray-500">No {COLUMN_CONFIGS[state].title}</p>
+                                <p className="text-[12px] text-gray-400 mt-1">Ideas added here will show up</p>
+                            </div>
+                        ) : (
 
-                            {currentIdeas.map(idea => (
-                                <IdeaCard key={idea.id} currentIdea={idea} state={state} theme={theme} />
-                            ))}
+                            <div className="flex-1 h-full overflow-y-auto scrollbar-hide px-3 pb-3">
+                                <div className="flex flex-col gap-3">
 
-                        </div>
-                    </div>
-                )}
+                                    {currentIdeas.map(idea => (
+                                        <IdeaCard key={idea.id} currentIdea={idea} state={state} theme={theme} />
+                                    ))}
+
+                                </div>
+                            </div>
+                        )}
 
                 {showAddIdea && (
                     <div className="shrink-0 px-3 pb-3 pt-1 mt-auto">

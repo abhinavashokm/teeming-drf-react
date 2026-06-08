@@ -29,7 +29,7 @@ export const goalService = {
     },
 
     starGoal: async (slug, goalId) => {
-        console.log("bro")
+
         const res = await api.post(`/workspaces/${slug}/goals/${goalId}/star/`)
         return res.data
     },

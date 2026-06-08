@@ -7,13 +7,15 @@ import useGoalId from '../../hooks/params/useGoalId';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { useState } from 'react';
 import GoalInfoModal from '../goal/GoalInfoModal';
+import { Link } from 'react-router-dom';
+import { ROUTE_PATHS } from '../../constants/routePaths';
 
 
 function Navbar({ isNavbarVisible, isScrolled, setIsGoalInfoModalOpen }) {
 
   const { data: currentWorkspace } = useWorkspace()
   const goalId = useGoalId()
-  const { data: currentGoal } = useGoal()
+  const { data: currentGoal, isPending } = useGoal()
   const matches = useMatches()
 
 
@@ -26,19 +28,30 @@ function Navbar({ isNavbarVisible, isScrolled, setIsGoalInfoModalOpen }) {
         className={`bg-white transition-all duration-200 overflow-hidden flex items-center justify-between shrink-0 w-full h-[44px] ${isScrolled ? 'border-b border-gray-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)]' : 'border-b border-transparent'}`}
       >
         <div className="flex items-center gap-2 pl-15 flex-1 min-w-0 overflow-hidden">
-          <span className="text-[13px] font-medium text-gray-500 shrink-0">{currentWorkspace.name}</span>
+          <Link to={ROUTE_PATHS.WORKSPACE(currentWorkspace.slug)} ><span className="text-[13px] font-medium text-gray-500 shrink-0">{currentWorkspace.name}</span></Link>
+
           <span className="text-gray-300 mx-1 shrink-0">›</span>
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <span className="text-[13px] font-medium text-gray-900 truncate">{currentPage}</span>
-            <button
-              className="hidden md:flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors outline-none shrink-0"
-              onClick={() => setIsGoalInfoModalOpen(true)}
-              title="Goal info"
-            >
-              {
-                goalId && <Info className="w-3.5 h-3.5" strokeWidth={2} />
-              }
-            </button>
+            {
+              currentPage ?
+                <>
+                  <span className="text-[13px] font-medium text-gray-900 truncate">{currentPage}</span>
+                  <button
+                    className="hidden md:flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors outline-none shrink-0"
+                    onClick={() => setIsGoalInfoModalOpen(true)}
+                    title="Goal info"
+                  >
+                    {
+                      goalId && <Info className="w-3.5 h-3.5" strokeWidth={2} />
+                    }
+                  </button>
+                </>
+                :
+                //loading skelton
+                <span className="inline-block h-[14px] w-24 bg-gray-100 rounded-md animate-pulse align-middle" />
+            }
+
+
           </div>
 
         </div>
@@ -50,7 +63,7 @@ function Navbar({ isNavbarVisible, isScrolled, setIsGoalInfoModalOpen }) {
           </button>
         </div>
       </header>
-      
+
     </>
   )
 }

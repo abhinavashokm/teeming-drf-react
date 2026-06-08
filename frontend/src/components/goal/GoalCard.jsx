@@ -109,7 +109,12 @@ function GoalCard({ goal }) {
                 <div className="p-4 flex-1 flex flex-col justify-center relative">
                     <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">{goal.name}</h3>
 
-                    <button onClick={handleToggleStar} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleStar();
+                        }}
+                        className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
                         <Star className={`h-4 w-4 ${goal.isStarred ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
                     </button>
 
