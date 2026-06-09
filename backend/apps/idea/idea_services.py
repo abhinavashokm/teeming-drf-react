@@ -4,6 +4,7 @@ from apps.goal.helpers.goal_helper import get_goal_or_raise
 from .helpers.idea_helper import get_idea_or_raise
 from .models import Idea, IdeaStatusHistory, IdeaAssignment
 from django.db import transaction
+from apps.notification import notification_services
 
 
 def create_idea(created_by, workspace, goal_id, data):
@@ -16,6 +17,14 @@ def create_idea(created_by, workspace, goal_id, data):
 
     created_idea = Idea.objects.create(
         created_by=created_by, workspace=workspace, goal=goal, **data
+    )
+
+    print("outsdie here broh")
+
+    notification_services.notify_workspace_members(
+        workspace=workspace,
+        exclude_user=created_by,
+        message=f'{created_by.full_name} created a new idea: "{created_idea.title}"',
     )
 
     return created_idea

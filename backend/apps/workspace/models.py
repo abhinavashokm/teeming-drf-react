@@ -25,7 +25,7 @@ class WorkspaceMember(WorkspaceScopedBaseModel):
         OWNER = "owner", "Owner"
 
     workspace = models.ForeignKey(
-        Workspace, on_delete=models.CASCADE, related_name="workspace_members"
+        Workspace, on_delete=models.CASCADE, related_name="members"
     )
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="workspace_memberships"

@@ -1,5 +1,11 @@
 from apps.workspace.models import Workspace
+from apps.user.models import User
 from django.http import JsonResponse
+from channels.middleware import BaseMiddleware
+from urllib.parse import parse_qs
+from channels.db import database_sync_to_async
+from rest_framework_simplejwt.tokens import AccessToken
+from django.contrib.auth.models import AnonymousUser
 
 # Reserved routes that should not be treated as workspace slugs
 # when using with /workspaces/<reserved_word>/
@@ -49,3 +55,25 @@ class WorkspaceMiddleware:
         response = self.get_response(request)
 
         return response
+    
+
+@database_sync_to_async
+def get_user_from_token(token_key):
+    try:
+        token = AccessToken(token_key)
+        user = User.objects.get(id=token["user_id"])
+        print("✅ WebSocket user:", user)  # check terminal
+        return user
+    except Exception as e:
+        print("❌ JWT error:", e)
+        return AnonymousUser()
+
+
+class JWTAuthMiddleware(BaseMiddleware):
+
+    async def __call__(self, scope, receive, send):
+
+        query_string = parse_qs(scope["query_string"].decode())
+        token = query_string.get("token", [None])[0]
+        scope["user"] = await get_user_from_token(token) if token else AnonymousUser()
+        return await super().__call__(scope, receive, send)

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
+    "channels",
     # google Oauth apps
     "rest_framework.authtoken",
     "django.contrib.sites",
@@ -43,6 +44,23 @@ INSTALLED_APPS = [
     "apps.goal",
     "apps.idea",
     "apps.outcome",
+    "apps.notification",
+]
+
+ASGI_APPLICATION = 'config.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
+
+# For Django Channels WebSocket origin check
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
 ]
 
 MIDDLEWARE = [
