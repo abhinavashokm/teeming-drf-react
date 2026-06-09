@@ -1,12 +1,14 @@
-import { Activity, AlertCircle, Check, CheckCircle2, ChevronRight, Flag, ThumbsUp } from 'lucide-react';
+import { Activity, AlertCircle, Check, CheckCircle2, ChevronDown, ChevronRight, Flag, ThumbsUp } from 'lucide-react';
+import { useState } from 'react';
 import { IDEA_STATUS } from '../../constants/ideaConstants.js';
-import BaseModal from '../ui/modal/BaseModal';
-import AppButton from '../ui/buttons/AppButton.jsx';
+import { PERMISSIONS } from '../../constants/permissions.js';
+import useAuth from '../../hooks/auth/useAuth.js';
 import useDeleteIdea from '../../hooks/idea/useDeleteIdea.js';
+import { useCan } from '../../hooks/permissions/useCan.js';
 import { dateToHuman } from '../../utils/timeUtils.js';
 import MemberAvatar from '../team/MemberAvatar.jsx';
-import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import AppButton from '../ui/buttons/AppButton.jsx';
+import BaseModal from '../ui/modal/BaseModal';
 
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -44,20 +46,7 @@ const MetaField = ({ label, children }) => (
     </div>
 );
 
-const UserAvatar = ({ initials, colorClass = 'bg-gray-100 text-gray-600' }) => (
-    <div className={`w-6 h-6 rounded-full ${colorClass} flex items-center justify-center text-[10px] font-semibold`}>
-        {initials}
-    </div>
-);
 
-const UserField = ({ label, user }) => (
-    <MetaField label={label}>
-        <div className="flex items-center gap-2">
-            <MemberAvatar name={user?.fullName} email={user?.email} />
-            <span className="text-[13px] text-gray-700">{user?.fullName}</span>
-        </div>
-    </MetaField>
-);
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -81,28 +70,15 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
     const [showActivity, setShowActivity] = useState(false);
     const [showAssignees, setShowAssignees] = useState(false);
 
-    // const assignees = [
-    //     {
-    //         id: '1',
-    //         fullName: 'John Smith',
-    //         email: 'john.smith@example.com',
-    //     },
-    //     {
-    //         id: '2',
-    //         fullName: 'Sarah Wilson',
-    //         email: 'sarah.wilson@example.com',
-    //     },
-    //     {
-    //         id: '3',
-    //         fullName: 'Michael Brown',
-    //         email: 'michael.brown@example.com',
-    //     },
-    //     {
-    //         id: '4',
-    //         fullName: 'Emma Davis',
-    //         email: 'emma.davis@example.com',
-    //     },
-    // ];
+    const { data: currentUser } = useAuth()
+
+    const isIdeaCreator = currentUser.id === createdBy.id
+    const isAssignedToIdea = isDraft ? false : assignees.some(member => member.id === currentUser.id)
+
+    const canMoveIdeaToProgress = useCan(PERMISSIONS.MOVE_IDEA_PROGRESS)
+    const canMoveIdeaToDone = useCan(PERMISSIONS.MOVE_IDEA_DONE) || isAssignedToIdea
+    const canDeleteOthersIdea = useCan(PERMISSIONS.DELETE_OTHERS_IDEA)
+    const canDropIdea = useCan(PERMISSIONS.DROP_IDEA)
 
 
     return (
@@ -171,11 +147,11 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                         {deadline || '—'}
                                     </p>
 
-                                    {isInProgress && (
+                                    {/* {isInProgress && (
                                         <p className="text-xs text-amber-600   mt-0.5">
                                             6 days left
                                         </p>
-                                    )}
+                                    )} */}
                                 </div>
 
                             </div>
@@ -200,32 +176,32 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                 </section>
 
                 {isDone && currentIdea.completionNote && (
-    <section>
+                    <section>
 
-        <div className="rounded-xl bg-amber-50 border border-amber-100 p-4">
+                        <div className="rounded-xl bg-amber-50 border border-amber-100 p-4">
 
-            <div className="flex items-start gap-2">
+                            <div className="flex items-start gap-2">
 
-                <div className="text-amber-500 mt-0.5">
-                    📝
-                </div>
+                                <div className="text-amber-500 mt-0.5">
+                                    📝
+                                </div>
 
-                <div>
-                    <h3 className="text-sm font-semibold text-amber-900 mb-2">
-                        Completion Note
-                    </h3>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-amber-900 mb-2">
+                                        Completion Note
+                                    </h3>
 
-                    <p className="text-sm text-amber-800 leading-6">
-                        {currentIdea.completionNote}
-                    </p>
-                </div>
+                                    <p className="text-sm text-amber-800 leading-6">
+                                        {currentIdea.completionNote}
+                                    </p>
+                                </div>
 
-            </div>
+                            </div>
 
-        </div>
+                        </div>
 
-    </section>
-)}
+                    </section>
+                )}
 
                 {/* Team */}
                 {assignees?.length > 0 && (
@@ -394,19 +370,38 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
 
             {/* Footer */}
             {!isDone && (
-                <BaseModal.Footer className="justify-between flex-wrap gap-3">
-                    <AppButton variant="danger" onClick={isDraft ? handleDeleteIdea : undefined} loading={isDraft && isPending}>
-                        {isDraft ? 'Delete' : 'Drop Idea'}
-                    </AppButton>
-
-
-                    <div className="flex items-center gap-3 ml-auto sm:ml-0">
-                        <AppButton variant="primary" onClick={onMove}>
-                            {isDraft
-                                ? <><ChevronRight className="w-4 h-4" /> Move to In Progress</>
-                                : <><Check className="w-4 h-4" /> Mark as Done</>
-                            }
+                <BaseModal.Footer className="flex items-center gap-2">
+                    {
+                        isDraft && (canDeleteOthersIdea || isIdeaCreator) &&
+                        <AppButton variant="danger" onClick={handleDeleteIdea} loading={isDraft && isPending}>
+                            Delete
                         </AppButton>
+                    }
+                    {
+                        isInProgress && canDropIdea &&
+                        <AppButton variant="danger" onClick={undefined} loading={isDraft && isPending}>
+                            Drop Idea
+                        </AppButton>
+                    }
+
+
+                    {isIdeaCreator && isDraft && (
+                        <AppButton variant="secondary" >
+                            Edit
+                        </AppButton>
+                    )}
+
+                    <div className="ml-auto">
+                        {isDraft && canMoveIdeaToProgress && (
+                            <AppButton variant="primary" onClick={onMove}>
+                                <ChevronRight className="w-4 h-4" /> Move to In Progress
+                            </AppButton>
+                        )}
+                        {isInProgress && canMoveIdeaToDone && (
+                            <AppButton variant="primary" onClick={onMove}>
+                                <Check className="w-4 h-4" /> Mark as Done
+                            </AppButton>
+                        )}
                     </div>
                 </BaseModal.Footer>
             )}

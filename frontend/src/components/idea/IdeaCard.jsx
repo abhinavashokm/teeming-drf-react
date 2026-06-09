@@ -1,10 +1,15 @@
-import { AlertCircle, CheckCircle2, MoreHorizontal, ThumbsUp } from 'lucide-react'
-import { formatDateTime } from "../../utils/timeUtils"
-import IdeaDetailModal from './IdeaDetailModal'
-import { useState } from 'react'
-import MoveToProgressModal from './MoveToProgressModal'
-import MoveToDoneModal from './MoveToDoneModal'
+import { AlertCircle, CheckCircle2, MoreHorizontal, Pencil, ThumbsUp, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { IDEA_STATUS } from '../../constants/ideaConstants.js'
+import { PERMISSIONS } from '../../constants/permissions.js'
+import useAuth from '../../hooks/auth/useAuth.js'
+import useDeleteIdea from '../../hooks/idea/useDeleteIdea.js'
+import { useCan } from '../../hooks/permissions/useCan.js'
+import { formatDateTime } from "../../utils/timeUtils"
+import MemberAvatar from '../team/MemberAvatar.jsx'
+import IdeaDetailModal from './IdeaDetailModal'
+import MoveToDoneModal from './MoveToDoneModal'
+import MoveToProgressModal from './MoveToProgressModal'
 
 const STATE_STYLES = {
     draft: {
@@ -26,40 +31,112 @@ export default function IdeaCard({ currentIdea, state, theme }) {
     const { wrapper, titleClass } = STATE_STYLES[state]
 
     const [activeModal, setActiveModal] = useState(null)
+    const [menuOpen, setMenuOpen] = useState(false)
+    const menuRef = useRef(null)
 
-    const openDetailModal = () => {
-        setActiveModal('detail')
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setMenuOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
+    const handleKebabClick = (e) => {
+        e.stopPropagation()
+        setMenuOpen(o => !o)
     }
 
-    const closeAll = () => {
-        setActiveModal(null)
+    const handleEdit = (e) => {
+        e.stopPropagation()
+        setMenuOpen(false)
+        // onEdit()
     }
+
+    const handleDelete = (e) => {
+        e.stopPropagation()
+        setMenuOpen(false)
+        // onDelete()
+    }
+
+    const handleMove = (e) => {
+        e.stopPropagation()
+        setMenuOpen(false)
+        setActiveModal(state === IDEA_STATUS.DRAFT ? 'moveToProgress' : 'moveToDone')
+    }
+
+
+    const { mutate: deleteIdea, isPending } = useDeleteIdea();
+    const handleDeleteIdea = () => deleteIdea(currentIdea.id, { onSuccess: () => setMenuOpen(false) })
+
+    const { data: currentUser } = useAuth()
+    const isIdeaCreator = currentUser.id === currentIdea.createdBy.id
+
+    const canDeleteOthersIdea = useCan(PERMISSIONS.DELETE_OTHERS_IDEA)
 
     return (
         <>
-            <div onClick={openDetailModal} className={`${wrapper} ${base}`}>
+            <div onClick={() => setActiveModal('detail')} className={`${wrapper} ${base}`}>
 
-                {/* In Progress accent bar */}
                 {state === 'in_progress' && (
                     <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#378ADD]" />
                 )}
 
-                {/* Title row */}
-                <div className={`flex items-start gap-2.5 mb-3 ${state === 'in_progress' ? 'mb-4' : 'mb-3'}`}>
+                <div className={`flex items-start gap-2.5 ${state === 'in_progress' ? 'mb-4' : 'mb-3'}`}>
                     {state === 'draft' && (
-                        <Avatar assignee={currentIdea.createdBy} size="md" className="mt-0.5" />
+                        <MemberAvatar name={currentIdea.createdBy.fullName} email={currentIdea.createdBy.email} size='sm' />
                     )}
                     <div className="flex-1 min-w-0 pr-1">
                         <p className={`text-[14px] font-medium transition-colors leading-snug ${titleClass}`}>
                             {currentIdea.title}
                         </p>
                     </div>
-                    <button className="text-gray-400 hover:text-gray-600 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                        <MoreHorizontal className="w-4 h-4" />
-                    </button>
+
+                    {/* Kebab */}
+                    {
+                        state === IDEA_STATUS.DRAFT && (isIdeaCreator || canDeleteOthersIdea) &&
+
+                        <div ref={menuRef} className="relative shrink-0" onClick={e => e.stopPropagation()}>
+                            <button
+                                onClick={handleKebabClick}
+                                className="text-gray-400 hover:text-gray-600 p-0.5 rounded transition-opacity"
+                            >
+                                <MoreHorizontal className="w-4 h-4" />
+                            </button>
+
+                            {menuOpen && (
+                                <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20">
+                                    {isIdeaCreator && (
+                                        <button
+                                            onClick={handleEdit}
+                                            className="w-full text-left px-3 py-2 text-[13px] text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                        >
+                                            <Pencil className="w-3.5 h-3.5" /> Edit
+                                        </button>
+                                    )}
+
+
+                                    {(isIdeaCreator || canDeleteOthersIdea) && (
+                                        <div className="border-t border-gray-100 mt-1 pt-1">
+                                            <button
+                                                onClick={handleDeleteIdea}
+                                                className="w-full text-left px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                                Delete
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    }
+
                 </div>
 
-                {/* Footer row */}
+                {/* Footer row — unchanged */}
                 <div className="flex items-center justify-between">
                     {state === IDEA_STATUS.DRAFT && (
                         <>
@@ -72,12 +149,11 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                             </div>
                         </>
                     )}
-
                     {state === IDEA_STATUS.IN_PROGRESS && (
                         <>
                             <div className="flex -space-x-1.5">
-                                {currentIdea.assignees?.map((a, i) => (
-                                    <Avatar key={i} assignee={a} size="md" ring />
+                                {currentIdea.assignees?.map((assignee, i) => (
+                                    <MemberAvatar key={assignee.id} name={assignee.fullName} email={assignee.email} size='xs' />
                                 ))}
                             </div>
                             <div className="flex items-center gap-1 text-amber-600 text-[11.5px] font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
@@ -86,13 +162,15 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                             </div>
                         </>
                     )}
-
                     {state === IDEA_STATUS.DONE && (
                         <>
                             <div className="flex items-center gap-1.5 opacity-75 group-hover:opacity-100 transition-opacity">
                                 <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                <Avatar assignee={currentIdea.createdBy} size="sm" />
-                                <span className="text-[11.5px] font-medium text-gray-600">{currentIdea.createdBy?.fullName}</span>
+                                <div className="flex -space-x-1.5">
+                                    {currentIdea.assignees?.map((assignee, i) => (
+                                        <MemberAvatar key={assignee.id} name={assignee.fullName} email={assignee.email} size='xs' />
+                                    ))}
+                                </div>
                             </div>
                             <span className="text-[11px] text-gray-400">{formatDateTime(currentIdea.updatedAt)}</span>
                         </>
@@ -103,19 +181,19 @@ export default function IdeaCard({ currentIdea, state, theme }) {
             <IdeaDetailModal
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'detail'}
-                onClose={closeAll}
-                onMove={() => setActiveModal( state === IDEA_STATUS.DRAFT ? 'moveToProgress' :  state === IDEA_STATUS.IN_PROGRESS ? 'moveToDone' : 'detail')}
+                onClose={() => setActiveModal(null)}
+                onMove={() => setActiveModal(state === IDEA_STATUS.DRAFT ? 'moveToProgress' : state === IDEA_STATUS.IN_PROGRESS ? 'moveToDone' : 'detail')}
             />
             <MoveToProgressModal
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'moveToProgress'}
-                onClose={closeAll}
+                onClose={() => setActiveModal(null)}
                 onBack={() => setActiveModal('detail')}
             />
             <MoveToDoneModal
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'moveToDone'}
-                onClose={closeAll}
+                onClose={() => setActiveModal(null)}
                 onBack={() => setActiveModal('detail')}
             />
         </>
@@ -123,19 +201,9 @@ export default function IdeaCard({ currentIdea, state, theme }) {
 }
 
 function Avatar({ assignee, size = 'md', ring = false, className = '' }) {
-    const sizes = {
-        sm: 'w-5 h-5 text-[9px]',
-        md: 'w-6 h-6 text-[10px]',
-    }
+    const sizes = { sm: 'w-5 h-5 text-[9px]', md: 'w-6 h-6 text-[10px]' }
     return (
-        <div className={`
-            rounded-full flex items-center justify-center font-medium shrink-0
-            ${sizes[size]}
-            ${assignee?.bgClass || 'bg-gray-100'}
-            ${assignee?.textClass || 'text-gray-600'}
-            ${ring ? 'ring-2 ring-white' : ''}
-            ${className}
-        `}>
+        <div className={`rounded-full flex items-center justify-center font-medium shrink-0 ${sizes[size]} ${assignee?.bgClass || 'bg-gray-100'} ${assignee?.textClass || 'text-gray-600'} ${ring ? 'ring-2 ring-white' : ''} ${className}`}>
             {assignee?.initials}
         </div>
     )

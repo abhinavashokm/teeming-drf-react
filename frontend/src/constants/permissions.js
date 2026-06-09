@@ -7,4 +7,8 @@ export const PERMISSIONS = {
   VIEW_GOALS:       'view_goals',
   LEAVE_WORKSPACE: 'leave_workspace',
   UPGRADE_PLAN: 'upgrade_plan',
+  MOVE_IDEA_PROGRESS: 'move_idea_progress',
+  MOVE_IDEA_DONE: 'move_idea_done',
+  DELETE_OTHERS_IDEA: 'delete_others_idea',
+  DROP_IDEA: 'drop_idea',
 }
