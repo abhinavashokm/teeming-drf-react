@@ -17,6 +17,7 @@ function useWorkspaceQueryKeys() {
         ideas: workspaceQueryKeys.ideas(workspaceSlug, goalId),
         metrics: workspaceQueryKeys.metrics(workspaceSlug, goalId),
         checkins: workspaceQueryKeys.checkins(workspaceSlug, goalId),
+        notifications: workspaceQueryKeys.notifications(workspaceSlug),
     }
 }
 

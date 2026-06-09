@@ -17,6 +17,11 @@ export const outcomeService = {
         return res.data
     },
 
+    updateMetric: async (slug, metricId, data) => {
+        const res = await api.patch(`/workspaces/${slug}/outcome/metrics/${metricId}/`, data)
+        return res.data
+    },
+
     deleteMetric: async (slug, metricId) => {
         const res = await api.delete(`/workspaces/${slug}/outcome/metrics/${metricId}/`)
         return res.data
@@ -34,6 +39,11 @@ export const outcomeService = {
 
     fetchCheckin: async (slug, checkinId) => {
         const res = await api.get(`/workspaces/${slug}/outcome/checkins/${checkinId}/`)
+        return res.data
+    },
+
+    updateCheckin: async (slug, checkinId, data) => {
+        const res = await api.patch(`/workspaces/${slug}/outcome/checkins/${checkinId}/`,data)
         return res.data
     },
 

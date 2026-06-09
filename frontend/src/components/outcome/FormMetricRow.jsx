@@ -106,7 +106,7 @@ export default function FormMetricRow({ index, onRemove, canRemove }) {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-[80px_minmax(0,1fr)_minmax(0,1fr)_72px] gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-[80px_minmax(0,1fr)_minmax(0,1fr)_72px] gap-3">
                 <select
                     {...register(`metrics.${index}.unit`)}
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD]"

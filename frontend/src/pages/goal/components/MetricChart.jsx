@@ -37,7 +37,12 @@ function MetricChart() {
 
     const selectedMetric = metrics?.find(m => m.id === selectedMetricId);
 
-    const chartData = checkins
+const chartData = [
+    ...(selectedMetric?.baselineValue !== undefined && selectedMetric?.baselineValue !== null
+        ? [{ date: 'Base', value: selectedMetric.baselineValue }]
+        : []
+    ),
+    ...checkins
         .filter(c => c.metricValues?.length)
         .map(c => {
             const metricValue = c.metricValues.find(v => v.metricId === selectedMetricId);
@@ -47,7 +52,8 @@ function MetricChart() {
             };
         })
         .filter(item => item.value !== undefined)
-        .reverse();
+        .reverse(),
+];
 
     const firstValue = chartData[0]?.value;
     const latestValue = chartData.at(-1)?.value;

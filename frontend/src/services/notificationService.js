@@ -6,10 +6,15 @@ export const notificationService = {
         const res = await api.get(`/workspaces/${slug}/notifications/`)
         return res.data
     },
+    markAllAsRead: async (slug) => {
+        const res = await api.patch(`/workspaces/${slug}/notifications/`)
+        return res.data
+    },
+    clearAll: async (slug) => {
+        const res = await api.delete(`/workspaces/${slug}/notifications/`)
+        return res.data
+    },
     markAsRead: (slug, notification_id) => {
         api.patch(`/workspaces/${slug}/notifications/${notification_id}/`)
-    },
-    markAllAsRead: (slug) => {
-        api.patch(`/workspaces/${slug}/notifications/mark-all-read/`)
     },
 }

@@ -8,6 +8,8 @@ import { CHECKIN_STATUS_LABELS } from "../../constants/outcomeConstants";
 import { dateToHuman } from "../../utils/timeUtils";
 import MemberAvatar from "../team/MemberAvatar";
 import CheckinActions from "./CheckinActions";
+import CheckinFormModal from "./CheckinFormModal";
+import { useState } from "react";
 
 
 const STATUS_CONFIG = {
@@ -48,18 +50,22 @@ function CheckinRow({
     checkin,
     isLast,
     onEdit,
+    canManageCheckins,
 }) {
     const statusConfig = STATUS_CONFIG[checkin.status];
     const StatusIcon = statusConfig.icon;
     const { createdBy } = checkin;
 
+    const [isCheckinModalOpen, setisCheckinModalOpen] = useState(false)
+
     return (
-        <div className="relative flex gap-3 sm:gap-4 p-4 sm:p-6">
-            {/* Timeline */}
-            <div className="relative w-6 shrink-0 flex justify-center">
-                {!isLast && (
-                    <div
-                        className="
+        <>
+            <div className="relative flex gap-3 sm:gap-4 p-4 sm:p-6">
+                {/* Timeline */}
+                <div className="relative w-6 shrink-0 flex justify-center">
+                    {!isLast && (
+                        <div
+                            className="
                     absolute
                     top-3
                     left-1/2
@@ -68,84 +74,97 @@ function CheckinRow({
                     w-px
                     bg-gray-200
                 "
-                    />
-                )}
+                        />
+                    )}
 
-                <div
-                    className={`relative z-10 w-3 h-3 rounded-full mt-1 ${statusConfig.dotClass}`}
-                />
-            </div>
-
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-                {/* Header */}
-                <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <MemberAvatar
-                                name={createdBy.fullName}
-                                email={createdBy.email}
-                                size="sm"
-                            />
-
-                            <span className="text-[13px] font-semibold text-gray-900">
-                                {createdBy.fullName}
-                            </span>
-
-                            <span className="text-gray-300">•</span>
-
-                            <span className="text-[12px] text-gray-500">
-                                {dateToHuman(checkin.createdAt)}
-                            </span>
-                        </div>
-
-                        <div className="mt-2">
-                            <span
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium ${statusConfig.badgeClass}`}
-                            >
-                                <StatusIcon className="w-3.5 h-3.5" />
-                                {statusConfig.label}
-                            </span>
-                        </div>
-                    </div>
-
-                    <CheckinActions
-                        checkin={checkin}
-                        onEdit={() => onEdit(checkin)}
+                    <div
+                        className={`relative z-10 w-3 h-3 rounded-full mt-1 ${statusConfig.dotClass}`}
                     />
                 </div>
 
-                {/* Metrics */}
-                {checkin.metricValues?.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        {checkin.metricValues.map((metric) => (
-                            <div
-                                key={metric.metricId}
-                                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2"
-                            >
-                                <div className="text-[11px] text-gray-500">
-                                    {metric.name}
-                                </div>
 
-                                <div className="text-[13px] font-semibold text-gray-900">
-                                    {metric.value}
-                                </div>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <MemberAvatar
+                                    name={createdBy.fullName}
+                                    email={createdBy.email}
+                                    size="sm"
+                                />
+
+                                <span className="text-[13px] font-semibold text-gray-900">
+                                    {createdBy.fullName}
+                                </span>
+
+                                <span className="text-gray-300">•</span>
+
+                                <span className="text-[12px] text-gray-500">
+                                    {dateToHuman(checkin.createdAt)}
+                                </span>
                             </div>
-                        ))}
-                    </div>
-                )}
 
-                {/* Notes */}
-                {checkin.notes && (
-                    <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-4">
-                        <p className="text-[13px] text-gray-700 leading-relaxed">
-                            {checkin.notes}
-                        </p>
+                            <div className="mt-2">
+                                <span
+                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium ${statusConfig.badgeClass}`}
+                                >
+                                    <StatusIcon className="w-3.5 h-3.5" />
+                                    {statusConfig.label}
+                                </span>
+                            </div>
+                        </div>
+
+                        {
+                            canManageCheckins &&
+                            <CheckinActions
+                                checkin={checkin}
+                                onEdit={() => setisCheckinModalOpen(true)}
+                            />
+                        }
+
                     </div>
-                )}
+
+                    {/* Metrics */}
+                    {checkin.metricValues?.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            {checkin.metricValues.map((metric) => (
+                                <div
+                                    key={metric.metricId}
+                                    className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2"
+                                >
+                                    <div className="text-[11px] text-gray-500">
+                                        {metric.name}
+                                    </div>
+
+                                    <div className="text-[13px] font-semibold text-gray-900">
+                                        {metric.value}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Notes */}
+                    {checkin.notes && (
+                        <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                            <p className="text-[13px] text-gray-700 leading-relaxed">
+                                {checkin.notes}
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+
+            <CheckinFormModal
+                isOpen={isCheckinModalOpen}
+                onClose={() => setisCheckinModalOpen(false)}
+                goalName={"goal"}
+                currentCheckin={checkin}
+            />
+        </>
+
     );
 }
 

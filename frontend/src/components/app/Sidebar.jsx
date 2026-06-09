@@ -225,7 +225,9 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                     <Link
                       key={goal.id}
                       to={ROUTE_PATHS.GOAL_DASHBOARD(currentWorkspace.slug, goal.id)}
-                      className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-100/50 rounded-md transition-colors`}
+                      onClick={() => { setCurrentView(`starredGoal:${goal.id}`); setIsMobileMenuOpen(false); }}
+                      className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors 
+                      ${currentView === `starredGoal:${goal.id}` ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
                       title={!sidebarContentExpanded ? goal.name : ''}
                     >
                       <div className="relative shrink-0">

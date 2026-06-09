@@ -11,4 +11,6 @@ export const PERMISSIONS = {
   MOVE_IDEA_DONE: 'move_idea_done',
   DELETE_OTHERS_IDEA: 'delete_others_idea',
   DROP_IDEA: 'drop_idea',
+  MANAGE_METRICS: 'manage_metrics',
+  MANAGE_CHECKINS: 'manage_checkins',
 }

@@ -140,7 +140,7 @@ export default function KanbanColumn({ state, onCardClick }) {
                             <h3 className="text-[14px] font-semibold text-gray-900 truncate">{title}</h3>
                             <span className={`py-0.5 px-2 rounded-full text-xs font-semibold shrink-0 ${theme.countBg} ${theme.countText}`}>{currentIdeas.length}</span>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0">
+                        {/* <div className="flex items-center gap-1 shrink-0">
                             <button
                                 className={`transition-colors p-1 rounded-md ${isSearchOpen ? 'text-gray-900 bg-gray-200' : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600'}`}
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -166,7 +166,7 @@ export default function KanbanColumn({ state, onCardClick }) {
                             <button className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-200" onClick={toggleCollapse}>
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
-                        </div>
+                        </div> */}
                     </div>
 
                     {isSearchOpen && (
