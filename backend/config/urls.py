@@ -29,7 +29,8 @@ urlpatterns = [
                                 include("apps.idea.list_urls"),
                             ),
                             path("goals/<uuid:goal_id>/outcome/", include("apps.outcome.list_urls")),
-                            path("outcome/", include("apps.outcome.detail_urls"))
+                            path("outcome/", include("apps.outcome.detail_urls")),
+                            path("notifications/", include("apps.notification.urls")),
                         ]
                     ),
                 ),

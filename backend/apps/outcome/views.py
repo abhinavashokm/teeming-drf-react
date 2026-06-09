@@ -1,11 +1,17 @@
-from core.permission_views import AdminBaseView
+from core.permission_views import AdminBaseView, WorkspacePermissionBaseView
+from core.permissions import IsWorkspaceAdmin, IsWorkspaceMember
 from core.responses.api_response import success_response
 from rest_framework import status
 from . import serializers, outcome_services
-from .helpers.outcome_helper import get_metric_or_raise
+from .helpers.outcome_helper import get_metric_or_raise, get_checkin_or_raise
 
 
-class MetricListCreateView(AdminBaseView):
+class MetricListCreateView(WorkspacePermissionBaseView):
+
+    permission_map = {
+        "GET": [IsWorkspaceMember],
+        "POST":[IsWorkspaceAdmin],
+    }
 
     def post(self, request, **kwargs):
         """create one or more metrics under goal"""
@@ -45,7 +51,13 @@ class MetricListCreateView(AdminBaseView):
         )
 
 
-class MetricDetailView(AdminBaseView):
+class MetricDetailView(WorkspacePermissionBaseView):
+
+    permission_map = {
+        "GET": [IsWorkspaceMember],
+        "PATCH": [IsWorkspaceAdmin],
+        "DELETE": [IsWorkspaceAdmin],
+    }
 
     def get(self, request, **kwargs):
 
@@ -82,11 +94,16 @@ class MetricDetailView(AdminBaseView):
         return success_response(message="Metric deleted")
 
 
-class CheckinListCreateView(AdminBaseView):
+class CheckinListCreateView(WorkspacePermissionBaseView):
+
+    permission_map = {
+        "GET": [IsWorkspaceMember],
+        "POST": [IsWorkspaceAdmin]
+    }
 
     def post(self, request, **kwargs):
 
-        serializer = serializers.CreateCheckinSerializer(data=request.data)
+        serializer = serializers.WriteCheckinSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         checkin = outcome_services.create_checkin(
@@ -124,6 +141,23 @@ class CheckinDetailView(AdminBaseView):
         )
 
         return success_response(data=serializers.ReadCheckinSerializer(checkin).data)
+    
+    def patch(self, request, **kwargs):
+
+        checkin = get_checkin_or_raise(
+            workspace=request.workspace,
+            checkin_id=kwargs["checkin_id"]
+        )
+
+        serializer = serializers.WriteCheckinSerializer(instance=checkin, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        updated_checkin = serializer.save()
+
+        return success_response(
+            message="Metric updated",
+            data=serializers.ReadCheckinSerializer(updated_checkin).data
+        )
 
     def delete(self, request, **kwargs):
 

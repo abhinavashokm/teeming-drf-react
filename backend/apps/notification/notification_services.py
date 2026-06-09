@@ -38,3 +38,22 @@ def notify_workspace_members(workspace, message, exclude_user=None):
             }
         )
 
+
+def mark_all_read(workspace, recipient):
+    
+    Notification.objects.filter(
+        workspace=workspace,
+        recipient=recipient,
+        is_read=False
+    ).update(is_read=True)
+
+
+def clear_all(workspace, recipient):
+
+    Notification.objects.filter(
+        workspace=workspace,
+        recipient=recipient
+    ).delete()
+
+
+

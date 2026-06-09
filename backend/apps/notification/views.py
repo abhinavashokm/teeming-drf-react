@@ -1,10 +1,10 @@
 from core.permission_views import MemberBaseView
-from rest_framework.views import APIView
 from .models import Notification
 from core.responses.api_response import success_response
+from . import notification_services
 
 
-class NotificationListView(APIView):
+class NotificationListView(MemberBaseView):
 
     def get(self, request, **kwargs):
         
@@ -19,8 +19,30 @@ class NotificationListView(APIView):
             data=list(data)
         )
     
+    def patch(self, request, **kwargs):
 
-class NotificationDetailView(APIView):
+        notification_services.mark_all_read(
+            workspace=request.workspace,
+            recipient=request.user,
+        )
+
+        return success_response(
+            message="marked all as read"
+        )
+    
+    def delete(self, request, **kwargs):
+        
+        notification_services.clear_all(
+            workspace=request.workspace,
+            recipient=request.user,
+        )
+
+        return success_response(
+            message="All notification cleared"
+        )
+    
+
+class NotificationDetailView(MemberBaseView):
 
     def patch(self, request, **kwargs):
         
