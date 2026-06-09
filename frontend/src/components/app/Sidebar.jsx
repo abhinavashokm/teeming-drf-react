@@ -23,6 +23,7 @@ import useWorkspace from '../../hooks/workspace/useWorkspace';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
 import { ROUTE_PATHS } from '../../constants/routePaths';
+import MemberAvatar from '../team/MemberAvatar';
 
 const getGoalColors = (goalName) => {
   const colorSets = [
@@ -288,9 +289,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
             title={!sidebarContentExpanded ? 'Profile' : ''}
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
-                {currentUser.fullName.slice(0, 2).toUpperCase()}
-              </div>
+              <MemberAvatar name={currentUser.fullName} email={currentUser.email} />
               {sidebarContentExpanded && (
                 <div className="flex flex-col min-w-0 text-left">
                   <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">{currentUser.fullName}</span>

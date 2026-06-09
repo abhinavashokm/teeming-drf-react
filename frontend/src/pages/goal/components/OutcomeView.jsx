@@ -21,7 +21,7 @@ function OutcomeView() {
 
     return (
         <>
-            <div className="max-w-5xl space-y-6 pb-12">
+            <div className="max-w-7xl space-y-6 pb-12">
                 {/* 1. Outcome Header Card */}
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                     <div className="flex flex-col min-[1043px]:flex-row min-[1043px]:items-start justify-between gap-4 min-[1043px]:gap-0 mb-6">

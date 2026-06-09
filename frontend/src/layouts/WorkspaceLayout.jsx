@@ -31,62 +31,73 @@ function WorkspaceLayout() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  if (isWorkspacePending) return <FullPageLoader />
+  // if (isWorkspacePending) return <FullPageLoader />
 
-  if (error?.response?.status === 404) {
-    if (error.response.data?.error?.code === errorCodes.WORKSPACE_NOT_FOUND) {
-      return <ErrorPage
-        type={errorCodes.WORKSPACE_NOT_FOUND}
-      />
-    }
-    return <ErrorPage
-      type={errorCodes.GENERAL}
-    />
-  }
+  // if (error?.response?.status === 404) {
+  //   if (error.response.data?.error?.code === errorCodes.WORKSPACE_NOT_FOUND) {
+  //     return <ErrorPage
+  //       type={errorCodes.WORKSPACE_NOT_FOUND}
+  //     />
+  //   }
+  //   return <ErrorPage
+  //     type={errorCodes.GENERAL}
+  //   />
+  // }
 
 
   return (
-    <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"
-    >
-
-      {/* Sidebar */}
-      <Sidebar
-        isSidebarVisible={isSidebarVisible}
-        setIsSidebarVisible={setIsSidebarVisible}
-        isMobileMenuOpen={isMobileMenuOpen}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-      />
-
-      {/* Main Area */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-
-        {/* Toggle Navbar & Sidebar Buttons - Pinned to top */}
-        <div className="absolute top-0 left-0 h-[44px] flex items-center gap-1 pl-4 z-30 pointer-events-none">
-          {!isMobileMenuOpen && (
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="pointer-events-auto min-[865px]:hidden text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
-            >
-              <Menu className="h-[20px] w-[20px]" strokeWidth={1.5} />
-            </button>
-          )}
-        </div>
-
-        {/* Navbar */}
-        <Navbar setIsMobileMenuOpen={setIsMobileMenuOpen} isScrolled={isScrolled} setIsGoalInfoModalOpen={setIsGoalInfoModalOpen} />
-
-        <main
-          className={`flex-1  ${isFullBleed ? "flex flex-col overflow-hidden" : "overflow-y-auto p-8 md:p-12 lg:px-16"}`}
-          onScroll={(e) => setIsScrolled(e.target.scrollTop > 10)}
+    <>
+      {isWorkspacePending && <FullPageLoader />}
+      {!isWorkspacePending && error && (
+        <ErrorPage type={error.response?.data?.error?.code === errorCodes.WORKSPACE_NOT_FOUND
+          ? errorCodes.WORKSPACE_NOT_FOUND
+          : errorCodes.GENERAL}
+        />
+      )}
+      {!isWorkspacePending && !error && (
+        <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"
         >
-          <Outlet context={{ setIsFullBleed, setIsGoalInfoModalOpen }} />
-        </main>
 
-      </div>
+          {/* Sidebar */}
+          <Sidebar
+            isSidebarVisible={isSidebarVisible}
+            setIsSidebarVisible={setIsSidebarVisible}
+            isMobileMenuOpen={isMobileMenuOpen}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+          />
 
-      <GoalInfoModal isOpen={isGoalInfoModalOpen} onClose={() => setIsGoalInfoModalOpen(false)} />
+          {/* Main Area */}
+          <div className="flex-1 flex flex-col overflow-hidden relative">
 
-    </div>
+            {/* Toggle Navbar & Sidebar Buttons - Pinned to top */}
+            <div className="absolute top-0 left-0 h-[44px] flex items-center gap-1 pl-4 z-30 pointer-events-none">
+              {!isMobileMenuOpen && (
+                <button
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="pointer-events-auto min-[865px]:hidden text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
+                >
+                  <Menu className="h-[20px] w-[20px]" strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
+
+            {/* Navbar */}
+            <Navbar setIsMobileMenuOpen={setIsMobileMenuOpen} isScrolled={isScrolled} setIsGoalInfoModalOpen={setIsGoalInfoModalOpen} />
+
+            <main
+              className={`flex-1  ${isFullBleed ? "flex flex-col overflow-hidden" : "overflow-y-auto p-8 md:p-12 lg:px-16"}`}
+              onScroll={(e) => setIsScrolled(e.target.scrollTop > 10)}
+            >
+              <Outlet context={{ setIsFullBleed, setIsGoalInfoModalOpen }} />
+            </main>
+
+          </div>
+
+          <GoalInfoModal isOpen={isGoalInfoModalOpen} onClose={() => setIsGoalInfoModalOpen(false)} />
+
+        </div>
+      )}
+    </>
   )
 }
 

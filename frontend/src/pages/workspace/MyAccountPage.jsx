@@ -61,7 +61,7 @@ function MyAccountPage() {
                         {/* Avatar Upload */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                             <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-xl font-medium shrink-0 relative group cursor-pointer overflow-hidden">
-                                A
+                                {currentUser.fullName[0].toUpperCase()}
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Camera className="h-5 w-5 text-white" />
                                 </div>

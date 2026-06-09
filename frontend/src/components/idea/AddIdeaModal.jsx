@@ -17,14 +17,13 @@ function AddIdeaModal({ isOpen, onClose }) {
     const goalId = useGoalId()
 
     const handleAddIdea = (data) => {
-        console.log(goalId)
+
         addIdea({data, goalId}, {
             onSuccess: () => {
                 reset()
                 onClose()
             }
         })
-       // console.log(data)
     }
 
     const [ideaTitle, setIdeaTitle] = useState('');

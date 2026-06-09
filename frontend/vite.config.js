@@ -16,5 +16,12 @@ export default defineConfig({
   server: {
     allowedHosts: ['simplistic-pokier-melania.ngrok-free.dev'],
     host: true,
+    proxy: {
+      '/ws': {
+        target: 'ws://localhost:8000',
+        ws: true,
+        changeOrigin: true,
+      }
+    }
   }
 })
