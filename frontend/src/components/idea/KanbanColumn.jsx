@@ -2,7 +2,7 @@ import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, ListFilter, MoreH
 import { useEffect, useRef, useState } from 'react';
 import useIdeas from '../../hooks/idea/useIdeas';
 import IdeaCard from './IdeaCard';
-import AddIdeaModal from './AddIdeaModal.jsx';
+import IdeaFormModal from './IdeaFormModal.jsx';
 import { IDEA_STATUS } from '../../constants/ideaConstants.js';
 import IdeaCardSkeleton from './IdeaCardSkelton.jsx';
 
@@ -62,10 +62,10 @@ const EMPTY_STATES = {
 
 export default function KanbanColumn({ state, onCardClick }) {
 
-    const { data: ideas = [], isSuccess , isPending} = useIdeas()
+    const { data: ideas = [], isSuccess, isPending } = useIdeas()
     const currentIdeas = ideas.filter(c => c.status === state)
 
-    const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false)
+    const [isAddIdeaFormModalOpen, setIsAddIdeaFormModalOpen] = useState(false)
 
     const { id, title, theme, showAddIdea } = COLUMN_CONFIGS[state]
     const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -210,8 +210,13 @@ export default function KanbanColumn({ state, onCardClick }) {
                             <div className="flex-1 h-full overflow-y-auto scrollbar-hide px-3 pb-3">
                                 <div className="flex flex-col gap-3">
 
-                                    {currentIdeas.map(idea => (
-                                        <IdeaCard key={idea.id} currentIdea={idea} state={state} theme={theme} />
+                                    {[...currentIdeas].reverse().map(idea => (
+                                        <IdeaCard
+                                            key={idea.id}
+                                            currentIdea={idea}
+                                            state={state}
+                                            theme={theme}
+                                        />
                                     ))}
 
                                 </div>
@@ -220,7 +225,7 @@ export default function KanbanColumn({ state, onCardClick }) {
 
                 {showAddIdea && (
                     <div className="shrink-0 px-3 pb-3 pt-1 mt-auto">
-                        <button onClick={() => setIsAddIdeaModalOpen(true)} className="flex items-center justify-center gap-1.5 w-full text-green-600 hover:text-green-700 hover:bg-amber-100/40 rounded-xl py-2 transition-colors text-[13px] font-medium">
+                        <button onClick={() => setIsAddIdeaFormModalOpen(true)} className="flex items-center justify-center gap-1.5 w-full text-green-600 hover:text-green-700 hover:bg-amber-100/40 rounded-xl py-2 transition-colors text-[13px] font-medium">
                             <Plus className="w-4 h-4" /> Add idea
                         </button>
                     </div>
@@ -228,7 +233,7 @@ export default function KanbanColumn({ state, onCardClick }) {
 
             </div>
 
-            <AddIdeaModal isOpen={isAddIdeaModalOpen} onClose={() => setIsAddIdeaModalOpen(false)} />
+            <IdeaFormModal isOpen={isAddIdeaFormModalOpen} onClose={() => setIsAddIdeaFormModalOpen(false)} />
         </>
     );
 }

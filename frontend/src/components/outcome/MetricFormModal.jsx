@@ -6,13 +6,15 @@ import useCreateMetrics from '../../hooks/outcome/useCreateMetrics';
 import useUpdateMetric from '../../hooks/outcome/useUpdateMetric';
 import AppButon from "../ui/buttons/AppButton"
 import AppButton from '../ui/buttons/AppButton';
+import { useEffect } from 'react';
+import { UNIT_OPTIONS } from '../../constants/outcomeConstants';
 
 
 const EMPTY_METRIC = {
     name: '',
     baselineValue: null,
     targetValue: null,
-    unit: '%',
+    unit: UNIT_OPTIONS[0],
     direction: 'increase',
 };
 
@@ -20,26 +22,35 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
 
     const isEdit = !!currentMetric;
 
-    const formMethods = useForm({
-        defaultValues: {
-            metrics: isEdit
-                ? [{
-                    name: currentMetric.name,
-                    baselineValue: currentMetric.baselineValue,
-                    targetValue: currentMetric.targetValue,
-                    unit: currentMetric.unit,
-                    direction: currentMetric.direction,
-                }]
-                : [{ ...EMPTY_METRIC }]
-        }
-    });
-
+    const formMethods = useForm();
     const { control, handleSubmit, reset, formState: { isDirty } } = formMethods;
 
     const { fields, append, remove } = useFieldArray({
         control,
         name: 'metrics'
     });
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        if (isEdit && currentMetric) {
+            reset({
+                metrics: [
+                    {
+                        name: currentMetric.name,
+                        baselineValue: currentMetric.baselineValue,
+                        targetValue: currentMetric.targetValue,
+                        unit: currentMetric.unit,
+                        direction: currentMetric.direction,
+                    }
+                ]
+            });
+        } else {
+            reset({
+                metrics: [{ ...EMPTY_METRIC }]
+            });
+        }
+    }, [isOpen, currentMetric, isEdit, reset]);
 
     const { mutate: createMetrics, isPending: isCreating } = useCreateMetrics();
     const { mutate: updateMetric, isPending: isUpdating } = useUpdateMetric()
@@ -55,7 +66,6 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
         console.log(data.metrics[0]);
         updateMetric({ data: data.metrics[0], "metricId": currentMetric.id }, {
             onSuccess: () => {
-                reset()
                 onClose();
             }
         })

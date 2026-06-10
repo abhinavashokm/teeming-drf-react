@@ -86,7 +86,7 @@ function GoalCard({ goal }) {
                                         Edit
                                     </button>
                                     <button
-                                        onClick={handleDeleteGoal}
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteGoal();}}
                                         className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-500 hover:bg-red-50 transition-colors"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />

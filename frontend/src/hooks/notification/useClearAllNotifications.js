@@ -11,6 +11,7 @@ function useClearAllNotifications() {
         mutationFn: notificationService.clearAll,
         passWorkspaceSlug: true,
         invalidateKeys: [workspaceKeys.notifications],
+        apiSuccessToast: false,
     })
 }
 

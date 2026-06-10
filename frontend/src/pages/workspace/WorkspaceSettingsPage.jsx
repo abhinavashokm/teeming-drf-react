@@ -209,6 +209,7 @@ function WorkspaceSettingsPage() {
                                 />
                             </div>
                         </div>
+
                         <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3 rounded-b-[16px]">
                             <button
                                 onClick={() => {
@@ -227,6 +228,7 @@ function WorkspaceSettingsPage() {
                                 Delete Workspace
                             </button>
                         </div>
+                        
                     </div>
                 </div>
             )}

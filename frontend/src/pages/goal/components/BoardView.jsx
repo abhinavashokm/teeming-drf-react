@@ -1,7 +1,4 @@
 
-import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, ListFilter, MoreHorizontal, Plus, Search, ThumbsUp } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
-import AddIdeaModal from '../../../components/idea/AddIdeaModal.jsx';
 import KanbanColumn from '../../../components/idea/KanbanColumn';
 import { IDEA_STATUS } from '../../../constants/ideaConstants.js';
 

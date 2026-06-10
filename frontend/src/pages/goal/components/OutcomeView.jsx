@@ -10,9 +10,12 @@ import useMetrics from '../../../hooks/outcome/useMetrics';
 import MetricChart from './MetricChart';
 import { useCan } from "../../../hooks/permissions/useCan"
 import { PERMISSIONS } from '../../../constants/permissions';
+import useGoal from "../../../hooks/goal/useGoal"
 
 
 function OutcomeView() {
+
+    const { data: currentGoal  } = useGoal()
 
     const { data: metrics } = useMetrics()
     const { data: checkins = [] } = useCheckins()
@@ -51,11 +54,26 @@ function OutcomeView() {
 
                     </div>
 
-                    {
-                        metrics?.map(metric => {
-                            return <MetricRow currentMetric={metric} canManageMetrics={canManageCheckins} />
-                        })
-                    }
+                    {metrics?.length > 0 ? (
+                        metrics.map(metric => (
+                            <MetricRow currentMetric={metric} canManageMetrics={canManageCheckins} />
+                        ))
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-8 px-4 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200 mb-4">
+                            <p className="text-[13px] font-semibold text-gray-700">No metrics yet</p>
+                            <p className="text-[12px] text-gray-400 mt-0.5 max-w-xs">
+                                Add a metric to start measuring the real impact of this idea.
+                            </p>
+                            {canManageMetrics && (
+                                <button
+                                    onClick={() => setIsMetricFormModalOpen(true)}
+                                    className="mt-3 px-3.5 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                                >
+                                    Add Metric
+                                </button>
+                            )}
+                        </div>
+                    )}
                     {
                         (canManageCheckins || canManageMetrics) &&
                         <div className="flex items-start gap-2 bg-blue-50/50 text-blue-800 p-3 rounded-lg border border-blue-100">
@@ -68,7 +86,7 @@ function OutcomeView() {
 
                 {/* 2. Metrics Journey Chart */}
                 {
-                    metrics?.length > 0
+                    metrics?.length > 0 
                     && <MetricChart />
                 }
 
@@ -77,7 +95,7 @@ function OutcomeView() {
                     <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <h2 className="text-[16px] font-bold text-gray-900">Check-ins</h2>
-                            <span className="text-[12px] text-gray-500 font-medium bg-gray-100 px-2 py-0.5 rounded-full">2 check-ins</span>
+                            <span className="text-[12px] text-gray-500 font-medium bg-gray-100 px-2 py-0.5 rounded-full">{checkins?.length ?? 0} check-ins</span>
                         </div>
                         <span className="text-[13px] text-gray-500 font-medium">Latest to oldest</span>
                     </div>
@@ -119,8 +137,8 @@ function OutcomeView() {
                 </div>
             </div >
 
-            <MetricFormModal isOpen={isMetricFormModalOpen} onClose={() => setIsMetricFormModalOpen(false)} />
-            <CheckinFormModal isOpen={isCheckinFormModalOpen} onClose={() => setIsCheckinFormModalOpen(false)} />
+            <MetricFormModal isOpen={isMetricFormModalOpen} onClose={() => setIsMetricFormModalOpen(false)} goalName={currentGoal?.name} />
+            <CheckinFormModal isOpen={isCheckinFormModalOpen} onClose={() => setIsCheckinFormModalOpen(false)} goalName={currentGoal?.name} />
         </>
     )
 }

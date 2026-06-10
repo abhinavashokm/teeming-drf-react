@@ -12,6 +12,11 @@ export const ideaService = {
         return res.data
     },
 
+    updateIdea: async (slug, ideaId, data) => {
+        const res = await api.patch(`/workspaces/${slug}/ideas/${ideaId}/`, data)
+        return res.data
+    },
+
     deleteIdea: async (slug, ideaId) => {
         const res = await api.delete(`/workspaces/${slug}/ideas/${ideaId}/`)
         return res.data

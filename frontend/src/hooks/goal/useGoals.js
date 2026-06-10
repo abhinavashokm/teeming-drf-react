@@ -6,11 +6,12 @@ import useWorkspaceSlug from '../params/useWorkspaceSlug'
 function useGoals() {
   const workspaceSlug = useWorkspaceSlug()
   const workspaceKeys = useWorkspaceQueryKeys()
+  const limit = 8
 
   return useQuery({
     queryKey: workspaceKeys.goals,
     queryFn: async () => {
-      const resData = await goalService.fetchAllGoals(workspaceSlug)
+      const resData = await goalService.fetchAllGoals(workspaceSlug, limit)
       return resData.data.goals
     },
   })

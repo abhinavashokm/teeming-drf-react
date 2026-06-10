@@ -104,7 +104,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                             </h2>
 
                             <p className="text-sm text-gray-500 mt-1">
-                                Added by {createdBy?.fullName} · {formattedDate}
+                                Added by {isIdeaCreator ? "You" : createdBy?.fullName} · {formattedDate}
                             </p>
                         </div>
 
@@ -342,7 +342,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                         </p>
 
                                         <p className="text-xs text-gray-500 mt-1">
-                                            {dateToHuman(currentIdea.movedAt)}
+                                            {dateToHuman(currentIdea.movedToProgressAt)}
                                         </p>
                                     </div>
                                 )}
@@ -385,11 +385,11 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                     }
 
 
-                    {isIdeaCreator && isDraft && (
+                    {/* {isIdeaCreator && isDraft && (
                         <AppButton variant="secondary" >
                             Edit
                         </AppButton>
-                    )}
+                    )} */}
 
                     <div className="ml-auto">
                         {isDraft && canMoveIdeaToProgress && (

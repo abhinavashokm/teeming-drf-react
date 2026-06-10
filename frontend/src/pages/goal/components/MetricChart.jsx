@@ -201,7 +201,7 @@ const chartData = [
 
             {/* Chart */}
             <div className="h-[280px]">
-                {chartData.length > 0 ? (
+                {chartData.length > 1 ? (
                     <Line data={data} options={options} />
                 ) : (
                     <div className="h-full flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl">

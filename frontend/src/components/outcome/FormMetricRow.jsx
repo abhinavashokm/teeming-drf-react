@@ -1,36 +1,7 @@
 import { X, TrendingUp, TrendingDown } from 'lucide-react';
 import { Controller, useFormContext } from "react-hook-form";
+import { UNIT_OPTIONS } from '../../constants/outcomeConstants';
 
-const UNIT_OPTIONS = [
-    {
-        value: "percentage",
-        display: "Percentage (%)",
-    },
-    {
-        value: "number",
-        display: "Count (#)",
-    },
-    {
-        value: "currency",
-        display: "Currency ($)",
-    },
-    {
-        value: "hours",
-        display: "Hours (hrs)",
-    },
-    {
-        value: "days",
-        display: "Days (d)",
-    },
-    {
-        value: "minutes",
-        display: "Minutes (min)",
-    },
-    {
-        value: "score",
-        display: "Score (Sc)",
-    },
-];
 
 function DirectionToggle({ value, onChange, disabled, dirty }) {
     return (
@@ -119,7 +90,7 @@ export default function FormMetricRow({ index, onRemove, canRemove }) {
                 <input
                     type="number"
                     {...register(`metrics.${index}.baselineValue`)}
-                    placeholder="Baseline"
+                    placeholder="Current value"
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD]"
                 />
 

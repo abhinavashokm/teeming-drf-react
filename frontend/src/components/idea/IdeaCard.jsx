@@ -10,6 +10,8 @@ import MemberAvatar from '../team/MemberAvatar.jsx'
 import IdeaDetailModal from './IdeaDetailModal'
 import MoveToDoneModal from './MoveToDoneModal'
 import MoveToProgressModal from './MoveToProgressModal'
+import IdeaFormModal from './IdeaFormModal.jsx'
+import DeleteConfirmationModal from '../ui/modal/DeleteConfirmationModal.jsx'
 
 const STATE_STYLES = {
     draft: {
@@ -29,6 +31,9 @@ const STATE_STYLES = {
 export default function IdeaCard({ currentIdea, state, theme }) {
     const base = `border rounded-xl p-4 shadow-sm hover:border-gray-300 hover:shadow transition-all cursor-pointer relative group ${theme.cardBorder || 'border-gray-200'}`
     const { wrapper, titleClass } = STATE_STYLES[state]
+
+    const [isEditIdeaModalOpen, setIsEditIdeaModalOpen] = useState(false)
+    const [isDeleteConfirmModalOpen, setisDeleteConfirmModalOpen] = useState(false)
 
     const [activeModal, setActiveModal] = useState(null)
     const [menuOpen, setMenuOpen] = useState(false)
@@ -110,7 +115,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                                 <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20">
                                     {isIdeaCreator && (
                                         <button
-                                            onClick={handleEdit}
+                                            onClick={() => setIsEditIdeaModalOpen(true)}
                                             className="w-full text-left px-3 py-2 text-[13px] text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                         >
                                             <Pencil className="w-3.5 h-3.5" /> Edit
@@ -121,7 +126,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                                     {(isIdeaCreator || canDeleteOthersIdea) && (
                                         <div className="border-t border-gray-100 mt-1 pt-1">
                                             <button
-                                                onClick={handleDeleteIdea}
+                                                onClick={() => setisDeleteConfirmModalOpen(true)}
                                                 className="w-full text-left px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 flex items-center gap-2"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -144,7 +149,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                                 <ThumbsUp className="w-3.5 h-3.5" /> {0}
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <span className="text-[11.5px] font-medium text-gray-600">{currentIdea.createdBy.fullName}</span>
+                                <span className="text-[11.5px] font-medium text-gray-600">{isIdeaCreator ? "You" : currentIdea.createdBy.fullName}</span>
                                 <span className="text-[11px] text-gray-400">· {formatDateTime(currentIdea.createdAt)}</span>
                             </div>
                         </>
@@ -195,6 +200,25 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                 isOpen={activeModal === 'moveToDone'}
                 onClose={() => setActiveModal(null)}
                 onBack={() => setActiveModal('detail')}
+            />
+
+            <IdeaFormModal
+                isOpen={isEditIdeaModalOpen}
+                onClose={() => setIsEditIdeaModalOpen(false)}
+                currentIdea={currentIdea}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteConfirmModalOpen}
+                onClose={() => setisDeleteConfirmModalOpen(false)}
+                onConfirm={handleDeleteIdea}
+                title={isIdeaCreator ? "Delete Idea" : `Delete ${currentIdea.createdBy.fullName}'s Idea`}
+                description={
+                    isIdeaCreator
+                        ? "This idea will be completely removed from this goal."
+                        : `You are deleting an idea submitted by ${currentIdea.createdBy.fullName}. This cannot be undone.`
+                }
+                confirmButtonText="Delete Idea"
             />
         </>
     )

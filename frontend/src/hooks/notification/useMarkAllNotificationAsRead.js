@@ -10,6 +10,7 @@ function useMarkAllNotificationAsRead() {
         mutationFn: notificationService.markAllAsRead,
         passWorkspaceSlug: true,
         invalidateKeys: [workspaceKeys.notifications],
+        apiSuccessToast: false,
     })
 }
 
