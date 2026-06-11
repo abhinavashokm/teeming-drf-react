@@ -5,6 +5,7 @@ from django.utils import timezone
 from .models import OutcomeMetric, OutcomeCheckIn, CheckInMetricValue
 from apps.goal.helpers.goal_helper import get_goal_or_raise
 from .helpers.outcome_helper import get_metric_or_raise, get_checkin_or_raise
+from apps.notification import notification_services
 
 
 def create_metrics(current_user, workspace, goal_id, data):
@@ -12,8 +13,12 @@ def create_metrics(current_user, workspace, goal_id, data):
     goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
 
     metrics = OutcomeMetric.objects.bulk_create(
-        [OutcomeMetric(created_by=current_user, workspace=workspace, goal=goal, **metricData)
-        for metricData in data]
+        [
+            OutcomeMetric(
+                created_by=current_user, workspace=workspace, goal=goal, **metricData
+            )
+            for metricData in data
+        ]
     )
 
     return metrics
@@ -65,6 +70,12 @@ def create_checkin(current_user, workspace, goal_id, data):
                     for mv in data["metric_values"]
                 ]
             )
+
+        notification_services.notify_workspace_members(
+            workspace=workspace,
+            exclude_user=current_user,
+            message=f'{current_user.full_name} added a new check-in for "{goal.name}"',
+        )
 
         return checkin
 

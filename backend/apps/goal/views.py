@@ -17,8 +17,6 @@ class GoalListCreateView(WorkspacePermissionBaseView):
 
     def post(self, request, **kwargs):
 
-        print(request.data)
-
         serializer = GoalWriteSerializer(
             data=request.data, context={"request": request.data}, partial=True
         )
@@ -42,9 +40,12 @@ class GoalListCreateView(WorkspacePermissionBaseView):
 
     def get(self, request, **kwargs):
 
+        params = request.query_params
+
         goals = goal_services.list_workspace_goals(
             workspace=request.workspace,
             user=request.user,
+            limit=params.get("limit"),
         )
 
         goals_data = GoalReadSerializer(goals, many=True).data

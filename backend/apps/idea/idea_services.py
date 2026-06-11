@@ -19,12 +19,10 @@ def create_idea(created_by, workspace, goal_id, data):
         created_by=created_by, workspace=workspace, goal=goal, **data
     )
 
-    print("outsdie here broh")
-
     notification_services.notify_workspace_members(
         workspace=workspace,
         exclude_user=created_by,
-        message=f'{created_by.full_name} created a new idea: "{created_idea.title}"',
+        message=f'{created_by.full_name} created a new idea: "{created_idea.title}" in goal "{created_idea.goal.name}',
     )
 
     return created_idea
@@ -48,7 +46,7 @@ def delete_idea(workspace, idea_id):
     return True
 
 
-def move_idea_to_progress(current_user, workspace, idea_id, assignees, deadline):
+def move_idea_to_planned(current_user, workspace, idea_id, assignees, deadline):
     """
     move idea to progress
     1] update idea
@@ -63,7 +61,7 @@ def move_idea_to_progress(current_user, workspace, idea_id, assignees, deadline)
         )
         previous_status = idea.status
 
-        idea.status = Idea.StatusChoices.IN_PROGRESS
+        idea.status = Idea.StatusChoices.PLANNED
         if deadline:
             idea.deadline = deadline
 
@@ -74,7 +72,7 @@ def move_idea_to_progress(current_user, workspace, idea_id, assignees, deadline)
             idea=idea,
             changed_by=current_user,
             from_status=previous_status,
-            to_status=Idea.StatusChoices.IN_PROGRESS,
+            to_status=Idea.StatusChoices.PLANNED,
         )
 
         IdeaAssignment.objects.bulk_create(
@@ -87,6 +85,36 @@ def move_idea_to_progress(current_user, workspace, idea_id, assignees, deadline)
                 )
                 for assignee in assignees
             ]
+        )
+
+        notification_services.notify_users(
+            workspace=workspace,
+            exclude_user=current_user,
+            message=f'You were assigned to "{idea.title}" in goal "{idea.goal.name}" by {current_user.full_name}',
+            users=assignees,
+        )
+
+        return idea
+
+
+def move_idea_to_progress(current_user, workspace, idea_id):
+
+    with transaction.atomic():
+
+        idea = get_idea_or_raise(
+            workspace=workspace, idea_id=idea_id, select_for_update=True
+        )
+        previous_status = idea.status
+
+        idea.status = Idea.StatusChoices.IN_PROGRESS
+        idea.save(update_fields=["status", "deadline"])
+
+        IdeaStatusHistory.objects.create(
+            workspace=workspace,
+            idea=idea,
+            changed_by=current_user,
+            from_status=previous_status,
+            to_status=Idea.StatusChoices.IN_PROGRESS,
         )
 
         return idea

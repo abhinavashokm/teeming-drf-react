@@ -6,7 +6,7 @@ from apps.user.models import User
 from apps.goal.serializers import GoalBasicSerializer
 
 
-class CreateIdeaSerializer(serializers.ModelSerializer):
+class WriteIdeaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Idea
@@ -34,7 +34,13 @@ class IdeaReadSerializer(serializers.ModelSerializer):
 
     assigned_by = serializers.SerializerMethodField()
 
-    move_to_progress_by = UserBasicSerializer(
+    moved_to_planned_by = UserBasicSerializer(
+        source="move_to_planned_history.changed_by", read_only=True, allow_null=True
+    )
+    moved_to_planned_at = serializers.DateTimeField(
+        source="move_to_planned_history.created_at", read_only=True, allow_null=True
+    )
+    moved_to_progress_by = UserBasicSerializer(
         source="moved_to_progress_history.changed_by", read_only=True, allow_null=True
     )
     moved_to_progress_at = serializers.DateTimeField(
@@ -63,7 +69,9 @@ class IdeaReadSerializer(serializers.ModelSerializer):
             "created_at",
             "assignees",
             "assigned_by",
-            "move_to_progress_by",
+            "moved_to_planned_by",
+            "moved_to_planned_at",
+            "moved_to_progress_by",
             "moved_to_progress_at",
             "moved_to_done_by",
             "moved_to_done_at",
@@ -76,7 +84,7 @@ class IdeaReadSerializer(serializers.ModelSerializer):
         if assignment:
             return UserBasicSerializer(assignment.assigned_by).data
         return None
-    
+
     def get_assignees(self, obj):
         return UserBasicSerializer(
             [assignment.assignee for assignment in obj.assignments.all()],
@@ -84,7 +92,7 @@ class IdeaReadSerializer(serializers.ModelSerializer):
         ).data
 
 
-class IdeaMoveToProgressSerializer(serializers.Serializer):
+class IdeaMoveToPlannedSerializer(serializers.Serializer):
     assignees = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
         many=True,
@@ -107,6 +115,31 @@ class IdeaMoveToProgressSerializer(serializers.Serializer):
             )
 
         return assignees
+
+
+# class IdeaMoveToProgressSerializer(serializers.Serializer):
+#     assignees = serializers.PrimaryKeyRelatedField(
+#         queryset=User.objects.all(),
+#         many=True,
+#     )
+#     deadline = serializers.DateField(required=False, allow_null=True)
+
+#     def validate_assignees(self, assignees):
+#         idea_id = self.context["idea_id"]
+
+#         existing_assignee_ids = set(
+#             IdeaAssignment.objects.filter(
+#                 idea_id=idea_id,
+#                 assignee__in=assignees,
+#             ).values_list("assignee_id", flat=True)
+#         )
+
+#         if existing_assignee_ids:
+#             raise serializers.ValidationError(
+#                 "One or more users are already assigned to this idea."
+#             )
+
+#         return assignees
 
 
 class IdeaMoveToDoneSerializer(serializers.ModelSerializer):

@@ -64,18 +64,29 @@ class CompleteSignupView(APIView):
             invitation_token=invitation_token,
         )
 
-        if invitation_token:
-            return success_response(
-                message="Signup successful. You have joined the workspace.",
-                data={
-                    "joined_workspace": JoinedWorkspaceSerializer(joined_workspace).data
-                },
-                status_code=status.HTTP_201_CREATED,
-            )
+        refresh_token = user_services.generate_tokens_for_user(user)
 
-        return success_response(
-            message="verification successfull", status_code=status.HTTP_200_OK
+
+        response_data = {
+            "user": UserSerializer(user).data,
+            "access_token": str(refresh_token.access_token),
+        }
+
+        if joined_workspace:
+            response_data["joined_workspace"] = JoinedWorkspaceSerializer(joined_workspace).data
+        
+        response = success_response(
+            message="Email verified successfully",
+            data=response_data,
+            status_code=status.HTTP_201_CREATED,
         )
+
+        # Set httpOnly refresh cookie, same as login
+        response = cookie_helper.set_refresh_cookie(
+            refresh_token=refresh_token, response=response
+        )
+
+        return response
 
 
 class ResendOTPView(APIView):

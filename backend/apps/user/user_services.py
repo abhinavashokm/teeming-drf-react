@@ -6,6 +6,7 @@ from django.db import transaction
 
 from .helpers import otp_helper, signup_helper, password_reset_helper
 from core.utils.token_utils import generate_token
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from .models import User
 from . import exceptions
@@ -215,4 +216,8 @@ def delete_user(user):
     """delete user account"""
 
     user.soft_delete()
+
+
+def generate_tokens_for_user(user):
+    return RefreshToken.for_user(user)
     

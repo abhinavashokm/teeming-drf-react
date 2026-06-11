@@ -7,6 +7,7 @@ class Idea(WorkspaceScopedBaseModel):
 
     class StatusChoices(models.TextChoices):
         DRAFT = "draft", "Draft"
+        PLANNED = "planned", "Planned"
         IN_PROGRESS = "in_progress", "In Progress"
         DONE = "done", "Done"
 
@@ -27,6 +28,12 @@ class Idea(WorkspaceScopedBaseModel):
 
     class Meta:
         db_table = "ideas"
+
+    @property
+    def move_to_planned_history(self):
+        return self.status_history.filter(
+            to_status=self.StatusChoices.PLANNED
+        ).first()
 
     @property
     def moved_to_progress_history(self):
