@@ -3,8 +3,14 @@ import applyCaseMiddleware from "axios-case-converter";
 import { authRequestInterceptor } from "./interceptors/authRequestInterceptor";
 import { authResponseInterceptor } from "./interceptors/authResponseInterceptor";
 
+
+const API_BASE_URL = import.meta.env.VITE_TUNNELING_MODE === 'true'
+  ? import.meta.env.VITE_TEMP_TUNNEL_URL
+  : import.meta.env.VITE_API_BASE_URL;
+  
+
 const api = applyCaseMiddleware(axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: API_BASE_URL,
     headers: {
         "Content-Type": 'application/json',
         ...(import.meta.env.DEV && { "ngrok-skip-browser-warning": "true" }), //for tunneling use

@@ -126,12 +126,17 @@ export default function GoalDashboard({ goalTitle }) {
       </div>
 
       {/* Floating Button for Panel */}
-      <button
-        className="fixed min-[865px]:absolute bottom-6 right-6 w-14 h-14 bg-[#378ADD] text-white rounded-full shadow-[0_4px_14px_rgba(55,138,221,0.4)] flex items-center justify-center hover:bg-[#2c71b6] transition-colors z-40"
-        onClick={() => setIsRightPanelOpen(true)}
-      >
-        <MessageSquare className="w-6 h-6" />
-      </button>
+      {
+        !isRightPanelOpen &&
+        <button
+          className="fixed min-[865px]:absolute bottom-6 right-6 w-14 h-14 bg-[#378ADD] text-white rounded-full shadow-[0_4px_14px_rgba(55,138,221,0.4)] flex items-center justify-center hover:bg-[#2c71b6] transition-colors z-40"
+          onClick={() => setIsRightPanelOpen(true)}
+        >
+          <MessageSquare className="w-6 h-6" />
+        </button>
+      }
+
+
 
       {/* Right Side Panel */}
       {/* Mobile */}
@@ -142,6 +147,7 @@ export default function GoalDashboard({ goalTitle }) {
           size="sm"
         >
           <RightPanel
+            isMobile={true}
             onClose={() => setIsRightPanelOpen(false)}
           />
         </BaseModal>
@@ -149,10 +155,8 @@ export default function GoalDashboard({ goalTitle }) {
 
       {/* Desktop */}
       {!isMobile && isRightPanelOpen && (
-        <div className="w-80 shrink-0 border-l border-gray-200 bg-white">
-          <RightPanel
-            onClose={() => setIsRightPanelOpen(false)}
-          />
+        <div className="w-80 shrink-0 border-l border-gray-200 bg-white h-full flex flex-col overflow-hidden">
+          <RightPanel onClose={() => setIsRightPanelOpen(false)} />
         </div>
       )}
 
