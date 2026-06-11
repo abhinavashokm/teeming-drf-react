@@ -19,6 +19,16 @@ const COLUMN_CONFIGS = {
         },
         showAddIdea: true,
     },
+    planned: {
+        id: 'planned',
+        title: 'Planned',
+        theme: {
+            bg: 'bg-indigo-50/40',
+            border: 'border-indigo-100/60',
+            countBg: 'bg-indigo-100/80',
+            countText: 'text-indigo-700',
+        },
+    },
     in_progress: {
         id: 'progress',
         title: 'In Progress',
@@ -46,20 +56,27 @@ const EMPTY_STATES = {
     [IDEA_STATUS.DRAFT]: {
         icon: <Lightbulb className="w-5 h-5 text-gray-400" />,
         title: 'No ideas yet',
-        description: 'Add an idea to get started',
+        description: 'Submit an idea to get started',
     },
+
+    [IDEA_STATUS.PLANNED]: {
+        icon: <AlertCircle className="w-5 h-5 text-gray-400" />,
+        title: 'Nothing planned',
+        description: 'Approved ideas waiting to be started',
+    },
+
     [IDEA_STATUS.IN_PROGRESS]: {
         icon: <Clock className="w-5 h-5 text-gray-400" />,
         title: 'Nothing in progress',
-        description: 'Move an idea here to start working on it',
+        description: 'Start working on a planned idea',
     },
+
     [IDEA_STATUS.DONE]: {
         icon: <CheckCircle2 className="w-5 h-5 text-gray-400" />,
         title: 'Nothing completed yet',
         description: 'Finished ideas will appear here',
     },
-}
-
+};
 export default function KanbanColumn({ state, onCardClick }) {
 
     const { data: ideas = [], isSuccess, isPending } = useIdeas()

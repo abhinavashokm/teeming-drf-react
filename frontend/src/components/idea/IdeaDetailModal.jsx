@@ -9,6 +9,8 @@ import { dateToHuman } from '../../utils/timeUtils.js';
 import MemberAvatar from '../team/MemberAvatar.jsx';
 import AppButton from '../ui/buttons/AppButton.jsx';
 import BaseModal from '../ui/modal/BaseModal';
+import useMoveIdeaToPlanned from '../../hooks/idea/useMoveIdeaToPlanned.js';
+import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress.js';
 
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -20,6 +22,13 @@ const STATUS_CONFIG = {
         descriptionWrapper: 'border border-dashed border-gray-300 bg-gray-50/50',
         metaWrapper: 'border-dashed border-gray-300 bg-gray-50/50',
         subtitleAccent: null,
+    },
+    [IDEA_STATUS.PLANNED]: {
+        badge: { label: 'PLANNED', icon: <Activity className="w-3.5 h-3.5" />, className: 'bg-blue-50 text-[#378ADD] border-[#378ADD]/30' },
+        statusPill: { label: 'Planned', className: 'bg-blue-100 text-blue-700' },
+        descriptionWrapper: '',
+        metaWrapper: 'border-gray-200 bg-white',
+        subtitleAccent: 'text-[#378ADD]  ',
     },
     [IDEA_STATUS.IN_PROGRESS]: {
         badge: { label: 'IN PROGRESS', icon: <Activity className="w-3.5 h-3.5" />, className: 'bg-blue-50 text-[#378ADD] border-[#378ADD]/30' },
@@ -53,9 +62,10 @@ const MetaField = ({ label, children }) => (
 function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
     if (!currentIdea) return null;
 
-    const { status: ideaStatus, createdBy, moveToProgressBy, movedToDoneBy, deadline, assignees, thumbsUp = 0 } = currentIdea;
+    const { status: ideaStatus, createdBy, movedToPlannedBy, movedToProgressBy, movedToDoneBy, deadline, assignees, thumbsUp = 0 } = currentIdea;
     const config = STATUS_CONFIG[ideaStatus];
     const { badge, statusPill, descriptionWrapper, metaWrapper, subtitleAccent } = config;
+    const isPlanned = ideaStatus === IDEA_STATUS.PLANNED
     const isInProgress = ideaStatus === IDEA_STATUS.IN_PROGRESS;
     const isDone = ideaStatus === IDEA_STATUS.DONE;
     const isDraft = ideaStatus === IDEA_STATUS.DRAFT;
@@ -75,11 +85,16 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
     const isIdeaCreator = currentUser.id === createdBy.id
     const isAssignedToIdea = isDraft ? false : assignees.some(member => member.id === currentUser.id)
 
-    const canMoveIdeaToProgress = useCan(PERMISSIONS.MOVE_IDEA_PROGRESS)
+    const canMoveIdeaToPlanned = useCan(PERMISSIONS.MOVE_IDEA_PLANNED)
+    const canMoveIdeaToProgress = useCan(PERMISSIONS.MOVE_IDEA_PROGRESS) || isAssignedToIdea
     const canMoveIdeaToDone = useCan(PERMISSIONS.MOVE_IDEA_DONE) || isAssignedToIdea
     const canDeleteOthersIdea = useCan(PERMISSIONS.DELETE_OTHERS_IDEA)
     const canDropIdea = useCan(PERMISSIONS.DROP_IDEA)
 
+    const { mutate: moveToProgress } = useMoveIdeaToProgress()
+    const handleMoveToProgress = () => {
+        moveToProgress(currentIdea.id, { onSuccess: onClose })
+    }
 
     return (
         <BaseModal isOpen={isOpen} onClose={onClose}>
@@ -303,8 +318,9 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                 <p className="text-xs text-gray-500 mt-0.5">
                                     {[
                                         true,
-                                        (isInProgress || isDone) && moveToProgressBy,
-                                        isDone && movedToDoneBy
+                                        !!movedToPlannedBy,
+                                        !!movedToProgressBy,
+                                        !!movedToDoneBy,
                                     ].filter(Boolean).length} events
                                 </p>
                             </div>
@@ -334,11 +350,23 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                     </p>
                                 </div>
 
-                                {/* Moved to Progress */}
-                                {(isInProgress || isDone) && moveToProgressBy && (
+                                {/* Moved To Planned */}
+                                {movedToPlannedBy && (
                                     <div className="rounded-lg bg-white px-3 py-2.5">
                                         <p className="text-sm   text-gray-700">
-                                            Moved to In Progress by {moveToProgressBy.fullName}
+                                            Moved to Planned by {movedToPlannedBy.fullName}
+                                        </p>
+
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {dateToHuman(currentIdea.movedToPlannedAt)}
+                                        </p>
+                                    </div>
+                                )}
+                                {/* Moved to Progress */}
+                                {(isInProgress || isDone) && movedToProgressBy && (
+                                    <div className="rounded-lg bg-white px-3 py-2.5">
+                                        <p className="text-sm   text-gray-700">
+                                            Moved to In Progress by {movedToProgressBy.fullName}
                                         </p>
 
                                         <p className="text-xs text-gray-500 mt-1">
@@ -392,8 +420,13 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                     )} */}
 
                     <div className="ml-auto">
-                        {isDraft && canMoveIdeaToProgress && (
+                        {isDraft && canMoveIdeaToPlanned && (
                             <AppButton variant="primary" onClick={onMove}>
+                                <ChevronRight className="w-4 h-4" /> Move to In Planned
+                            </AppButton>
+                        )}
+                        {isPlanned && canMoveIdeaToProgress && (
+                            <AppButton variant="primary" onClick={handleMoveToProgress}>
                                 <ChevronRight className="w-4 h-4" /> Move to In Progress
                             </AppButton>
                         )}

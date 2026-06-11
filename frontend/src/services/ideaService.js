@@ -22,8 +22,8 @@ export const ideaService = {
         return res.data
     },
 
-    moveIdeaToProgress: async (slug, ideaId, data) => {
-        const res = await api.post(`/workspaces/${slug}/ideas/${ideaId}/move-progress/`, data)
+    moveIdeaToProgress: async (slug, ideaId) => {
+        const res = await api.post(`/workspaces/${slug}/ideas/${ideaId}/move-progress/`)
         return res.data
     },
 
@@ -31,5 +31,10 @@ export const ideaService = {
         const res = await api.post(`/workspaces/${slug}/ideas/${ideaId}/move-done/`, data)
         return res.data
     },
+
+    moveIdeaToPlanned: async (slug, ideaId, data) => {
+        const res = await api.post(`/workspaces/${slug}/ideas/${ideaId}/move-planned/`, data)
+        return res.data
+    }
 
 }

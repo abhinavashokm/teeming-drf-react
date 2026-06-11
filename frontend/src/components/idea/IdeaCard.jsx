@@ -7,16 +7,21 @@ import useDeleteIdea from '../../hooks/idea/useDeleteIdea.js'
 import { useCan } from '../../hooks/permissions/useCan.js'
 import { formatDateTime } from "../../utils/timeUtils"
 import MemberAvatar from '../team/MemberAvatar.jsx'
-import IdeaDetailModal from './IdeaDetailModal'
-import MoveToDoneModal from './MoveToDoneModal'
-import MoveToProgressModal from './MoveToProgressModal'
-import IdeaFormModal from './IdeaFormModal.jsx'
 import DeleteConfirmationModal from '../ui/modal/DeleteConfirmationModal.jsx'
+import IdeaDetailModal from './IdeaDetailModal'
+import IdeaFormModal from './IdeaFormModal.jsx'
+import MoveToDoneModal from './MoveToDoneModal'
+import MoveToPlannedModal from './MoveToPlannedModal.jsx'
+import MoveToProgressModal from './MoveToProgressModal'
 
 const STATE_STYLES = {
     draft: {
         wrapper: 'bg-white',
         titleClass: 'text-gray-900 group-hover:text-teeming-green',
+    },
+    planned: {
+        wrapper: 'bg-white',
+        titleClass: 'text-gray-900 group-hover:text-indigo-600',
     },
     in_progress: {
         wrapper: 'bg-white overflow-hidden',
@@ -54,25 +59,6 @@ export default function IdeaCard({ currentIdea, state, theme }) {
         setMenuOpen(o => !o)
     }
 
-    const handleEdit = (e) => {
-        e.stopPropagation()
-        setMenuOpen(false)
-        // onEdit()
-    }
-
-    const handleDelete = (e) => {
-        e.stopPropagation()
-        setMenuOpen(false)
-        // onDelete()
-    }
-
-    const handleMove = (e) => {
-        e.stopPropagation()
-        setMenuOpen(false)
-        setActiveModal(state === IDEA_STATUS.DRAFT ? 'moveToProgress' : 'moveToDone')
-    }
-
-
     const { mutate: deleteIdea, isPending } = useDeleteIdea();
     const handleDeleteIdea = () => deleteIdea(currentIdea.id, { onSuccess: () => setMenuOpen(false) })
 
@@ -84,6 +70,10 @@ export default function IdeaCard({ currentIdea, state, theme }) {
     return (
         <>
             <div onClick={() => setActiveModal('detail')} className={`${wrapper} ${base}`}>
+
+                {state === IDEA_STATUS.PLANNED && (
+                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-500 rounded-l-xl" />
+                )}
 
                 {state === 'in_progress' && (
                     <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#378ADD]" />
@@ -154,6 +144,24 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                             </div>
                         </>
                     )}
+                    {state === IDEA_STATUS.PLANNED && (
+                        <>
+                            <div className="flex -space-x-1.5">
+                                {currentIdea.assignees?.map((assignee) => (
+                                    <MemberAvatar
+                                        key={assignee.id}
+                                        name={assignee.fullName}
+                                        email={assignee.email}
+                                        size="xs"
+                                    />
+                                ))}
+                            </div>
+
+                            <span className="text-[11px] text-gray-400">
+                                Assigned {formatDateTime(currentIdea.updatedAt)}
+                            </span>
+                        </>
+                    )}
                     {state === IDEA_STATUS.IN_PROGRESS && (
                         <>
                             <div className="flex -space-x-1.5">
@@ -187,14 +195,23 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'detail'}
                 onClose={() => setActiveModal(null)}
-                onMove={() => setActiveModal(state === IDEA_STATUS.DRAFT ? 'moveToProgress' : state === IDEA_STATUS.IN_PROGRESS ? 'moveToDone' : 'detail')}
+                onMove={() => setActiveModal(
+                    state === IDEA_STATUS.DRAFT ? 'moveToPlanned'
+                        : state === IDEA_STATUS.PLANNED ? 'moveToProgress'
+                            : state === IDEA_STATUS.IN_PROGRESS ? 'moveToDone' : 'detail')}
             />
-            <MoveToProgressModal
+            <MoveToPlannedModal
+                currentIdea={currentIdea}
+                isOpen={activeModal === 'moveToPlanned'}
+                onClose={() => setActiveModal(null)}
+                onBack={() => setActiveModal('detail')}
+            />
+            {/* <MoveToProgressModal
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'moveToProgress'}
                 onClose={() => setActiveModal(null)}
                 onBack={() => setActiveModal('detail')}
-            />
+            /> */}
             <MoveToDoneModal
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'moveToDone'}

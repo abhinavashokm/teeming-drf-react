@@ -23,6 +23,7 @@ function BoardView({ isRightPanelOpen }) {
 
             <div className={`flex gap-4 md:gap-6 w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide flex-1 min-h-0 after:content-[''] after:shrink-0 ${isRightPanelOpen ? 'lg:after:w-[340px]' : 'after:w-4'}`}>
                 <KanbanColumn state={IDEA_STATUS.DRAFT} />
+                <KanbanColumn state={IDEA_STATUS.PLANNED} />
                 <KanbanColumn state={IDEA_STATUS.IN_PROGRESS} />
                 <KanbanColumn state={IDEA_STATUS.DONE} />
             </div>
