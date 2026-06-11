@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.idea",
     "apps.outcome",
     "apps.notification",
+    "apps.discussion",
 ]
 
 ASGI_APPLICATION = 'config.asgi.application'

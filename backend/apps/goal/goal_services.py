@@ -23,16 +23,19 @@ def get_goal(workspace, goal_id):
 def list_workspace_goals(workspace, user, limit):
     """return all goals in the current workspace with is starred field annotated"""
 
-    print("Limit: ", limit)
-
     starred_goals = StarredGoal.objects.in_workspace(workspace).filter(
         user=user,
         goal = OuterRef("pk")
     )
 
-    return Goal.objects.in_workspace(workspace).annotate(
+    goals =  Goal.objects.in_workspace(workspace).annotate(
         is_starred = Exists(starred_goals)
-    )[:int(limit)]
+    )
+
+    if limit is not None:
+        goals = goals[:int(limit)]
+
+    return goals
 
 
 def update_goal(workspace, goal_id, data):

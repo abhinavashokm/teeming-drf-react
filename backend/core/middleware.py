@@ -1,5 +1,6 @@
 from apps.workspace.models import Workspace
 from apps.user.models import User
+from apps.workspace.models import Workspace
 from django.http import JsonResponse
 from channels.middleware import BaseMiddleware
 from urllib.parse import parse_qs
@@ -76,4 +77,32 @@ class JWTAuthMiddleware(BaseMiddleware):
         query_string = parse_qs(scope["query_string"].decode())
         token = query_string.get("token", [None])[0]
         scope["user"] = await get_user_from_token(token) if token else AnonymousUser()
+        return await super().__call__(scope, receive, send)
+    
+
+@database_sync_to_async
+def get_workspace_for_member(slug, user):
+    try:
+        return Workspace.objects.get(slug=slug, members__user=user)
+    except Workspace.DoesNotExist:
+        return None
+
+
+class WebSocketWorkspaceMiddleware(BaseMiddleware):
+
+    async def __call__(self, scope, receive, send):
+        
+        scope['workspace'] = None
+
+        path = scope['path']
+        parts = path.strip('/').split('/')
+
+        if len(parts) >= 3 and parts[1] == 'workspaces':
+            slug = parts[2]
+            user = scope.get("user")
+
+            if user and not user.is_anonymous:
+                print("workspace middlware wroked!!!!!!!")
+                scope['workspace'] = await get_workspace_for_member(slug, user)
+
         return await super().__call__(scope, receive, send)

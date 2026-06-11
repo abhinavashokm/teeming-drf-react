@@ -31,6 +31,7 @@ urlpatterns = [
                             path("goals/<uuid:goal_id>/outcome/", include("apps.outcome.list_urls")),
                             path("outcome/", include("apps.outcome.detail_urls")),
                             path("notifications/", include("apps.notification.urls")),
+                            path("goals/<uuid:goal_id>/discussion/", include("apps.discussion.urls")),
                         ]
                     ),
                 ),
