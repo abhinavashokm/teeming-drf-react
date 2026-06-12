@@ -1,67 +1,59 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import useDiscussionHistory from './useDiscussionHistory'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { connectDiscussionSocket } from '../../services/websocket'; 
 import useGoalId from '../params/useGoalId'
-import { useSelector } from 'react-redux'
-import { connectDiscussionSocket } from '../../services/webSocket/discussionSocket'
 import useWorkspaceSlug from '../params/useWorkspaceSlug'
+import useDiscussionHistory from './useDiscussionHistory'
 
 function useDiscussion() {
 
     const wsRef = useRef(null)
-    const [messages, setMessages] = useState([])
+    const seededRef = useRef(false)
 
     const workspaceSlug = useWorkspaceSlug()
     const goalId = useGoalId()
 
     const { data: history, isPending: isLoading } = useDiscussionHistory()
- 
-    // Seed state with history once loaded
+    const [messages, setMessages] = useState([])
+
+    // Seed history once
     useEffect(() => {
-        if (history) setMessages([...history]);
-    }, [history]);
+        if (history && !seededRef.current) {
+            seededRef.current = true
+            setMessages(prev => {
+                const historyIds = new Set(history.map(m => m.id))
+                const liveMessages = prev.filter(m => !historyIds.has(m.id))
+                return [...history, ...liveMessages]
+            })
+        }
+    }, [history])
 
     // WebSocket connection
     useEffect(() => {
+        if (!workspaceSlug || !goalId) return
 
-        const socket = connectDiscussionSocket(workspaceSlug, goalId,
-            {
-                onMessage: (data) => {
-                    console.log(data)
-                    if (data.type === 'discussion_message') {
-                        console.log('inside')
-                        setMessages((prev) => [...prev, data]);
-                    }else{
-                        console.log("outside")
-                    }
-                },
-                onError: (error) => {
-                    console.error(error);
-                },
+        setMessages([])
+        seededRef.current = false
+
+        const socket = connectDiscussionSocket(workspaceSlug, goalId, {
+            onMessage: (data) => {
+                if (data.type === 'discussion_message') {
+                    setMessages(prev => [...prev, data])
+                }
             }
-        )
+        })
 
         wsRef.current = socket
 
-        return () => {
-            socket.close()
-        } 
-
+        return () => socket.close()
     }, [workspaceSlug, goalId])
 
     const sendMessage = useCallback((content) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-            wsRef.current.send(
-                JSON.stringify({ content })
-            );
+            wsRef.current.send(JSON.stringify({ content }))
         }
     }, [])
 
-
-    return {
-        messages,
-        sendMessage,
-        isLoading,
-    };
+    return { messages, sendMessage, isLoading }
 }
 
 export default useDiscussion

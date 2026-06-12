@@ -34,10 +34,10 @@ function HomePage() {
 
   const { getWelcome, removeWelcome } = useWelcomeBanner()
 
-  const [showWelcome, setShowWelcome] = useState(() => getWelcome(currentWorkspace.slug))
+  const [showWelcome, setShowWelcome] = useState(() => getWelcome(currentWorkspace.slug, currentUser.id))
 
   const handleRemoveWelcome = () => {
-    removeWelcome(currentWorkspace.slug)
+    removeWelcome(currentWorkspace.slug, currentUser.id)
     setShowWelcome(false)
   }
 

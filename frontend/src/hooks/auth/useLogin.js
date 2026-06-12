@@ -27,7 +27,7 @@ export function useLogin() {
 
             //if user joined a workspace using invite token, store workspace deatils for showing welcome banner
             if (res.data?.joinedWorkspace) {
-                setWelcome(res.data.joinedWorkspace.slug)
+                setWelcome(res.data.joinedWorkspace.slug, res.data.user.id)
             }
 
             redirectToWorkspace()
