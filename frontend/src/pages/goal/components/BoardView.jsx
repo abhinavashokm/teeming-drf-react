@@ -3,7 +3,7 @@ import KanbanColumn from '../../../components/idea/KanbanColumn';
 import { IDEA_STATUS } from '../../../constants/ideaConstants.js';
 
 
-function BoardView({ isRightPanelOpen }) {
+function BoardView({ isDiscussionPanelOpen }) {
 
     return (
         <div className="flex flex-col h-[calc(100dvh-120px)] -mx-4 px-4 md:mx-0 md:px-0">
@@ -21,7 +21,7 @@ function BoardView({ isRightPanelOpen }) {
                 </button>
             </div>
 
-            <div className={`flex gap-4 md:gap-6 w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide flex-1 min-h-0 after:content-[''] after:shrink-0 ${isRightPanelOpen ? 'lg:after:w-[340px]' : 'after:w-4'}`}>
+            <div className={`flex gap-4 md:gap-6 w-full overflow-x-auto snap-x snap-mandatory scrollbar-hide flex-1 min-h-0 after:content-[''] after:shrink-0 ${isDiscussionPanelOpen ? 'lg:after:w-[340px]' : 'after:w-4'}`}>
                 <KanbanColumn state={IDEA_STATUS.DRAFT} />
                 <KanbanColumn state={IDEA_STATUS.PLANNED} />
                 <KanbanColumn state={IDEA_STATUS.IN_PROGRESS} />

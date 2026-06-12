@@ -45,6 +45,12 @@ export const workspaceQueryKeys = {
     notifications: (slug) => [
         ...root(slug),
         "notifications",
+    ],
+
+    discussions: (slug, goal_id) => [
+        ...root(slug),
+        goal_id,
+        "discussions",
     ]
 }
 

@@ -6,13 +6,13 @@ import useGoal from '../../hooks/goal/useGoal';
 import BoardView from './components/BoardView';
 import GoalTabs from './components/GoalTabs';
 import OutcomeView from './components/OutcomeView';
-import RightPanel from './components/RightPanel';
+import DiscussionPanel from './components/DiscussionPanel';
 
 
 export default function GoalDashboard({ goalTitle }) {
 
   const { setIsFullBleed, setIsGoalInfoModalOpen } = useOutletContext()
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false)
+  const [isDiscussionPanelOpen, setIsDiscussionPanelOpen] = useState(false)
 
   useEffect(() => {
     setIsFullBleed(true)
@@ -116,7 +116,7 @@ export default function GoalDashboard({ goalTitle }) {
 
             {/* Main Content Areas */}
             {activeView === 'board' ? (
-              <BoardView isRightPanelOpen={isRightPanelOpen} />
+              <BoardView isDiscussionPanelOpen={isDiscussionPanelOpen} />
             ) : (
               <OutcomeView />
             )}
@@ -127,10 +127,10 @@ export default function GoalDashboard({ goalTitle }) {
 
       {/* Floating Button for Panel */}
       {
-        !isRightPanelOpen &&
+        !isDiscussionPanelOpen &&
         <button
           className="fixed min-[865px]:absolute bottom-6 right-6 w-14 h-14 bg-[#378ADD] text-white rounded-full shadow-[0_4px_14px_rgba(55,138,221,0.4)] flex items-center justify-center hover:bg-[#2c71b6] transition-colors z-40"
-          onClick={() => setIsRightPanelOpen(true)}
+          onClick={() => setIsDiscussionPanelOpen(true)}
         >
           <MessageSquare className="w-6 h-6" />
         </button>
@@ -142,21 +142,21 @@ export default function GoalDashboard({ goalTitle }) {
       {/* Mobile */}
       {isMobile && (
         <BaseModal
-          isOpen={isRightPanelOpen}
-          onClose={() => setIsRightPanelOpen(false)}
+          isOpen={isDiscussionPanelOpen}
+          onClose={() => setIsDiscussionPanelOpen(false)}
           size="sm"
         >
-          <RightPanel
+          <DiscussionPanel
             isMobile={true}
-            onClose={() => setIsRightPanelOpen(false)}
+            onClose={() => setIsDiscussionPanelOpen(false)}
           />
         </BaseModal>
       )}
 
       {/* Desktop */}
-      {!isMobile && isRightPanelOpen && (
+      {!isMobile && isDiscussionPanelOpen && (
         <div className="w-80 shrink-0 border-l border-gray-200 bg-white h-full flex flex-col overflow-hidden">
-          <RightPanel onClose={() => setIsRightPanelOpen(false)} />
+          <DiscussionPanel onClose={() => setIsDiscussionPanelOpen(false)} />
         </div>
       )}
 
