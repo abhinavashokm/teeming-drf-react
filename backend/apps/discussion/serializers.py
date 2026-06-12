@@ -8,4 +8,4 @@ class ReadDiscussionMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DiscussionMessage
-        fields = ["sender", "content"]
+        fields = ["id", "sender", "content", "created_at"]

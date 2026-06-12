@@ -26,13 +26,11 @@ def notify_users(workspace, users, message, exclude_user=None):
             f"notifications_user_{user.id}",
             {
                 "type": "send_notification",
-                "data": {
-                    "id": notification.id,
-                    "message": notification.message,
-                    "workspace": workspace.name,
-                    "is_read": False,
-                    "created_at": notification.created_at.isoformat(),
-                },
+                "id": notification.id,
+                "message": notification.message,
+                "workspace": workspace.name,
+                "is_read": False,
+                "created_at": notification.created_at.isoformat(),
             },
         )
 

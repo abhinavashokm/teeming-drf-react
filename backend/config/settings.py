@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = ["localhost", "simplistic-pokier-melania.ngrok-free.dev", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "simplistic-pokier-melania.ngrok-free.dev", "127.0.0.1", '10.10.10.69']
 
 
 # Application definition

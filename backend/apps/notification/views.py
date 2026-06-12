@@ -14,9 +14,9 @@ class NotificationListView(MemberBaseView):
         )
 
         data = notification.values('id', 'message', 'is_read', 'created_at', 'workspace__name')
-
+        print(list(data))
         return success_response(
-            data=list(data)
+            data=list(data) or []
         )
     
     def patch(self, request, **kwargs):

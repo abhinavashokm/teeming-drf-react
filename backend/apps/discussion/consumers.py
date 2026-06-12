@@ -21,6 +21,8 @@ class DiscussionConsumer(AsyncWebsocketConsumer):
             print("❌ Rejected: goal doesn't belong to workspace")
             await self.close()
             return
+        
+        print("joined discussion: ", self.scope.get('user').full_name)
 
         self.room_group_name = f"goal_discussion_{self.goal_id}"
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -40,27 +42,25 @@ class DiscussionConsumer(AsyncWebsocketConsumer):
             return
 
         message = await self.save_message(content)
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "discussion_message",
-                "message_id": str(message.id),
+                "id": str(message.id),
                 "content": message.content,
-                "sender_id": str(message.sender.id),
-                "sender_name": message.sender.get_full_name(),
-                "created_at": message.created_at.isoformat(),
+                "sender": {
+                    "id": str(message.sender.id),
+                    "fullName": message.sender.full_name,
+                    "email": message.sender.email
+                },
+                "createdAt": message.created_at.isoformat(),
             },
         )
 
     async def discussion_message(self, event):
-        await self.send(text_data=json.dumps({
-            'type': 'dicussion_message',
-            'message_id': event['message_id'],
-            'content': event['content'],
-            'sender_id': event['sender_id'],
-            'sender_name': event['sender_name'],
-            'created_at': event['created_at'],
-        }))
+
+        await self.send(text_data=json.dumps(event))
 
     @database_sync_to_async
     def goal_belongs_to_workspace(self):

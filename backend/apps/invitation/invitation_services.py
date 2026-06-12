@@ -92,6 +92,7 @@ def verify_token_and_accept_invitation(invitation_token, user):
 
     # check if invite is for current user
     if not invitation.email == user.email:
+        print(invitation.email, user.email)
         raise exceptions.InvitationEmailMismatch()
 
     # verify workspace still exists

@@ -15,6 +15,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         self.group_name = f"notifications_user_{self.user.id}"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
+        print("connect!!!!!!!!!!!!")
 
     async def disconnect(self, close_code):
         if hasattr(self, 'group_name'):
@@ -22,4 +23,5 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
     # Called when a message is pushed to this user's group
     async def send_notification(self, event):
-        await self.send(text_data=json.dumps(event["data"]))
+        print("sentt!!!!!!!!!!!!!!!!!!!!!!!")
+        await self.send(text_data=json.dumps(event))
