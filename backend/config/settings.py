@@ -1,4 +1,5 @@
 import os
+import stripe
 from datetime import timedelta
 from pathlib import Path
 
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     "apps.outcome",
     "apps.notification",
     "apps.discussion",
+    "apps.subscription",
 ]
 
 ASGI_APPLICATION = 'config.asgi.application'
@@ -272,3 +274,10 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "email"
+
+#STRIPE PAYMENT GATEWAY CONIFGURATION
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
+
+stripe.api_key = STRIPE_SECRET_KEY
