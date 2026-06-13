@@ -1,134 +1,174 @@
-import { Sparkles, X } from 'lucide-react';
+import { Sparkles, X, MessageSquare } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import MemberAvatar from "../../../components/team/MemberAvatar";
 import useAuth from "../../../hooks/auth/useAuth";
 import useDiscussion from '../../../hooks/discussion/useDiscussion';
 import { formatDateTime } from '../../../utils/timeUtils';
 
-const MessageStatus = ({ status='sent' }) => {
+const MessageStatus = ({ status = 'sent' }) => {
     if (status === 'sent') return (
         <svg width="14" height="10" viewBox="0 0 14 10" fill="none" className="inline-block">
-            <path d="M1 5L4.5 8.5L10 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400" />
+            <path d="M1 5L4.5 8.5L10 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80" />
         </svg>
     )
+
     if (status === 'delivered') return (
         <svg width="18" height="10" viewBox="0 0 18 10" fill="none" className="inline-block">
-            <path d="M1 5L4.5 8.5L10 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400" />
-            <path d="M5 5L8.5 8.5L14 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400" />
+            <path d="M1 5L4.5 8.5L10 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80" />
+            <path d="M5 5L8.5 8.5L14 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80" />
         </svg>
     )
+
     return null;
-}
+};
 
 function DiscussionPanel({ onClose, isMobile }) {
+    const [input, setInput] = useState('');
 
-    const [input, setInput] = useState('')
-
-    const { messages, sendMessage, isLoading } = useDiscussion()
-    const { data: currentUser } = useAuth()
-
+    const { messages, sendMessage, isLoading } = useDiscussion();
+    const { data: currentUser } = useAuth();
 
     const bottomRef = useRef(null);
 
-    //automatically scroll to bottom
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
     const handleSend = () => {
         if (!input.trim()) return;
+
         sendMessage(input.trim());
         setInput('');
     };
 
-
-    if (isLoading) return <div className="p-4 text-sm text-gray-400">Loading...</div>;
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-full text-sm text-gray-400">
+                Loading discussion...
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col flex-1 min-h-0 bg-white">
-            {/* Header — desktop only */}
+            {/* Header */}
             {!isMobile && (
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 shrink-0">
-                    <h3 className="text-[13px] font-semibold text-gray-900">Discussion</h3>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-white/90 backdrop-blur-sm shrink-0">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-[#378ADD]" />
+                            <h3 className="text-[13px] font-semibold text-gray-900">
+                                Discussion
+                            </h3>
+                        </div>
+
+                        <p className="text-[11px] text-gray-500 mt-0.5">
+                            {messages?.length || 0} messages
+                        </p>
+                    </div>
+
                     <button
                         onClick={onClose}
                         className="p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
-                        title="Close"
                     >
                         <X className="w-4 h-4" />
                     </button>
                 </div>
             )}
 
-            {/* messages */}
-            <div className="flex-1 overflow-y-auto min-h-0 p-4 space-y-3">
-                {messages?.map(message => {
-                    const isMe = message.sender.id === currentUser.id;
-                    return (
-                        <div key={message.id} className={`flex gap-2 items-end ${isMe ? 'flex-row-reverse' : ''}`}>
-
-                            {/* Avatar */}
-                            <MemberAvatar
-                                name={message.sender.fullName}
-                                email={message.sender.email}
-                                size='sm'
-                            />
-
-                            {/* Bubble */}
-                            <div className={`flex flex-col gap-1 max-w-[72%] ${isMe ? 'items-end' : 'items-start'}`}>
-
-                                {/* Show sender name only for others */}
-                                {!isMe && (
-                                    <span className="text-[11px] text-gray-400 px-1">
-                                        {message.sender.fullName}
-                                    </span>
-                                )}
-
-                                <div className={`px-3 py-2 text-[13px] leading-relaxed break-words
-                        ${isMe
-                                        ? 'bg-blue-50 text-blue-950 rounded-2xl rounded-br-sm'
-                                        : 'bg-gray-100 text-gray-800 rounded-2xl rounded-bl-sm border border-gray-100'
-                                    }`}
-                                >
-                                    {message.content}
-                                </div>
-                                {isMe && (
-                                    <div className="flex items-center gap-1 px-1">
-                                        <span className="text-[11px] text-gray-400">
-                                            {formatDateTime(message.createdAt)}
-                                        </span>
-                                        <MessageStatus status={message.status} />
-                                    </div>
-                                )}
-                                {!isMe && (
-                                    <span className="text-[11px] text-gray-400 px-1">
-                                        {formatDateTime(message.createdAt)}
-                                    </span>
-                                )}
-
-
-                            </div>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto min-h-0 p-4 bg-slate-50/60">
+                {messages?.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center px-6">
+                        <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
+                            <MessageSquare className="w-10 h-10 text-blue-300" />
                         </div>
-                    );
-                })}
-                <div ref={bottomRef} />
+
+                        <h3 className="text-sm font-semibold text-gray-900">
+                            No discussion yet
+                        </h3>
+
+                        <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
+                            Share updates, ask questions, and collaborate around this goal.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {messages?.map((message) => {
+                            const isMe = message.sender.id === currentUser.id;
+
+                            return (
+                                <div
+                                    key={message.id}
+                                    className={`flex gap-3 items-end ${isMe ? 'flex-row-reverse' : ''
+                                        }`}
+                                >
+                                    <MemberAvatar
+                                        name={message.sender.fullName}
+                                        email={message.sender.email}
+                                        size="sm"
+                                    />
+
+                                    <div
+                                        className={`flex flex-col gap-1 max-w-[78%] ${isMe ? 'items-end' : 'items-start'
+                                            }`}
+                                    >
+                                        {!isMe && (
+                                            <span className="text-[11px] font-medium text-gray-500 px-1">
+                                                {message.sender.fullName}
+                                            </span>
+                                        )}
+
+                                        <div
+                                            className={`px-4 py-2.5 text-[13px] leading-relaxed shadow-sm [overflow-wrap:anywhere]
+                                                    ${isMe
+                                                    ? 'bg-[#378ADD] text-white rounded-2xl rounded-br-md'
+                                                    : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-md'
+                                                }`}
+                                        >
+                                            {message.content}
+                                        </div>
+
+                                        {isMe ? (
+                                            <div className="flex items-center gap-1 px-1">
+                                                <span className="text-[11px] text-gray-400">
+                                                    {formatDateTime(message.createdAt)}
+                                                </span>
+
+                                                <MessageStatus status={message.status} />
+                                            </div>
+                                        ) : (
+                                            <span className="text-[11px] text-gray-400 px-1">
+                                                {formatDateTime(message.createdAt)}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        <div ref={bottomRef} />
+                    </div>
+                )}
             </div>
 
-            {/* Fixed input */}
-            <div className="shrink-0 px-4 py-3 bg-white border-t border-gray-100">
+            {/* Composer */}
+            <div className="shrink-0 px-4 py-3 bg-white border-t border-gray-200 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
                 <div className="flex items-center gap-2.5">
+                    <MemberAvatar
+                        name={currentUser.fullName}
+                        email={currentUser.email}
+                        size="sm"
+                    />
 
-                    <MemberAvatar name={currentUser.fullName} email={currentUser.email} size='sm' />
-
-                    {/* Input */}
-                    <div className="flex-1 flex items-start bg-gray-100 rounded-2xl px-4 py-2.5 gap-2">
+                    <div className="flex-1 min-w-0 flex items-start bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 gap-2 focus-within:border-[#378ADD] focus-within:ring-2 focus-within:ring-[#378ADD]/10 transition-all">
                         <textarea
-                            placeholder="Add a input..."
+                            placeholder="Share an update..."
                             value={input}
                             onChange={(e) => {
-                                setInput(e.target.value)
-                                e.target.style.height = 'auto'
-                                e.target.style.height = e.target.scrollHeight + 'px'
+                                setInput(e.target.value);
+                                e.target.style.height = 'auto';
+                                e.target.style.height = e.target.scrollHeight + 'px';
                             }}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -137,24 +177,30 @@ function DiscussionPanel({ onClose, isMobile }) {
                                 }
                             }}
                             rows={1}
-                            className="flex-1 bg-transparent text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none resize-none overflow-hidden leading-relaxed"
+                            className="flex-1 min-w-0 bg-transparent text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none resize-none overflow-hidden leading-relaxed"
                         />
+
                         {input.trim() && (
-                            <button onClick={handleSend} className="text-[#378ADD] text-[13px] font-semibold shrink-0 hover:text-[#2c71b6] transition-colors mt-0.5">
-                                Post
+                            <button
+                                onClick={handleSend}
+                                className="shrink-0 px-3 py-1.5 bg-[#378ADD] text-white rounded-lg text-xs font-medium hover:bg-[#2c71b6] transition-colors"
+                            >
+                                Send
                             </button>
                         )}
                     </div>
 
-                    {/* AI toggle */}
-                    <button className="p-1.5 text-gray-400 hover:text-[#378ADD] rounded-full hover:bg-[#378ADD]/8 transition-colors shrink-0" title="AI assist">
+                    <button
+                        className="shrink-0 p-2 text-gray-400 hover:text-[#378ADD] rounded-full hover:bg-[#378ADD]/10 transition-colors"
+                        title="AI assist"
+                    >
                         <Sparkles className="w-4 h-4" />
                     </button>
                 </div>
             </div>
 
         </div>
-    )
+    );
 }
 
-export default DiscussionPanel
+export default DiscussionPanel;

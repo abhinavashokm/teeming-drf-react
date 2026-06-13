@@ -2,15 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import { cn } from '../../../utils/cn';
 
 /**
- * Modal
- * 
+ * BaseModal
+ *
  * Props:
  * - isOpen: bool
  * - onClose: fn
  * - children: ReactNode
  * - size: 'sm' | 'md' | 'lg' | 'xl'  (default: 'md')
- * - mobileSheet: bool  (default: true) — slides up from bottom on mobile
+ * - mobileSheet: bool  (default: true)
  * - closeOnOverlay: bool  (default: true)
+ * - sheetBreakpoint: 'md' | 'lg'  (default: 'md')
+ *   'md' → bottom sheet below 768px, centered modal above
+ *   'lg' → bottom sheet below 1024px, centered modal above
  */
 
 const sizeMap = {
@@ -20,6 +23,13 @@ const sizeMap = {
   xl: 'md:max-w-4xl',
 }
 
+const lgSizeMap = {
+  sm: 'lg:max-w-sm',
+  md: 'lg:max-w-lg',
+  lg: 'lg:max-w-2xl',
+  xl: 'lg:max-w-4xl',
+}
+
 function BaseModal({
   isOpen,
   onClose,
@@ -27,11 +37,14 @@ function BaseModal({
   size = 'md',
   mobileSheet = true,
   closeOnOverlay = true,
+  sheetBreakpoint = 'md',
 }) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragY, setDragY] = useState(0)
   const dragStartY = useRef(null)
   const sheetRef = useRef(null)
+
+  const isLg = sheetBreakpoint === 'lg'
 
   // Lock body scroll when open
   useEffect(() => {
@@ -79,7 +92,14 @@ function BaseModal({
 
   return (
     <div
-      className={`fixed inset-0 z-[60] flex ${mobileSheet ? 'items-end md:items-center' : 'items-center'} justify-center`}
+      className={cn(
+        'fixed inset-0 z-[60] flex justify-center',
+        mobileSheet
+          ? isLg
+            ? 'items-end lg:items-center'
+            : 'items-end md:items-center'
+          : 'items-center'
+      )}
       aria-modal="true"
       role="dialog"
     >
@@ -92,19 +112,29 @@ function BaseModal({
       {/* Modal panel */}
       <div
         ref={sheetRef}
-        style={mobileSheet ? { transform: `translateY(${dragY}px)`, transition: isDragging ? 'none' : 'transform 0.2s ease' } : {}}
-        className={`
-          relative bg-white w-full overflow-hidden flex flex-col
-          ${mobileSheet ? 'rounded-t-2xl md:rounded-2xl max-h-[90dvh] md:max-h-[85dvh]' : 'rounded-2xl max-h-[85dvh]'}
-          ${sizeMap[size]}
-          shadow-xl
-        `}
+        style={
+          mobileSheet
+            ? { transform: `translateY(${dragY}px)`, transition: isDragging ? 'none' : 'transform 0.2s ease' }
+            : {}
+        }
+        className={cn(
+          'relative bg-white w-full overflow-hidden flex flex-col shadow-xl',
+          mobileSheet
+            ? isLg
+              ? 'rounded-t-2xl lg:rounded-2xl max-h-[90dvh] lg:max-h-[85dvh]'
+              : 'rounded-t-2xl md:rounded-2xl max-h-[90dvh] md:max-h-[85dvh]'
+            : 'rounded-2xl max-h-[85dvh]',
+          isLg ? lgSizeMap[size] : sizeMap[size]
+        )}
         onClick={e => e.stopPropagation()}
       >
-        {/* Mobile drag handle */}
+        {/* Drag handle */}
         {mobileSheet && (
           <div
-            className="md:hidden w-full flex justify-center py-4 shrink-0 cursor-grab active:cursor-grabbing touch-none"
+            className={cn(
+              'w-full flex justify-center py-4 shrink-0 cursor-grab active:cursor-grabbing touch-none',
+              isLg ? 'lg:hidden' : 'md:hidden'
+            )}
             onTouchStart={handleDragStart}
             onTouchMove={handleDragMove}
             onTouchEnd={handleDragEnd}
@@ -124,16 +154,6 @@ function BaseModal({
     </div>
   )
 }
-
-/**
- * Convenience sub-components for consistent modal structure.
- * Usage:
- *   <Modal ...>
- *     <Modal.Header onClose={onClose}>Title</Modal.Header>
- *     <Modal.Body>...</Modal.Body>
- *     <Modal.Footer>...</Modal.Footer>
- *   </Modal>
- */
 
 BaseModal.Header = function ModalHeader({ children, onClose }) {
   return (

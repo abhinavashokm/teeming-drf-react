@@ -58,5 +58,6 @@ export const workspaceQueryKeys = {
 export const globalQueryKeys = {
     auth: ['auth'],
     workspaces: ['userWorkspaces'],
+    plans: ['plans']
 }
 

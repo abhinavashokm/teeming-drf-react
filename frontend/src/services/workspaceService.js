@@ -46,7 +46,7 @@ export const workspaceService = {
     },
 
     leaveWorkspace: async (slug) => {
-        console.log(slug)
+
         const res = await api.delete(`/workspaces/${slug}/members/leave/`)
         return res.data
     },

@@ -1,5 +1,5 @@
 import { Flag, Info, Lock, MessageSquare, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import BaseModal from '../../components/ui/modal/BaseModal';
 import useGoal from '../../hooks/goal/useGoal';
@@ -22,11 +22,40 @@ export default function GoalDashboard({ goalTitle }) {
   const { data: currentGoal, isLoading } = useGoal()
 
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 865);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [canResizeDiscussionPanel, setCanResizeDiscussionPanel] = useState(window.innerWidth >= 1400)
+
+  const panelWidth = useRef(320);
+  const [width, setWidth] = useState(320);
+  const isResizing = useRef(false);
+
+  const onMouseDown = () => {
+    isResizing.current = true;
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  const onMouseMove = (e) => {
+    if (!isResizing.current) return;
+    const newWidth = window.innerWidth - e.clientX;
+    if (newWidth < 240 || newWidth > 600) return; // min/max limits
+    panelWidth.current = newWidth;
+    setWidth(newWidth);
+  };
+
+  const onMouseUp = () => {
+    isResizing.current = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 865);
+      setIsMobile(window.innerWidth < 1024);
+      setCanResizeDiscussionPanel(window.innerWidth >= 1400)
+      if (window.innerWidth < 1400) {
+        setWidth(320);
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -41,66 +70,6 @@ export default function GoalDashboard({ goalTitle }) {
   const [baselineMode, setBaselineMode] = useState('create');
   const [metrics, setMetrics] = useState([]);
 
-  const [isCheckinModalOpen, setIsCheckinModalOpen] = useState(false);
-  const [checkinStatus, setCheckinStatus] = useState(null);
-  const [checkinMetrics, setCheckinMetrics] = useState([
-    { id: 1, name: 'Checkout rate', baselineValue: 42, currentValue: '', unit: '%' },
-    { id: 2, name: 'Drop-off users', baselineValue: 12000, currentValue: '', unit: 'users/week' },
-    { id: 3, name: 'Conversion', baselineValue: 3.2, currentValue: '', unit: '%' }
-  ]);
-  const [checkinNotes, setCheckinNotes] = useState('');
-
-  const [selectedIdeaCard, setSelectedIdeaCard] = useState(null);
-
-
-  const [isMarkAsDoneModalOpen, setIsMarkAsDoneModalOpen] = useState(false);
-  const [completionNote, setCompletionNote] = useState('');
-
-  const availableMembers = [
-    { id: 'm1', name: 'Arjun Patel', role: 'Engineering', initials: 'AP', bgClass: 'bg-blue-100', textClass: 'text-blue-700' },
-    { id: 'm2', name: 'Sarah Miller', role: 'Design', initials: 'SM', bgClass: 'bg-purple-100', textClass: 'text-purple-700' },
-    { id: 'm3', name: 'Kevin Lee', role: 'Product', initials: 'KL', bgClass: 'bg-teal-100', textClass: 'text-teal-700' },
-    { id: 'm4', name: 'Tom Riddle', role: 'Marketing', initials: 'TR', bgClass: 'bg-amber-100', textClass: 'text-amber-700' },
-    { id: 'm5', name: 'Alice Wang', role: 'Engineering', initials: 'AW', bgClass: 'bg-pink-100', textClass: 'text-pink-700' }
-  ];
-
-  const calculateChange = (baseline, current) => {
-    if (!current || isNaN(current)) return null;
-    const b = parseFloat(baseline);
-    const c = parseFloat(current);
-    if (b === 0) return null;
-    const pct = ((c - b) / b) * 100;
-    return {
-      val: Math.abs(pct).toFixed(1),
-      isPositive: pct > 0,
-      isNegative: pct < 0,
-      raw: pct
-    };
-  };
-
-  const handleOpenBaseline = (mode) => {
-    setBaselineMode(mode);
-    if (mode === 'edit') {
-      setMetrics([
-        { id: 1, name: 'Checkout rate', value: '42', unit: '%' },
-        { id: 2, name: 'Drop-off users', value: '12k', unit: 'users/week' },
-        { id: 3, name: 'Conversion', value: '3.2', unit: '%' }
-      ]);
-    } else {
-      setMetrics([{ id: Date.now(), name: '', value: '', unit: '' }]);
-    }
-    setIsBaselineModalOpen(true);
-  };
-  const scrollToColumn = (id) => {
-    const el = document.getElementById(id);
-    if (el && el.parentElement) {
-      const scrollLeftPos = el.offsetLeft - el.parentElement.offsetLeft;
-      el.parentElement.scrollTo({
-        left: scrollLeftPos,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   return (
     <div className="flex flex-1 h-full overflow-hidden  relative">
@@ -112,7 +81,12 @@ export default function GoalDashboard({ goalTitle }) {
 
         {/* Scrollable Content */}
         <div className={`flex-1 min-h-0 ${activeView === 'board' ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden scrollbar-hide'}`}>
-          <div className={`px-8 pt-6 md:px-12 lg:px-16 w-full transition-all duration-300 ${activeView === 'board' ? 'h-full' : 'pb-8 md:pb-12'}`}>
+          <div className={`w-full transition-all duration-300 
+            ${activeView === 'board'
+              ? 'h-full pt-6'
+              : 'px-8 pt-6 md:px-12 lg:px-16 pb-8 md:pb-12'
+            }`}
+          >
 
             {/* Main Content Areas */}
             {activeView === 'board' ? (
@@ -145,6 +119,7 @@ export default function GoalDashboard({ goalTitle }) {
           isOpen={isDiscussionPanelOpen}
           onClose={() => setIsDiscussionPanelOpen(false)}
           size="sm"
+          sheetBreakpoint="lg"
         >
           <DiscussionPanel
             isMobile={true}
@@ -155,7 +130,18 @@ export default function GoalDashboard({ goalTitle }) {
 
       {/* Desktop */}
       {!isMobile && isDiscussionPanelOpen && (
-        <div className="w-80 shrink-0 border-l border-gray-200 bg-white h-full flex flex-col overflow-hidden">
+        <div
+          style={{ width }}
+          className="shrink-0 border-l border-gray-200 bg-white h-full flex flex-col overflow-hidden relative"
+        >
+          {/* Drag handle */}
+          {
+            canResizeDiscussionPanel &&
+            <div
+              onMouseDown={onMouseDown}
+              className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[#378ADD]/30 transition-colors z-10"
+            />
+          }
           <DiscussionPanel onClose={() => setIsDiscussionPanelOpen(false)} />
         </div>
       )}

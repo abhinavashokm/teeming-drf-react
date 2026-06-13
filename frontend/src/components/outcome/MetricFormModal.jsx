@@ -63,7 +63,7 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
 
     const handleEditMetric = (data) => {
         // handle edit — data.metrics[0] has the updated values
-        console.log(data.metrics[0]);
+
         updateMetric({ data: data.metrics[0], "metricId": currentMetric.id }, {
             onSuccess: () => {
                 onClose();

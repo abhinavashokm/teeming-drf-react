@@ -75,18 +75,18 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
       {/* Mobile backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="min-[865px]:hidden fixed inset-0 bg-gray-900/40 z-40"
+          className="min-[1024px]:hidden fixed inset-0 bg-gray-900/40 z-40"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       <aside className={`
-        bg-white min-[865px]:bg-gray-50/50 flex flex-col shrink-0 h-[100dvh]
-        fixed min-[865px]:relative top-0 left-0 z-50
+        bg-white min-[1024px]:bg-gray-50/50 flex flex-col shrink-0 h-[100dvh]
+        fixed min-[1024px]:relative top-0 left-0 z-50
         transition-all duration-200
-        min-[865px]:translate-x-0
-        ${isMobileMenuOpen ? 'translate-x-0 w-64 shadow-2xl min-[865px]:shadow-none' : '-translate-x-full'}
-        ${isSidebarVisible ? 'min-[865px]:w-64' : 'min-[865px]:w-11'}
+        min-[1024px]:translate-x-0
+        ${isMobileMenuOpen ? 'translate-x-0 w-64 shadow-2xl min-[1024px]:shadow-none' : '-translate-x-full'}
+        ${isSidebarVisible ? 'min-[1024px]:w-64' : 'min-[1024px]:w-11'}
         border-r border-gray-200
       `}>
 
@@ -164,10 +164,10 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                 <div className="border-t border-gray-100/80 mb-1.5" />
 
                 {canUpgradePlan && (
-                  <button className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
+                  <Link to={'upgrade-plan'} onClick={() => setIsWorkspaceDropdownOpen(false)} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
                     <Zap className="h-[15px] w-[15px] text-gray-400 group-hover:text-yellow-500" />
                     Upgrade Plan
-                  </button>
+                  </Link>
                 )}
 
                 <button

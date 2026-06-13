@@ -11,7 +11,7 @@ function createSocket(path, { onOpen, onMessage, onError, onClose } = {}) {
     socket.onopen = () => onOpen?.()
     socket.onmessage = (event) => onMessage?.(JSON.parse(event.data))
     socket.onerror = (error) => {
-        console.log(error)
+
         onError?.(error)
     }
     socket.onclose = () => onClose?.()

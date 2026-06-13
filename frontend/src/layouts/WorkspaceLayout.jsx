@@ -74,7 +74,7 @@ function WorkspaceLayout() {
               {!isMobileMenuOpen && (
                 <button
                   onClick={() => setIsMobileMenuOpen(true)}
-                  className="pointer-events-auto min-[865px]:hidden text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
+                  className="pointer-events-auto min-[1024px]:hidden text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
                 >
                   <Menu className="h-[20px] w-[20px]" strokeWidth={1.5} />
                 </button>

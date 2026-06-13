@@ -148,16 +148,15 @@ export default function KanbanColumn({ state, onCardClick }) {
     }
 
     return (
-        <>
-            <div key={state} className={`w-[85vw] md:w-auto md:flex-1 shrink-0 snap-start min-w-[216px] flex flex-col rounded-2xl border h-full md:max-h-[calc(100dvh-220px)] ${theme.bg} ${theme.border} overflow-hidden`}>
-                {/* Header */}
-                <div className="shrink-0 p-3 pb-2 border-b border-transparent" ref={searchContainerRef}>
-                    <div className="flex items-center justify-between mb-1 px-1">
-                        <div className="flex items-center gap-2 truncate pr-2">
-                            <h3 className="text-[14px] font-semibold text-gray-900 truncate">{title}</h3>
-                            <span className={`py-0.5 px-2 rounded-full text-xs font-semibold shrink-0 ${theme.countBg} ${theme.countText}`}>{currentIdeas.length}</span>
-                        </div>
-                        {/* <div className="flex items-center gap-1 shrink-0">
+        <div key={state} className={`w-[85vw] md:w-auto md:flex-1 shrink-0 snap-start min-w-[216px] flex flex-col rounded-2xl border h-full md:max-h-[calc(100dvh-220px)] ${theme.bg} ${theme.border} overflow-hidden`}>
+            {/* Header */}
+            <div className="shrink-0 p-3 pb-2 border-b border-transparent" ref={searchContainerRef}>
+                <div className="flex items-center justify-between mb-1 px-1">
+                    <div className="flex items-center gap-2 truncate pr-2">
+                        <h3 className="text-[14px] font-semibold text-gray-900 truncate">{title}</h3>
+                        <span className={`py-0.5 px-2 rounded-full text-xs font-semibold shrink-0 ${theme.countBg} ${theme.countText}`}>{currentIdeas.length}</span>
+                    </div>
+                    {/* <div className="flex items-center gap-1 shrink-0">
                             <button
                                 className={`transition-colors p-1 rounded-md ${isSearchOpen ? 'text-gray-900 bg-gray-200' : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600'}`}
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -184,73 +183,73 @@ export default function KanbanColumn({ state, onCardClick }) {
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
                         </div> */}
-                    </div>
-
-                    {isSearchOpen && (
-                        <div className="mt-2 px-1">
-                            <input
-                                ref={searchInputRef}
-                                type="text"
-                                placeholder="Filter cards..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#378ADD]/20 focus:border-[#378ADD]"
-                            />
-                        </div>
-                    )}
                 </div>
 
-                {/* Cards */}
-
-                {
-                    isPending ? (
-                        <div className="px-3 pb-3 overflow-hidden ">
-                            <div className="flex flex-col gap-3">
-                                {[...Array(4)].map((_, i) => (
-                                    <IdeaCardSkeleton key={i} state={state} />
-                                ))}
-                            </div>
-                        </div>
-                    ) :
-
-                        currentIdeas.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-10 text-center">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                                    {EMPTY_STATES[state].icon}
-                                </div>
-                                <p className="text-[13px] font-medium text-gray-500">No {COLUMN_CONFIGS[state].title}</p>
-                                <p className="text-[12px] text-gray-400 mt-1">Ideas added here will show up</p>
-                            </div>
-                        ) : (
-
-                            <div className="flex-1 h-full overflow-y-auto scrollbar-hide px-3 pb-3">
-                                <div className="flex flex-col gap-3">
-
-                                    {[...currentIdeas].reverse().map(idea => (
-                                        <IdeaCard
-                                            key={idea.id}
-                                            currentIdea={idea}
-                                            state={state}
-                                            theme={theme}
-                                        />
-                                    ))}
-
-                                </div>
-                            </div>
-                        )}
-
-                {showAddIdea && (
-                    <div className="shrink-0 px-3 pb-3 pt-1 mt-auto">
-                        <button onClick={() => setIsAddIdeaFormModalOpen(true)} className="flex items-center justify-center gap-1.5 w-full text-green-600 hover:text-green-700 hover:bg-amber-100/40 rounded-xl py-2 transition-colors text-[13px] font-medium">
-                            <Plus className="w-4 h-4" /> Add idea
-                        </button>
+                {isSearchOpen && (
+                    <div className="mt-2 px-1">
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            placeholder="Filter cards..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#378ADD]/20 focus:border-[#378ADD]"
+                        />
                     </div>
                 )}
-
             </div>
 
+            {/* Cards */}
+
+            {
+                isPending ? (
+                    <div className="px-3 pb-3 overflow-hidden ">
+                        <div className="flex flex-col gap-3">
+                            {[...Array(4)].map((_, i) => (
+                                <IdeaCardSkeleton key={i} state={state} />
+                            ))}
+                        </div>
+                    </div>
+                ) :
+
+                    currentIdeas.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                                {EMPTY_STATES[state].icon}
+                            </div>
+                            <p className="text-[13px] font-medium text-gray-500">No {COLUMN_CONFIGS[state].title}</p>
+                            <p className="text-[12px] text-gray-400 mt-1">Ideas added here will show up</p>
+                        </div>
+                    ) : (
+
+                        <div className="flex-1 h-full overflow-y-auto scrollbar-hide px-3 pb-3">
+                            <div className="flex flex-col gap-3">
+
+                                {[...currentIdeas].reverse().map(idea => (
+                                    <IdeaCard
+                                        key={idea.id}
+                                        currentIdea={idea}
+                                        state={state}
+                                        theme={theme}
+                                    />
+                                ))}
+
+                            </div>
+                        </div>
+                    )}
+
+            {showAddIdea && (
+                <div className="shrink-0 px-3 pb-3 pt-1 mt-auto">
+                    <button onClick={() => setIsAddIdeaFormModalOpen(true)} className="flex items-center justify-center gap-1.5 w-full text-green-600 hover:text-green-700 hover:bg-amber-100/40 rounded-xl py-2 transition-colors text-[13px] font-medium">
+                        <Plus className="w-4 h-4" /> Add idea
+                    </button>
+                </div>
+            )}
+
             <IdeaFormModal isOpen={isAddIdeaFormModalOpen} onClose={() => setIsAddIdeaFormModalOpen(false)} />
-        </>
+        </div>
+
+
     );
 }

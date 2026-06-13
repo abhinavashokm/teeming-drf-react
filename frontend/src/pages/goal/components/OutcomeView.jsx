@@ -31,16 +31,16 @@ function OutcomeView() {
             <div className="max-w-7xl space-y-6 pb-12">
                 {/* 1. Outcome Header Card */}
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                    <div className="flex flex-col min-[1043px]:flex-row min-[1043px]:items-start justify-between gap-4 min-[1043px]:gap-0 mb-6">
+                    <div className="flex flex-col min-[1210px]:flex-row min-[1210px]:items-start justify-between gap-4 min-[1210px]:gap-0 mb-6">
                         <div>
                             <h2 className="text-[18px] font-bold text-gray-900 leading-tight">Outcome</h2>
                             <p className="text-[13px] text-gray-500 mt-1">Track what actually changed</p>
                         </div>
 
-                        <div className="flex items-center gap-3 w-full min-[1043px]:w-auto">
+                        <div className="flex items-center gap-3 w-full min-[1210px]:w-auto">
                             {
                                 canManageMetrics &&
-                                <button onClick={() => setIsMetricFormModalOpen(true)} className="flex-1 min-[1043px]:flex-none px-4 py-2 border border-gray-200 text-gray-700 font-medium rounded-lg text-[13px] hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center">
+                                <button onClick={() => setIsMetricFormModalOpen(true)} className="flex-1 min-[1210px]:flex-none px-4 py-2 border border-gray-200 text-gray-700 font-medium rounded-lg text-[13px] hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center">
                                     Add Metric
                                 </button>
                             }
