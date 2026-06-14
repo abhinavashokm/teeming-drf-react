@@ -2,9 +2,19 @@ import { Check, X } from 'lucide-react';
 import { currencySymbols } from '../../constants/currencySymbols';
 import useCreateCheckoutSession from '../../hooks/subscription/useCreateCheckoutSession';
 import AppButton from "../../components/ui/buttons/AppButton"
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 
 function PlanCard({ plan }) {
+
+    const { data: currentWorkspace } = useWorkspace()
+
+    const currentPlanCode =
+        currentWorkspace?.subscription?.plan?.code
+
+    const isCurrentPlan =
+        currentPlanCode === plan.code
+
 
     const { mutate: createCheckoutSession, isPending } = useCreateCheckoutSession()
 
@@ -13,13 +23,24 @@ function PlanCard({ plan }) {
     }
 
     return (
-        <div className="flex-1 min-w-[280px] snap-center bg-white rounded-xl relative flex flex-col border-2 border-[#1A9E6E] shadow-md">
+        <div
+            className={`flex-1 min-w-[280px] snap-center bg-white rounded-xl relative flex flex-col border-2 shadow-md 
+                ${isCurrentPlan
+                    ? 'border-[#1A9E6E] ring-2 ring-[#1A9E6E]/10'
+                    : 'border-gray-200'
+                }
 
+                `}
+        >
             {/* Badge */}
             <div className="absolute -top-3 right-4 flex gap-2">
-                <span className="bg-[#1A9E6E] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                    Recommended
-                </span>
+
+                {isCurrentPlan && (
+                    <span className="bg-[#1A9E6E] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                        Current Plan
+                    </span>
+                )}
+
             </div>
 
             <div className="p-6 flex-1 flex flex-col">
@@ -30,9 +51,14 @@ function PlanCard({ plan }) {
                         {plan.name}
                     </h3>
 
-                    <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md uppercase">
-                        Popular
-                    </span>
+                    {
+                        plan.code === "PRO" && (
+                            <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md uppercase">
+                                Popular
+                            </span>
+                        )
+                    }
+
                 </div>
 
                 {/* Price */}
@@ -56,7 +82,7 @@ function PlanCard({ plan }) {
                         </span>
 
                         <span className="text-[13px] font-bold text-gray-900 leading-none">
-                            25
+                            {plan.maxMembers ?? "Unlimited"}
                         </span>
                     </div>
 
@@ -66,7 +92,7 @@ function PlanCard({ plan }) {
                         </span>
 
                         <span className="text-[13px] font-bold text-gray-900 leading-none">
-                            100
+                            {plan.maxGoals ?? "Unlimited"}
                         </span>
                     </div>
 
@@ -84,58 +110,65 @@ function PlanCard({ plan }) {
                 {/* Features */}
                 <div className="flex-1">
                     <ul className="space-y-3.5">
+                        {plan.features.map((feature) => (
+                            <li
+                                key={feature.key}
+                                className="flex items-start gap-2.5"
+                            >
+                                {feature.enabled ? (
+                                    <>
+                                        <div className="mt-[3px] shrink-0 bg-[#1A9E6E]/10 rounded-full p-0.5">
+                                            <Check
+                                                className="w-3 h-3 text-[#1A9E6E]"
+                                                strokeWidth={3}
+                                            />
+                                        </div>
 
-                        <li className="flex items-start gap-2.5">
-                            <div className="mt-[3px] shrink-0 bg-[#1A9E6E]/10 rounded-full p-0.5">
-                                <Check className="w-3 h-3 text-[#1A9E6E]" strokeWidth={3} />
-                            </div>
+                                        <span className="text-[13px] leading-snug text-gray-700 font-medium">
+                                            {feature.name}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="mt-[3px] shrink-0">
+                                            <X
+                                                className="w-4 h-4 text-gray-300"
+                                                strokeWidth={2.5}
+                                            />
+                                        </div>
 
-                            <span className="text-[13px] leading-snug text-gray-700 font-medium">
-                                AI Idea Suggestions
-                            </span>
-                        </li>
-
-                        <li className="flex items-start gap-2.5">
-                            <div className="mt-[3px] shrink-0 bg-[#1A9E6E]/10 rounded-full p-0.5">
-                                <Check className="w-3 h-3 text-[#1A9E6E]" strokeWidth={3} />
-                            </div>
-
-                            <span className="text-[13px] leading-snug text-gray-700 font-medium">
-                                AI Assistant
-                            </span>
-                        </li>
-
-                        <li className="flex items-start gap-2.5">
-                            <div className="mt-[3px] shrink-0 bg-[#1A9E6E]/10 rounded-full p-0.5">
-                                <Check className="w-3 h-3 text-[#1A9E6E]" strokeWidth={3} />
-                            </div>
-
-                            <span className="text-[13px] leading-snug text-gray-700 font-medium">
-                                Export Workspace Data
-                            </span>
-                        </li>
-
-                        <li className="flex items-start gap-2.5">
-                            <div className="mt-[3px] shrink-0">
-                                <X className="w-4 h-4 text-gray-300" strokeWidth={2.5} />
-                            </div>
-
-                            <span className="text-[13px] leading-snug text-gray-400 line-through">
-                                Priority Support
-                            </span>
-                        </li>
-
+                                        <span className="text-[13px] leading-snug text-gray-400 line-through">
+                                            {feature.name}
+                                        </span>
+                                    </>
+                                )}
+                            </li>
+                        ))}
                     </ul>
                 </div>
 
                 {/* Button */}
                 <div className="mt-8 pt-6 border-t border-gray-100">
-                    <AppButton fullWidth={true} loading={isPending}
-                        onClick={handleCreateCheckoutSession}
-                        className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white shadow-sm"
-                    >
-                        Upgrade to Pro
-                    </AppButton>
+
+                    {isCurrentPlan ? (
+                        <AppButton
+                            fullWidth
+                            disabled
+                            className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-gray-100 text-gray-500 cursor-not-allowed"
+                        >
+                            Current Plan
+                        </AppButton>
+                    ) : (
+                        <AppButton
+                            fullWidth
+                            loading={isPending}
+                            onClick={handleCreateCheckoutSession}
+                            className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white shadow-sm"
+                        >
+                            Upgrade to {plan.name}
+                        </AppButton>
+                    )}
+
                 </div>
 
             </div>

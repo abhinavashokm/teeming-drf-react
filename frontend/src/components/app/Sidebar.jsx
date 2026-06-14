@@ -47,6 +47,8 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
   const { mutate: logoutUser } = useLogout()
   const { data: goals } = useGoals()
 
+  const currentPlan = currentWorkspace?.subscription?.plan
+
   const canLeaveWorkspace = useCan(PERMISSIONS.LEAVE_WORKSPACE)
   const canUpgradePlan = useCan(PERMISSIONS.UPGRADE_PLAN)
   const canManageSettings = useCan(PERMISSIONS.MANAGE_SETTINGS)
@@ -108,7 +110,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                     <ChevronDown className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 shrink-0" />
                   </div>
                   <div className="flex items-center text-[11px] mt-0.5">
-                    <span className="text-gray-500 truncate">Free plan</span>
+                    <span className="text-gray-500 truncate">{currentPlan?.name} plan</span>
                     <span className="text-gray-300 mx-1">·</span>
                     <span className={`truncate ${roleColors[currentWorkspace.role] || 'text-gray-500'}`}>{currentWorkspace.role}</span>
                   </div>

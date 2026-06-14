@@ -11,6 +11,10 @@ export const subscriptionService = {
     createCheckoutSession : async (slug, data) => {
         const res = await api.post(`/workspaces/${slug}/subscriptions/checkout/`, data)
         return res.data
-    }
+    },
+
+    fetchCurrentPlan: async (slug) => {
+        const res = await api.get(`/workspaces/${slug}/subscriptions/current`)
+    },
 
 }
