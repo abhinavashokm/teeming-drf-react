@@ -13,7 +13,7 @@ import {
   Zap
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { PERMISSIONS } from '../../constants/permissions';
 import useAuth from '../../hooks/auth/useAuth';
 import useLogout from '../../hooks/auth/useLogout';
@@ -39,6 +39,40 @@ const getGoalColors = (goalName) => {
   }
   return colorSets[Math.abs(hash) % colorSets.length];
 };
+
+const SidebarItem = ({ icon: Icon, to, children, sidebarContentExpanded, leading }) => {
+  return (
+
+    <NavLink
+      to={to}
+      end
+      className={({ isActive }) => `flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors 
+              ${isActive ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
+      title={!sidebarContentExpanded ? 'Home' : ''}
+    >
+      {({ isActive }) => (
+        <>
+          {leading}
+          {
+            Icon && <Icon
+              className={`h-4 w-4 shrink-0 ${isActive
+                ? 'text-teeming-green'
+                : 'text-gray-400'
+                }`}
+              strokeWidth={1.5}
+            />
+          }
+
+
+          {
+            sidebarContentExpanded && children
+          }
+        </>
+      )}
+    </NavLink>
+  )
+}
+
 
 function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setIsMobileMenuOpen }) {
 
@@ -202,15 +236,9 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
 
           {/* Home */}
           <div className="pb-4 border-b border-gray-200">
-            <Link
-              to=""
-              onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}
-              className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'home' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
-              title={!sidebarContentExpanded ? 'Home' : ''}
-            >
-              <Home className={`h-4 w-4 shrink-0 ${currentView === 'home' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-              {sidebarContentExpanded && <span>Home</span>}
-            </Link>
+            <SidebarItem to={""} sidebarContentExpanded={sidebarContentExpanded} icon={Home} >
+              <span>Home</span>
+            </SidebarItem>
           </div>
 
           {/* Starred Goals */}
@@ -224,31 +252,19 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                 {starredGoals.map(goal => {
                   const colors = getGoalColors(goal.name);
                   return (
-                    <Link
-                      key={goal.id}
+                    <SidebarItem key={goal.id}
                       to={ROUTE_PATHS.GOAL_DASHBOARD(currentWorkspace.slug, goal.id)}
-                      onClick={() => { setCurrentView(`starredGoal:${goal.id}`); setIsMobileMenuOpen(false); }}
-                      className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors 
-                      ${currentView === `starredGoal:${goal.id}` ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
-                      title={!sidebarContentExpanded ? goal.name : ''}
-                    >
-                      <div className="relative shrink-0">
-                        <div className={`flex items-center justify-center text-[9px] font-semibold rounded-full ${colors.bg} ${colors.text} ${sidebarContentExpanded ? 'w-[22px] h-[22px]' : 'w-[26px] h-[26px]'}`}>
+                      sidebarContentExpanded={sidebarContentExpanded}
+                      leading={
+                        <div
+                          className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[9px] font-semibold ${colors.bg} ${colors.text}`}
+                        >
                           {goal.name.substring(0, 2).toUpperCase()}
                         </div>
-                        {!sidebarContentExpanded && (
-                          <div className="absolute -top-[3px] -right-[3px] bg-white rounded-full ring-[2px] ring-white">
-                            <Star className="h-[9px] w-[9px] text-amber-400 fill-amber-400" strokeWidth={1.5} />
-                          </div>
-                        )}
-                      </div>
-                      {sidebarContentExpanded && (
-                        <div className="flex items-center justify-between flex-1 min-w-0 pr-1">
-                          <span className="truncate">{goal.name}</span>
-                          <Star className="h-3 w-3 text-amber-400 fill-amber-400 opacity-60 shrink-0" strokeWidth={1} />
-                        </div>
-                      )}
-                    </Link>
+                      }
+                    >
+                      <span> {goal.name}</span>
+                    </SidebarItem>
                   );
                 })}
                 {sidebarContentExpanded && starredGoals.length === 0 && (
@@ -260,27 +276,17 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
 
           {/* Manage Team & Settings */}
           <div className="space-y-0.5">
-            <Link
-              to="manage-team"
-              onClick={() => { setCurrentView('team'); setIsMobileMenuOpen(false); }}
-              className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'team' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
-              title={!sidebarContentExpanded ? (currentWorkspace.role !== 'Member' ? 'Manage Team' : 'View Team') : ''}
-            >
-              <Users className={`h-4 w-4 shrink-0 ${currentView === 'team' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-              {sidebarContentExpanded && <span>{currentWorkspace.role !== 'Member' ? 'Manage Team' : 'View Team'}</span>}
-            </Link>
+
+            <SidebarItem to={"manage-team"} sidebarContentExpanded={sidebarContentExpanded} icon={Users} >
+              <span>{currentWorkspace.role !== 'Member' ? 'Manage Team' : 'View Team'}</span>
+            </SidebarItem>
 
             {canManageSettings && (
-              <Link
-                to="settings"
-                onClick={() => { setCurrentView('workspace_settings'); setIsMobileMenuOpen(false); }}
-                className={`flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors ${currentView === 'workspace_settings' ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
-                title={!sidebarContentExpanded ? 'Settings' : ''}
-              >
-                <Settings className={`h-4 w-4 shrink-0 ${currentView === 'workspace_settings' ? 'text-teeming-green' : 'text-gray-400'}`} strokeWidth={1.5} />
-                {sidebarContentExpanded && <span>Settings</span>}
-              </Link>
+              <SidebarItem to={"settings"} sidebarContentExpanded={sidebarContentExpanded} icon={Settings} >
+                <span>Settings</span>
+              </SidebarItem>
             )}
+
           </div>
 
         </nav>

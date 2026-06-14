@@ -7,25 +7,26 @@ import {
 import { useState } from 'react';
 import GoalCard from '../../components/goal/GoalCard';
 import GoalFormModal from '../../components/goal/GoalFormModal';
-import InviteModal from '../../components/workspace/InviteModal';
-import SwitchWorkspaceModal from '../../components/workspace/SwitchWorkspaceModal';
+import UpgradePlanModal from '../../components/subscription/UpgradePlanModal';
+import AppButton from '../../components/ui/buttons/AppButton';
 import { PERMISSIONS } from '../../constants/permissions';
+import useAuth from '../../hooks/auth/useAuth';
 import useGoals from '../../hooks/goal/useGoals';
+import useWelcomeBanner from '../../hooks/invite/useWelcomeBanner';
 import { useCan } from '../../hooks/permissions/useCan';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
-import useWelcomeBanner from '../../hooks/invite/useWelcomeBanner';
-import useAuth from '../../hooks/auth/useAuth';
-import AppButton from '../../components/ui/buttons/AppButton';
 
 
 function HomePage() {
 
-  const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
-  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
-  const [isSwitchWorkspaceModalOpen, setIsSwitchWorkspaceModalOpen] = useState(false);
-
   const [isGoalFormModalOpen, setIsGoalFormModalOpen] = useState(false);
+  const [isUpgradePlanModalOpen, setIsUpgradePlanModalOpen] = useState(false)
+
   const { data: currentWorkspace } = useWorkspace()
+  const currentPlan = currentWorkspace?.subscription?.plan
+  const goalCountLimit = currentWorkspace?.limits?.goals
+  const goalLimitReached = (goalCountLimit.used === goalCountLimit.max) ?? false
+
   const { data: currentUser } = useAuth()
 
   const { data: Goals } = useGoals()
@@ -41,45 +42,75 @@ function HomePage() {
     setShowWelcome(false)
   }
 
+  const handleCreateGoal = () => {
+
+    if (goalLimitReached) {
+      setIsUpgradePlanModalOpen(true)
+      return
+    }
+
+    setIsGoalFormModalOpen(true)
+  }
+
   return (
 
     <>
       <div className="max-w-5xl mx-auto space-y-14 pb-20">
 
         {showWelcome && (
-        
-            <div className="flex items-center gap-3.5 bg-[#E1F5EE] border border-[#5DCAA5] rounded-2xl px-4 py-3.5">
-              <div className="w-10 h-10 rounded-xl bg-[#1D9E75] flex items-center justify-center shrink-0">
-                <PartyPopper className="h-5 w-5 text-white" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1">
-                <p className="text-[14px] font-medium text-[#085041]">Welcome to {currentWorkspace.name}!</p>
-                <p className="text-[12px] text-[#0F6E56] leading-relaxed mt-0.5">
-                  {currentWorkspace.role === 'Admin'
-                    ? `Hey ${currentUser.fullName.split(' ')[0]}! You've been added as an admin. You can manage goals, invite members, and configure settings.`
-                    : `Hey ${currentUser.fullName.split(' ')[0]}! You've been added as a member. Explore goals and start contributing to ideas.`
-                  }
-                </p>
-              </div>
-              <button onClick={handleRemoveWelcome} className="p-1 rounded-md hover:bg-[#9FE1CB] transition-colors">
-                <X className="h-4 w-4 text-[#0F6E56]" strokeWidth={2} />
-              </button>
+
+          <div className="flex items-center gap-3.5 bg-[#E1F5EE] border border-[#5DCAA5] rounded-2xl px-4 py-3.5">
+            <div className="w-10 h-10 rounded-xl bg-[#1D9E75] flex items-center justify-center shrink-0">
+              <PartyPopper className="h-5 w-5 text-white" strokeWidth={1.5} />
             </div>
-  
+            <div className="flex-1">
+              <p className="text-[14px] font-medium text-[#085041]">Welcome to {currentWorkspace.name}!</p>
+              <p className="text-[12px] text-[#0F6E56] leading-relaxed mt-0.5">
+                {currentWorkspace.role === 'Admin'
+                  ? `Hey ${currentUser.fullName.split(' ')[0]}! You've been added as an admin. You can manage goals, invite members, and configure settings.`
+                  : `Hey ${currentUser.fullName.split(' ')[0]}! You've been added as a member. Explore goals and start contributing to ideas.`
+                }
+              </p>
+            </div>
+            <button onClick={handleRemoveWelcome} className="p-1 rounded-md hover:bg-[#9FE1CB] transition-colors">
+              <X className="h-4 w-4 text-[#0F6E56]" strokeWidth={2} />
+            </button>
+          </div>
+
         )}
 
         {/* Goals */}
         <section>
+
           <div className="flex items-center justify-between mb-5">
-            <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900 tracking-tight">
-              <Layers className="h-5 w-5 text-gray-900" strokeWidth={1.5} />
-              Goals
-            </h2>
+            <div className="flex items-center gap-3">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900 tracking-tight">
+                <Layers className="h-5 w-5 text-gray-900" strokeWidth={1.5} />
+                Goals
+              </h2>
+
+              {
+                goalLimitReached ?
+                  (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[11px] font-medium text-red-700">
+                      Limit Reached ({goalCountLimit.used} / {goalCountLimit.max})
+                    </span>
+                  ) :
+                  (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-700">
+                      {goalCountLimit.used} / {goalCountLimit.max} Used
+                    </span>
+                  )
+              }
+
+
+            </div>
+
 
             {
               canManageGoals &&
 
-              <AppButton onClick={() => setIsGoalFormModalOpen(true)} >
+              <AppButton onClick={handleCreateGoal} >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 New Goal
               </AppButton>
@@ -288,9 +319,8 @@ function HomePage() {
 
       </div>
 
-      <InviteModal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} />
-      <SwitchWorkspaceModal isOpen={isSwitchWorkspaceModalOpen} onClose={() => setIsSwitchWorkspaceModalOpen(false)} />
       <GoalFormModal isOpen={isGoalFormModalOpen} onClose={() => setIsGoalFormModalOpen(false)} />
+        <UpgradePlanModal isOpen={isUpgradePlanModalOpen} onClose={() => setIsUpgradePlanModalOpen(false)} currentLimit={goalCountLimit.max} currentUsage={goalCountLimit.used} currentPlan={currentPlan.name} />
 
     </>
   )

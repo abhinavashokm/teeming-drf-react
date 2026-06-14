@@ -1,5 +1,5 @@
 import { Check, X } from 'lucide-react';
-import { currencySymbols } from '../../constants/currencySymbols';
+import { currencySymbols } from '../../constants/subscriptionConstants';
 import useCreateCheckoutSession from '../../hooks/subscription/useCreateCheckoutSession';
 import AppButton from "../../components/ui/buttons/AppButton"
 import useWorkspace from '../../hooks/workspace/useWorkspace';
@@ -165,7 +165,8 @@ function PlanCard({ plan }) {
                             onClick={handleCreateCheckoutSession}
                             className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white shadow-sm"
                         >
-                            Upgrade to {plan.name}
+                            {plan.tier < currentWorkspace.subscription.plan.tier ? `Downgrade to ${plan.name}` :
+                                `Upgrade to ${plan.name}`}
                         </AppButton>
                     )}
 

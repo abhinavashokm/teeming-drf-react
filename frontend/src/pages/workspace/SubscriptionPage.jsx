@@ -3,11 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 import usePlans from '../../hooks/subscription/usePlans';
 import PlanCard from '../../components/subscription/PlanCard';
 import useWorkspace from "../../hooks/workspace/useWorkspace"
+import { dateToHuman } from "../../utils/timeUtils"
+import { currencySymbols, planCodes } from '../../constants/subscriptionConstants';
 
 function SubscriptionPage() {
 
     const { data: plans, isPending } = usePlans()
     const { data: currentWorkspace } = useWorkspace()
+
+    const subscription = currentWorkspace?.subscription
 
     const [billingCycle, setBillingCycle] = useState('monthly');
     const scrollContainerRef = useRef(null);
@@ -65,7 +69,7 @@ function SubscriptionPage() {
                 <p className="text-[15px] text-gray-500 mb-8">All plans are billed per workspace. Upgrade or downgrade anytime.</p>
 
                 {/* Toggle */}
-                <div className="inline-flex items-center justify-center p-1 bg-gray-100/80 border border-gray-200/60 rounded-full mx-auto w-auto">
+                {/* <div className="inline-flex items-center justify-center p-1 bg-gray-100/80 border border-gray-200/60 rounded-full mx-auto w-auto">
                     <button
                         onClick={() => setBillingCycle('monthly')}
                         className={`relative z-10 px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${billingCycle === 'monthly' ? 'text-gray-900 shadow-sm bg-white' : 'text-gray-500 hover:text-gray-700'}`}
@@ -79,6 +83,42 @@ function SubscriptionPage() {
                         Yearly
                         <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full transition-colors leading-none ${billingCycle === 'yearly' ? 'bg-[#1A9E6E]/10 text-[#1A9E6E]' : 'bg-gray-200 text-gray-500'}`}>Save 20%</span>
                     </button>
+                </div> */}
+
+            </div>
+
+            {/* Current Subscription */}
+            <div className="max-w-[1100px] mx-auto px-6 mb-8">
+                <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                            Current Subscription
+                        </p>
+
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-semibold text-gray-900">
+                                {subscription.plan.name} Plan
+                            </h2>
+
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                                {subscription.status}
+                            </span>
+                        </div>
+
+                        {
+                            subscription.plan.code !== planCodes.FREE &&
+                            <p className="text-sm text-gray-500 mt-1">
+                                Renews on {dateToHuman(subscription.expiresAt)}
+                            </p>
+                        }
+
+                    </div>
+
+                    <div className="text-sm text-gray-500">
+                        {currencySymbols[subscription.plan.currency]}{subscription.plan.monthlyPrice}/month
+                    </div>
+
                 </div>
             </div>
 
@@ -118,7 +158,7 @@ function SubscriptionPage() {
                     {plans?.map((plan) => (
                         <PlanCard plan={plan} key={plan.id} />
                     ))}
-                    
+
                     {/* Spacer to ensure the last card isn't flush against the right edge when fully scrolled */}
                     <div className="flex-none w-2 sm:w-6 shrink-0"></div>
                 </div>
