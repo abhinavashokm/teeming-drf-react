@@ -84,3 +84,8 @@ def unstar_goal(user, workspace, goal_id):
     )
 
     StarredGoal.objects.in_workspace(workspace).filter(goal=goal, user=user).delete()
+
+
+def get_workspace_goal_count(workspace):
+
+    return Goal.objects.in_workspace(workspace).count()

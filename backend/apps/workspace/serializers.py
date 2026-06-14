@@ -21,10 +21,11 @@ class WorkspaceRetrieveSerializer(serializers.ModelSerializer):
 class GetCurrentWorkspaceSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
     subscription = serializers.SerializerMethodField()
+    limits = serializers.SerializerMethodField()
 
     class Meta:
         model = Workspace
-        fields = ["id", "name", "slug", "role", "subscription"]
+        fields = ["id", "name", "slug", "role", "subscription", "limits"]
 
     def get_role(self, obj):
         return self.context["member"].role
@@ -33,6 +34,9 @@ class GetCurrentWorkspaceSerializer(serializers.ModelSerializer):
         subscription = self.context["subscription"]
 
         return WorkspaceSubscriptionSerializer(subscription).data
+
+    def get_limits(self, obj):
+        return self.context["limits"]
 
 
 class WorkspaceUpdateSerializer(serializers.ModelSerializer):

@@ -10,7 +10,6 @@ from .serializers import (
     WorkspaceRoleUpdateSerializer,
 )
 from . import serializers
-from .models import WorkspaceMember
 from rest_framework.permissions import IsAuthenticated
 from core.permission_views import (
     MemberBaseView,
@@ -18,6 +17,7 @@ from core.permission_views import (
 )
 from core.permissions import IsWorkspaceMember, IsWorkspaceAdmin, IsWorkspaceOwner
 from apps.subscription import subscription_services
+from apps.goal import goal_services
 
 
 class WorkspaceSessionView(APIView):
@@ -58,11 +58,23 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
             workspace=request.workspace
         )
 
+        limits = {
+            "members": {
+                "used": request.workspace.members.count(),
+                "max": subscription.plan.max_members,
+            },
+            "goals": {
+                "used": goal_services.get_workspace_goal_count(workspace=request.workspace),
+                "max": subscription.plan.max_goals,
+            },
+        }
+
         workspace_data = serializers.GetCurrentWorkspaceSerializer(
             request.workspace,
             context={
                 "member": request.member,
                 "subscription": subscription,
+                "limits": limits,
             },
         ).data
 

@@ -38,11 +38,11 @@ class Plan(BaseAbstractModel):
     stripe_price_id = models.CharField(max_length=255, null=True, blank=True)
 
     #field to determine plan sorting order
-    display_order = models.PositiveIntegerField(unique=True)
+    tier = models.PositiveIntegerField(unique=True)
 
     class Meta:
         db_table = "plans"
-        ordering = ["display_order"]
+        ordering = ["tier"]
 
 
 ACTIVE_STATUS = "active"

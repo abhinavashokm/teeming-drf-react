@@ -55,6 +55,7 @@ class UserReadPlanSerializer(serializers.ModelSerializer):
             "features",
             "monthly_price",
             "currency",
+            "tier",
         ]
 
     def get_features(self, obj):
@@ -88,7 +89,7 @@ class GetCurrentPlanSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Plan
-        fields = ["id", "code", "name"]
+        fields = ["id", "code", "name", "monthly_price", "currency", "tier",]
 
 
 class WorkspaceSubscriptionSerializer(serializers.ModelSerializer):
