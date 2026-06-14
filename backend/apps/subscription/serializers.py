@@ -41,6 +41,7 @@ class AdminReadPlanSerializer(serializers.ModelSerializer):
 
 
 class UserReadPlanSerializer(serializers.ModelSerializer):
+    features = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -51,11 +52,28 @@ class UserReadPlanSerializer(serializers.ModelSerializer):
             "description",
             "max_goals",
             "max_members",
-            "can_use_ai_idea_suggestions",
-            "can_use_ai_assistant",
-            "can_export_workspace_data",
+            "features",
             "monthly_price",
             "currency",
+        ]
+
+    def get_features(self, obj):
+        return [
+            {
+                "key": "ai_idea_suggestions",
+                "name": "AI Idea Suggestions",
+                "enabled": obj.can_use_ai_idea_suggestions,
+            },
+            {
+                "key": "ai_assistant",
+                "name": "AI Assistant",
+                "enabled": obj.can_use_ai_assistant,
+            },
+            {
+                "key": "export_workspace_data",
+                "name": "Export Workspace Data",
+                "enabled": obj.can_export_workspace_data,
+            },
         ]
 
 

@@ -9,15 +9,15 @@ from .serializers import (
     WorkspaceUpdateSerializer,
     WorkspaceRoleUpdateSerializer,
 )
+from . import serializers
 from .models import WorkspaceMember
 from rest_framework.permissions import IsAuthenticated
 from core.permission_views import (
     MemberBaseView,
-    AdminBaseView,
-    OwnerBaseView,
     WorkspacePermissionBaseView,
 )
 from core.permissions import IsWorkspaceMember, IsWorkspaceAdmin, IsWorkspaceOwner
+from apps.subscription import subscription_services
 
 
 class WorkspaceSessionView(APIView):
@@ -54,16 +54,19 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
 
     def get(self, request, **kwargs):
 
-        workspace_data = WorkspaceRetrieveSerializer(request.workspace).data
-
-        return success_response(
-            data={
-                "workspace_id": workspace_data["id"],
-                "name": workspace_data["name"],
-                "slug": workspace_data["slug"],
-                "role": request.member.get_role_display(),
-            }
+        subscription = subscription_services.get_current_plan(
+            workspace=request.workspace
         )
+
+        workspace_data = serializers.GetCurrentWorkspaceSerializer(
+            request.workspace,
+            context={
+                "member": request.member,
+                "subscription": subscription,
+            },
+        ).data
+
+        return success_response(data=workspace_data)
 
     def patch(self, request, **kwargs):
 
@@ -101,23 +104,13 @@ class WorkspaceListCreateView(APIView):
         )
         serializer.is_valid(raise_exception=True)
 
-        new_workspace = serializer.save()
-
-        # add membership
-        membership = WorkspaceMember.objects.create(
-            user=request.user,
-            workspace=new_workspace,
-            role=WorkspaceMember.RoleChoices.OWNER,
+        new_workspace = workspace_services.create_workspace_with_free_plan(
+            current_user=request.user, data=serializer.validated_data
         )
 
         return success_response(
             message="workspace created",
-            data={
-                "workspace_id": new_workspace.id,
-                "slug": new_workspace.slug,
-                "name": new_workspace.name,
-                "role": membership.get_role_display(),
-            },
+            data=WorkspaceRetrieveSerializer(new_workspace).data,
             status_code=status.HTTP_201_CREATED,
         )
 
@@ -164,7 +157,7 @@ class WorkspaceMemberDetailView(WorkspacePermissionBaseView):
         workspace_services.update_role(
             workspace=request.workspace,
             member_id=kwargs["member_id"],
-            role=serializer.validated_data['role'],
+            role=serializer.validated_data["role"],
         )
 
         return success_response(
@@ -172,13 +165,13 @@ class WorkspaceMemberDetailView(WorkspacePermissionBaseView):
             data=serializer.validated_data,
             status_code=status.HTTP_200_OK,
         )
-    
+
     def delete(self, request, **kwargs):
         """remove member from workspace"""
-        
+
         workspace_services.remove_member(
             workspace=request.workspace,
-            member_id=kwargs['member_id'],
+            member_id=kwargs["member_id"],
         )
 
         return success_response(
@@ -198,6 +191,5 @@ class LeaveWorkspaceView(MemberBaseView):
         )
 
         return success_response(
-            message="you left from workspace",
-            status_code=status.HTTP_200_OK
+            message="you left from workspace", status_code=status.HTTP_200_OK
         )

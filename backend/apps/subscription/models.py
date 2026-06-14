@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 from core.models import BaseAbstractModel
 
@@ -36,19 +37,25 @@ class Plan(BaseAbstractModel):
     stripe_product_id = models.CharField(max_length=255, null=True, blank=True)
     stripe_price_id = models.CharField(max_length=255, null=True, blank=True)
 
+    #field to determine plan sorting order
+    display_order = models.PositiveIntegerField(unique=True)
+
     class Meta:
         db_table = "plans"
+        ordering = ["display_order"]
 
+
+ACTIVE_STATUS = "active"
 
 class WorkspaceSubscription(BaseAbstractModel):
 
     class StatusChoices(models.TextChoices):
-        ACTIVE = ("active", "Active")
+        ACTIVE = (ACTIVE_STATUS, "Active")
         EXPIRED = ("expired", "Expired")
         CANCELLED = ("cancelled", "cancelled")
         TRIALING = "trialing", "Trialing"
 
-    workspace = models.ForeignKey("workspace.Workspace", on_delete=models.CASCADE)
+    workspace = models.ForeignKey("workspace.Workspace", on_delete=models.CASCADE, related_name="subscriptions")
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     started_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(blank=True, null=True) #it's a required field. made it option for temporary
@@ -58,9 +65,16 @@ class WorkspaceSubscription(BaseAbstractModel):
         max_length=20, choices=StatusChoices.choices, default=StatusChoices.ACTIVE
     )
 
-    stripe_customer_id = models.CharField(max_length=255)
-    stripe_subscription_id = models.CharField(max_length=255)
+    stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
+    stripe_subscription_id = models.CharField(max_length=255, null=True, blank=True,)
 
     class Meta:
         db_table = "workspace_subscription"
         indexes = [models.Index(fields=["workspace", "status"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["workspace"],
+                condition=Q(status=ACTIVE_STATUS),
+                name="one_active_subscription_per_workspace",
+            )
+        ]

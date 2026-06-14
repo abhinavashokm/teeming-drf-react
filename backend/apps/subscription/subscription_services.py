@@ -1,8 +1,10 @@
 from django.db.models import Q
 
+from core.exceptions.base import NotFoundException
 from .models import Plan
 from . import strip_services
 from .models import WorkspaceSubscription
+from .helpers.subscription_helper import get_plan_or_raise
 
 
 def create_plan(data):
@@ -24,6 +26,11 @@ def list_plans():
     return Plan.objects.all()
 
 
+def delete_plan(plan_id):
+    plan = get_plan_or_raise(plan_id=plan_id)
+    plan.soft_delete()
+
+
 def create_checkout_session(workspace, plan):
     return strip_services.create_checkout_session(workspace, plan)
 
@@ -40,6 +47,17 @@ def create_workspace_subscription(
             "status": "active",
         },
     )
+
+
+def create_free_plan_subscription(workspace):
+    
+    try:
+        free_plan = Plan.objects.get(code="FREE")
+    except Plan.DoesNotExist:
+        raise NotFoundException("Free plan not found")
+    
+    WorkspaceSubscription.objects.create(workspace=workspace, plan=free_plan)
+
 
 
 def get_current_plan(workspace):

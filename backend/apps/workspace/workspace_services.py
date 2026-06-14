@@ -1,6 +1,30 @@
 from .models import WorkspaceMember, Workspace
+from django.db import transaction
 from django.db.models import Case, When, Value, IntegerField
 from . import exceptions
+from apps.subscription import subscription_services
+
+
+def create_workspace_with_free_plan(current_user, data):
+    """
+    create workspace with free plan, add current user as owner of the workspace
+    """
+
+    with transaction.atomic():
+
+        workspace = Workspace.objects.create(**data)
+
+        #add current user a membership to workspace as role owner
+        WorkspaceMember.objects.create(
+            user=current_user,
+            workspace=workspace,
+            role=WorkspaceMember.RoleChoices.OWNER,
+        )
+
+        #create free plan subscription
+        subscription_services.create_free_plan_subscription(workspace=workspace)
+
+        return workspace
 
 
 def fetch_user_workspace_list(user):
@@ -37,8 +61,7 @@ def add_workspace_member(user, workspace, role):
 
 def fetch_workspace_members_ordered(workspace):
     return (
-        WorkspaceMember.objects
-        .in_workspace(workspace)
+        WorkspaceMember.objects.in_workspace(workspace)
         .annotate(
             role_priority=Case(
                 When(role=WorkspaceMember.RoleChoices.OWNER, then=Value(0)),
@@ -49,7 +72,6 @@ def fetch_workspace_members_ordered(workspace):
         )
         .order_by("role_priority", "-joined_at")
     )
-
 
 
 def update_workspace(workspace, data):
@@ -89,7 +111,7 @@ def remove_member(workspace, member_id):
 
     if not member:
         raise exceptions.WorkspaceMemberNotFound()
-    
+
     member.delete()
 
 
@@ -100,5 +122,5 @@ def leave_workspace(user, workspace):
 
     if not member:
         raise exceptions.WorkspaceMemberNotFound()
-    
+
     member.delete()

@@ -32,6 +32,15 @@ class AdminPlanListCreateView(APIView):
         )
     
 
+class AdminPlanDetailView(APIView):
+
+    def delete(self, request, **kwargs):
+
+        subscription_services.delete_plan(plan_id=kwargs["plan_id"])
+
+        return success_response(message="Plan deleted")
+
+
 class UserListPlanView(APIView):
 
     def get(self, requset, **kwargs):
