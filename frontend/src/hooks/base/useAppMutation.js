@@ -72,7 +72,6 @@ function useAppMutation({
             if (apiErrorToast) {
                 showApiError(error)
             }
-
             onError?.(error, variables, context)
         },
 

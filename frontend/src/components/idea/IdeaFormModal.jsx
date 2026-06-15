@@ -1,17 +1,19 @@
-import { RefreshCw, Sparkles, Target, Wand2 } from 'lucide-react';
+import { Sparkles, Target, X, TriangleAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import BaseModal from '../ui/modal/BaseModal';
+import AppButton from "../ui/buttons/AppButton";
+import CancelButton from "../ui/buttons/CancelButton";
 import FormField from "../ui/form/FormField";
 import InputField from '../ui/form/InputField';
 import TextareaField from '../ui/form/TextAreaField';
-import AppButton from "../ui/buttons/AppButton";
-import CancelButton from "../ui/buttons/CancelButton";
+import BaseModal from '../ui/modal/BaseModal';
 
+import useImproveIdea from '../../hooks/ai/useImproveIdea';
 import useAddIdea from '../../hooks/idea/useAddIdea';
-import useGoalId from "../../hooks/params/useGoalId";
 import useUpdateIdea from '../../hooks/idea/useUpdateIdea';
+import useGoalId from "../../hooks/params/useGoalId";
+import { errorCodes } from '../../constants/errorCodes';
 
 function IdeaFormModal({
     isOpen,
@@ -27,7 +29,7 @@ function IdeaFormModal({
         reset,
         watch,
         setValue,
-        formState: {isDirty}
+        formState: { isDirty }
     } = useForm({
         defaultValues: {
             title: '',
@@ -49,8 +51,8 @@ function IdeaFormModal({
             });
         } else {
             reset({
-                title: '',
-                description: '',
+                title: 'simplify checkout form',
+                description: 'trust me. it will reduce friction',
             });
         }
     }, [currentIdea, reset]);
@@ -59,10 +61,7 @@ function IdeaFormModal({
 
     const handleEditIdea = (data) => {
         updateIdea({ data: data, ideaId: currentIdea.id }, {
-            onSuccess: () => {
-                reset();
-                onClose();
-            }
+            onSuccess: handleClose
         })
     }
 
@@ -76,50 +75,111 @@ function IdeaFormModal({
         addIdea(
             { data, goalId },
             {
-                onSuccess: () => {
-                    reset();
-                    onClose();
-                },
+                onSuccess: handleClose,
             }
         );
     };
 
+    //---------------------AI FEATURE--------------------------
+    const { mutate: improveIdeaWithAI } = useImproveIdea()
+
+    const [isEnhancingIdea, setIsEnhancingIdea] = useState(false);
+    const [showAiBanner, setShowAiBanner] = useState(false);
+    const [originalIdea, setOriginalIdea] = useState(null);
+    const [highlightAIFields, setHighlightAIFields] = useState(false);
+    const [aiError, setAiError] = useState(false);
+
+    const resetAIStates = () => {
+        setIsEnhancingIdea(false)
+        setShowAiBanner(false)
+        setHighlightAIFields(false)
+        setOriginalIdea(null)
+        setAiError(false)
+    }
+
+    const handleImproveIdea = async (data) => {
+
+        setIsEnhancingIdea(true);
+
+        setOriginalIdea({
+            title: data.title,
+            description: data.description,
+        });
+
+        improveIdeaWithAI({ goalId: goalId, data: data }, {
+            onSuccess: ({ data: { improvedTitle, improvedDescription } }) => {
+
+                resetAIStates()
+
+                setValue("title",
+                    improvedTitle,
+                    {
+                        shouldDirty: true,
+                    })
+
+                setValue(
+                    "description",
+                    improvedDescription,
+                    {
+                        shouldDirty: true,
+                    }
+                );
+
+                setHighlightAIFields(true);
+                setShowAiBanner(true);
+            },
+
+            onError: (error) => {
+
+                resetAIStates()
+
+                const errorRes = error?.response?.data?.error
+                if (errorRes?.code === errorCodes.RATE_LIMITED) {
+                    setAiError("Too many requests. Please try again later")
+                } else if (errorRes?.code === errorCodes.AI_RATE_LIMITED) {
+                    setAiError("AI is currently busy. Please try again in a minute.")
+                }
+            }
+        })
+    };
+
+    const handleUndoAIChanges = () => {
+
+        if (!originalIdea) return;
+
+        setValue(
+            "title",
+            originalIdea.title,
+            {
+                shouldDirty: true,
+            }
+        );
+
+        setValue(
+            "description",
+            originalIdea.description,
+            {
+                shouldDirty: true,
+            }
+        );
+
+        setShowAiBanner(false);
+        setHighlightAIFields(false);
+        setOriginalIdea(null);
+    };
+    const handleKeepAIChanges = () => {
+
+        setShowAiBanner(false);
+        setHighlightAIFields(false);
+        setOriginalIdea(null);
+    };
+
+
     const handleClose = () => {
         reset();
         onClose();
+        resetAIStates()
     };
-
-    const [suggestWithAi, setSuggestWithAi] = useState(false);
-    const [aiSuggestions, setAiSuggestions] = useState([]);
-    const [isAiLoading, setIsAiLoading] = useState(false);
-
-    const fetchAISuggestions = async () => {
-        setIsAiLoading(true);
-        setAiSuggestions([]);
-
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const suggestions = [
-                    "Add guest checkout option",
-                    "Implement one-click Apple Pay",
-                    "Show progress indicator during checkout",
-                    "Auto-fill address via Google Maps",
-                    "Offer Buy Now, Pay Later options"
-                ];
-
-                setAiSuggestions(suggestions);
-                setIsAiLoading(false);
-
-                resolve(suggestions);
-            }, 1500);
-        });
-    };
-
-    useEffect(() => {
-        if (suggestWithAi && aiSuggestions.length === 0 && !isAiLoading) {
-            fetchAISuggestions();
-        }
-    }, [suggestWithAi]);
 
     return (
         <BaseModal
@@ -144,7 +204,18 @@ function IdeaFormModal({
 
                 {/* Title */}
                 <FormField
-                    label="Title *"
+                    label={
+                        <div className="flex items-center gap-2">
+                            <span>Title *</span>
+
+                            {showAiBanner && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold">
+                                    <Sparkles className="w-3 h-3" />
+                                    AI
+                                </span>
+                            )}
+                        </div>
+                    }
                     className="uppercase mb-5"
                 >
                     <InputField
@@ -152,13 +223,29 @@ function IdeaFormModal({
                         placeholder="What's the idea? Keep it short..."
                         size="lg"
                         shadow
+                        className={
+                            highlightAIFields
+                                ? "bg-indigo-50 border-indigo-300 ring-2 ring-indigo-100"
+                                : ""
+                        }
                         {...register('title')}
                     />
                 </FormField>
 
                 {/* Description */}
                 <FormField
-                    label="Description"
+                    label={
+                        <div className="flex items-center gap-2">
+                            <span>Description</span>
+
+                            {showAiBanner && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold">
+                                    <Sparkles className="w-3 h-3" />
+                                    AI
+                                </span>
+                            )}
+                        </div>
+                    }
                     optional
                     className="mb-6 relative uppercase"
                 >
@@ -166,6 +253,11 @@ function IdeaFormModal({
                         maxLength={300}
                         placeholder="Add more context about this idea..."
                         shadow
+                        className={
+                            highlightAIFields
+                                ? "bg-indigo-50 border-indigo-300 ring-2 ring-indigo-100"
+                                : ""
+                        }
                         {...register('description')}
                     />
 
@@ -174,93 +266,98 @@ function IdeaFormModal({
                     </span>
                 </FormField>
 
+                {showAiBanner && (
+                    <div className="mb-6 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 p-3">
+
+                        <div className="flex items-center justify-between">
+
+                            <div className="flex items-center gap-2">
+
+                                <Sparkles className="w-4 h-4 text-indigo-600" />
+
+                                <span className="text-[13px] font-medium text-indigo-900">
+                                    AI enhanced your idea
+                                </span>
+
+                            </div>
+
+                            <div className="flex items-center gap-4">
+
+                                <button
+                                    type="button"
+                                    onClick={handleUndoAIChanges}
+                                    className="text-[12px] font-semibold text-gray-600 hover:text-gray-900"
+                                >
+                                    Undo
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleKeepAIChanges}
+                                    className="text-[12px] font-semibold text-indigo-600 hover:text-indigo-800"
+                                >
+                                    Keep
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                )}
+
                 {/* AI Suggestions only for create */}
                 {!isEditMode && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
 
-                        <div className="p-4 flex items-center justify-between">
+                    <div className="flex justify-end mb-4">
+
+                        <AppButton
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            disabled={
+                                !watch("title")?.trim()
+                                || isEnhancingIdea
+                            }
+                            loading={isEnhancingIdea}
+                            onClick={handleSubmit(handleImproveIdea)}
+                        >
+                            <Sparkles className="w-4 h-4" />
+
+                            Enhance Idea
+                        </AppButton>
+
+                    </div>
+
+                )}
+
+                {aiError && (
+                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
+
+                        <div className="flex items-start justify-between gap-3">
+
                             <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
-                                    <Wand2 className="w-4 h-4 text-indigo-600" />
-                                </div>
 
-                                <span className="text-[13px] font-bold text-gray-900">
-                                    Suggest ideas with AI
+                                <span className="text-amber-600 text-sm">
+                                    <TriangleAlert />
                                 </span>
+
+                                <span className="text-[13px] text-amber-800">
+                                    AI is currently busy. Please try again in a minute.
+                                </span>
+
                             </div>
 
                             <button
                                 type="button"
-                                onClick={() => setSuggestWithAi(!suggestWithAi)}
-                                className={`relative w-10 h-5 rounded-full transition-colors ${suggestWithAi
-                                    ? 'bg-green-500'
-                                    : 'bg-gray-300'
-                                    }`}
+                                onClick={() => setAiError(null)}
+                                className="text-amber-500 hover:text-amber-700 transition-colors"
                             >
-                                <div
-                                    className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${suggestWithAi
-                                        ? 'translate-x-5'
-                                        : ''
-                                        }`}
-                                />
+                                <X className="w-4 h-4" />
                             </button>
+
                         </div>
 
-                        {suggestWithAi && (
-                            <div className="p-4 pt-0 border-t border-gray-100 bg-white">
-
-                                <div className="flex items-center gap-3 mb-4 mt-4">
-                                    <div className="h-px bg-gray-100 flex-1" />
-
-                                    <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
-                                        AI Suggestions Based On Your Goal
-                                    </span>
-
-                                    <div className="h-px bg-gray-100 flex-1" />
-                                </div>
-
-                                {isAiLoading ? (
-                                    <div className="flex items-center justify-center py-6 gap-2 text-indigo-600">
-                                        <RefreshCw className="w-4 h-4 animate-spin" />
-                                        <span className="text-[13px] font-medium animate-pulse">
-                                            Generating suggestions...
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-1.5">
-
-                                        {aiSuggestions.map((sug, i) => (
-                                            <button
-                                                key={i}
-                                                type="button"
-                                                onClick={() =>
-                                                    setValue('title', sug, {
-                                                        shouldDirty: true,
-                                                    })
-                                                }
-                                                className={`w-full text-left px-3 py-2 rounded-lg text-[13px] transition-colors flex items-center gap-2 ${i === 0
-                                                    ? 'bg-green-50 text-green-700 font-medium hover:bg-green-100'
-                                                    : 'text-gray-700 hover:bg-gray-50'
-                                                    }`}
-                                            >
-                                                <span
-                                                    className={
-                                                        i === 0
-                                                            ? 'text-green-500 font-bold text-[14px]'
-                                                            : 'text-gray-400 font-bold text-[14px]'
-                                                    }
-                                                >
-                                                    +
-                                                </span>
-
-                                                {sug}
-                                            </button>
-                                        ))}
-
-                                    </div>
-                                )}
-                            </div>
-                        )}
                     </div>
                 )}
 

@@ -90,17 +90,20 @@ function HomePage() {
               </h2>
 
               {
-                goalLimitReached ?
-                  (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[11px] font-medium text-red-700">
-                      Limit Reached ({goalCountLimit.used} / {goalCountLimit.max})
-                    </span>
-                  ) :
-                  (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-700">
-                      {goalCountLimit.used} / {goalCountLimit.max} Used
-                    </span>
-                  )
+                goalCountLimit.max && (
+
+                  goalLimitReached ?
+                    (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[11px] font-medium text-red-700">
+                        Limit Reached ({goalCountLimit.used} / {goalCountLimit.max})
+                      </span>
+                    ) :
+                    (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-700">
+                        {goalCountLimit.used} / {goalCountLimit.max} Used
+                      </span>
+                    )
+                )
               }
 
 
@@ -320,7 +323,7 @@ function HomePage() {
       </div>
 
       <GoalFormModal isOpen={isGoalFormModalOpen} onClose={() => setIsGoalFormModalOpen(false)} />
-        <UpgradePlanModal isOpen={isUpgradePlanModalOpen} onClose={() => setIsUpgradePlanModalOpen(false)} currentLimit={goalCountLimit.max} currentUsage={goalCountLimit.used} currentPlan={currentPlan.name} />
+      <UpgradePlanModal isOpen={isUpgradePlanModalOpen} onClose={() => setIsUpgradePlanModalOpen(false)} currentLimit={goalCountLimit.max} currentUsage={goalCountLimit.used} currentPlan={currentPlan.name} />
 
     </>
   )

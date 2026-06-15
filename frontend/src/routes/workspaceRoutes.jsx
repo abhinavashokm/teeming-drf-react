@@ -5,7 +5,8 @@ import HomePage from "../pages/workspace/HomePage";
 import ManageTeamPage from "../pages/workspace/ManageTeamPage";
 import MyAccountPage from "../pages/workspace/MyAccountPage";
 import WorkspaceSettingsPage from "../pages/workspace/WorkspaceSettingsPage";
-import SubscriptionPage from "../pages/workspace/SubscriptionPage";
+import SubscriptionPage from "../pages/subscription/SubscriptionPage";
+import SubscriptionSuccessPage from "../pages/subscription/SubscriptionSuccessPage";
 
 
 
@@ -15,24 +16,30 @@ const workspaceRoutes = {
         {
             index: true,
             element: <HomePage />,
-            handle: {breadcrumb: 'Home'}
-        },{
-            path:'manage-team',
-            element: <ManageTeamPage/>,
-            handle: {breadcrumb: 'Manage Team'}
-        },{
+            handle: { breadcrumb: 'Home' }
+        }, {
+            path: 'manage-team',
+            element: <ManageTeamPage />,
+            handle: { breadcrumb: 'Manage Team' }
+        }, {
             path: 'my-account',
-            element: <MyAccountPage/>,
-            handle: {breadcrumb: 'My Account'}
-        },{
+            element: <MyAccountPage />,
+            handle: { breadcrumb: 'My Account' }
+        }, {
             path: 'settings',
-            element: <WorkspaceSettingsPage/>,
-            handle: {breadcrumb: 'Settings'}
-        },{
+            element: <WorkspaceSettingsPage />,
+            handle: { breadcrumb: 'Settings' }
+        }, {
             path: 'upgrade-plan',
             element: <SubscriptionPage />,
-            handle: {breadcrumb: "Upgrade plan"}
-        },{
+            handle: { breadcrumb: "Upgrade plan" }
+        },
+        {
+            path: "upgrade-plan/success",
+            element: <SubscriptionSuccessPage />,
+            handle: { breadcrumb: "Success" }
+        },
+        {
             path: 'goals/:goalId',
             element: <GoalDashboard />
         }
