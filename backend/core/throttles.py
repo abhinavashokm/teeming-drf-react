@@ -1,7 +1,8 @@
-from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import AnonRateThrottle
 
-class AuthThrottle(ScopedRateThrottle):
+
+class AuthThrottle(AnonRateThrottle):
     scope = "auth"
 
-class SensitiveThrottle(ScopedRateThrottle):
+class SensitiveThrottle(AnonRateThrottle):
     scope = "sensitive"

@@ -13,7 +13,12 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = ["localhost", "simplistic-pokier-melania.ngrok-free.dev", "127.0.0.1", '10.10.10.69']
+ALLOWED_HOSTS = [
+    "localhost",
+    "simplistic-pokier-melania.ngrok-free.dev",
+    "127.0.0.1",
+    "10.10.10.69",
+]
 
 
 # Application definition
@@ -48,15 +53,16 @@ INSTALLED_APPS = [
     "apps.notification",
     "apps.discussion",
     "apps.subscription",
+    "apps.ai",
 ]
 
-ASGI_APPLICATION = 'config.asgi.application'
+ASGI_APPLICATION = "config.asgi.application"
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
         },
     },
 }
@@ -209,12 +215,14 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
         "anon": "60/minute",
         "user": "500/minute",
         "auth": "10/minute",  # login, refresh, register
         "sensitive": "5/minute",  # password reset, email verify
+        "ai": "20/hour", #ai features
     },
 }
 
@@ -275,9 +283,19 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 
-#STRIPE PAYMENT GATEWAY CONIFGURATION
+# STRIPE PAYMENT GATEWAY CONIFGURATION
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
 stripe.api_key = STRIPE_SECRET_KEY
+
+
+# AI INTEGRATION
+AI_PROVIDER = os.environ.get("AI_PROVIDER", default="gemini")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_MODEL = os.environ.get(
+    "GEMINI_MODEL",
+    default="gemini-2.5-flash",
+)
+USE_MOCK_AI=os.getenv("USE_MOCK_AI", "False").lower() == "true"

@@ -33,6 +33,7 @@ urlpatterns = [
                                         path("ideas/", include("apps.idea.list_urls")),
                                         path("outcome/",include("apps.outcome.list_urls")),
                                         path("discussion/",include("apps.discussion.urls")),
+                                        path("ai/", include("apps.ai.urls")),
                                     ]
                                 ),
                             ),
