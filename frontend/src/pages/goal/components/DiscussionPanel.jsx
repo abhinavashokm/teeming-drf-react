@@ -98,84 +98,83 @@ function DiscussionPanel({ onClose, isMobile }) {
             )}
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto min-h-0 p-4 bg-slate-50/60">
+            <div className="flex-1 overflow-y-auto min-h-0  bg-slate-50/60">
                 {mode === 'discussion' ? (
+                    <div className="p-4">
+                        {messages?.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center px-6">
+                                <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
+                                    <MessageSquare className="w-10 h-10 text-blue-300" />
+                                </div>
 
+                                <h3 className="text-sm font-semibold text-gray-900">
+                                    No discussion yet
+                                </h3>
 
-                    messages?.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-center px-6">
-                            <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
-                                <MessageSquare className="w-10 h-10 text-blue-300" />
+                                <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
+                                    Share updates, ask questions, and collaborate around this goal.
+                                </p>
                             </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {messages?.map((message) => {
+                                    const isMe = message.sender.id === currentUser.id;
 
-                            <h3 className="text-sm font-semibold text-gray-900">
-                                No discussion yet
-                            </h3>
-
-                            <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
-                                Share updates, ask questions, and collaborate around this goal.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {messages?.map((message) => {
-                                const isMe = message.sender.id === currentUser.id;
-
-                                return (
-                                    <div
-                                        key={message.id}
-                                        className={`flex gap-3 items-end ${isMe ? 'flex-row-reverse' : ''
-                                            }`}
-                                    >
-                                        <MemberAvatar
-                                            name={message.sender.fullName}
-                                            email={message.sender.email}
-                                            size="sm"
-                                        />
-
+                                    return (
                                         <div
-                                            className={`flex flex-col gap-1 max-w-[78%] ${isMe ? 'items-end' : 'items-start'
+                                            key={message.id}
+                                            className={`flex gap-3 items-end ${isMe ? 'flex-row-reverse' : ''
                                                 }`}
                                         >
-                                            {!isMe && (
-                                                <span className="text-[11px] font-medium text-gray-500 px-1">
-                                                    {message.sender.fullName}
-                                                </span>
-                                            )}
+                                            <MemberAvatar
+                                                name={message.sender.fullName}
+                                                email={message.sender.email}
+                                                size="sm"
+                                            />
 
                                             <div
-                                                className={`px-4 py-2.5 text-[13px] leading-relaxed shadow-sm [overflow-wrap:anywhere]
-                                                    ${isMe
-                                                        ? 'bg-[#378ADD] text-white rounded-2xl rounded-br-md'
-                                                        : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-md'
+                                                className={`flex flex-col gap-1 max-w-[78%] ${isMe ? 'items-end' : 'items-start'
                                                     }`}
                                             >
-                                                {message.content}
-                                            </div>
+                                                {!isMe && (
+                                                    <span className="text-[11px] font-medium text-gray-500 px-1">
+                                                        {message.sender.fullName}
+                                                    </span>
+                                                )}
 
-                                            {isMe ? (
-                                                <div className="flex items-center gap-1 px-1">
-                                                    <span className="text-[11px] text-gray-400">
+                                                <div
+                                                    className={`px-4 py-2.5 text-[13px] leading-relaxed shadow-sm [overflow-wrap:anywhere]
+                                                    ${isMe
+                                                            ? 'bg-[#378ADD] text-white rounded-2xl rounded-br-md'
+                                                            : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-md'
+                                                        }`}
+                                                >
+                                                    {message.content}
+                                                </div>
+
+                                                {isMe ? (
+                                                    <div className="flex items-center gap-1 px-1">
+                                                        <span className="text-[11px] text-gray-400">
+                                                            {formatDateTime(message.createdAt)}
+                                                        </span>
+
+                                                        <MessageStatus status={message.status} />
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[11px] text-gray-400 px-1">
                                                         {formatDateTime(message.createdAt)}
                                                     </span>
-
-                                                    <MessageStatus status={message.status} />
-                                                </div>
-                                            ) : (
-                                                <span className="text-[11px] text-gray-400 px-1">
-                                                    {formatDateTime(message.createdAt)}
-                                                </span>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
 
-                            <div ref={bottomRef} />
-                        </div>
-                    )
+                                <div ref={bottomRef} />
+                            </div>
+                        )
 
-
+                        } </div>
                 ) : (
 
                     <AIAssistant />

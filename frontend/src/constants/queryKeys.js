@@ -51,6 +51,12 @@ export const workspaceQueryKeys = {
         ...root(slug),
         goal_id,
         "discussions",
+    ],
+    ai_assistant_responses: (user_email, slug, goal_id) => [
+        user_email,
+        ...root(slug),
+        goal_id,
+        "ai_assistant"
     ]
 }
 

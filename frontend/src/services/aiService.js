@@ -13,4 +13,14 @@ export const aiService = {
         return res.data
     },
 
+    listAIResponses: async (slug, goalId) => {
+        const res = await api.get(`/workspaces/${slug}/goals/${goalId}/ai/assistant/`)
+        return res.data
+    },
+
+    clearAllAIResponses: async (slug, goalId) => {
+        const res = await api.delete(`/workspaces/${slug}/goals/${goalId}/ai/assistant/`)
+        return res.data
+    },
+
 }
