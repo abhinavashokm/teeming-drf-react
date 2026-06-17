@@ -6,6 +6,7 @@ from apps.ai.schemas.improve_idea import ImproveIdeaResponse
 from apps.ai.schemas.ai_assistant import GoalSummaryResponse
 from apps.goal.helpers.goal_helper import get_goal_or_raise
 from apps.idea.models import Idea
+from .models import AIAssistantResponse
 
 
 class AIService:
@@ -34,7 +35,9 @@ class AIService:
 
 class GoalAssistantService:
 
-    def __init__(self, workspace, goal_id):
+    def __init__(self, current_user, workspace, goal_id):
+        self.user = current_user
+        self.workspace = workspace
         self.goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
         self.provider = ProviderRegistry.get_provider()
 
@@ -44,12 +47,22 @@ class GoalAssistantService:
 
         prompt = build_summary_prompt(context=context)
 
-        response = self.provider.generate_structured(
-            prompt=prompt,
-            schema=GoalSummaryResponse,
-            )
+        # response = self.provider.generate_structured(
+        #     prompt=prompt,
+        #     schema=GoalSummaryResponse,
+        #     )
+        response = GoalSummaryResponse.mock_summary()
+        content = self.build_summary_content(response)
+        
+        insight = AIAssistantResponse.objects.create(
+            workspace=self.workspace,
+            goal=self.goal,
+            user=self.user,
+            type=AIAssistantResponse.InsightType.SUMMARY,
+            content=content,
+        )
 
-        return response
+        return insight
 
 
     @staticmethod
@@ -110,3 +123,48 @@ class GoalAssistantService:
             context_parts.append("\nNo ideas have been added yet.\n")
 
         return "\n".join(context_parts)
+    
+    @staticmethod
+    def build_summary_content(summary: GoalSummaryResponse):
+        return {
+            "sections": [
+                {
+                    "type": "text",
+                    "title": "Overview",
+                    "body": summary.overview,
+                },
+                {
+                    "type": "text",
+                    "title": "Progress Status",
+                    "body": summary.progress_status,
+                },
+                {
+                    "type": "list",
+                    "title": "Completed Work",
+                    "body": summary.completed_items,
+                },
+                {
+                    "type": "list",
+                    "title": "Active Work",
+                    "body": summary.active_items,
+                },
+            ],
+        }
+    
+
+def list_ai_assistant_responses(current_user, workspace, goal_id):
+    goal = get_goal_or_raise(
+        workspace=workspace,
+        goal_id=goal_id,
+    )
+
+    return AIAssistantResponse.objects.filter(user=current_user, goal=goal)
+
+
+def clear_all_assistant_responses(current_user, workspace, goal_id):
+    goal = get_goal_or_raise(
+        workspace=workspace,
+        goal_id=goal_id,
+    )
+
+    AIAssistantResponse.objects.filter(user=current_user, goal=goal).delete()

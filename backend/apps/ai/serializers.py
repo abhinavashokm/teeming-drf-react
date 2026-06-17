@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from .models import AIAssistantResponse
 
 
 class ImproveIdeaRequestSerializer(
@@ -12,3 +13,10 @@ class ImproveIdeaRequestSerializer(
         allow_blank=True,
         required=False,
     )
+
+
+class AIAssistantResponseSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AIAssistantResponse
+        fields = ["id", "type", "content", "created_at" ]
