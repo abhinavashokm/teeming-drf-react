@@ -99,7 +99,7 @@ class IdeaMoveToPlannedView(AdminBaseView):
         )
 
 
-class IdeaMoveToProgressView(AdminBaseView):
+class IdeaMoveToProgressView(MemberBaseView):
 
     def post(self, request, **kwargs):
 
