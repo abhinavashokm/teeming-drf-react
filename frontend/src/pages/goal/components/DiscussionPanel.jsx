@@ -4,6 +4,7 @@ import MemberAvatar from "../../../components/team/MemberAvatar";
 import useAuth from "../../../hooks/auth/useAuth";
 import useDiscussion from '../../../hooks/discussion/useDiscussion';
 import { formatDateTime } from '../../../utils/timeUtils';
+import AIAssistant from './AIAssistant';
 
 const MessageStatus = ({ status = 'sent' }) => {
     if (status === 'sent') return (
@@ -49,6 +50,8 @@ function DiscussionPanel({ onClose, isMobile }) {
         );
     }
 
+    const [mode, setMode] = useState('discussion');
+
     return (
         <div className="flex flex-col flex-1 min-h-0 bg-white">
             {/* Header */}
@@ -56,15 +59,33 @@ function DiscussionPanel({ onClose, isMobile }) {
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-white/90 backdrop-blur-sm shrink-0">
                     <div>
                         <div className="flex items-center gap-2">
-                            <MessageSquare className="w-4 h-4 text-[#378ADD]" />
-                            <h3 className="text-[13px] font-semibold text-gray-900">
-                                Discussion
-                            </h3>
+                            <div className="flex items-center bg-gray-100 p-1 rounded-lg">
+                                <button
+                                    onClick={() => setMode('discussion')}
+                                    className={`px-3 py-1.5 text-xs rounded-md transition ${mode === 'discussion'
+                                        ? 'bg-white shadow text-gray-900'
+                                        : 'text-gray-500'
+                                        }`}
+                                >
+                                    Discussion
+                                </button>
+
+                                <button
+                                    onClick={() => setMode('ai')}
+                                    className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-md transition ${mode === 'ai'
+                                        ? 'bg-white shadow text-gray-900'
+                                        : 'text-gray-500'
+                                        }`}
+                                >
+                                    <Sparkles className="w-3 h-3" />
+                                    Assistant
+                                </button>
+                            </div>
                         </div>
 
-                        <p className="text-[11px] text-gray-500 mt-0.5">
+                        {/* <p className="text-[11px] text-gray-500 mt-0.5">
                             {messages?.length || 0} messages
-                        </p>
+                        </p> */}
                     </div>
 
                     <button
@@ -78,77 +99,87 @@ function DiscussionPanel({ onClose, isMobile }) {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto min-h-0 p-4 bg-slate-50/60">
-                {messages?.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center px-6">
-                        <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
-                            <MessageSquare className="w-10 h-10 text-blue-300" />
+                {mode === 'discussion' ? (
+
+
+                    messages?.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center px-6">
+                            <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
+                                <MessageSquare className="w-10 h-10 text-blue-300" />
+                            </div>
+
+                            <h3 className="text-sm font-semibold text-gray-900">
+                                No discussion yet
+                            </h3>
+
+                            <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
+                                Share updates, ask questions, and collaborate around this goal.
+                            </p>
                         </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {messages?.map((message) => {
+                                const isMe = message.sender.id === currentUser.id;
 
-                        <h3 className="text-sm font-semibold text-gray-900">
-                            No discussion yet
-                        </h3>
-
-                        <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
-                            Share updates, ask questions, and collaborate around this goal.
-                        </p>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {messages?.map((message) => {
-                            const isMe = message.sender.id === currentUser.id;
-
-                            return (
-                                <div
-                                    key={message.id}
-                                    className={`flex gap-3 items-end ${isMe ? 'flex-row-reverse' : ''
-                                        }`}
-                                >
-                                    <MemberAvatar
-                                        name={message.sender.fullName}
-                                        email={message.sender.email}
-                                        size="sm"
-                                    />
-
+                                return (
                                     <div
-                                        className={`flex flex-col gap-1 max-w-[78%] ${isMe ? 'items-end' : 'items-start'
+                                        key={message.id}
+                                        className={`flex gap-3 items-end ${isMe ? 'flex-row-reverse' : ''
                                             }`}
                                     >
-                                        {!isMe && (
-                                            <span className="text-[11px] font-medium text-gray-500 px-1">
-                                                {message.sender.fullName}
-                                            </span>
-                                        )}
+                                        <MemberAvatar
+                                            name={message.sender.fullName}
+                                            email={message.sender.email}
+                                            size="sm"
+                                        />
 
                                         <div
-                                            className={`px-4 py-2.5 text-[13px] leading-relaxed shadow-sm [overflow-wrap:anywhere]
-                                                    ${isMe
-                                                    ? 'bg-[#378ADD] text-white rounded-2xl rounded-br-md'
-                                                    : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-md'
+                                            className={`flex flex-col gap-1 max-w-[78%] ${isMe ? 'items-end' : 'items-start'
                                                 }`}
                                         >
-                                            {message.content}
-                                        </div>
+                                            {!isMe && (
+                                                <span className="text-[11px] font-medium text-gray-500 px-1">
+                                                    {message.sender.fullName}
+                                                </span>
+                                            )}
 
-                                        {isMe ? (
-                                            <div className="flex items-center gap-1 px-1">
-                                                <span className="text-[11px] text-gray-400">
+                                            <div
+                                                className={`px-4 py-2.5 text-[13px] leading-relaxed shadow-sm [overflow-wrap:anywhere]
+                                                    ${isMe
+                                                        ? 'bg-[#378ADD] text-white rounded-2xl rounded-br-md'
+                                                        : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-md'
+                                                    }`}
+                                            >
+                                                {message.content}
+                                            </div>
+
+                                            {isMe ? (
+                                                <div className="flex items-center gap-1 px-1">
+                                                    <span className="text-[11px] text-gray-400">
+                                                        {formatDateTime(message.createdAt)}
+                                                    </span>
+
+                                                    <MessageStatus status={message.status} />
+                                                </div>
+                                            ) : (
+                                                <span className="text-[11px] text-gray-400 px-1">
                                                     {formatDateTime(message.createdAt)}
                                                 </span>
-
-                                                <MessageStatus status={message.status} />
-                                            </div>
-                                        ) : (
-                                            <span className="text-[11px] text-gray-400 px-1">
-                                                {formatDateTime(message.createdAt)}
-                                            </span>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
 
-                        <div ref={bottomRef} />
-                    </div>
+                            <div ref={bottomRef} />
+                        </div>
+                    )
+
+
+                ) : (
+
+                    <AIAssistant />
+
                 )}
             </div>
 
@@ -191,11 +222,25 @@ function DiscussionPanel({ onClose, isMobile }) {
                     </div>
 
                     <button
-                        className="shrink-0 p-2 text-gray-400 hover:text-[#378ADD] rounded-full hover:bg-[#378ADD]/10 transition-colors"
-                        title="AI assist"
+                        onClick={() =>
+                            setMode(prev => prev === 'ai' ? 'discussion' : 'ai')
+                        }
+                        className={`lg:hidden shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-full transition-colors ${mode === 'ai'
+                                ? 'bg-[#378ADD] text-white'
+                                : 'bg-[#378ADD]/10 text-[#378ADD] hover:bg-[#378ADD]/15'
+                            }`}
                     >
-                        <Sparkles className="w-4 h-4" />
+                        {mode === 'ai' ? (
+                            <MessageSquare className="w-3.5 h-3.5" />
+                        ) : (
+                            <Sparkles className="w-3.5 h-3.5" />
+                        )}
+
+                        <span>
+                            {mode === 'ai' ? 'Chat' : 'Ask AI'}
+                        </span>
                     </button>
+
                 </div>
             </div>
 

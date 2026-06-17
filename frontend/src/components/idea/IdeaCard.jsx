@@ -59,7 +59,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
         setMenuOpen(o => !o)
     }
 
-    const { mutate: deleteIdea, isPending } = useDeleteIdea();
+    const { mutate: deleteIdea, isPending: isDeleting } = useDeleteIdea();
     const handleDeleteIdea = () => deleteIdea(currentIdea.id, { onSuccess: () => setMenuOpen(false) })
 
     const { data: currentUser } = useAuth()
@@ -206,12 +206,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                 onClose={() => setActiveModal(null)}
                 onBack={() => setActiveModal('detail')}
             />
-            {/* <MoveToProgressModal
-                currentIdea={currentIdea}
-                isOpen={activeModal === 'moveToProgress'}
-                onClose={() => setActiveModal(null)}
-                onBack={() => setActiveModal('detail')}
-            /> */}
+
             <MoveToDoneModal
                 currentIdea={currentIdea}
                 isOpen={activeModal === 'moveToDone'}
@@ -228,6 +223,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
             <DeleteConfirmationModal
                 isOpen={isDeleteConfirmModalOpen}
                 onClose={() => setisDeleteConfirmModalOpen(false)}
+                isLoading={isDeleting}
                 onConfirm={handleDeleteIdea}
                 title={isIdeaCreator ? "Delete Idea" : `Delete ${currentIdea.createdBy.fullName}'s Idea`}
                 description={

@@ -123,7 +123,6 @@ function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Goal 1 */}
 
             {
               Goals?.length > 0 ? (
@@ -158,69 +157,10 @@ function HomePage() {
               )
             }
 
-
-            {/* <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
-              <div className="h-28 bg-[#1D9E75] p-4 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">8 ideas · 5 in progress</span>
-                  <MoreHorizontal className="h-4 w-4 text-white/50 group-hover:text-white transition-colors" strokeWidth={2} />
-                </div>
-                <div className="flex -space-x-1.5 mt-4">
-                  <div className="w-6 h-6 rounded-full bg-blue-500 ring-2 ring-[#1D9E75] flex items-center justify-center text-[9px] text-white font-medium">JD</div>
-                  <div className="w-6 h-6 rounded-full bg-pink-500 ring-2 ring-[#1D9E75] flex items-center justify-center text-[9px] text-white font-medium">AW</div>
-                  <div className="w-6 h-6 rounded-full bg-amber-500 ring-2 ring-[#1D9E75] flex items-center justify-center text-[9px] text-white font-medium">KL</div>
-                  <div className="w-6 h-6 rounded-full bg-white ring-2 ring-[#1D9E75] flex items-center justify-center text-[9px] text-gray-500 font-medium">+2</div>
-                </div>
-              </div>
-              <div className="p-4 flex-1 flex flex-col justify-center relative">
-                <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">Reduce Churn</h3>
-                <button onClick={(e) => toggleFavorite(e, 'Reduce Churn')} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
-                  <Star className={`h-4 w-4 ${favoriteGoals.includes('Reduce Churn') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
-                </button>
-              </div>
-            </div>
-
-            <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
-              <div className="h-28 bg-[#EF9F27] p-4 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">2 ideas · 2 in progress</span>
-                  <MoreHorizontal className="h-4 w-4 text-white/50 group-hover:text-white transition-colors" strokeWidth={2} />
-                </div>
-                <div className="flex -space-x-1.5 mt-4">
-                  <div className="w-6 h-6 rounded-full bg-blue-600 ring-2 ring-[#EF9F27] flex items-center justify-center text-[9px] text-white font-medium">JD</div>
-                  <div className="w-6 h-6 rounded-full bg-teal-500 ring-2 ring-[#EF9F27] flex items-center justify-center text-[9px] text-white font-medium">TR</div>
-                </div>
-              </div>
-              <div className="p-4 flex-1 flex flex-col justify-center relative">
-                <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">Launch V2</h3>
-                <button onClick={(e) => toggleFavorite(e, 'Launch V2')} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
-                  <Star className={`h-4 w-4 ${favoriteGoals.includes('Launch V2') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
-                </button>
-              </div>
-            </div>
-
-            <div className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
-              <div className="h-28 bg-[#8B5CF6] p-4 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">2 ideas · 2 in progress</span>
-                  <MoreHorizontal className="h-4 w-4 text-white/50 group-hover:text-white transition-colors" strokeWidth={2} />
-                </div>
-                <div className="flex -space-x-1.5 mt-4">
-                  <div className="w-6 h-6 rounded-full bg-indigo-500 ring-2 ring-[#8B5CF6] flex items-center justify-center text-[9px] text-white font-medium">AJ</div>
-                </div>
-              </div>
-              <div className="p-4 flex-1 flex flex-col justify-center relative">
-                <h3 className="font-medium text-[14px] text-gray-900 leading-none pr-6">Personal Goals</h3>
-                <button onClick={(e) => toggleFavorite(e, 'Personal Goals')} className="absolute bottom-3 right-3 p-1 hover:bg-gray-100 rounded-md transition-colors">
-                  <Star className={`h-4 w-4 ${favoriteGoals.includes('Personal Goals') ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-gray-400'}`} />
-                </button>
-              </div>
-            </div> */}
-
           </div>
         </section>
 
-        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
           <section>
             <div className="flex items-center justify-between mb-4">
@@ -318,7 +258,7 @@ function HomePage() {
               </div>
             </div>
           </section>
-        </div> */}
+        </div>
 
       </div>
 

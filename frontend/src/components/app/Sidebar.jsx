@@ -3,27 +3,24 @@ import {
   Home,
   Layers,
   LogOut,
-  Mail,
-  Menu,
   PanelLeft,
   Search,
   Settings,
-  Star,
   Users,
   Zap
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { PERMISSIONS } from '../../constants/permissions';
+import { ROUTE_PATHS } from '../../constants/routePaths';
 import useAuth from '../../hooks/auth/useAuth';
 import useLogout from '../../hooks/auth/useLogout';
 import useGoals from '../../hooks/goal/useGoals';
 import { useCan } from '../../hooks/permissions/useCan';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import MemberAvatar from '../team/MemberAvatar';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
-import { ROUTE_PATHS } from '../../constants/routePaths';
-import MemberAvatar from '../team/MemberAvatar';
 
 const getGoalColors = (goalName) => {
   const colorSets = [
