@@ -6,7 +6,8 @@ import authReducer from './slices/authSlice';
 const store = configureStore({
     reducer: {
         auth: authReducer,
-    }
+    },
+    devTools: import.meta.env.DEV,
 })
 
 // Inject store into axios AFTER store is fully initialized

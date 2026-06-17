@@ -24,6 +24,8 @@ const MessageStatus = ({ status = 'sent' }) => {
 };
 
 function DiscussionPanel({ onClose, isMobile }) {
+
+    const [mode, setMode] = useState('discussion');
     const [input, setInput] = useState('');
 
     const { messages, sendMessage, isLoading } = useDiscussion();
@@ -49,8 +51,6 @@ function DiscussionPanel({ onClose, isMobile }) {
             </div>
         );
     }
-
-    const [mode, setMode] = useState('discussion');
 
     return (
         <div className="flex flex-col flex-1 min-h-0 bg-white">
@@ -226,8 +226,8 @@ function DiscussionPanel({ onClose, isMobile }) {
                             setMode(prev => prev === 'ai' ? 'discussion' : 'ai')
                         }
                         className={`lg:hidden shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-full transition-colors ${mode === 'ai'
-                                ? 'bg-[#378ADD] text-white'
-                                : 'bg-[#378ADD]/10 text-[#378ADD] hover:bg-[#378ADD]/15'
+                            ? 'bg-[#378ADD] text-white'
+                            : 'bg-[#378ADD]/10 text-[#378ADD] hover:bg-[#378ADD]/15'
                             }`}
                     >
                         {mode === 'ai' ? (

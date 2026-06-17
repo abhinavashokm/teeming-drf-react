@@ -51,8 +51,8 @@ function IdeaFormModal({
             });
         } else {
             reset({
-                title: 'simplify checkout form',
-                description: 'trust me. it will reduce friction',
+                title: '',
+                description: '',
             });
         }
     }, [currentIdea, reset]);
