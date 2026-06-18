@@ -1,3 +1,6 @@
+import time
+from django.conf import settings
+
 from apps.workspace.models import Workspace
 from apps.user.models import User
 from apps.workspace.models import Workspace
@@ -106,3 +109,16 @@ class WebSocketWorkspaceMiddleware(BaseMiddleware):
                 scope['workspace'] = await get_workspace_for_member(slug, user)
 
         return await super().__call__(scope, receive, send)
+
+
+class ResponseDelayMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        if settings.DEBUG_API_DELAY:
+            time.sleep(0)
+
+        return response

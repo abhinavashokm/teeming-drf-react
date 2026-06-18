@@ -60,8 +60,6 @@ class AIAssistantView(MemberBaseView):
                 data=GoalSummaryResponse.mock_summary().model_dump()
             )
 
-        time.sleep(3)
-
         assistant = ai_services.GoalAssistantService(
             current_user=request.user,
             workspace=request.workspace,

@@ -5,8 +5,8 @@ def set_refresh_cookie(refresh_token, response):
         key="refresh_token",
         value=str(refresh_token),
         httponly=True,
-        secure=False if settings.DEBUG else True,
-        samesite=None if settings.DEBUG else "Lax",
+        secure=True if settings.DEBUG else True,
+        samesite="None" if settings.DEBUG else "Lax",
         max_age=settings.REFRESH_TOKEN_MAX_AGE,
     )
 

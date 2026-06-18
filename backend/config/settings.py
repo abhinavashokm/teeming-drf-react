@@ -12,6 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG") == "True"
+DEBUG_API_DELAY = DEBUG
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -85,6 +86,8 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     # tenant/workspace resolution
     "core.middleware.WorkspaceMiddleware",
+    # development only - mock delay in response
+    "core.middleware.ResponseDelayMiddleware",
 ]
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")
