@@ -9,6 +9,7 @@ class Workspace(BaseAbstractModel):
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="owned_workspaces"
     )
+    logo_key = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
         db_table = "workspaces"

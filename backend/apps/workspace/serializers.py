@@ -3,6 +3,7 @@ import re
 from rest_framework import serializers
 from .models import Workspace, WorkspaceMember
 from apps.subscription.serializers import WorkspaceSubscriptionSerializer
+from django.conf import settings
 
 
 class WorkspaceSlugValidationMixin:
@@ -68,21 +69,40 @@ class WorkspaceUpdateSerializer(
         return attrs
 
 
-class WorkspaceRetrieveSerializer(serializers.ModelSerializer):
+class BuildWorkspaceLogoUrlMixin:
+
+    def get_logo_url(self, obj):
+
+        if not obj.logo_key:
+            return None
+
+        return (
+            f"https://{settings.AWS_STORAGE_BUCKET_NAME}"
+            f".s3.{settings.AWS_S3_REGION_NAME}"
+            f".amazonaws.com/"
+            f"{obj.logo_key}"
+        )
+
+
+class BaseWorkspaceSerializer(BuildWorkspaceLogoUrlMixin, serializers.ModelSerializer):
+    logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Workspace
-        fields = ["name", "slug", "id"]
+        fields = ["name", "slug", "id", "logo_url"]
 
 
-class GetCurrentWorkspaceSerializer(serializers.ModelSerializer):
+class GetCurrentWorkspaceSerializer(
+    BuildWorkspaceLogoUrlMixin, serializers.ModelSerializer
+):
     role = serializers.SerializerMethodField()
     subscription = serializers.SerializerMethodField()
     limits = serializers.SerializerMethodField()
+    logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Workspace
-        fields = ["id", "name", "slug", "role", "subscription", "limits"]
+        fields = ["id", "name", "slug", "role", "subscription", "limits", "logo_url"]
 
     def get_role(self, obj):
         return self.context["member"].role
@@ -111,3 +131,14 @@ class WorkspaceRoleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkspaceMember
         fields = ["role"]
+
+
+class WorkspaceLogoUploadSerializer(serializers.Serializer):
+    content_type = serializers.CharField()
+
+
+class WorkspaceLogoSaveSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Workspace
+        fields = ["logo_key"]

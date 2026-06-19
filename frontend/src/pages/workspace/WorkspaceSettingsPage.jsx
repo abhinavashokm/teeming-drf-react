@@ -1,20 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { Camera, Building, Globe, Shield, Trash2, ArrowRight, AlertTriangle, Lock, Unlock } from 'lucide-react';
-import useWorkspace from '../../hooks/workspace/useWorkspace';
-import useUpdateWorkspace from '../../hooks/workspace/useUpdateWorkspace';
+import { AlertTriangle, Building, Camera, Globe, Lock, Trash2, Unlock } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import useDeleteWorkspace from '../../hooks/workspace/useDeleteWorkspace';
+import AppButton from '../../components/ui/buttons/AppButton';
 import FormField from '../../components/ui/form/FormField';
 import InputField from '../../components/ui/form/InputField';
-import AppButton from '../../components/ui/buttons/AppButton';
+import useDeleteWorkspace from '../../hooks/workspace/useDeleteWorkspace';
+import useUpdateWorkspace from '../../hooks/workspace/useUpdateWorkspace';
+import useUploadWorkspaceLogo from '../../hooks/workspace/useUploadWorkspaceLogo';
+import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { slugify } from '../../utils/slugUtils';
+import WorkspaceAvatar from '../../components/workspace/WorkspaceAvatar';
 
 
 function WorkspaceSettingsPage() {
 
     const { data: currentWorkspace } = useWorkspace()
-    const { mutate: updateWorkspace, isPending } = useUpdateWorkspace()
     const { mutate: deleteWorkspace } = useDeleteWorkspace()
+    const { mutate: uploadLogo } = useUploadWorkspaceLogo()
 
     const { register, handleSubmit, reset, resetField, setValue, formState: { isDirty } } = useForm({
         defaultValues: {
@@ -36,7 +38,7 @@ function WorkspaceSettingsPage() {
         setValue(
             "slug",
             slugify(e.target.value),
-            { shouldValidate: true,  shouldDirty: true, }
+            { shouldValidate: true, shouldDirty: true, }
         )
     };
 
@@ -44,18 +46,62 @@ function WorkspaceSettingsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
 
-    const handleUpdateWorkspace = (data) => {
-        updateWorkspace(data, {
-            onSuccess: (res) => {
-                reset()
-                setIsSlugUnlocked(false)
-            }
-        })
-    }
-
     const handleDeleteWorkspace = () => {
         deleteWorkspace()
     }
+
+    /* -------------------------------------------------------------------------- */
+    /* LOGO UPLOAD */
+    /* -------------------------------------------------------------------------- */
+    const fileInputRef = useRef(null);
+    const [logoFile, setLogoFile] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        setLogoFile(file);
+        setLogoPreview(URL.createObjectURL(file));
+    };
+
+    //clean up preview urls
+    useEffect(() => {
+        return () => {
+            if (logoPreview) {
+                URL.revokeObjectURL(logoPreview);
+            }
+        };
+    }, [logoPreview]);
+
+
+    /* -------------------------------------------------------------------------- */
+    /* update workspace details */
+    /* -------------------------------------------------------------------------- */
+    const { mutateAsync: updateWorkspace, isPending } = useUpdateWorkspace()
+
+    const handleUpdateWorkspace = async (data) => {
+        try {
+
+            if (logoFile) {
+                await uploadLogo(logoFile);
+            }
+
+            updateWorkspace(data, {
+                onSuccess: () => {
+                    setLogoFile(null);
+                    reset();
+                    setIsSlugUnlocked(false);
+                }
+            });
+
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+
 
     return (
         <div className="max-w-5xl mx-auto space-y-14 pb-20">
@@ -81,19 +127,49 @@ function WorkspaceSettingsPage() {
 
                     {/* Workspace Logo Upload */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div className="h-16 w-16 rounded-xl bg-gray-900 flex items-center justify-center text-white text-xl font-medium shrink-0 relative group cursor-pointer overflow-hidden shadow-sm">
-                            A
-                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* hidden input for Logo Upload */}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileChange}
+                        />
+
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className="relative group cursor-pointer"
+                        >
+                            <WorkspaceAvatar
+                                workspace={{
+                                    ...currentWorkspace,
+                                    logoUrl: logoPreview || currentWorkspace?.logoUrl,
+                                }}
+                                size="lg"
+                            />
+
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
                                 <Camera className="h-5 w-5 text-white" />
                             </div>
                         </div>
+
                         <div className="flex items-center gap-3">
-                            <button className="px-3.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="px-3.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                            >
                                 Upload new logo
                             </button>
-                            <button className="px-3.5 py-1.5 text-[13px] font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+
+                            <button
+                                type='button'
+                                className="px-3.5 py-1.5 text-[13px] font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
                                 Remove
                             </button>
+
                         </div>
                     </div>
 
@@ -153,7 +229,7 @@ function WorkspaceSettingsPage() {
 
                     <AppButton
                         variant="dark"
-                        disabled={!isDirty}
+                        disabled={!isDirty && !logoFile}
                         loading={isPending}
                         onClick={handleSubmit(handleUpdateWorkspace)}
                     >

@@ -4,6 +4,7 @@ import useMyWorkspaces from '../../hooks/workspace/useMyWorkspaces';
 import useWorkspace from "../../hooks/workspace/useWorkspace"
 import useSwitchWorkspace from '../../hooks/workspace/useSwitchWorkspace';
 import { useNavigate } from 'react-router-dom';
+import WorkspaceAvatar from './WorkspaceAvatar';
 
 export default function SwitchWorkspaceModal({ isOpen, onClose }) {
 
@@ -70,9 +71,12 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
                 onClick={() => { handleSwitchWorkspace(workspace) }}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-[8px] flex items-center justify-center text-white text-[13px] font-medium shadow-sm ${getWorkspaceColor(workspace.name)}`}>
-                    {workspace.name[0]}
-                  </div>
+
+                  <WorkspaceAvatar
+                    workspace={workspace}
+                    size="sm"
+                  />
+
                   <span className={`text-[13px] font-medium ${workspace.active ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>
                     {workspace.name}
                   </span>

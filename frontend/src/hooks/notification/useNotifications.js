@@ -13,8 +13,7 @@ function useNotifications() {
         queryKey: workspaceKeys.notifications,
         queryFn: async () => {
             const res = await notificationService.fetchNotifications(workspaceSlug)
-
-            return res.data
+            return res.data ?? []
         },
     })
 }

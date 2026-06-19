@@ -35,12 +35,7 @@ def fetch_user_workspace_list(user):
     ).select_related("workspace")
 
     return [
-        {
-            "id": m.workspace.id,
-            "name": m.workspace.name,
-            "slug": m.workspace.slug,
-            "role": m.role,
-        }
+        m.workspace
         for m in memberships
     ]
 
@@ -114,3 +109,9 @@ def leave_workspace(user, workspace):
         raise exceptions.WorkspaceMemberNotFound()
 
     member.delete()
+
+
+def save_workspace_logo_url(workspace, logo_key):
+
+    workspace.logo_key = logo_key
+    workspace.save()

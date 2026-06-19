@@ -1,20 +1,32 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (
-    WorkspaceSessionView,
+    ListUserWorkspacesView,
     WorkspaceListCreateView,
     WorkspaceHomeView,
     WorkspaceDetailView,
     WorkspaceMemberListView,
     WorkspaceMemberDetailView,
     LeaveWorkspaceView,
+    WorkspaceLogoUploadURLView,
+    SaveWorkspaceLogoUrlView,
 )
 
 urlpatterns = [
     path("", WorkspaceListCreateView.as_view()),
-    path("session/", WorkspaceSessionView.as_view()),
-    path("<slug:slug>/", WorkspaceDetailView.as_view()),
-    path("<slug:slug>/home/", WorkspaceHomeView.as_view()),
-    path("<slug:slug>/members/", WorkspaceMemberListView.as_view()),
-    path("<slug:slug>/members/<uuid:member_id>/", WorkspaceMemberDetailView.as_view()),
-    path("<slug:slug>/members/leave/", LeaveWorkspaceView.as_view()),
+    path("session/", ListUserWorkspacesView.as_view()),
+    path(
+        "<slug:slug>/",
+        include([
+                path("", WorkspaceDetailView.as_view()),
+                path("home/", WorkspaceHomeView.as_view()),
+                path("members/", WorkspaceMemberListView.as_view()),
+                path(
+                    "members/<uuid:member_id>/",
+                    WorkspaceMemberDetailView.as_view(),
+                ),
+                path("members/leave/", LeaveWorkspaceView.as_view()),
+                path("logo/", SaveWorkspaceLogoUrlView.as_view()),
+                path("logo/upload-url/", WorkspaceLogoUploadURLView.as_view()),
+            ]),
+    ),
 ]

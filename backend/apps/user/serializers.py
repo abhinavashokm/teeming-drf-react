@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from .models import User
 from core.constants.error_codes import ErrorCode
-from apps.workspace.serializers import WorkspaceRetrieveSerializer
+from apps.workspace.serializers import BaseWorkspaceSerializer
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
@@ -12,7 +12,7 @@ class UserBasicSerializer(serializers.ModelSerializer):
 
 
 class MeSerilaizer(serializers.ModelSerializer):
-    last_workspace = WorkspaceRetrieveSerializer()
+    last_workspace = BaseWorkspaceSerializer()
 
     class Meta:
         model = User

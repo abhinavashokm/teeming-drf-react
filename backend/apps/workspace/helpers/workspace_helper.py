@@ -8,3 +8,4 @@ def get_workspace_or_raise(workspace_id):
     except Workspace.DoesNotExist:
         raise NotFoundException("Workspace not found")
 
+

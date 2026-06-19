@@ -21,6 +21,7 @@ import useWorkspace from '../../hooks/workspace/useWorkspace';
 import MemberAvatar from '../team/MemberAvatar';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
+import WorkspaceAvatar from '../workspace/WorkspaceAvatar';
 
 const getGoalColors = (goalName) => {
   const colorSets = [
@@ -136,9 +137,12 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
             title={!sidebarContentExpanded ? currentWorkspace.name : ''}
           >
             <div className={`flex items-center gap-2.5 min-w-0 ${!sidebarContentExpanded ? 'mx-auto' : ''}`}>
-              <div className="w-8 h-8 bg-gray-900 rounded-[8px] flex items-center justify-center text-white text-[12px] font-medium shadow-sm shrink-0">
-                {currentWorkspace.name[0]?.toUpperCase()}
-              </div>
+
+              <WorkspaceAvatar
+                workspace={currentWorkspace}
+                size="sm"
+              />
+              
               {sidebarContentExpanded && (
                 <div className="flex flex-col min-w-0 text-left">
                   <div className="flex items-center gap-1.5 overflow-hidden">
@@ -202,14 +206,14 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                 <div className="border-t border-gray-100/80 mb-1.5" />
 
                 {canUpgradePlan && (
-                  <Link to={'upgrade-plan'} onClick={() => {setIsWorkspaceDropdownOpen(false); handleCloseSidebarOnMobile();}} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
+                  <Link to={'upgrade-plan'} onClick={() => { setIsWorkspaceDropdownOpen(false); handleCloseSidebarOnMobile(); }} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
                     <Zap className="h-[15px] w-[15px] text-gray-400 group-hover:text-yellow-500" />
                     Upgrade Plan
                   </Link>
                 )}
 
                 <button
-                  onClick={() => { setIsSwitchWorkspaceModalOpen(true); setIsWorkspaceDropdownOpen(false);handleCloseSidebarOnMobile() }}
+                  onClick={() => { setIsSwitchWorkspaceModalOpen(true); setIsWorkspaceDropdownOpen(false); handleCloseSidebarOnMobile() }}
                   className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group"
                 >
                   <Layers className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
@@ -238,11 +242,11 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
 
           {/* Home */}
           <div className="pb-4 border-b border-gray-200">
-            <SidebarItem 
-            to={""} 
-            onClick={handleCloseSidebarOnMobile}
-            sidebarContentExpanded={sidebarContentExpanded} 
-            icon={Home} 
+            <SidebarItem
+              to={""}
+              onClick={handleCloseSidebarOnMobile}
+              sidebarContentExpanded={sidebarContentExpanded}
+              icon={Home}
             >
               <span>Home</span>
             </SidebarItem>

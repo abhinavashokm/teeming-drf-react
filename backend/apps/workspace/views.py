@@ -4,7 +4,7 @@ from rest_framework import status
 from . import workspace_services
 from .serializers import (
     CreateWorkspaceSerilaizer,
-    WorkspaceRetrieveSerializer,
+    BaseWorkspaceSerializer,
     WorkspaceMemberSerializer,
     WorkspaceUpdateSerializer,
     WorkspaceRoleUpdateSerializer,
@@ -19,12 +19,12 @@ from core.permissions import IsWorkspaceMember, IsWorkspaceAdmin, IsWorkspaceOwn
 from apps.subscription import subscription_services
 from apps.goal import goal_services
 from apps.user import user_services
+from core.services.s3_service import S3Service
 
 
-class WorkspaceSessionView(APIView):
+class ListUserWorkspacesView(APIView):
     """
-    Returns workspace session data for app initialization,
-    including user workspaces and last visited workspace.
+    Returns all workspaces the current user belongs to.
     """
 
     permission_classes = [IsAuthenticated]
@@ -37,7 +37,7 @@ class WorkspaceSessionView(APIView):
 
         return success_response(
             data={
-                "workspaces": membership_workspaces,
+                "workspaces": serializers.BaseWorkspaceSerializer(membership_workspaces, many=True).data,
             }
         )
 
@@ -128,7 +128,7 @@ class WorkspaceListCreateView(APIView):
 
         return success_response(
             message="workspace created",
-            data=WorkspaceRetrieveSerializer(new_workspace).data,
+            data=BaseWorkspaceSerializer(new_workspace).data,
             status_code=status.HTTP_201_CREATED,
         )
 
@@ -211,3 +211,36 @@ class LeaveWorkspaceView(MemberBaseView):
         return success_response(
             message="you left from workspace", status_code=status.HTTP_200_OK
         )
+
+
+class WorkspaceLogoUploadURLView(MemberBaseView):
+
+    def post(self, request, **kwargs):
+        
+        serializer = serializers.WorkspaceLogoUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = S3Service.generate_workspace_logo_upload_url(
+            workspace=request.workspace,
+            content_type=serializer.validated_data["content_type"]
+        )
+
+        return success_response(
+            data=data
+        )
+    
+
+class SaveWorkspaceLogoUrlView(MemberBaseView):
+
+    def post(self, request, **kwargs):
+        print("call is on save logo")
+
+        serializer = serializers.WorkspaceLogoSaveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        workspace_services.save_workspace_logo_url(
+            workspace=request.workspace,
+            logo_key=serializer.validated_data["logo_key"]
+        )
+
+        return success_response()
