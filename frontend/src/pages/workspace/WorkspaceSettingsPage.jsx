@@ -7,6 +7,7 @@ import useDeleteWorkspace from '../../hooks/workspace/useDeleteWorkspace';
 import FormField from '../../components/ui/form/FormField';
 import InputField from '../../components/ui/form/InputField';
 import AppButton from '../../components/ui/buttons/AppButton';
+import { slugify } from '../../utils/slugUtils';
 
 
 function WorkspaceSettingsPage() {
@@ -15,7 +16,7 @@ function WorkspaceSettingsPage() {
     const { mutate: updateWorkspace, isPending } = useUpdateWorkspace()
     const { mutate: deleteWorkspace } = useDeleteWorkspace()
 
-    const { register, handleSubmit, reset, resetField, formState: { isDirty } } = useForm({
+    const { register, handleSubmit, reset, resetField, setValue, formState: { isDirty } } = useForm({
         defaultValues: {
             name: currentWorkspace?.name || "",
             slug: currentWorkspace?.slug || "",
@@ -30,6 +31,14 @@ function WorkspaceSettingsPage() {
             })
         }
     }, [currentWorkspace, reset])
+
+    const handleSlugChange = (e) => {
+        setValue(
+            "slug",
+            slugify(e.target.value),
+            { shouldValidate: true,  shouldDirty: true, }
+        )
+    };
 
     const [isSlugUnlocked, setIsSlugUnlocked] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -107,11 +116,12 @@ function WorkspaceSettingsPage() {
                                         <input
                                             type="text"
                                             {...register('slug')}
+                                            onChange={(e) => handleSlugChange(e)}
                                             disabled={!isSlugUnlocked}
                                             className={`flex-1 w-full px-3 py-2 text-[13px] focus:outline-none ${isSlugUnlocked ? 'bg-white text-gray-900' : 'bg-gray-50 text-gray-500 cursor-not-allowed'}`}
                                         />
                                         <button
-                                            onClick={() => {setIsSlugUnlocked(!isSlugUnlocked), resetField('slug');}}
+                                            onClick={() => { setIsSlugUnlocked(!isSlugUnlocked), resetField('slug'); }}
                                             className={`px-3 py-2 border-l transition-colors ${isSlugUnlocked ? 'text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100' : 'text-gray-400 bg-white border-transparent hover:bg-gray-100 hover:text-gray-600'}`}
                                         >
                                             {isSlugUnlocked ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
@@ -228,7 +238,7 @@ function WorkspaceSettingsPage() {
                                 Delete Workspace
                             </button>
                         </div>
-                        
+
                     </div>
                 </div>
             )}

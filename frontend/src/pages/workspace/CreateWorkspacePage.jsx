@@ -2,15 +2,19 @@ import { LayoutGrid } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import FormField from "../../components/ui/form/FormField";
+import InputField from "../../components/ui/form/InputField";
+import PrefixInput from "../../components/ui/form/PrefixInput";
 import { ROUTE_PATHS } from "../../constants/routePaths";
 import useAuth from "../../hooks/auth/useAuth";
 import useLogout from "../../hooks/auth/useLogout";
 import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
 import useMyWorkspaces from "../../hooks/workspace/useMyWorkspaces";
 import { toSlug } from "../../utils/slugUtils";
-import FormField from "../../components/ui/form/FormField";
-import InputField from "../../components/ui/form/InputField";
-import PrefixInput from "../../components/ui/form/PrefixInput";
+import { validations } from "../../utils/validations";
+import { slugify } from "../../utils/slugUtils";
+import { handleFormError } from "../../utils/errorUtils";
+import { showApiError } from "../../utils/toast";
 
 
 function CreateWorkspacePage() {
@@ -18,7 +22,7 @@ function CreateWorkspacePage() {
 
     const navigate = useNavigate();
 
-    const { register, handleSubmit, setValue } = useForm()
+    const { register, handleSubmit, setValue, setError, formState: { errors } } = useForm()
     const [slugEdited, setSlugEdited] = useState(false);
 
 
@@ -30,7 +34,11 @@ function CreateWorkspacePage() {
 
     const handleSlugChange = (e) => {
         setSlugEdited(true);
-        setValue('slug', toSlug(e.target.value));
+        setValue(
+            "slug",
+            slugify(e.target.value),
+            { shouldValidate: true }
+        )
     };
 
 
@@ -47,7 +55,15 @@ function CreateWorkspacePage() {
     const haveWorkspaces = workspaceData?.workspaces.length > 0
 
     const handleCreateWorkspace = ({ name, slug }) => {
-        createWorkspace({ name, slug })
+        createWorkspace({ name, slug }, {
+            onError: (error) => {
+                if (handleFormError(error, setError)) {
+                    return;
+                }
+
+                showApiError(error)
+            }
+        })
 
     }
 
@@ -85,112 +101,15 @@ function CreateWorkspacePage() {
                     <FormField label="Workspace Name" >
                         <InputField size="lg" {...register('name')} onChange={handleNameChange} placeholder="e.g. Acme Corp" />
                     </FormField>
-                    {/* <div className="flex flex-col gap-1.5">
 
-                        <label className="text-teeming-text-dark font-semibold text-[14px]">
-                            Workspace Name
-                        </label>
-
-                        <input
-                            type="text"
-                            placeholder="e.g. Acme Corp"
-                            {...register("name")}
-                            onChange={handleNameChange}
-                            className="
-                    w-full
-                    py-[11px] px-4
-                    bg-white
-                    border border-teeming-border
-                    rounded-xl
-
-                    text-[15px]
-                    text-teeming-text-dark
-                    placeholder-teeming-light-gray
-
-                    hover:border-gray-300
-
-                    focus:outline-none
-                    focus:ring-2
-                    focus:ring-emerald-500/10
-                    focus:border-teeming-green
-
-                    transition-all
-                "
-                        />
-
-                    </div> */}
-
-                    <FormField label="Workspace URL" >
+                    <FormField label="Workspace URL" error={errors.slug} >
                         <PrefixInput prefix="app.com/">
-                            <InputField size="lg" {...register('slug')} className="border-0" focusRing={false}/>
+                            <InputField size="lg" className="border-0" focusRing={false}
+                                {...register('slug', validations.slug)} error={errors.slug}
+                                onChange={(e) => handleSlugChange(e)}
+                            />
                         </PrefixInput>
                     </FormField>
-
-                    {/* Workspace URL */}
-                    {/* <div className="flex flex-col gap-1.5">
-
-                        <label className="text-teeming-text-dark font-semibold text-[14px]">
-                            Workspace URL
-                        </label>
-
-                        <div
-                            className="
-                    flex items-center
-                    w-full
-                    bg-white
-
-                    border border-teeming-border
-                    rounded-xl
-                    overflow-hidden
-
-                    hover:border-gray-300
-
-                    focus-within:ring-2
-                    focus-within:ring-emerald-500/10
-                    focus-within:border-teeming-green
-
-                    transition-all
-                "
-                        >
-
-                            <span
-                                className="
-                        py-[11px]
-                        pl-4 pr-1
-
-                        text-[14px]
-                        font-medium
-                        text-gray-500
-
-                        select-none
-                    "
-                            >
-                                app.com/
-                            </span>
-
-                            <input
-                                type="text"
-                                placeholder="acme-corp"
-                                {...register("slug")}
-                                onChange={handleSlugChange}
-                                className="
-                        flex-1
-                        py-[11px]
-                        pr-4 pl-0.5
-
-                        bg-transparent
-
-                        text-[14px]
-                        text-teeming-text-dark
-                        placeholder-teeming-light-gray
-
-                        focus:outline-none
-                    "
-                            />
-
-                        </div>
-
-                    </div> */}
 
                     {/* Submit */}
                     <button

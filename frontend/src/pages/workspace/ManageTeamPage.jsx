@@ -1,4 +1,4 @@
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search, SearchX } from 'lucide-react';
 import { useState } from 'react';
 import EmptyPendingInvitations from '../../components/team/EmptyPendingInvitation';
 import PendingInvitation from '../../components/team/PendingInvitation';
@@ -11,11 +11,32 @@ import usePendingInvitations from '../../hooks/invite/usePendingInvitations';
 import { useCan } from '../../hooks/permissions/useCan';
 import useTeamMembers from '../../hooks/team/useTeamMembers';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import UpgradePlanModal from '../../components/subscription/UpgradePlanModal';
 
 
 function ManageTeamPage() {
 
     const { data: teamMembers, isSuccess, isPending } = useTeamMembers()
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [roleFilter, setRoleFilter] = useState('all');
+
+    const filteredMembers = (teamMembers ?? []).filter((member) => {
+
+        const matchesSearch =
+            member.fullName
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase()) ||
+            member.email
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase());
+
+        const matchesRole =
+            roleFilter === 'all' ||
+            member.role === roleFilter;
+
+        return matchesSearch && matchesRole;
+    });
 
     const canInviteMembers = useCan(PERMISSIONS.INVITE_MEMBERS)
     const canManageTeam = useCan(PERMISSIONS.MANAGE_TEAM)
@@ -23,8 +44,19 @@ function ManageTeamPage() {
 
 
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [isUpgradePlanModalOpen, setIsUpgradePlanModalOpen] = useState(false)
+
     const { data: currentWorkspace } = useWorkspace()
     const { data: pendingInvitations } = usePendingInvitations()
+
+    //enforce max member limit in ui according to current plan
+    const currentPlan = currentWorkspace?.subscription?.plan
+    const memberCountLimit = currentWorkspace?.limits?.members
+    const memberLimitReached = (memberCountLimit.used === memberCountLimit.max) ?? false
+
+    const handleInviteMember = () => {
+        setIsInviteModalOpen(true)
+    }
 
     return (
         <>
@@ -37,7 +69,7 @@ function ManageTeamPage() {
                         <p className="text-[13px] text-gray-500">Manage roles and access for your workspace members</p>
                     </div>
                     {canInviteMembers && (
-                        <AppButton onClick={() => setIsInviteModalOpen(true)}>
+                        <AppButton onClick={handleInviteMember}>
                             + Invite Members
                         </AppButton>
                     )}
@@ -67,12 +99,21 @@ function ManageTeamPage() {
                                 <input
                                     type="text"
                                     placeholder="Search members..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-full sm:w-64 pl-9 pr-4 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-900 placeholder:text-gray-500 transition-colors focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200"
                                 />
                             </div>
-                            <button className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] font-medium text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors">
-                                Role: All <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
-                            </button>
+                            <select
+                                value={roleFilter}
+                                onChange={(e) => setRoleFilter(e.target.value)}
+                                className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] font-medium text-gray-600 focus:outline-none"
+                            >
+                                <option value="all">Role: All</option>
+                                <option value="owner">Owner</option>
+                                <option value="admin">Admin</option>
+                                <option value="member">Member</option>
+                            </select>
                         </div>
 
                     </div>
@@ -94,7 +135,23 @@ function ManageTeamPage() {
                         <div className="divide-y divide-gray-100">
                             {isPending
                                 ? Array.from({ length: 5 }).map((_, i) => <MemberRowSkelton key={i} />)
-                                : teamMembers.map(member => <MemberRow key={member.id} member={member} />)
+                                : filteredMembers.length > 0
+                                    ? filteredMembers.map(member => <MemberRow key={member.id} member={member} />)
+                                    : (
+                                        <div className="py-12 px-6 flex flex-col items-center text-center">
+                                            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                                                <SearchX className="w-5 h-5 text-gray-400" />
+                                            </div>
+
+                                            <h3 className="text-sm font-medium text-gray-900">
+                                                No members found
+                                            </h3>
+
+                                            <p className="mt-1 text-[13px] text-gray-500 max-w-sm">
+                                                Try adjusting your search or role filter to find matching team members.
+                                            </p>
+                                        </div>
+                                    )
                             }
                         </div>
                     </div>
@@ -138,7 +195,20 @@ function ManageTeamPage() {
 
             </div>
 
-            <InviteModal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} />
+            <InviteModal
+                isOpen={isInviteModalOpen}
+                onUpgrade={() => setIsUpgradePlanModalOpen(true)}
+                onClose={() => setIsInviteModalOpen(false)}
+                memberLimit={memberCountLimit}
+            />
+            <UpgradePlanModal
+                isOpen={isUpgradePlanModalOpen}
+                onClose={() => setIsUpgradePlanModalOpen(false)}
+                limitName='member'
+                currentLimit={memberCountLimit.max}
+                currentUsage={memberCountLimit.used}
+                currentPlan={currentPlan.name}
+            />
         </>
     )
 }

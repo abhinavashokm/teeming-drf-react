@@ -9,6 +9,7 @@ function UpgradePlanModal({
     currentPlan,
     currentUsage,
     currentLimit,
+    limitName = "goal"
 }) {
 
     const navigate = useNavigate()
@@ -17,6 +18,8 @@ function UpgradePlanModal({
         onClose()
         navigate('upgrade-plan')
     }
+
+    limitName = limitName.toLowerCase()
 
     return (
         <BaseModal
@@ -27,10 +30,10 @@ function UpgradePlanModal({
             <BaseModal.Header onClose={onClose}>
                 <div>
                     <h2 className="text-base font-semibold text-gray-900">
-                        Goal Limit Reached
+                        Max {limitName} Limit Reached
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        Upgrade your plan to create more goals.
+                        Upgrade your plan to create more {limitName}s.
                     </p>
                 </div>
             </BaseModal.Header>
@@ -45,14 +48,14 @@ function UpgradePlanModal({
 
                         <div>
                             <p className="text-sm font-medium text-amber-900">
-                                You've reached your goal limit
+                                You've reached your {limitName} limit
                             </p>
 
                             <p className="text-sm text-amber-800 mt-1">
                                 Your <strong>{currentPlan}</strong> plan allows up to{' '}
-                                <strong>{currentLimit}</strong> goals.
+                                <strong>{currentLimit}</strong> {limitName}.
                                 You currently have{' '}
-                                <strong>{currentUsage}</strong> goals.
+                                <strong>{currentUsage}</strong> {limitName}.
                             </p>
                         </div>
                     </div>

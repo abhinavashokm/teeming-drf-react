@@ -11,15 +11,42 @@ import useWorkspace from '../../hooks/workspace/useWorkspace';
 import useWorkspaceSlug from '../../hooks/params/useWorkspaceSlug';
 import { getGoalCardColorClass } from '../../utils/styleUtils';
 import GoalFormModal from './GoalFormModal';
+import DeleteConfirmationModal from '../ui/modal/DeleteConfirmationModal';
 
-function GoalCard({ goal }) {
 
-    const { mutate: deleteGoal } = useDeleteGoal()
+function GoalCardSkeleton() {
+    return (
+        <div className="border border-gray-200 rounded-[12px] overflow-hidden bg-white animate-pulse">
+
+            {/* Header */}
+            <div className="h-28 bg-gray-100 p-4 flex flex-col justify-between">
+                <div className="flex justify-between items-start">
+                    <div className="h-6 w-20 rounded-full bg-gray-200" />
+                    <div className="h-6 w-6 rounded-md bg-gray-200" />
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 relative">
+                <div className="h-4 w-3/4 bg-gray-200 rounded" />
+
+                <div className="absolute bottom-3 right-3 h-6 w-6 rounded-md bg-gray-200" />
+            </div>
+
+        </div>
+    );
+}
+
+function GoalCard({ goal, loading = false }) {
+
+    const { mutate: deleteGoal, isPending: isDeleting } = useDeleteGoal()
     const { mutate: starGoal } = useStarGoal()
     const { mutate: unstarGoal } = useUnstarGoal()
     const { data: currentWorkspace } = useWorkspace()
 
     const canManageGoals = useCan(PERMISSIONS.MANAGE_GOALS)
+
+    const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false)
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
@@ -55,6 +82,8 @@ function GoalCard({ goal }) {
         navigate(ROUTE_PATHS.GOAL_DASHBOARD(workspaceSlug, goal.id))
     }
 
+    if (loading) return <GoalCardSkeleton />;
+
     return (
         <>
             <div onClick={handleOpenGoal} className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
@@ -86,7 +115,7 @@ function GoalCard({ goal }) {
                                         Edit
                                     </button>
                                     <button
-                                        onClick={(e) => { e.stopPropagation(); handleDeleteGoal();}}
+                                        onClick={(e) => { e.stopPropagation(); setIsDeleteConfirmModalOpen(true); }}
                                         className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-500 hover:bg-red-50 transition-colors"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />
@@ -122,6 +151,15 @@ function GoalCard({ goal }) {
 
             </div>
             <GoalFormModal goal={goal} isEditMode={true} isOpen={isEditGoalModalOpen} onClose={() => setIsEditGoalModalOpen(false)} />
+            <DeleteConfirmationModal
+                isOpen={isDeleteConfirmModalOpen}
+                onClose={() => setIsDeleteConfirmModalOpen(false)}
+                isLoading={isDeleting}
+                onConfirm={handleDeleteGoal}
+                title={"Delete Goal"}
+                description={ "This goal will be completely removed from this workspace."}
+                confirmButtonText="Delete Goal"
+            />
         </>
     );
 }

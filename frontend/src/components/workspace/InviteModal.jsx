@@ -6,6 +6,9 @@ import useInviteMembers from '../../hooks/invite/useInviteMembers';
 import AppButton from '../ui/buttons/AppButton';
 import CancelButton from '../ui/buttons/CancelButton';
 import BaseModal from '../ui/modal/BaseModal';
+import { useNavigate } from 'react-router-dom';
+import { ROUTE_PATHS } from '../../constants/routePaths';
+import useWorkspaceSlug from '../../hooks/params/useWorkspaceSlug';
 
 const initialState = {
     inputValue: '',
@@ -31,10 +34,13 @@ const reducer = (state, action) => {
     }
 }
 
-export default function InviteModal({ isOpen, onClose }) {
+export default function InviteModal({ isOpen, onClose, memberLimit }) {
 
     const { data: currentWorkspace } = useWorkspace()
     const { mutate: inviteMembers, isPending: isInvitePending } = useInviteMembers()
+
+    const navigate = useNavigate()
+    const workspaceSlug = useWorkspaceSlug()
 
     const [state, dispatch] = useReducer(reducer, initialState)
 
@@ -43,7 +49,18 @@ export default function InviteModal({ isOpen, onClose }) {
         onClose()
     }
 
+    // const memberLimitReached = (memberLimit.used === memberLimit.max) ?? false
+
+    const totalMembersAfterInvite = memberLimit.used + state.selectedEmails.length
+    const exceedsMemberLimit = totalMembersAfterInvite > memberLimit.max
+
     const handleInviteMember = () => {
+
+        if (exceedsMemberLimit) {
+            navigate(ROUTE_PATHS.UPGRADE_PLAN(workspaceSlug))
+            return
+        }
+
         inviteMembers({ emails: state.selectedEmails, role: state.role }, {
             onSuccess: () => handleClose()
         })
@@ -67,11 +84,22 @@ export default function InviteModal({ isOpen, onClose }) {
                 <p className="text-sm text-gray-500 mb-6">Add teammates to collaborate on goals together</p>
 
                 {/* Workspace row */}
-                <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 mb-6">
-                    <div className="w-9 h-9 rounded-[10px] bg-emerald-600 text-white font-medium text-sm flex items-center justify-center shrink-0">
-                        {currentWorkspace.name[0]}
+                <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-[10px] bg-emerald-600 text-white font-medium text-sm flex items-center justify-center">
+                            {currentWorkspace.name[0]}
+                        </div>
+                        <span className="text-[14px] font-medium text-gray-900">
+                            {currentWorkspace.name}
+                        </span>
                     </div>
-                    <span className="text-[14px] font-medium text-gray-900">{currentWorkspace.name}</span>
+
+                    <div className={`text-xs font-medium px-2 py-1 rounded-md ${exceedsMemberLimit
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-gray-100 text-gray-600'
+                        }`}>
+                        {memberLimit.used}/{memberLimit.max} members
+                    </div>
                 </div>
 
                 {/* Label */}
@@ -161,16 +189,20 @@ export default function InviteModal({ isOpen, onClose }) {
                 {/* Buttons */}
                 <div className="flex gap-2">
                     <CancelButton onClick={handleClose} className="hidden sm:flex" />
+
                     <AppButton
                         onClick={handleInviteMember}
                         loading={isInvitePending}
                         disabled={isInvitePending || state.selectedEmails.length === 0}
                     >
-                        Send invites <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        {exceedsMemberLimit ? "Upgrade plan" : "Send invites"} <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
                     </AppButton>
+
                 </div>
             </BaseModal.Footer>
 
         </BaseModal>
+
+
     )
 }

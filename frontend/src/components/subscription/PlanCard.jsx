@@ -5,7 +5,7 @@ import AppButton from "../../components/ui/buttons/AppButton"
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 
 
-function PlanCard({ plan }) {
+function PlanCard({ plan, loading }) {
 
     const { data: currentWorkspace } = useWorkspace()
 
@@ -13,24 +13,31 @@ function PlanCard({ plan }) {
         currentWorkspace?.subscription?.plan?.code
 
     const isCurrentPlan =
-        currentPlanCode === plan.code
+        currentPlanCode === plan?.code
 
 
     const { mutate: createCheckoutSession, isPending } = useCreateCheckoutSession()
 
     const handleCreateCheckoutSession = () => {
-        createCheckoutSession({ plan_id: plan.id })
+        createCheckoutSession({ plan_id: plan?.id })
+    }
+
+    if (loading) {
+        return <PlanCardSkeleton />
     }
 
     return (
         <div
-            className={`flex-1 min-w-[280px] snap-center bg-white rounded-xl relative flex flex-col border-2 shadow-md 
-                ${isCurrentPlan
+            className={`
+        w-full
+        lg:flex-1 lg:min-w-[280px]
+        lg:snap-center
+        bg-white rounded-xl relative flex flex-col border-2 shadow-md
+        ${isCurrentPlan
                     ? 'border-[#1A9E6E] ring-2 ring-[#1A9E6E]/10'
                     : 'border-gray-200'
                 }
-
-                `}
+    `}
         >
             {/* Badge */}
             <div className="absolute -top-3 right-4 flex gap-2">
@@ -46,7 +53,7 @@ function PlanCard({ plan }) {
             <div className="p-6 flex-1 flex flex-col">
 
                 {/* Plan Header */}
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-2 md:mb-4">
                     <h3 className="text-[18px] font-bold text-gray-900">
                         {plan.name}
                     </h3>
@@ -64,11 +71,11 @@ function PlanCard({ plan }) {
                 {/* Price */}
                 <div className="mb-6 h-[50px] flex flex-col justify-end">
                     <div className="flex items-end gap-1">
-                        <span className="text-[36px] font-bold text-gray-900 leading-none">
+                        <span className="text-[28px] sm:text-[32px] lg:text-[36px] font-bold text-gray-900 leading-none">
                             {currencySymbols[plan.currency]}{plan.monthlyPrice}
                         </span>
 
-                        <span className="text-[14px] text-gray-500 mb-1">
+                        <span className="text-[12px] sm:text-[13px] lg:text-[14px] text-gray-500 mb-1">
                             /month
                         </span>
                     </div>
@@ -82,7 +89,12 @@ function PlanCard({ plan }) {
                         </span>
 
                         <span className="text-[13px] font-bold text-gray-900 leading-none">
-                            {plan.maxMembers ?? "Unlimited"}
+                            {plan.maxMembers ?? (
+                                <>
+                                    <span className="sm:hidden">∞</span>
+                                    <span className="hidden sm:inline">Unlimited</span>
+                                </>
+                            )}
                         </span>
                     </div>
 
@@ -92,7 +104,12 @@ function PlanCard({ plan }) {
                         </span>
 
                         <span className="text-[13px] font-bold text-gray-900 leading-none">
-                            {plan.maxGoals ?? "Unlimited"}
+                            {plan.maxGoals ?? (
+                                <>
+                                    <span className="sm:hidden">∞</span>
+                                    <span className="hidden sm:inline">Unlimited</span>
+                                </>
+                            )}
                         </span>
                     </div>
 
@@ -102,7 +119,8 @@ function PlanCard({ plan }) {
                         </span>
 
                         <span className="text-[13px] font-bold text-gray-900 leading-none">
-                            Unlimited
+                            <span className="sm:hidden">∞</span>
+                            <span className="hidden sm:inline">Unlimited</span>
                         </span>
                     </div>
                 </div>
@@ -178,3 +196,64 @@ function PlanCard({ plan }) {
 }
 
 export default PlanCard
+
+
+function PlanCardSkeleton() {
+    return (
+        <div className="w-full lg:flex-1 lg:min-w-[280px] lg:snap-center bg-white rounded-xl relative flex flex-col border-2 border-gray-200 shadow-lg animate-pulse">
+            <div className="p-6 flex flex-col h-full">
+
+                {/* Header */}
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="h-6 w-24 rounded bg-gray-200" />
+                    <div className="h-5 w-16 rounded-md bg-gray-100" />
+                </div>
+
+                {/* Price */}
+                <div className="mb-6 h-[50px] flex items-end gap-2">
+                    <div className="h-10 w-24 rounded bg-gray-200" />
+                    <div className="h-4 w-16 rounded bg-gray-100 mb-1" />
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-2 mb-6">
+                    {[1, 2, 3].map((item) => (
+                        <div
+                            key={item}
+                            className="border border-gray-200 rounded-lg p-2 bg-gray-50"
+                        >
+                            <div className="h-3 w-12 mx-auto rounded bg-gray-100 mb-2" />
+                            <div className="h-4 w-10 mx-auto rounded bg-gray-200" />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Features */}
+                <div className="flex-1">
+                    <ul className="space-y-3.5">
+                        {[1, 2, 3, 4, 5, 6].map((item) => (
+                            <li
+                                key={item}
+                                className="flex items-center gap-3"
+                            >
+                                <div className="w-4 h-4 rounded-full bg-gray-200 shrink-0" />
+                                <div
+                                    className={`h-4 rounded bg-gray-200 ${item % 2 === 0
+                                        ? "w-40"
+                                        : "w-32"
+                                        }`}
+                                />
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Button */}
+                <div className="mt-8 pt-6 border-t border-gray-100">
+                    <div className="h-10 w-full rounded-lg bg-gray-200" />
+                </div>
+
+            </div>
+        </div>
+    );
+}

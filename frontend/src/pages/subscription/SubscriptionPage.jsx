@@ -9,7 +9,7 @@ import CurrentSubscriptionCard from '../../components/subscription/CurrentSubscr
 
 function SubscriptionPage() {
 
-    const { data: plans, isPending } = usePlans()
+    const { data: plans, isPending: isPlansLoading } = usePlans()
     const { data: currentWorkspace } = useWorkspace()
 
     const subscription = currentWorkspace?.subscription
@@ -120,18 +120,38 @@ function SubscriptionPage() {
                 <div
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
-                    className="flex gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide py-6 px-6 sm:px-12 w-full"
+                    className="
+                    flex flex-col lg:flex-row
+                    gap-5
+                    lg:overflow-x-auto
+                    lg:snap-x lg:snap-mandatory
+                    scrollbar-hide
+                    py-6 px-6 sm:px-12
+                    w-full
+                "
                     style={{
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none'
                     }}
                 >
-                    {plans?.map((plan) => (
-                        <PlanCard plan={plan} key={plan.id} />
-                    ))}
+
+                    {
+                        isPlansLoading ?
+                            (
+                                [...Array(3)]?.map((val, index) => (
+                                    <PlanCard key={index} loading={true} />
+                                ))
+                            )
+                            : (
+                                plans?.map((plan) => (
+                                    <PlanCard plan={plan} key={plan.id} />
+                                ))
+                            )
+                    }
+
 
                     {/* Spacer to ensure the last card isn't flush against the right edge when fully scrolled */}
-                    <div className="flex-none w-2 sm:w-6 shrink-0"></div>
+                    <div className="hidden lg:block flex-none w-6 shrink-0"></div>
                 </div>
             </div>
 

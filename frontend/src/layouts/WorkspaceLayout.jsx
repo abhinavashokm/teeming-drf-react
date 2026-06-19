@@ -70,7 +70,7 @@ function WorkspaceLayout() {
           <div className="flex-1 flex flex-col overflow-hidden relative">
 
             {/* Toggle Navbar & Sidebar Buttons - Pinned to top */}
-            <div className="absolute top-0 left-0 h-[44px] flex items-center gap-1 pl-4 z-30 pointer-events-none">
+            <div className="fixed top-0 z-51 left-0 h-[44px] flex items-center gap-1 pl-4 z-30 pointer-events-none">
               {!isMobileMenuOpen && (
                 <button
                   onClick={() => setIsMobileMenuOpen(true)}
@@ -83,6 +83,7 @@ function WorkspaceLayout() {
 
             {/* Navbar */}
             <Navbar setIsMobileMenuOpen={setIsMobileMenuOpen} isScrolled={isScrolled} setIsGoalInfoModalOpen={setIsGoalInfoModalOpen} />
+            <div className="h-[44px]" />
 
             <main
               className={`flex-1  ${isFullBleed ? "flex flex-col overflow-hidden" : "overflow-y-auto p-8 md:p-12 lg:px-16"}`}

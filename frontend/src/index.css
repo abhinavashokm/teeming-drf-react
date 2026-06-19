@@ -34,4 +34,5 @@
 body {
     font-family: var(--font-sans);
     background-color: #F7F6F3;
+    overscroll-behavior-y: none;
 }

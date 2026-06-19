@@ -15,6 +15,7 @@ import useGoals from '../../hooks/goal/useGoals';
 import useWelcomeBanner from '../../hooks/invite/useWelcomeBanner';
 import { useCan } from '../../hooks/permissions/useCan';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import { cn } from '../../utils/cn';
 
 
 function HomePage() {
@@ -29,7 +30,7 @@ function HomePage() {
 
   const { data: currentUser } = useAuth()
 
-  const { data: Goals } = useGoals()
+  const { data: Goals, isPending:isGoalsLoading } = useGoals()
 
   const canManageGoals = useCan(PERMISSIONS.MANAGE_GOALS)
 
@@ -82,86 +83,84 @@ function HomePage() {
         {/* Goals */}
         <section>
 
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900 tracking-tight">
                 <Layers className="h-5 w-5 text-gray-900" strokeWidth={1.5} />
                 Goals
               </h2>
 
-              {
-                goalCountLimit.max && (
-
-                  goalLimitReached ?
-                    (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[11px] font-medium text-red-700">
-                        Limit Reached ({goalCountLimit.used} / {goalCountLimit.max})
-                      </span>
-                    ) :
-                    (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-700">
-                        {goalCountLimit.used} / {goalCountLimit.max} Used
-                      </span>
-                    )
-                )
-              }
-
-
+              {goalCountLimit.max && (
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-full border px-2 py-1 text-[10px] sm:text-[11px] font-medium",
+                    goalLimitReached
+                      ? "bg-red-50 border-red-200 text-red-700"
+                      : "bg-amber-50 border-amber-200 text-amber-700"
+                  )}
+                >
+                  {goalLimitReached
+                    ? `Limit Reached (${goalCountLimit.used}/${goalCountLimit.max})`
+                    : `${goalCountLimit.used}/${goalCountLimit.max} Used`}
+                </span>
+              )}
             </div>
 
-
-            {
-              canManageGoals &&
-
-              <AppButton onClick={handleCreateGoal} >
+            {canManageGoals && (
+              <AppButton
+                onClick={handleCreateGoal}
+                className="w-full sm:w-auto"
+              >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 New Goal
               </AppButton>
-            }
-
-
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
             {
-              Goals?.length > 0 ? (
-                Goals.map((goal) => (
-                  <GoalCard key={goal.id} goal={goal} />
-                ))
-              ) : (
-                <div className="col-span-full border border-dashed border-gray-300 rounded-2xl bg-white py-14 px-8 flex flex-col items-center justify-center text-center">
+              isGoalsLoading ?
+                [...Array(4)].map((_, i) => (
+                  <GoalCard key={i} loading />
+                )) :
+                Goals?.length > 0 ? (
+                  Goals.map((goal) => (
+                    <GoalCard key={goal.id} goal={goal} />
+                  ))
+                ) : (
+                  <div className="col-span-full border border-dashed border-gray-300 rounded-2xl bg-white py-14 px-8 flex flex-col items-center justify-center text-center">
 
-                  <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
-                    <Layers
-                      className="h-7 w-7 text-gray-400"
-                      strokeWidth={1.7}
-                    />
+                    <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
+                      <Layers
+                        className="h-7 w-7 text-gray-400"
+                        strokeWidth={1.7}
+                      />
+                    </div>
+
+                    <h3 className="text-[15px] font-semibold text-gray-900 mb-1.5">
+                      No goals yet
+                    </h3>
+
+                    <p className="text-[13px] text-gray-500 max-w-sm leading-relaxed mb-5">
+                      {currentWorkspace.role === 'Member' ?
+                        "No goals in the workspace yet"
+                        :
+
+                        " Create your first goal to organize ideas, track progress, and align your workspace around outcomes."
+                      }
+
+                    </p>
+
                   </div>
-
-                  <h3 className="text-[15px] font-semibold text-gray-900 mb-1.5">
-                    No goals yet
-                  </h3>
-
-                  <p className="text-[13px] text-gray-500 max-w-sm leading-relaxed mb-5">
-                    {currentWorkspace.role === 'Member' ?
-                      "No goals in the workspace yet"
-                      :
-
-                      " Create your first goal to organize ideas, track progress, and align your workspace around outcomes."
-                    }
-
-                  </p>
-
-                </div>
-              )
+                )
             }
 
           </div>
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          
+
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-gray-900 tracking-tight">Assigned Ideas</h2>
@@ -169,7 +168,7 @@ function HomePage() {
             </div>
 
             <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-              
+
               <div className="p-4 flex items-center justify-between border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group cursor-pointer">
                 <div className="flex items-start gap-3">
                   <div>
@@ -185,7 +184,7 @@ function HomePage() {
                 </div>
               </div>
 
-              
+
               <div className="p-4 flex items-center justify-between border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group cursor-pointer">
                 <div className="flex items-start gap-3">
                   <div>
@@ -201,7 +200,7 @@ function HomePage() {
                 </div>
               </div>
 
-              
+
               <div className="p-4 flex items-center justify-between border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group cursor-pointer">
                 <div className="flex items-start gap-3">
                   <div>
@@ -219,7 +218,7 @@ function HomePage() {
             </div>
           </section>
 
-        
+
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-gray-900 tracking-tight">Recent Activity</h2>

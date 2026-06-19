@@ -37,11 +37,12 @@ const getGoalColors = (goalName) => {
   return colorSets[Math.abs(hash) % colorSets.length];
 };
 
-const SidebarItem = ({ icon: Icon, to, children, sidebarContentExpanded, leading }) => {
+const SidebarItem = ({ icon: Icon, to, children, sidebarContentExpanded, leading, onClick }) => {
   return (
 
     <NavLink
       to={to}
+      onClick={onClick}
       end
       className={({ isActive }) => `flex items-center ${sidebarContentExpanded ? 'gap-2.5 px-2.5' : 'justify-center px-0'} py-1.5 text-[13px] font-medium rounded-md transition-colors 
               ${isActive ? 'bg-teeming-green/10 text-teeming-green' : 'text-gray-600 hover:bg-gray-100/50'}`}
@@ -73,9 +74,13 @@ const SidebarItem = ({ icon: Icon, to, children, sidebarContentExpanded, leading
 
 function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setIsMobileMenuOpen }) {
 
+  const handleCloseSidebarOnMobile = () => {
+    setIsMobileMenuOpen(false)
+  }
+
   const { data: currentUser } = useAuth()
   const { data: currentWorkspace } = useWorkspace()
-  const { mutate: logoutUser } = useLogout()
+  const { mutate: logoutUser, isPending: isSigningOut } = useLogout()
   const { data: goals } = useGoals()
 
   const currentPlan = currentWorkspace?.subscription?.plan
@@ -114,7 +119,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
       )}
 
       <aside className={`
-        bg-white min-[1024px]:bg-gray-50/50 flex flex-col shrink-0 h-[100dvh]
+        bg-white min-[1024px]:bg-gray-50/50 flex flex-col shrink-0 h-[100dvh] z-52
         fixed min-[1024px]:relative top-0 left-0 z-50
         transition-all duration-200
         min-[1024px]:translate-x-0
@@ -197,14 +202,14 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                 <div className="border-t border-gray-100/80 mb-1.5" />
 
                 {canUpgradePlan && (
-                  <Link to={'upgrade-plan'} onClick={() => setIsWorkspaceDropdownOpen(false)} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
+                  <Link to={'upgrade-plan'} onClick={() => {setIsWorkspaceDropdownOpen(false); handleCloseSidebarOnMobile();}} className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
                     <Zap className="h-[15px] w-[15px] text-gray-400 group-hover:text-yellow-500" />
                     Upgrade Plan
                   </Link>
                 )}
 
                 <button
-                  onClick={() => { setIsSwitchWorkspaceModalOpen(true); setIsWorkspaceDropdownOpen(false); }}
+                  onClick={() => { setIsSwitchWorkspaceModalOpen(true); setIsWorkspaceDropdownOpen(false);handleCloseSidebarOnMobile() }}
                   className="w-[calc(100%-12px)] mx-1.5 flex items-center justify-start gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group"
                 >
                   <Layers className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
@@ -233,7 +238,12 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
 
           {/* Home */}
           <div className="pb-4 border-b border-gray-200">
-            <SidebarItem to={""} sidebarContentExpanded={sidebarContentExpanded} icon={Home} >
+            <SidebarItem 
+            to={""} 
+            onClick={handleCloseSidebarOnMobile}
+            sidebarContentExpanded={sidebarContentExpanded} 
+            icon={Home} 
+            >
               <span>Home</span>
             </SidebarItem>
           </div>
@@ -251,6 +261,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                   return (
                     <SidebarItem key={goal.id}
                       to={ROUTE_PATHS.GOAL_DASHBOARD(currentWorkspace.slug, goal.id)}
+                      onClick={handleCloseSidebarOnMobile}
                       sidebarContentExpanded={sidebarContentExpanded}
                       leading={
                         <div
@@ -274,12 +285,12 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
           {/* Manage Team & Settings */}
           <div className="space-y-0.5">
 
-            <SidebarItem to={"manage-team"} sidebarContentExpanded={sidebarContentExpanded} icon={Users} >
+            <SidebarItem to={"manage-team"} sidebarContentExpanded={sidebarContentExpanded} icon={Users} onClick={handleCloseSidebarOnMobile} >
               <span>{currentWorkspace.role !== 'Member' ? 'Manage Team' : 'View Team'}</span>
             </SidebarItem>
 
             {canManageSettings && (
-              <SidebarItem to={"settings"} sidebarContentExpanded={sidebarContentExpanded} icon={Settings} >
+              <SidebarItem to={"settings"} sidebarContentExpanded={sidebarContentExpanded} icon={Settings} onClick={handleCloseSidebarOnMobile} >
                 <span>Settings</span>
               </SidebarItem>
             )}
@@ -315,7 +326,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsProfileDropdownOpen(false)} />
               <div className="absolute bottom-full left-4 mb-3 w-[240px] bg-white border border-gray-200/80 rounded-xl shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] py-2 z-50 overflow-hidden">
-                <Link to="my-account" onClick={() => { setCurrentView('account'); setIsProfileDropdownOpen(false); setIsMobileMenuOpen(false); }}>
+                <Link to="my-account" onClick={() => { setIsProfileDropdownOpen(false); handleCloseSidebarOnMobile(); }}>
                   <button className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-[8px] transition-colors group">
                     <Settings className="h-[15px] w-[15px] text-gray-400 group-hover:text-gray-600" />
                     My Account
@@ -324,10 +335,11 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                 <div className="border-t border-gray-100 my-1.5" />
                 <button
                   onClick={logoutUser}
+                  disabled={isSigningOut}
                   className="w-[calc(100%-12px)] mx-1.5 flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-[8px] transition-colors group"
                 >
                   <LogOut className="h-[15px] w-[15px] text-red-500 group-hover:text-red-600" />
-                  Sign Out
+                  {isSigningOut ? "Signing Out.." : "Sign Out"}
                 </button>
               </div>
             </>

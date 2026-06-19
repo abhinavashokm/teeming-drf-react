@@ -19,7 +19,7 @@ export default function useAuth(caller) {
                 dispatch(setAccessToken(refreshRes?.data?.accessToken))
                 const userRes = await authService.getCurrentUser()
 
-                return userRes.data.user
+                return userRes.data
             } catch (error) {
                 return null
             }

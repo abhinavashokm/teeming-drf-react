@@ -34,4 +34,39 @@ export const validations = {
             message: "Must include uppercase, lowercase and number",
         },
     },
+
+    slug: {
+        required: "Workspace URL is required",
+
+        minLength: {
+            value: 3,
+            message: "Must be at least 3 characters",
+        },
+
+        maxLength: {
+            value: 50,
+            message: "Cannot exceed 50 characters",
+        },
+
+        validate: (value) => {
+            if (!/^[a-z0-9-]+$/.test(value)) {
+                return "Use lowercase letters, numbers and hyphens only";
+            }
+
+            if (value.startsWith("-")) {
+                return "Cannot start with a hyphen";
+            }
+
+            if (value.endsWith("-")) {
+                return "Cannot end with a hyphen";
+            }
+
+            if (value.includes("--")) {
+                return "Cannot contain consecutive hyphens";
+            }
+
+            return true;
+        },
+    },
 }
+

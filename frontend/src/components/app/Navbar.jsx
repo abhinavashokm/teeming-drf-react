@@ -24,7 +24,7 @@ function Navbar({ isNavbarVisible, isScrolled, showShadow = false, setIsGoalInfo
   return (
     <>
       <header
-        className={`bg-white transition-all duration-200 flex items-center justify-between shrink-0 w-full h-[44px] 
+        className={`fixed top-0 bg-white transition-all duration-200 flex items-center justify-between shrink-0 w-full h-[44px] z-50
           ${isScrolled || showShadow
             ? 'border-b border-gray-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)]'
             : 'border-b border-transparent'

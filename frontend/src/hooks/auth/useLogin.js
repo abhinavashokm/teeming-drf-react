@@ -7,12 +7,15 @@ import useInvitationToken from "../invite/useInvitationToken";
 import useWorkspaceRedirect from "../routes/useWorkspaceRedirect";
 import useWelcomeBanner from "../invite/useWelcomeBanner";
 import { globalQueryKeys } from "../../constants/queryKeys";
+import { useNavigate } from "react-router-dom";
+import { buildWorkspacePath } from "../../utils/routeUtils";
 
 
 export function useLogin() {
 
     const dispatch = useDispatch()
     const queryClient = useQueryClient()
+    const navigate = useNavigate()
 
     const { mutate: redirectToWorkspace } = useWorkspaceRedirect()
     const invitationToken = useInvitationToken()
@@ -30,7 +33,12 @@ export function useLogin() {
                 setWelcome(res.data.joinedWorkspace.slug, res.data.user.id)
             }
 
-            redirectToWorkspace()
+            if(res.data.user?.lastWorkspace){
+                navigate(buildWorkspacePath(res.data.user.lastWorkspace.slug))
+            }else{
+                redirectToWorkspace()
+            }
+            
         },
         apiSuccessToast: false,
          
