@@ -23,6 +23,7 @@ from . import exceptions, user_services, serializers
 from .helpers import cookie_helper
 from core.throttles import AuthThrottle, SensitiveThrottle
 from apps.invitation.serializers import JoinedWorkspaceSerializer
+from .models import User
 
 
 class RegisterView(APIView):
@@ -124,7 +125,7 @@ class LoginView(APIView):
 
         response = None
         response_data = {
-            "user": UserSerializer(user).data,
+            "user": serializers.MeSerilaizer(user).data,
             "access_token": str(refresh_token.access_token),
         }
 
@@ -179,13 +180,7 @@ class MeView(APIView):
         """retrieve authenticated user"""
 
         return success_response(
-            data={
-                "user": {
-                    "id": request.user.id,
-                    "email": request.user.email,
-                    "full_name": request.user.full_name,
-                }
-            }
+            data=serializers.MeSerilaizer(request.user).data
         )
 
     def patch(self, request):

@@ -223,7 +223,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "60/minute",
         "user": "500/minute",
-        "auth": "10/minute",  # login, refresh, register
+        "auth": "50/minute",  # login, refresh, register
         "sensitive": "5/minute",  # password reset, email verify
         "ai": "20/hour", #ai features
     },

@@ -3,6 +3,7 @@ from django.db import transaction
 from django.db.models import Case, When, Value, IntegerField
 from . import exceptions
 from apps.subscription import subscription_services
+from .helpers.workspace_helper import get_workspace_or_raise
 
 
 def create_workspace_with_free_plan(current_user, data):
@@ -33,26 +34,15 @@ def fetch_user_workspace_list(user):
         workspace__is_deleted=False,
     ).select_related("workspace")
 
-    membership_res = [
+    return [
         {
             "id": m.workspace.id,
             "name": m.workspace.name,
             "slug": m.workspace.slug,
-            "role": m.get_role_display(),
+            "role": m.role,
         }
         for m in memberships
     ]
-
-    last_workspace = Workspace.objects.filter(id=user.last_workspace).filter()
-    last_workspace_res = {}
-
-    if last_workspace:
-        last_workspace_res = {
-            "id": last_workspace.id,
-            "slug": last_workspace.slug,
-        }
-
-    return membership_res, last_workspace_res
 
 
 def add_workspace_member(user, workspace, role):

@@ -2,12 +2,21 @@ from rest_framework import serializers
 
 from .models import User
 from core.constants.error_codes import ErrorCode
+from apps.workspace.serializers import WorkspaceRetrieveSerializer
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'full_name', 'email')
+
+
+class MeSerilaizer(serializers.ModelSerializer):
+    last_workspace = WorkspaceRetrieveSerializer()
+
+    class Meta:
+        model = User
+        fields = ('id', 'full_name', 'email', "last_workspace")
         
 
 class RegisterSerializer(serializers.ModelSerializer):

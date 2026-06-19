@@ -5,12 +5,12 @@ from rest_framework_simplejwt.exceptions import TokenError
 from django.db import transaction
 
 from .helpers import otp_helper, signup_helper, password_reset_helper
-from core.utils.token_utils import generate_token
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from .models import User
 from . import exceptions
 from apps.invitation import invitation_services as invitation_services
+from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 
 
 def register_user(full_name, email, password):
@@ -221,3 +221,10 @@ def delete_user(user):
 def generate_tokens_for_user(user):
     return RefreshToken.for_user(user)
     
+
+def update_last_visited_workspace(current_user, workspace):
+
+    workspace_instance = get_workspace_or_raise(workspace_id=workspace.id)
+    
+    current_user.last_workspace = workspace_instance
+    current_user.save()

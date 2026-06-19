@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from core.responses.api_response import success_response, error_response
+from core.responses.api_response import success_response
 from rest_framework import status
 from . import workspace_services
 from .serializers import (
@@ -18,6 +18,7 @@ from core.permission_views import (
 from core.permissions import IsWorkspaceMember, IsWorkspaceAdmin, IsWorkspaceOwner
 from apps.subscription import subscription_services
 from apps.goal import goal_services
+from apps.user import user_services
 
 
 class WorkspaceSessionView(APIView):
@@ -30,16 +31,14 @@ class WorkspaceSessionView(APIView):
 
     def get(self, request):
 
-        membership_workspaces, last_workspace = (
-            workspace_services.fetch_user_workspace_list(request.user)
+        membership_workspaces = workspace_services.fetch_user_workspace_list(
+            request.user
         )
 
         return success_response(
             data={
                 "workspaces": membership_workspaces,
-                "last_workspace": last_workspace,
-            },
-            status_code=status.HTTP_200_OK,
+            }
         )
 
 
@@ -64,10 +63,17 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
                 "max": subscription.plan.max_members,
             },
             "goals": {
-                "used": goal_services.get_workspace_goal_count(workspace=request.workspace),
+                "used": goal_services.get_workspace_goal_count(
+                    workspace=request.workspace
+                ),
                 "max": subscription.plan.max_goals,
             },
         }
+
+        user_services.update_last_visited_workspace(
+            current_user=request.user,
+            workspace=request.workspace,
+        )
 
         workspace_data = serializers.GetCurrentWorkspaceSerializer(
             request.workspace,
