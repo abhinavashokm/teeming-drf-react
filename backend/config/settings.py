@@ -13,6 +13,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG") == "True"
 DEBUG_API_DELAY = DEBUG
+MOCK_RESPONSE_DELAY = float(os.getenv("MOCK_RESPONSE_DELAY")) #in seconds
 
 ALLOWED_HOSTS = [
     "localhost",

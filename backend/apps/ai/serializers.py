@@ -18,10 +18,14 @@ class AIAssistantRequestSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=AIAssistantResponse.ResponseType.choices
     )
+    message = serializers.CharField(
+        required=False,
+        allow_null=True,
+    )
 
 
 class AIAssistantResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AIAssistantResponse
-        fields = ["id", "type", "content", "created_at" ]
+        fields = ["id", "type", "content", "created_at", "request_text" ]

@@ -1,3 +1,5 @@
+from core.exceptions.base import AppException
+
 class AIException(Exception):
     pass
 

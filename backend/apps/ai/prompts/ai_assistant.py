@@ -18,5 +18,40 @@ def build_summary_prompt(context):
     {context}
     """
 
+
 def build_idea_suggestions_prompt(context):
-    pass
+    return f"""
+    You are an AI project assistant.
+
+    Analyze the goal and its existing ideas.
+
+    Suggest 5 new ideas that could help achieve the goal.
+
+    Requirements:
+    - Suggestions should be practical and actionable.
+    - Do not repeat existing ideas.
+    - Focus on gaps, improvements, risks, opportunities, and next steps.
+    - Keep each suggestion concise (one sentence).
+    - Prioritize ideas with high potential impact.
+
+    Context:
+
+    {context}
+    """
+
+
+def build_custom_chat_prompt(context, message):
+    return f"""
+    You are an AI project assistant.
+
+    Answer the user's question using the goal context provided below.
+
+    Keep responses concise, practical, and relevant to the goal.
+
+    USER QUESTION:
+    {message}
+
+    CONTEXT:
+
+    {context}
+    """

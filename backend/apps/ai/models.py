@@ -9,7 +9,7 @@ class AIAssistantResponse(WorkspaceScopedBaseModel):
         SUMMARY = "summary", "Summary"
         BLOCKERS = "blockers", "Blockers"
         IDEA_SUGGESTIONS = "idea_suggestions", "Idea Suggestions"
-        CHAT = "chat", "Chat"
+        CUSTOM_CHAT = "custom_chat", "Custom Chat"
 
     goal = models.ForeignKey(
         "goal.Goal",
@@ -27,6 +27,8 @@ class AIAssistantResponse(WorkspaceScopedBaseModel):
         max_length=30,
         choices=ResponseType.choices
     )
+
+    request_text = models.TextField(blank=True, null=True) 
 
     content = models.JSONField()
 

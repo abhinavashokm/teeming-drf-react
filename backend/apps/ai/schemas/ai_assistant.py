@@ -9,6 +9,32 @@ class GoalSummaryResponse(AISchema):
     completed_items: List[str]
     active_items: List[str]
 
+    def build_content(self):
+        return {
+            "sections": [
+                {
+                    "type": "text",
+                    "title": "Overview",
+                    "body": self.overview,
+                },
+                {
+                    "type": "text",
+                    "title": "Progress Status",
+                    "body": self.progress_status,
+                },
+                {
+                    "type": "list",
+                    "title": "Completed Work",
+                    "body": self.completed_items,
+                },
+                {
+                    "type": "list",
+                    "title": "Active Work",
+                    "body": self.active_items,
+                },
+            ],
+        }
+
     @classmethod
     def mock(cls):
         return cls(
@@ -31,10 +57,22 @@ class GoalSummaryResponse(AISchema):
                 "Develop personalized user recommendations",
             ],
         )
+
     
 
 class GoalIdeaSuggestionsResponse(AISchema):
     suggestions: List[str]
+
+    def build_content(self):
+        return {
+            "sections": [
+                {
+                    "type": "list",
+                    "title": "Suggested Ideas",
+                    "body": self.suggestions,
+                }
+            ]
+        }
 
     @classmethod
     def mock(cls):
@@ -46,4 +84,30 @@ class GoalIdeaSuggestionsResponse(AISchema):
                 "Create a feedback collection workflow after goal completion",
                 "Provide personalized recommendations based on user activity",
             ]
+        )
+    
+
+class AICustomChatResponse(AISchema):
+    response: str
+
+    def build_content(self):
+        return {
+            "sections": [
+                {
+                    "type": "text",
+                    "title": "Response",
+                    "body": self.response,
+                }
+            ]
+        }
+
+    @classmethod
+    def mock(cls):
+        return cls(
+            response=(
+                "Based on the current goal progress, I recommend focusing on "
+                "improving onboarding analytics first. This will help identify "
+                "where users drop off and provide clearer direction for future "
+                "improvements."
+            )
         )

@@ -119,6 +119,6 @@ class ResponseDelayMiddleware:
         response = self.get_response(request)
 
         if settings.DEBUG_API_DELAY:
-            time.sleep(0)
+            time.sleep(settings.MOCK_RESPONSE_DELAY)
 
         return response

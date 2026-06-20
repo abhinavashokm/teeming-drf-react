@@ -3,12 +3,14 @@ from apps.ai.prompts.improve_idea import build_improve_idea_prompt
 from apps.ai.prompts.ai_assistant import (
     build_summary_prompt,
     build_idea_suggestions_prompt,
+    build_custom_chat_prompt,
 )
 
 from apps.ai.schemas.improve_idea import ImproveIdeaResponse
 from apps.ai.schemas.ai_assistant import (
     GoalSummaryResponse,
     GoalIdeaSuggestionsResponse,
+    AICustomChatResponse,
 )
 from apps.goal.helpers.goal_helper import get_goal_or_raise
 from apps.idea.models import Idea
@@ -46,67 +48,67 @@ class GoalAssistantService:
         self.workspace = workspace
         self.goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
         self.provider = ProviderRegistry.get_provider()
+        self.context = self._build_context(self.goal)
 
-    def execute(self, action):
+    def execute(self, action, message=None):
 
-        actions = {
-            AIAssistantResponse.ResponseType.SUMMARY: self.summarize,
-            AIAssistantResponse.ResponseType.IDEA_SUGGESTIONS: self.suggest_ideas,
+        configs = {
+            AIAssistantResponse.ResponseType.SUMMARY: {
+                "prompt": build_summary_prompt(
+                    context=self.context,
+                ),
+                "schema": GoalSummaryResponse,
+            },
+            AIAssistantResponse.ResponseType.IDEA_SUGGESTIONS: {
+                "prompt": build_idea_suggestions_prompt(
+                    context=self.context,
+                ),
+                "schema": GoalIdeaSuggestionsResponse,
+            },
+            AIAssistantResponse.ResponseType.CUSTOM_CHAT: {
+                "prompt": build_custom_chat_prompt(
+                    context=self.context,
+                    message=message,
+                ),
+                "schema": AICustomChatResponse,
+            },
         }
 
-        handler = actions.get(action)
+        config = configs.get(action)
 
-        if not handler:
+        if not config:
             raise ValueError(f"Unsupported action: {action}")
 
-        return handler()
-
-    def summarize(self):
-
-        context = self.build_context(self.goal)
-
-        prompt = build_summary_prompt(context=context)
-
-        response = self.provider.generate_structured(
-            prompt=prompt,
-            schema=GoalSummaryResponse,
+        return self._generate_response(
+            response_type=action,
+            prompt=config["prompt"],
+            schema=config["schema"],
+            message=message,
         )
 
-        content = self.build_summary_content(response)
+    def _generate_response(
+        self,
+        response_type,
+        prompt,
+        schema,
+        message=None
+    ):
+        response = self.provider.generate_structured(
+            prompt=prompt,
+            schema=schema,
+        )
 
         return AIAssistantResponse.objects.create(
             workspace=self.workspace,
             goal=self.goal,
             user=self.user,
-            type=AIAssistantResponse.ResponseType.SUMMARY,
-            content=content,
-        )
-
-    def suggest_ideas(self):
-
-        context = self.build_context(self.goal)
-
-        prompt = build_idea_suggestions_prompt(
-            context=context,
-        )
-
-        response = self.provider.generate_structured(
-            prompt=prompt,
-            schema=GoalIdeaSuggestionsResponse,
-        )
-
-        content = self.build_idea_suggestions_content(response)
-
-        return AIAssistantResponse.objects.create(
-            workspace=self.workspace,
-            goal=self.goal,
-            user=self.user,
-            type=AIAssistantResponse.ResponseType.IDEA_SUGGESTIONS,
-            content=content,
+            type=response_type,
+            content=response.build_content(),
+            request_text=message,
         )
 
     @staticmethod
-    def build_context(goal):
+    def _build_context(goal):
 
         ideas = (
             Idea.objects.filter(goal=goal, is_deleted=False)
@@ -156,47 +158,6 @@ class GoalAssistantService:
             context_parts.append("\nNo ideas have been added yet.\n")
 
         return "\n".join(context_parts)
-
-    @staticmethod
-    def build_summary_content(summary: GoalSummaryResponse):
-        return {
-            "sections": [
-                {
-                    "type": "text",
-                    "title": "Overview",
-                    "body": summary.overview,
-                },
-                {
-                    "type": "text",
-                    "title": "Progress Status",
-                    "body": summary.progress_status,
-                },
-                {
-                    "type": "list",
-                    "title": "Completed Work",
-                    "body": summary.completed_items,
-                },
-                {
-                    "type": "list",
-                    "title": "Active Work",
-                    "body": summary.active_items,
-                },
-            ],
-        }
-
-    @staticmethod
-    def build_idea_suggestions_content(
-        suggestions: GoalIdeaSuggestionsResponse,
-    ):
-        return {
-            "sections": [
-                {
-                    "type": "list",
-                    "title": "Suggested Ideas",
-                    "body": suggestions.suggestions,
-                }
-            ]
-        }
 
 
 def list_ai_assistant_responses(current_user, workspace, goal_id):
