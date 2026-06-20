@@ -6,13 +6,13 @@ import useGoal from '../../hooks/goal/useGoal';
 import BoardView from './components/BoardView';
 import GoalTabs from './components/GoalTabs';
 import OutcomeView from './components/OutcomeView';
-import DiscussionPanel from './components/DiscussionPanel';
+import RightPanel from './components/rightPanel/RightPanel';
 
 
 export default function GoalDashboard({ goalTitle }) {
 
   const { setIsFullBleed, setIsGoalInfoModalOpen } = useOutletContext()
-  const [isDiscussionPanelOpen, setIsDiscussionPanelOpen] = useState(false)
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false)
 
   useEffect(() => {
     setIsFullBleed(true)
@@ -23,7 +23,7 @@ export default function GoalDashboard({ goalTitle }) {
 
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [canResizeDiscussionPanel, setCanResizeDiscussionPanel] = useState(window.innerWidth >= 1400)
+  const [canResizeRightPanel, setCanResizeRightPanel] = useState(window.innerWidth >= 1400)
 
   const panelWidth = useRef(320);
   const [width, setWidth] = useState(320);
@@ -52,7 +52,7 @@ export default function GoalDashboard({ goalTitle }) {
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
-      setCanResizeDiscussionPanel(window.innerWidth >= 1400)
+      setCanResizeRightPanel(window.innerWidth >= 1400)
       if (window.innerWidth < 1400) {
         setWidth(320);
       }
@@ -90,7 +90,7 @@ export default function GoalDashboard({ goalTitle }) {
 
             {/* Main Content Areas */}
             {activeView === 'board' ? (
-              <BoardView isDiscussionPanelOpen={isDiscussionPanelOpen} />
+              <BoardView isRightPanelOpen={isRightPanelOpen} />
             ) : (
               <OutcomeView />
             )}
@@ -101,10 +101,10 @@ export default function GoalDashboard({ goalTitle }) {
 
       {/* Floating Button for Panel */}
       {
-        !isDiscussionPanelOpen &&
+        !isRightPanelOpen &&
         <button
           className="fixed min-[865px]:absolute bottom-6 right-6 w-14 h-14 bg-[#378ADD] text-white rounded-full shadow-[0_4px_14px_rgba(55,138,221,0.4)] flex items-center justify-center hover:bg-[#2c71b6] transition-colors z-40"
-          onClick={() => setIsDiscussionPanelOpen(true)}
+          onClick={() => setIsRightPanelOpen(true)}
         >
           <MessageSquare className="w-6 h-6" />
         </button>
@@ -116,33 +116,33 @@ export default function GoalDashboard({ goalTitle }) {
       {/* Mobile */}
       {isMobile && (
         <BaseModal
-          isOpen={isDiscussionPanelOpen}
-          onClose={() => setIsDiscussionPanelOpen(false)}
+          isOpen={isRightPanelOpen}
+          onClose={() => setIsRightPanelOpen(false)}
           size="sm"
           sheetBreakpoint="lg"
         >
-          <DiscussionPanel
+          <RightPanel
             isMobile={true}
-            onClose={() => setIsDiscussionPanelOpen(false)}
+            onClose={() => setIsRightPanelOpen(false)}
           />
         </BaseModal>
       )}
 
       {/* Desktop */}
-      {!isMobile && isDiscussionPanelOpen && (
+      {!isMobile && isRightPanelOpen && (
         <div
           style={{ width }}
           className="shrink-0 border-l border-gray-200 bg-white h-full flex flex-col overflow-hidden relative"
         >
           {/* Drag handle */}
           {
-            canResizeDiscussionPanel &&
+            canResizeRightPanel &&
             <div
               onMouseDown={onMouseDown}
               className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[#378ADD]/30 transition-colors z-10"
             />
           }
-          <DiscussionPanel onClose={() => setIsDiscussionPanelOpen(false)} />
+          <RightPanel onClose={() => setIsRightPanelOpen(false)} />
         </div>
       )}
 

@@ -14,7 +14,7 @@ function useAIAssistant() {
         passWorkspaceSlug: true,
         apiSuccessToast: false,
         apiErrorToast: false,
-        invalidateKeys: [workspaceKeys.ai_assistant_responses]
+        invalidateKeys: [workspaceKeys.ai_assistant_responses],
     })
 
 }

@@ -15,7 +15,7 @@ function useAIAssistantResponses() {
         queryKey: workspaceKeys.ai_assistant_responses,
         queryFn: async () => {
             const res = await aiService.listAIResponses(workspaceSlug, goalId)
-            return res.data
+            return res.data ?? []
         },
     })
 }

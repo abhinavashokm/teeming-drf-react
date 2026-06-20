@@ -1,22 +1,140 @@
 import { Lock, Sparkles } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import useAIAssistant from '../../../hooks/ai/useAIAssistant';
-import useAIAssistantResponses from '../../../hooks/ai/useAIAssistantResponses';
-import useClearAllAIResponses from '../../../hooks/ai/useClearAllAIResponses';
-import { formatDateTime } from '../../../utils/timeUtils';
+import useAIAssistant from '../../../../hooks/ai/useAIAssistant';
+import useAIAssistantResponses from '../../../../hooks/ai/useAIAssistantResponses';
+import useClearAllAIResponses from '../../../../hooks/ai/useClearAllAIResponses';
+import { formatDateTime } from '../../../../utils/timeUtils';
 
 
-const suggestions = [
+const quickActions = [
+    {
+        label: 'Suggest ideas',
+        type: 'idea_suggestions',
+        responseTitle: 'Idea Suggestions'
+    },
+    // {
+    //     label: 'Find blockers',
+    //     type: 'blockers'
+    // },
     {
         label: 'Summarize progress',
-        type: 'summarize'
-    }, {
-        label: 'Find blockers',
-        type: 'find_blockers'
+        type: 'summary',
+        responseTitle: 'Goal Summary'
     },
 ];
 
-function AIInsight({ response }) {
+const actionMap = {
+    idea_suggestions: {
+        label: 'Suggest ideas',
+        responseTitle: 'Idea Suggestions',
+    },
+    summary: {
+        label: 'Summarize progress',
+        responseTitle: 'Goal Summary',
+    },
+};
+
+function AIAssistant() {
+
+    const { data: aiResponses, isPending: loadingResponses } = useAIAssistantResponses()
+    const hasResponses = aiResponses?.length > 0;
+
+    const { mutate: askAI, isPending: isAIGenerating } = useAIAssistant()
+    const { mutate: clearAllResponses, isPending: isClearing } = useClearAllAIResponses()
+
+    const bottomRef = useRef(null);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'end',
+        });
+    }, [aiResponses?.length, isAIGenerating]);
+
+    /* -------------------------------------------------------------------------- */
+    /* handle ask questions or suggestions to ai */
+    /* -------------------------------------------------------------------------- */
+    const handleAskAI = (type, message = null) => {
+        const reqData = { type: type }
+
+        if (message) {
+            reqData.message = message
+        }
+
+        askAI(reqData)
+    }
+
+    const handleClearResponses = () => {
+        clearAllResponses()
+    }
+
+    return (
+        <>
+            {hasResponses ? (
+                <AssistantToolbar
+                    onAsk={handleAskAI}
+                    onClear={handleClearResponses}
+                    isLoading={isClearing}
+                />
+            ) : (
+                <AssistantWelcome
+                    onAsk={handleAskAI}
+                />
+            )}
+
+
+            {loadingResponses && (
+                <div className="rounded-xl border border-slate-200 bg-white p-4 animate-pulse">
+                    <div className="space-y-3">
+                        <div className="h-3 bg-slate-200 rounded w-3/4" />
+                        <div className="h-3 bg-slate-200 rounded w-full" />
+                        <div className="h-3 bg-slate-200 rounded w-5/6" />
+                    </div>
+                </div>
+            )}
+
+            <div className="p-4">
+                {aiResponses?.map((response) => (
+                    <AIResponse
+                        key={response.id}
+                        response={response}
+                    />
+                ))}
+
+                {
+                    isAIGenerating &&
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 animate-pulse mb-5">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Sparkles className="w-4 h-4 text-[#378ADD]" />
+                            <span className="text-sm font-medium text-gray-700">
+                                Generating insights...
+                            </span>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="h-3 bg-slate-200 rounded w-3/4" />
+                            <div className="h-3 bg-slate-200 rounded w-full" />
+                            <div className="h-3 bg-slate-200 rounded w-5/6" />
+                        </div>
+                    </div>
+                }
+
+
+                <div ref={bottomRef} />
+            </div>
+        </>
+
+    )
+}
+
+export default AIAssistant
+
+
+/* -------------------------------------------------------------------------- */
+/* sub components - AIResponse */
+/* -------------------------------------------------------------------------- */
+function AIResponse({ response }) {
+    console.log(response)
     return (
         <div className="mb-4 rounded-lg border border-slate-200 bg-white">
 
@@ -25,7 +143,7 @@ function AIInsight({ response }) {
                     <Sparkles className="w-3.5 h-3.5 text-[#378ADD]" />
 
                     <span className="text-xs font-medium text-slate-700">
-                        Goal Summary
+                        {actionMap[response.type]?.responseTitle}
                     </span>
                 </div>
 
@@ -70,7 +188,12 @@ function AIInsight({ response }) {
     );
 }
 
-function AssistantWelcome({ suggestions, onAsk }) {
+
+/* -------------------------------------------------------------------------- */
+/* sub components - AssistantWelcome */
+/* -------------------------------------------------------------------------- */
+
+function AssistantWelcome({ onAsk }) {
     return (
 
         <div className='p-4'>
@@ -97,7 +220,7 @@ function AssistantWelcome({ suggestions, onAsk }) {
             </div>
 
             <div className="flex flex-wrap gap-2 mb-5">
-                {suggestions.map((item) => (
+                {quickActions.map((item) => (
                     <button
                         key={item.type}
                         onClick={() => onAsk(item.type)}
@@ -112,7 +235,11 @@ function AssistantWelcome({ suggestions, onAsk }) {
     );
 }
 
-function AssistantToolbar({ suggestions, onAsk, onClear, isLoading }) {
+/* -------------------------------------------------------------------------- */
+/* sub components - AssistantToolbar */
+/* -------------------------------------------------------------------------- */
+
+function AssistantToolbar({ onAsk, onClear, isLoading }) {
     return (
         <div className="sticky top-0 z-10 p-4 bg-white/95 backdrop-blur-sm pb-3 mb-4 border-b border-slate-100">
             <div className="flex items-center justify-between py-2">
@@ -139,7 +266,7 @@ function AssistantToolbar({ suggestions, onAsk, onClear, isLoading }) {
             </div>
 
             <div className="flex flex-wrap gap-2">
-                {suggestions.map((item) => (
+                {quickActions.map((item) => (
                     <button
                         key={item.type}
                         onClick={() => onAsk(item.type)}
@@ -152,102 +279,3 @@ function AssistantToolbar({ suggestions, onAsk, onClear, isLoading }) {
         </div>
     );
 }
-
-function AIAssistant() {
-
-    const { data: aiResponses, isPending: loadingResponses } = useAIAssistantResponses()
-    const hasResponses = aiResponses?.length > 0;
-
-    const { mutate: askAI, isPending: isAIGenerating } = useAIAssistant()
-    const { mutate: clearAllResponses, isPending: isClearing } = useClearAllAIResponses()
-
-    const bottomRef = useRef(null);
-
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'end',
-        });
-    }, [aiResponses?.length, isAIGenerating]);
-
-
-    const handleAskAI = (type, message = null) => {
-        const reqData = { type: type }
-
-        if (message) {
-            reqData.message = message
-        }
-
-        askAI(reqData, {
-            onSuccess: (res) => {
-                console.log(res.data)
-            }
-        })
-    }
-
-    const handleClearResponses = () => {
-        clearAllResponses()
-    }
-
-    return (
-        <>
-            {hasResponses ? (
-                <AssistantToolbar
-                    suggestions={suggestions}
-                    onAsk={handleAskAI}
-                    onClear={handleClearResponses}
-                    isLoading={isClearing}
-                />
-            ) : (
-                <AssistantWelcome
-                    suggestions={suggestions}
-                    onAsk={handleAskAI}
-                />
-            )}
-
-
-            {loadingResponses && (
-                <div className="rounded-xl border border-slate-200 bg-white p-4 animate-pulse">
-                    <div className="space-y-3">
-                        <div className="h-3 bg-slate-200 rounded w-3/4" />
-                        <div className="h-3 bg-slate-200 rounded w-full" />
-                        <div className="h-3 bg-slate-200 rounded w-5/6" />
-                    </div>
-                </div>
-            )}
-
-            <div className="p-4">
-                {aiResponses?.map((response) => (
-                    <AIInsight
-                        key={response.id}
-                        response={response}
-                    />
-                ))}
-
-                {
-                    isAIGenerating &&
-                    <div className="rounded-xl border border-slate-200 bg-white p-4 animate-pulse mb-5">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Sparkles className="w-4 h-4 text-[#378ADD]" />
-                            <span className="text-sm font-medium text-gray-700">
-                                Generating insights...
-                            </span>
-                        </div>
-
-                        <div className="space-y-3">
-                            <div className="h-3 bg-slate-200 rounded w-3/4" />
-                            <div className="h-3 bg-slate-200 rounded w-full" />
-                            <div className="h-3 bg-slate-200 rounded w-5/6" />
-                        </div>
-                    </div>
-                }
-
-
-                <div ref={bottomRef} />
-            </div>
-        </>
-
-    )
-}
-
-export default AIAssistant
