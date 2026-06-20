@@ -1,5 +1,4 @@
 from rest_framework import status
-import time
 
 from core.permission_views import MemberBaseView
 from core.responses.api_response import success_response, error_response
@@ -7,7 +6,7 @@ from . import serializers, exceptions
 from . import ai_services
 from django.conf import settings
 from .schemas.improve_idea import ImproveIdeaResponse
-from .schemas.ai_assistant import GoalSummaryResponse
+from .schemas.ai_assistant import GoalIdeaSuggestionsResponse
 from core.constants.error_codes import ErrorCode
 
 
@@ -26,7 +25,7 @@ class ImproveIdeaView(MemberBaseView):
                 data=ImproveIdeaResponse.mock_response().model_dump()
             )
 
-        service = ai_services.AIService()
+        service = ai_services.ImproveIdeaService()
 
         try:
             result = service.improve_idea(**serializer.validated_data)
@@ -52,13 +51,8 @@ class AIAssistantView(MemberBaseView):
     
     def post(self, request, **kwargs):
 
-        action = request.data.get("type")
-
-        # mock ai fallback for testing
-        if settings.USE_MOCK_AI:
-            return success_response(
-                data=GoalSummaryResponse.mock_summary().model_dump()
-            )
+        serializer = serializers.AIAssistantRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         assistant = ai_services.GoalAssistantService(
             current_user=request.user,
@@ -66,15 +60,10 @@ class AIAssistantView(MemberBaseView):
             goal_id=kwargs["goal_id"],
         )
 
-        res_data = None
-
-        if action == "summarize":
-            
-            summary = assistant.summarize()
-            res_data = serializers.AIAssistantResponseSerializer(summary).data
+        ai_response = assistant.execute(action=serializer.validated_data["type"])
 
         return success_response(
-            data=res_data,
+            data=serializers.AIAssistantResponseSerializer(ai_response).data,
             status_code=status.HTTP_201_CREATED
         )
 

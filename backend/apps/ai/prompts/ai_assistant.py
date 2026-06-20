@@ -17,3 +17,6 @@ def build_summary_prompt(context):
 
     {context}
     """
+
+def build_idea_suggestions_prompt(context):
+    pass

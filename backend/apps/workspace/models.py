@@ -1,11 +1,13 @@
 from django.db import models
 from apps.user.models import User
 from core.models import BaseAbstractModel, WorkspaceScopedBaseModel
+from django.db.models import Q
+
 
 class Workspace(BaseAbstractModel):
 
     name = models.CharField(max_length=255)
-    slug = models.CharField(max_length=255, unique=True)
+    slug = models.CharField(max_length=255)
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="owned_workspaces"
     )
@@ -13,6 +15,15 @@ class Workspace(BaseAbstractModel):
 
     class Meta:
         db_table = "workspaces"
+        # Enforce unique slugs for active workspaces only.
+        # Deleted workspace slugs can be reused.
+        constraints = [
+            models.UniqueConstraint(
+                fields=["slug"],
+                condition=Q(is_deleted=False),
+                name="unique_active_workspace_slug",
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -48,9 +59,3 @@ class WorkspaceMember(WorkspaceScopedBaseModel):
 
     def __str__(self):
         return f"{self.user} - {self.workspace} ({self.role})"
-
-
-
-
-
-

@@ -5,11 +5,11 @@ from core.models import WorkspaceScopedBaseModel
 
 class AIAssistantResponse(WorkspaceScopedBaseModel):
 
-    class InsightType(models.TextChoices):
+    class ResponseType(models.TextChoices):
         SUMMARY = "summary", "Summary"
         BLOCKERS = "blockers", "Blockers"
+        IDEA_SUGGESTIONS = "idea_suggestions", "Idea Suggestions"
         CHAT = "chat", "Chat"
-        RECOMMENDATIONS = "recommendations", "Recommendations"
 
     goal = models.ForeignKey(
         "goal.Goal",
@@ -25,7 +25,7 @@ class AIAssistantResponse(WorkspaceScopedBaseModel):
 
     type = models.CharField(
         max_length=30,
-        choices=InsightType.choices
+        choices=ResponseType.choices
     )
 
     content = models.JSONField()

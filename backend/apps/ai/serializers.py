@@ -14,6 +14,11 @@ class ImproveIdeaRequestSerializer(
         required=False,
     )
 
+class AIAssistantRequestSerializer(serializers.Serializer):
+    type = serializers.ChoiceField(
+        choices=AIAssistantResponse.ResponseType.choices
+    )
+
 
 class AIAssistantResponseSerializer(serializers.ModelSerializer):
 

@@ -32,7 +32,7 @@ class GeminiProvider(AIProvider):
 
         return response.text
     
-    def generate_structured(
+    def _generate_structured(
         self,
         prompt: str,
         schema,
