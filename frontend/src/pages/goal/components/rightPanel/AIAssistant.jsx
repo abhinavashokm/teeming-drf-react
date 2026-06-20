@@ -1,9 +1,12 @@
 import { Lock, Sparkles } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import useAIAssistant from '../../../../hooks/ai/useAIAssistant';
 import useAIAssistantResponses from '../../../../hooks/ai/useAIAssistantResponses';
 import useClearAllAIResponses from '../../../../hooks/ai/useClearAllAIResponses';
 import { formatDateTime } from '../../../../utils/timeUtils';
+import ChatBubble from '../../../../components/chat/ChatBubble';
+import useAuth from '../../../../hooks/auth/useAuth';
+import AIResponseBubble from '../../../../components/chat/AIResponseBubble';
 
 
 const quickActions = [
@@ -12,10 +15,6 @@ const quickActions = [
         type: 'idea_suggestions',
         responseTitle: 'Idea Suggestions'
     },
-    // {
-    //     label: 'Find blockers',
-    //     type: 'blockers'
-    // },
     {
         label: 'Summarize progress',
         type: 'summary',
@@ -27,18 +26,24 @@ const actionMap = {
     idea_suggestions: {
         label: 'Suggest ideas',
         responseTitle: 'Idea Suggestions',
+        requestText: "suggest some ideas",
     },
     summary: {
         label: 'Summarize progress',
         responseTitle: 'Goal Summary',
+        requestText: "summarize progress",
+    },
+    custom_chat: {
+        responseTitle: 'Custom Chat'
     },
 };
 
-function AIAssistant() {
+function AIAssistant({ pendingAIMessage, setPendingAIMessage, isAIChatResGenerating }) {
 
     const { data: aiResponses, isPending: loadingResponses } = useAIAssistantResponses()
     const hasResponses = aiResponses?.length > 0;
 
+    const { data: currentUser } = useAuth()
     const { mutate: askAI, isPending: isAIGenerating } = useAIAssistant()
     const { mutate: clearAllResponses, isPending: isClearing } = useClearAllAIResponses()
 
@@ -49,19 +54,19 @@ function AIAssistant() {
             behavior: 'smooth',
             block: 'end',
         });
-    }, [aiResponses?.length, isAIGenerating]);
+    }, [aiResponses?.length, isAIGenerating, pendingAIMessage]);
 
     /* -------------------------------------------------------------------------- */
     /* handle ask questions or suggestions to ai */
     /* -------------------------------------------------------------------------- */
-    const handleAskAI = (type, message = null) => {
-        const reqData = { type: type }
+    const handleAskAI = (type) => {
+        setPendingAIMessage(actionMap[type].requestText)
 
-        if (message) {
-            reqData.message = message
-        }
-
-        askAI(reqData)
+        askAI({ type: type }, {
+            onSettled: () => {
+                setPendingAIMessage(null)
+            }
+        })
     }
 
     const handleClearResponses = () => {
@@ -98,25 +103,37 @@ function AIAssistant() {
                     <AIResponse
                         key={response.id}
                         response={response}
+                        currentUser={currentUser}
                     />
                 ))}
 
                 {
-                    isAIGenerating &&
-                    <div className="rounded-xl border border-slate-200 bg-white p-4 animate-pulse mb-5">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Sparkles className="w-4 h-4 text-[#378ADD]" />
-                            <span className="text-sm font-medium text-gray-700">
-                                Generating insights...
-                            </span>
-                        </div>
+                    (pendingAIMessage) &&
+                    <>
 
-                        <div className="space-y-3">
-                            <div className="h-3 bg-slate-200 rounded w-3/4" />
-                            <div className="h-3 bg-slate-200 rounded w-full" />
-                            <div className="h-3 bg-slate-200 rounded w-5/6" />
+                        <ChatBubble
+                            content={pendingAIMessage}
+                            isMine
+                            sender={currentUser}
+                            createdAt={Date.now()}
+                            className="mb-2"
+                        />
+
+                        <div className="rounded-xl border border-slate-200 bg-white p-4 animate-pulse mb-5">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Sparkles className="w-4 h-4 text-[#378ADD]" />
+                                <span className="text-sm font-medium text-gray-700">
+                                    Thinking...
+                                </span>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="h-3 bg-slate-200 rounded w-3/4" />
+                                <div className="h-3 bg-slate-200 rounded w-full" />
+                                <div className="h-3 bg-slate-200 rounded w-5/6" />
+                            </div>
                         </div>
-                    </div>
+                    </>
                 }
 
 
@@ -133,61 +150,29 @@ export default AIAssistant
 /* -------------------------------------------------------------------------- */
 /* sub components - AIResponse */
 /* -------------------------------------------------------------------------- */
-function AIResponse({ response }) {
-    console.log(response)
+function AIResponse({ response, currentUser }) {
+    const type = response.type
+
     return (
-        <div className="mb-4 rounded-lg border border-slate-200 bg-white">
+        <div className="mb-6">
 
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                    <Sparkles className="w-3.5 h-3.5 text-[#378ADD]" />
+            <ChatBubble
+                content={type === 'custom_chat' ? response.requestText : actionMap[response.type].requestText}
+                isMine
+                showAvatar={false}
+                showSender={false}
+                className="mb-3"
+            />
 
-                    <span className="text-xs font-medium text-slate-700">
-                        {actionMap[response.type]?.responseTitle}
-                    </span>
-                </div>
+            {/* AI RESPONSE */}
+            <AIResponseBubble
+                response={response}
+                actionMap={actionMap}
+            />
 
-                <span className="text-[11px] text-slate-400">
-                    {formatDateTime(response.createdAt)}
-                </span>
-            </div>
-
-            <div className="p-4 space-y-4">
-                {response.content.sections.map((section, index) => (
-                    <div key={index}>
-                        <h4 className="text-xs font-medium text-slate-500 mb-2">
-                            {section.title}
-                        </h4>
-
-                        {section.type === 'text' && (
-                            <p className="text-sm text-slate-700 leading-relaxed">
-                                {section.body}
-                            </p>
-                        )}
-
-                        {section.type === 'list' && (
-                            <ul className="space-y-1.5">
-                                {section.body.map((item, itemIndex) => (
-                                    <li
-                                        key={itemIndex}
-                                        className="flex gap-2 text-sm text-slate-700"
-                                    >
-                                        <span className="text-slate-400 mt-[2px]">
-                                            •
-                                        </span>
-
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                ))}
-            </div>
         </div>
     );
 }
-
 
 /* -------------------------------------------------------------------------- */
 /* sub components - AssistantWelcome */

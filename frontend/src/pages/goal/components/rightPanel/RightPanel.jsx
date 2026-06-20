@@ -4,6 +4,8 @@ import MemberAvatar from "../../../../components/team/MemberAvatar";
 import useAuth from "../../../../hooks/auth/useAuth";
 import AIAssistant from './AIAssistant';
 import GroupDiscussion from './GroupDiscussion';
+import useDiscussion from '../../../../hooks/discussion/useDiscussion';
+import useAIAssistant from '../../../../hooks/ai/useAIAssistant';
 
 const MessageStatus = ({ status = 'sent' }) => {
     if (status === 'sent') return (
@@ -22,18 +24,35 @@ const MessageStatus = ({ status = 'sent' }) => {
     return null;
 };
 
-function DiscussionPanel({ onClose, isMobile }) {
+function RightPanel({ onClose, isMobile }) {
 
     const [mode, setMode] = useState('discussion');
     const [input, setInput] = useState('');
+    const [pendingAIMessage, setPendingAIMessage] = useState(null);
 
     const { data: currentUser } = useAuth();
+    const { sendMessage, isLoading } = useDiscussion();
 
+    /* -------------------------------------------------------------------------- */
+    /* handle send message (ask ai/send group message) */
+    /* -------------------------------------------------------------------------- */
+    const { mutate: askAI, isPending: isAIChatResGenerating } = useAIAssistant()
 
     const handleSend = () => {
         if (!input.trim()) return;
 
-        sendMessage(input.trim());
+        if (mode === 'discussion') {
+            sendMessage(input.trim());
+
+        } else if (mode === 'ai') {
+            setPendingAIMessage(input);
+            askAI({ type: "custom_chat", message: input.trim() }, {
+                onSettled: () => {
+                    setPendingAIMessage(null)
+                }
+            })
+        }
+
         setInput('');
     };
 
@@ -91,7 +110,11 @@ function DiscussionPanel({ onClose, isMobile }) {
 
                 ) : (
 
-                    <AIAssistant />
+                    <AIAssistant
+                        pendingAIMessage={pendingAIMessage}
+                        setPendingAIMessage={setPendingAIMessage}
+                        isAIChatResGenerating={isAIChatResGenerating}
+                    />
 
                 )}
 
@@ -108,7 +131,11 @@ function DiscussionPanel({ onClose, isMobile }) {
 
                     <div className="flex-1 min-w-0 flex items-start bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 gap-2 focus-within:border-[#378ADD] focus-within:ring-2 focus-within:ring-[#378ADD]/10 transition-all">
                         <textarea
-                            placeholder="Share an update..."
+                            placeholder={
+                                mode === 'discussion'
+                                    ? 'Share an update...'
+                                    : 'Ask AI about this goal...'
+                            }
                             value={input}
                             onChange={(e) => {
                                 setInput(e.target.value);
@@ -162,4 +189,4 @@ function DiscussionPanel({ onClose, isMobile }) {
     );
 }
 
-export default DiscussionPanel;
+export default RightPanel;

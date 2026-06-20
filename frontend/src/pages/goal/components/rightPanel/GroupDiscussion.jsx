@@ -9,8 +9,8 @@ import { formatDateTime } from '../../../../utils/timeUtils';
 
 function GroupDiscussion() {
 
-    const { messages, sendMessage, isLoading } = useDiscussion();
     const { data: currentUser } = useAuth();
+    const { messages } = useDiscussion();
 
     const bottomRef = useRef(null);
 
@@ -18,12 +18,6 @@ function GroupDiscussion() {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const handleSend = () => {
-        if (!input.trim()) return;
-
-        sendMessage(input.trim());
-        setInput('');
-    };
 
     return (
         <div className="p-4">
