@@ -95,7 +95,19 @@ const authService = {
     updateUserProfile: async (data) => {
         const res = await api.patch(`/auth/me/`, data)
         return res.data
-    }
+    },
+
+    createProfilePicUploadUrl: async (data) => {
+        const res = await api.post(`/auth/me/avatar/upload-url/`, data)
+        return res.data
+    },
+
+    //react -> drf (for saving filekey in the workspace db table)
+    saveProfilePic: async (data) => {
+        const res = await api.post(`/auth/me/avatar/`, data);
+        return res.data;
+    },
+
 }
 
 export default authService

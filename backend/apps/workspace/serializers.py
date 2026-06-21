@@ -3,7 +3,7 @@ import re
 from rest_framework import serializers
 from .models import Workspace, WorkspaceMember
 from apps.subscription.serializers import WorkspaceSubscriptionSerializer
-from django.conf import settings
+from core.services import s3_service
 
 
 class WorkspaceSlugValidationMixin:
@@ -72,16 +72,7 @@ class WorkspaceUpdateSerializer(
 class BuildWorkspaceLogoUrlMixin:
 
     def get_logo_url(self, obj):
-
-        if not obj.logo_key:
-            return None
-
-        return (
-            f"https://{settings.AWS_STORAGE_BUCKET_NAME}"
-            f".s3.{settings.AWS_S3_REGION_NAME}"
-            f".amazonaws.com/"
-            f"{obj.logo_key}"
-        )
+        return s3_service.build_s3_url(file_key=obj.logo_key)
 
 
 class BaseWorkspaceSerializer(BuildWorkspaceLogoUrlMixin, serializers.ModelSerializer):
@@ -120,10 +111,15 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
     user_id = serializers.UUIDField(source="user.id")
     full_name = serializers.CharField(source="user.full_name")
     email = serializers.EmailField(source="user.email")
+    avatar_url = serializers.SerializerMethodField()
+
 
     class Meta:
         model = WorkspaceMember
-        fields = ["id", "user_id", "full_name", "email", "role", "joined_at"]
+        fields = ["id", "role", "joined_at", "user_id", "full_name", "email", "avatar_url"]
+
+    def get_avatar_url(self, obj):
+        return s3_service.build_s3_url(obj.user.avatar_key)
 
 
 class WorkspaceRoleUpdateSerializer(serializers.ModelSerializer):

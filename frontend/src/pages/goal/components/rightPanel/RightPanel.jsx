@@ -124,8 +124,7 @@ function RightPanel({ onClose, isMobile }) {
             <div className="shrink-0 px-4 py-3 bg-white border-t border-gray-200 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
                 <div className="flex items-center gap-2.5">
                     <MemberAvatar
-                        name={currentUser.fullName}
-                        email={currentUser.email}
+                        user={currentUser}
                         size="sm"
                     />
 

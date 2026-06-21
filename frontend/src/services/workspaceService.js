@@ -56,24 +56,7 @@ export const workspaceService = {
         return res.data
     },
 
-    //react -> s3 bucket
-    uploadLogoToS3: async (uploadUrl, file) => {
-        const res = await fetch(uploadUrl, {
-            method: "PUT",
-            headers: {
-                "Content-Type": file.type,
-            },
-            body: file,
-        });
-
-        if (!res.ok) {
-            throw new Error("Failed to upload logo");
-        }
-
-        return true;
-    },
-
-    //react -> drf (for saving filekey in the workspace db table)
+    //(for saving filekey in the workspace db table)
     saveWorkspaceLogo: async (slug, fileKey) => {
         const res = await api.post(`/workspaces/${slug}/logo/`,{ logoKey: fileKey });
         return res.data;

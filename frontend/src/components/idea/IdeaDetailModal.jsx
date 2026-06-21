@@ -243,8 +243,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                     {assignees.slice(0, 3).map(member => (
                                         <MemberAvatar
                                             key={member.id}
-                                            name={member.fullName}
-                                            email={member.email}
+                                            user={member}
                                             className="ring-2 ring-gray-50"
                                         />
                                     ))}
@@ -277,8 +276,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                         className="flex items-center gap-3 rounded-lg bg-gray-100/70 px-3 py-2.5"
                                     >
                                         <MemberAvatar
-                                            name={member.fullName}
-                                            email={member.email}
+                                            user={member}
                                         />
 
                                         <div className="min-w-0">

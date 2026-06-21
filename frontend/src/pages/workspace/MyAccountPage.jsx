@@ -2,15 +2,17 @@ import { Camera, Lock, Mail, UserMinus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import useAuth from "../../hooks/auth/useAuth";
 import useUpdateProfile from '../../hooks/profile/useUpdateProfile';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import FormField from '../../components/ui/form/FormField';
 import InputField from '../../components/ui/form/InputField';
 import AppButton from '../../components/ui/buttons/AppButton';
+import MemberAvatar from '../../components/team/MemberAvatar';
+import useUploadProfilePic from '../../hooks/profile/useUploadProfilePic';
 
 function MyAccountPage() {
 
     const { data: currentUser } = useAuth()
-    const { mutate: updateProfile, isPending } = useUpdateProfile()
+    const { mutateAsync: updateProfile, isPending: updatingProfileDetails } = useUpdateProfile()
 
     const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
         defaultValues: {
@@ -28,12 +30,52 @@ function MyAccountPage() {
 
     }, [currentUser, reset])
 
-    const handleUpdateProfile = (data) => {
-        updateProfile(data, {
-            onSuccess: (res) => {
-                reset()
+    /* -------------------------------------------------------------------------- */
+    /* upload profile picture */
+    /* -------------------------------------------------------------------------- */
+    const { mutateAsync: uploadProfilePicture, isPending: uploadingProfilePicture } = useUploadProfilePic()
+    const fileInputRef = useRef(null);
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState(null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        setAvatarFile(file);
+        setAvatarPreview(URL.createObjectURL(file));
+    };
+
+    // clean up preview urls
+    useEffect(() => {
+        return () => {
+            if (avatarPreview) {
+                URL.revokeObjectURL(avatarPreview);
             }
-        })
+        };
+    }, [avatarPreview]);
+
+    /* -------------------------------------------------------------------------- */
+    /* update profile details */
+    /* -------------------------------------------------------------------------- */
+    const handleUpdateProfile = async (data) => {
+        try {
+
+            if (avatarFile) {
+                await uploadProfilePicture(avatarFile);
+            }
+
+            updateProfile(data, {
+                onSuccess: () => {
+                    setAvatarFile(null);
+                    reset();
+                }
+            })
+
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     return (
@@ -60,22 +102,50 @@ function MyAccountPage() {
 
                         {/* Avatar Upload */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                            <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white text-xl font-medium shrink-0 relative group cursor-pointer overflow-hidden">
-                                {currentUser.fullName[0].toUpperCase()}
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+
+                            {/* hidden input for profile pic Upload */}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="relative group cursor-pointer rounded-full overflow-hidden w-16 h-16 shrink-0"
+                            >
+                                <MemberAvatar
+                                    user={currentUser}
+                                    preview={avatarPreview}
+                                    size="xl"
+                                />
+
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
                                     <Camera className="h-5 w-5 text-white" />
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <button className="px-3.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="px-3.5 py-1.5 bg-white border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                                >
                                     Upload new photo
                                 </button>
-                                <button className="px-3.5 py-1.5 text-[13px] font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setAvatarFile(null);
+                                        setAvatarPreview(null);
+                                    }}
+                                    className="px-3.5 py-1.5 text-[13px] font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                >
                                     Remove
                                 </button>
                             </div>
                         </div>
-
                         <div className="space-y-5">
 
                             <FormField label="Full Name" >
@@ -97,18 +167,18 @@ function MyAccountPage() {
 
                         <AppButton
                             variant="dark"
-                            disabled={!isDirty}
-                            loading={isPending}
+                            disabled={!isDirty && !avatarFile}
+                            loading={updatingProfileDetails || uploadingProfilePicture}
                             onClick={handleSubmit(handleUpdateProfile)}
                         >
-                            {isPending ? "Saving..." : "Save Changes"}
+                            {updatingProfileDetails || uploadingProfilePicture ? "Saving..." : "Save Changes"}
                         </AppButton>
 
                     </div>
                 </section>
 
                 {/* Security Section */}
-                <section className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                {/* <section className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                     <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
                         <div>
                             <h2 className="text-[15px] font-semibold text-gray-900 tracking-tight">Password & Security</h2>
@@ -128,10 +198,10 @@ function MyAccountPage() {
                             Update Password
                         </button>
                     </div>
-                </section>
+                </section> */}
 
                 {/* Danger Zone */}
-                <section className="bg-red-50/50 border border-red-100 rounded-xl overflow-hidden">
+                {/* <section className="bg-red-50/50 border border-red-100 rounded-xl overflow-hidden">
                     <div className="px-6 py-5 border-b border-red-100">
                         <h2 className="text-[15px] font-semibold text-red-900 tracking-tight">Danger Zone</h2>
                         <p className="text-[13px] text-red-700/80 mt-1">Irreversible and destructive actions.</p>
@@ -147,7 +217,7 @@ function MyAccountPage() {
                             Delete Account
                         </button>
                     </div>
-                </section>
+                </section> */}
 
             </div>
         </div>

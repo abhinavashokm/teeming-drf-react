@@ -3,20 +3,29 @@ from rest_framework import serializers
 from .models import User
 from core.constants.error_codes import ErrorCode
 from apps.workspace.serializers import BaseWorkspaceSerializer
+from core.services import s3_service
 
 
-class UserBasicSerializer(serializers.ModelSerializer):
+class GetAvatarUrlMixin(serializers.Serializer):
+    avatar_url = serializers.SerializerMethodField()
+
+    def get_avatar_url(self, obj):
+        return s3_service.build_s3_url(obj.avatar_key)
+    
+
+class UserBasicSerializer(GetAvatarUrlMixin, serializers.ModelSerializer):
+    
     class Meta:
         model = User
-        fields = ('id', 'full_name', 'email')
+        fields = ('id', 'full_name', 'email', "avatar_url")
 
 
-class MeSerilaizer(serializers.ModelSerializer):
+class MeSerilaizer(GetAvatarUrlMixin, serializers.ModelSerializer):
     last_workspace = BaseWorkspaceSerializer()
 
     class Meta:
         model = User
-        fields = ('id', 'full_name', 'email', "last_workspace")
+        fields = ('id', 'full_name', 'email', "last_workspace", "avatar_url")
         
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -110,3 +119,14 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['full_name']
+
+
+class UserAvatarUploadURLSerializer(serializers.Serializer):
+    content_type = serializers.CharField()
+
+
+class UserAvatarUrlSaveSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["avatar_key"]

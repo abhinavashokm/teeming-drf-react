@@ -3,6 +3,7 @@ import { workspaceService } from "../../services/workspaceService";
 import useAppMutation from "../base/useAppMutation";
 import useWorkspaceQueryKeys from "../helper/useWorkspaceQueryKeys";
 import useWorkspace from "./useWorkspace";
+import { s3Service } from "../../services/s3Service";
 
 const useUploadWorkspaceLogo = () => {
 
@@ -17,7 +18,7 @@ const useUploadWorkspaceLogo = () => {
           currentWorkspace.slug, file.type
         );
 
-      await workspaceService.uploadLogoToS3(
+      await s3Service.uploadLogoToS3(
         uploadUrl,
         file
       );

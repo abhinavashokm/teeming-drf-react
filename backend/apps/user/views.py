@@ -23,7 +23,7 @@ from . import exceptions, user_services, serializers
 from .helpers import cookie_helper
 from core.throttles import AuthThrottle, SensitiveThrottle
 from apps.invitation.serializers import JoinedWorkspaceSerializer
-from .models import User
+from core.services import s3_service
 
 
 class RegisterView(APIView):
@@ -306,3 +306,39 @@ class ValidateResetTokenView(APIView):
         return success_response(
             message="password reset token verified", status_code=status.HTTP_200_OK
         )
+    
+
+class UserAvatarUploadURLView(APIView):
+    
+    def post(self, request, **kwargs):
+
+        serializer = serializers.UserAvatarUploadURLSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        res_data = s3_service.generate_user_avatar_upload_url(
+            user=request.user,
+            content_type=serializer.validated_data["content_type"]
+        )
+
+        return success_response(
+            data=res_data
+        )
+
+
+class SaveUserAvatarUrlView(APIView):
+
+    def post(self, request, **kwargs):
+
+        print(request.data)
+
+        serializer = serializers.UserAvatarUrlSaveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        print(serializer.validated_data)
+
+        user_services.save_user_avatar_key(
+            user=request.user,
+            avatar_key=serializer.validated_data["avatar_key"]
+        )
+
+        return success_response()

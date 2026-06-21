@@ -19,7 +19,7 @@ from core.permissions import IsWorkspaceMember, IsWorkspaceAdmin, IsWorkspaceOwn
 from apps.subscription import subscription_services
 from apps.goal import goal_services
 from apps.user import user_services
-from core.services.s3_service import S3Service
+from core.services import s3_service
 
 
 class ListUserWorkspacesView(APIView):
@@ -220,7 +220,7 @@ class WorkspaceLogoUploadURLView(MemberBaseView):
         serializer = serializers.WorkspaceLogoUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        data = S3Service.generate_workspace_logo_upload_url(
+        data = s3_service.generate_workspace_logo_upload_url(
             workspace=request.workspace,
             content_type=serializer.validated_data["content_type"]
         )
@@ -233,7 +233,6 @@ class WorkspaceLogoUploadURLView(MemberBaseView):
 class SaveWorkspaceLogoUrlView(MemberBaseView):
 
     def post(self, request, **kwargs):
-        print("call is on save logo")
 
         serializer = serializers.WorkspaceLogoSaveSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

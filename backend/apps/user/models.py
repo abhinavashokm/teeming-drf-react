@@ -38,7 +38,7 @@ class User(BaseAbstractModel, AbstractUser):
 
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
-    avatar_url = models.URLField(blank=True, null=True)
+    avatar_key = models.CharField(max_length=500, blank=True, null=True)
 
     current_plan = models.CharField(
         default=PlanChoices.FREE,
@@ -66,6 +66,9 @@ class User(BaseAbstractModel, AbstractUser):
     last_name = None
 
     objects = UserManager()
+
+    class Meta:
+        db_table="users"
 
     def __str__(self):
         return self.email

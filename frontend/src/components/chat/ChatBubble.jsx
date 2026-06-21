@@ -24,8 +24,7 @@ function ChatBubble({
 
             {showAvatar && sender && (
                 <MemberAvatar
-                    name={sender.fullName}
-                    email={sender.email}
+                    user={sender}
                     size="sm"
                 />
             )}

@@ -311,7 +311,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
             title={!sidebarContentExpanded ? 'Profile' : ''}
           >
             <div className="flex items-center gap-3">
-              <MemberAvatar name={currentUser.fullName} email={currentUser.email} />
+              <MemberAvatar user={currentUser} />
               {sidebarContentExpanded && (
                 <div className="flex flex-col min-w-0 text-left">
                   <span className="text-[14px] font-medium text-gray-900 truncate leading-tight">{currentUser.fullName}</span>

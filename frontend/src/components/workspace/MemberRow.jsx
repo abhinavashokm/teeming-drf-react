@@ -36,7 +36,7 @@ function MemberRow({ member }) {
 ">
             {/* Name — full width on mobile, 5 cols on desktop */}
             <div className="sm:col-span-5 flex items-center gap-3 min-w-0">
-                <MemberAvatar name={member.fullName} email={member.email} showYou={isCurrentUser} />
+                <MemberAvatar user={member} showYou={isCurrentUser} />
                 <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-[13px] font-medium text-gray-900 truncate">{member.fullName}</p>

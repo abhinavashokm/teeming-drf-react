@@ -81,7 +81,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
 
                 <div className={`flex items-start gap-2.5 ${state === 'in_progress' ? 'mb-4' : 'mb-3'}`}>
                     {state === 'draft' && (
-                        <MemberAvatar name={currentIdea.createdBy.fullName} email={currentIdea.createdBy.email} size='sm' />
+                        <MemberAvatar user={currentIdea.createdBy} size='sm' />
                     )}
                     <div className="flex-1 min-w-0 pr-1">
                         <p className={`text-[14px] font-medium transition-colors leading-snug ${titleClass}`}>
@@ -150,8 +150,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                                 {currentIdea.assignees?.map((assignee) => (
                                     <MemberAvatar
                                         key={assignee.id}
-                                        name={assignee.fullName}
-                                        email={assignee.email}
+                                        user={assignee}
                                         size="xs"
                                     />
                                 ))}
@@ -166,7 +165,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                         <>
                             <div className="flex -space-x-1.5">
                                 {currentIdea.assignees?.map((assignee, i) => (
-                                    <MemberAvatar key={assignee.id} name={assignee.fullName} email={assignee.email} size='xs' />
+                                    <MemberAvatar key={assignee.id} user={assignee} size='xs' />
                                 ))}
                             </div>
                             <div className="flex items-center gap-1 text-amber-600 text-[11.5px] font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
@@ -181,7 +180,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                                 <CheckCircle2 className="w-4 h-4 text-green-500" />
                                 <div className="flex -space-x-1.5">
                                     {currentIdea.assignees?.map((assignee, i) => (
-                                        <MemberAvatar key={assignee.id} name={assignee.fullName} email={assignee.email} size='xs' />
+                                        <MemberAvatar key={assignee.id} user={assignee} size='xs' />
                                     ))}
                                 </div>
                             </div>
