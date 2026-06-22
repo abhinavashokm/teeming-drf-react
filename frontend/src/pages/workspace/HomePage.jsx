@@ -16,6 +16,7 @@ import useWelcomeBanner from '../../hooks/invite/useWelcomeBanner';
 import { useCan } from '../../hooks/permissions/useCan';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { cn } from '../../utils/cn';
+import { workspaceRoles } from '../../constants/workspaceConstants';
 
 
 function HomePage() {
@@ -67,7 +68,7 @@ function HomePage() {
             <div className="flex-1">
               <p className="text-[14px] font-medium text-[#085041]">Welcome to {currentWorkspace.name}!</p>
               <p className="text-[12px] text-[#0F6E56] leading-relaxed mt-0.5">
-                {currentWorkspace.role === 'Admin'
+                {currentWorkspace.role === workspaceRoles.ADMIN
                   ? `Hey ${currentUser.fullName.split(' ')[0]}! You've been added as an admin. You can manage goals, invite members, and configure settings.`
                   : `Hey ${currentUser.fullName.split(' ')[0]}! You've been added as a member. Explore goals and start contributing to ideas.`
                 }

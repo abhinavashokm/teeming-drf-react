@@ -9,6 +9,7 @@ import BaseModal from '../ui/modal/BaseModal';
 import { useNavigate } from 'react-router-dom';
 import { ROUTE_PATHS } from '../../constants/routePaths';
 import useWorkspaceSlug from '../../hooks/params/useWorkspaceSlug';
+import WorkspaceAvatar from "./WorkspaceAvatar"
 
 const initialState = {
     inputValue: '',
@@ -86,9 +87,10 @@ export default function InviteModal({ isOpen, onClose, memberLimit }) {
                 {/* Workspace row */}
                 <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-[10px] bg-emerald-600 text-white font-medium text-sm flex items-center justify-center">
-                            {currentWorkspace.name[0]}
-                        </div>
+                        <WorkspaceAvatar
+                            workspace={currentWorkspace}
+                            size="sm"
+                        />
                         <span className="text-[14px] font-medium text-gray-900">
                             {currentWorkspace.name}
                         </span>

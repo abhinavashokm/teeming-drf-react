@@ -77,7 +77,7 @@ function MoveToProgressModal({ isOpen, onClose, onBack, currentIdea }) {
                             {selectedMembers.map(member => (
                                 <div key={member.id} className="flex items-center gap-1.5 bg-blue-50 border border-[#378ADD]/30 rounded-md py-1 px-1.5">
                                     
-                                    <MemberAvatar name={member.fullName} email={member.email} size="sm" />
+                                    <MemberAvatar user={member} size="sm" />
 
                                     <span className="text-[12px] font-medium text-gray-700">{member.fullName}</span>
                                     <button onClick={() => setSelectedMembers(prev => prev.filter(u => u.id !== member.id))}>
@@ -117,7 +117,7 @@ function MoveToProgressModal({ isOpen, onClose, onBack, currentIdea }) {
                                         <div className="flex items-center gap-3">
 
                                             <MemberAvatar
-                                                name={member.fullName} email={member.email} size="sm"
+                                                user={member} size="sm"
                                             />
 
                                             <div>

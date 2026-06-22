@@ -12,7 +12,20 @@ function ChatBubble({
     showSender = true,
     children,
     className,
+    isLoading=false,
+    index=0,
 }) {
+    if (isLoading) {
+        return (
+            <ChatBubbleSkeleton
+                isMine={isMine}
+                index={index}
+                showAvatar={showAvatar}
+                className={className}
+            />
+        );
+    }
+
     return (
         <div
             className={cn(
@@ -92,3 +105,42 @@ const MessageStatus = ({ status = 'sent' }) => {
 
     return null;
 };
+
+/* -------------------------------------------------------------------------- */
+/* chat bubble skelton for loading state */
+/* -------------------------------------------------------------------------- */
+const WIDTHS = ['w-32', 'w-44', 'w-28', 'w-52', 'w-36', 'w-40'];
+
+function ChatBubbleSkeleton({ isMine = false, index = 0, showAvatar = true, className }) {
+    const width = WIDTHS[index % WIDTHS.length];
+
+    return (
+        <div
+            className={cn(
+                "flex gap-3 items-end animate-pulse",
+                isMine && "flex-row-reverse",
+                className
+            )}
+        >
+            {showAvatar && (
+                <div className="w-7 h-7 rounded-full bg-gray-200 shrink-0" />
+            )}
+
+            <div className={`flex flex-col gap-1 max-w-[78%] ${isMine ? 'items-end' : 'items-start'}`}>
+                {!isMine && (
+                    <div className="h-2.5 w-16 rounded bg-gray-200 mx-1" />
+                )}
+
+                <div
+                    className={cn(
+                        "h-9 rounded-2xl bg-gray-200",
+                        width,
+                        isMine ? 'rounded-br-md' : 'rounded-bl-md'
+                    )}
+                />
+
+                <div className="h-2 w-10 rounded bg-gray-100 mx-1" />
+            </div>
+        </div>
+    );
+}

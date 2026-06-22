@@ -14,7 +14,7 @@ function createSocket(path, { onOpen, onMessage, onError, onClose } = {}) {
 
         onError?.(error)
     }
-    socket.onclose = () => onClose?.()
+    socket.onclose = (event) => onClose?.(event)
 
     return socket
 }

@@ -1,16 +1,20 @@
+import { format, isToday, isYesterday } from "date-fns";
 import { MessageSquare } from 'lucide-react';
-import { useEffect, useRef } from 'react';
-import MemberAvatar from "../../../../components/team/MemberAvatar";
+import { useEffect, useMemo, useRef } from 'react';
+import ChatBubble from '../../../../components/chat/ChatBubble';
 import useAuth from "../../../../hooks/auth/useAuth";
-import useDiscussion from '../../../../hooks/discussion/useDiscussion';
-import { formatDateTime } from '../../../../utils/timeUtils';
+import { buildChatTimeline } from '../../../../utils/chatUtils';
+import { CHAT_ITEM_TYPES } from "../../../../constants/chatConstants";
+import { useGroupDiscussionWS } from "../../../../contexts/GroupDiscussionWSContext";
+
+
 
 
 
 function GroupDiscussion() {
 
+    const { messages, isLoading } = useGroupDiscussionWS()
     const { data: currentUser } = useAuth();
-    const { messages } = useDiscussion();
 
     const bottomRef = useRef(null);
 
@@ -18,81 +22,71 @@ function GroupDiscussion() {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    const chatItems = useMemo(
+        () => buildChatTimeline(messages),
+        [messages]
+    );
+
 
     return (
         <div className="p-4">
-            {messages?.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center px-6">
-                    <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
-                        <MessageSquare className="w-10 h-10 text-blue-300" />
-                    </div>
+            {
+                isLoading ?
 
-                    <h3 className="text-sm font-semibold text-gray-900">
-                        No discussion yet
-                    </h3>
+                    Array.from({ length: 6 }).map((_, i) => (
+                        <ChatBubble
+                            key={i}
+                            isLoading
+                            index={i}
+                            isMine={i % 3 === 1}
+                        />
+                    ))
+                    :
 
-                    <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
-                        Share updates, ask questions, and collaborate around this goal.
-                    </p>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {messages?.map((message) => {
-                        const isMe = message.sender.id === currentUser.id;
-
-                        return (
-                            <div
-                                key={message.id}
-                                className={`flex gap-3 items-end ${isMe ? 'flex-row-reverse' : ''
-                                    }`}
-                            >
-                                <MemberAvatar
-                                    name={message.sender.fullName}
-                                    email={message.sender.email}
-                                    size="sm"
-                                />
-
-                                <div
-                                    className={`flex flex-col gap-1 max-w-[78%] ${isMe ? 'items-end' : 'items-start'
-                                        }`}
-                                >
-                                    {!isMe && (
-                                        <span className="text-[11px] font-medium text-gray-500 px-1">
-                                            {message.sender.fullName}
-                                        </span>
-                                    )}
-
-                                    <div
-                                        className={`px-4 py-2.5 text-[13px] leading-relaxed shadow-sm [overflow-wrap:anywhere]
-                                                    ${isMe
-                                                ? 'bg-[#378ADD] text-white rounded-2xl rounded-br-md'
-                                                : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-md'
-                                            }`}
-                                    >
-                                        {message.content}
-                                    </div>
-
-                                    {isMe ? (
-                                        <div className="flex items-center gap-1 px-1">
-                                            <span className="text-[11px] text-gray-400">
-                                                {formatDateTime(message.createdAt)}
-                                            </span>
-
-                                            <MessageStatus status={message.status} />
-                                        </div>
-                                    ) : (
-                                        <span className="text-[11px] text-gray-400 px-1">
-                                            {formatDateTime(message.createdAt)}
-                                        </span>
-                                    )}
-                                </div>
+                    messages?.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center px-6">
+                            <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
+                                <MessageSquare className="w-10 h-10 text-blue-300" />
                             </div>
-                        );
-                    })}
 
-                    <div ref={bottomRef} />
-                </div>
-            )
+                            <h3 className="text-sm font-semibold text-gray-900">
+                                No discussion yet
+                            </h3>
+
+                            <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
+                                Share updates, ask questions, and collaborate around this goal.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {chatItems?.map((item, index) => {
+                                if (item.type === CHAT_ITEM_TYPES.DATE_DIVIDER) {
+                                    return (
+                                        <ChatDateDivider
+                                            key={`${CHAT_ITEM_TYPES.DATE_DIVIDER}-${new Date(item.date).toDateString()}`}
+                                            date={item.date}
+                                        />
+                                    );
+                                }
+
+                                const message = item.message
+                                const isMe = message.sender.id === currentUser.id;
+
+                                return (
+                                    <ChatBubble
+                                        key={message.id}
+                                        content={message.content}
+                                        createdAt={message.createdAt}
+                                        isMine={isMe}
+                                        sender={message.sender}
+                                        status={message.status}
+                                    />
+                                );
+                            })}
+
+                            <div ref={bottomRef} />
+                        </div>
+                    )
 
             } </div>
     )
@@ -120,3 +114,27 @@ const MessageStatus = ({ status = 'sent' }) => {
 
     return null;
 };
+
+
+/* -------------------------------------------------------------------------- */
+/* chat date divider */
+/* -------------------------------------------------------------------------- */
+const getDateLabel = (date) => {
+    const d = new Date(date);
+
+    if (isToday(d)) return "Today";
+    if (isYesterday(d)) return "Yesterday";
+
+    return format(d, "dd MMM yyyy");
+};
+
+function ChatDateDivider({ date }) {
+    return (
+        <div className="flex items-center justify-center my-4">
+            <span className="px-3 py-1 text-xs text-gray-500 bg-gray-100 rounded-full">
+                {getDateLabel(date)}
+            </span>
+        </div>
+    )
+}
+

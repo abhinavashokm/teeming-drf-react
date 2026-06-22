@@ -1,18 +1,20 @@
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { buildWorkspacePath } from '../../utils/routeUtils';
+import WorkspaceAvatar from '../workspace/WorkspaceAvatar';
+import {workspaceRoles} from "../../constants/workspaceConstants"
 
 function WorkspaceRow({ workspace }) {
     const roleColors = {
-        Owner: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-        Admin: 'text-blue-600 bg-blue-50 border-blue-100',
-        Member: 'text-gray-500 bg-gray-50 border-gray-200'
+        [workspaceRoles.OWNER]: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+        [workspaceRoles.ADMIN]: 'text-blue-600 bg-blue-50 border-blue-100',
+        [workspaceRoles.MEMBER]: 'text-gray-500 bg-gray-50 border-gray-200'
     };
 
     const navigate = useNavigate()
 
     const selectWorkspace = () => {
-       navigate(buildWorkspacePath(workspace.slug)) 
+        navigate(buildWorkspacePath(workspace.slug))
     }
 
     return (
@@ -27,9 +29,10 @@ function WorkspaceRow({ workspace }) {
     "
         >
             <div className="flex items-center gap-4 min-w-0">
-                <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center text-white text-[16px] font-semibold shadow-sm shrink-0">
-                    {workspace.name[0]}
-                </div>
+                <WorkspaceAvatar
+                    workspace={workspace}
+                    size="md"
+                />
 
                 <div className="flex flex-col min-w-0">
                     <h3 className="font-semibold text-gray-900 text-[16px] truncate mb-0.5">

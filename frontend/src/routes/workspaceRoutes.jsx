@@ -1,12 +1,12 @@
-import { elements } from "chart.js";
+import GoalDashboardLayout from "../layouts/GoalDashboardLayout";
 import WorkspaceLayout from "../layouts/WorkspaceLayout";
 import GoalDashboard from "../pages/goal/GoalDashboard";
+import SubscriptionPage from "../pages/subscription/SubscriptionPage";
+import SubscriptionSuccessPage from "../pages/subscription/SubscriptionSuccessPage";
 import HomePage from "../pages/workspace/HomePage";
 import ManageTeamPage from "../pages/workspace/ManageTeamPage";
 import MyAccountPage from "../pages/workspace/MyAccountPage";
 import WorkspaceSettingsPage from "../pages/workspace/WorkspaceSettingsPage";
-import SubscriptionPage from "../pages/subscription/SubscriptionPage";
-import SubscriptionSuccessPage from "../pages/subscription/SubscriptionSuccessPage";
 
 
 
@@ -41,7 +41,11 @@ const workspaceRoutes = {
         },
         {
             path: 'goals/:goalId',
-            element: <GoalDashboard />
+            element: <GoalDashboardLayout />,
+            children: [{
+                element: <GoalDashboard />,
+                index: true
+            }]
         }
     ]
 }

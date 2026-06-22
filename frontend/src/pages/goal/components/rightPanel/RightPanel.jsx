@@ -1,11 +1,11 @@
 import { MessageSquare, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
 import MemberAvatar from "../../../../components/team/MemberAvatar";
+import { useGroupDiscussionWS } from '../../../../contexts/GroupDiscussionWSContext';
+import useAIAssistant from '../../../../hooks/ai/useAIAssistant';
 import useAuth from "../../../../hooks/auth/useAuth";
 import AIAssistant from './AIAssistant';
 import GroupDiscussion from './GroupDiscussion';
-import useDiscussion from '../../../../hooks/discussion/useDiscussion';
-import useAIAssistant from '../../../../hooks/ai/useAIAssistant';
 
 const MessageStatus = ({ status = 'sent' }) => {
     if (status === 'sent') return (
@@ -31,7 +31,7 @@ function RightPanel({ onClose, isMobile }) {
     const [pendingAIMessage, setPendingAIMessage] = useState(null);
 
     const { data: currentUser } = useAuth();
-    const { sendMessage, isLoading } = useDiscussion();
+    const { sendMessage } = useGroupDiscussionWS();
 
     /* -------------------------------------------------------------------------- */
     /* handle send message (ask ai/send group message) */
@@ -106,7 +106,7 @@ function RightPanel({ onClose, isMobile }) {
 
                 {mode === 'discussion' ? (
 
-                    <GroupDiscussion />
+                    <GroupDiscussion /> 
 
                 ) : (
 
