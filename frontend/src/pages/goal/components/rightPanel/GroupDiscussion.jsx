@@ -6,92 +6,132 @@ import useAuth from "../../../../hooks/auth/useAuth";
 import { buildChatTimeline } from '../../../../utils/chatUtils';
 import { CHAT_ITEM_TYPES } from "../../../../constants/chatConstants";
 import { useGroupDiscussionWS } from "../../../../contexts/GroupDiscussionWSContext";
-
-
-
+import useGoalId from "../../../../hooks/params/useGoalId";
 
 
 function GroupDiscussion() {
 
-    const { messages, isLoading } = useGroupDiscussionWS()
+    const { messages, isLoading, loadMore, hasMore, isFetchingMore } = useGroupDiscussionWS()
     const { data: currentUser } = useAuth();
 
-    const bottomRef = useRef(null);
-
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+    const scrollRef = useRef(null)
+    const prevScrollHeightRef = useRef(0)
+    const isFirstLoad = useRef(true)
 
     const chatItems = useMemo(
         () => buildChatTimeline(messages),
         [messages]
     );
 
+    /* ------------------------------------------------------------------ */
+    /* Scroll to bottom on first load only                                 */
+    /* ------------------------------------------------------------------ */
+    const goalId = useGoalId()
+
+    useEffect(() => {
+        const el = scrollRef.current
+        if (!el || !messages.length) return
+
+        if (isFirstLoad.current) {
+            el.scrollTop = el.scrollHeight
+            isFirstLoad.current = false
+            return
+        }
+
+        // After new live message — only scroll to bottom if already near bottom
+        const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+        if (isNearBottom) {
+            el.scrollTop = el.scrollHeight
+        }
+    }, [messages, goalId])
+
+    /* ------------------------------------------------------------------ */
+    /* After prepend — restore scroll position so user doesn't jump        */
+    /* ------------------------------------------------------------------ */
+    useEffect(() => {
+        const el = scrollRef.current
+        if (!el || isFirstLoad.current) return
+
+        const diff = el.scrollHeight - prevScrollHeightRef.current
+        if (diff > 0 && prevScrollHeightRef.current > 0) {
+            el.scrollTop = diff
+            prevScrollHeightRef.current = 0  // reset after restore
+        }
+    }, [messages])
+
+    /* ------------------------------------------------------------------ */
+    /* Detect scroll near top → load more                                  */
+    /* ------------------------------------------------------------------ */
+    const handleScroll = () => {
+        const el = scrollRef.current
+        if (!el) return
+
+        if (el.scrollTop < 80 && hasMore && !isFetchingMore) {
+            prevScrollHeightRef.current = el.scrollHeight  // snapshot before fetch
+            loadMore()
+        }
+    }
 
     return (
-        <div className="p-4">
-            {
-                isLoading ?
+        // ✅ scroll container is now the outermost div
+        <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex-1 h-full overflow-y-auto p-4"
+        >
+            {/* Load more indicator — top of list */}
+            {isFetchingMore && (
+                <div className="text-center py-2 text-sm text-gray-400">Loading...</div>
+            )}
+            {!hasMore && messages.length > 0 && (
+                <div className="text-center py-2 text-sm text-gray-400">No more messages</div>
+            )}
 
-                    Array.from({ length: 6 }).map((_, i) => (
-                        <ChatBubble
-                            key={i}
-                            isLoading
-                            index={i}
-                            isMine={i % 3 === 1}
-                        />
-                    ))
-                    :
+            {isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                    <ChatBubble key={i} isLoading index={i} isMine={i % 3 === 1} />
+                ))
+            ) : messages?.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center px-6">
+                    <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
+                        <MessageSquare className="w-10 h-10 text-blue-300" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-gray-900">No discussion yet</h3>
+                    <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
+                        Share updates, ask questions, and collaborate around this goal.
+                    </p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {chatItems?.map((item) => {
+                        if (item.type === CHAT_ITEM_TYPES.DATE_DIVIDER) {
+                            return (
+                                <ChatDateDivider
+                                    key={`${CHAT_ITEM_TYPES.DATE_DIVIDER}-${new Date(item.date).toDateString()}`}
+                                    date={item.date}
+                                />
+                            );
+                        }
 
-                    messages?.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-center px-6">
-                            <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-5">
-                                <MessageSquare className="w-10 h-10 text-blue-300" />
-                            </div>
+                        const message = item.message
+                        const isMe = message.sender.id === currentUser.id;
 
-                            <h3 className="text-sm font-semibold text-gray-900">
-                                No discussion yet
-                            </h3>
-
-                            <p className="text-xs text-gray-500 mt-2 max-w-[240px] leading-relaxed">
-                                Share updates, ask questions, and collaborate around this goal.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {chatItems?.map((item, index) => {
-                                if (item.type === CHAT_ITEM_TYPES.DATE_DIVIDER) {
-                                    return (
-                                        <ChatDateDivider
-                                            key={`${CHAT_ITEM_TYPES.DATE_DIVIDER}-${new Date(item.date).toDateString()}`}
-                                            date={item.date}
-                                        />
-                                    );
-                                }
-
-                                const message = item.message
-                                const isMe = message.sender.id === currentUser.id;
-
-                                return (
-                                    <ChatBubble
-                                        key={message.id}
-                                        content={message.content}
-                                        createdAt={message.createdAt}
-                                        isMine={isMe}
-                                        sender={message.sender}
-                                        status={message.status}
-                                    />
-                                );
-                            })}
-
-                            <div ref={bottomRef} />
-                        </div>
-                    )
-
-            } </div>
+                        return (
+                            <ChatBubble
+                                key={message.id}
+                                content={message.content}
+                                createdAt={message.createdAt}
+                                isMine={isMe}
+                                sender={message.sender}
+                                status={message.status}
+                            />
+                        );
+                    })}
+                </div>
+            )}
+        </div>
     )
 }
-
 export default GroupDiscussion
 
 /* -------------------------------------------------------------------------- */

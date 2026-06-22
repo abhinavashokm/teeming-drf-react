@@ -59,6 +59,7 @@ build
 # ===================================
 # IDE & Editor
 # ===================================
+**/.vscode/
 .vscode/*
 !.vscode/extensions.json
 .idea

@@ -47,10 +47,11 @@ export const workspaceQueryKeys = {
         "notifications",
     ],
 
-    discussions: (slug, goal_id) => [
+    discussions: (slug, goal_id, page) => [
         ...root(slug),
         goal_id,
         "discussions",
+        page,
     ],
     ai_assistant_responses: (user_email, slug, goal_id) => [
         user_email,

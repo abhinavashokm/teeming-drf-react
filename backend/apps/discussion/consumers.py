@@ -4,6 +4,7 @@ from channels.db import database_sync_to_async
 
 from apps.goal.models import Goal
 from apps.discussion.models import DiscussionMessage
+from core.services import s3_service
 
 
 class DiscussionConsumer(AsyncWebsocketConsumer):
@@ -52,7 +53,8 @@ class DiscussionConsumer(AsyncWebsocketConsumer):
                 "sender": {
                     "id": str(message.sender.id),
                     "fullName": message.sender.full_name,
-                    "email": message.sender.email
+                    "email": message.sender.email,
+                    "avatarUrl": s3_service.build_s3_url(message.sender.avatar_key),
                 },
                 "createdAt": message.created_at.isoformat(),
             },

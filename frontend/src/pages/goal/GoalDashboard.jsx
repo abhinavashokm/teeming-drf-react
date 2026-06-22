@@ -1,16 +1,13 @@
-import { Flag, Info, Lock, MessageSquare, X } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import RightPanelToggleBtn from '../../components/goal/RightPanelToggleBtn';
 import BaseModal from '../../components/ui/modal/BaseModal';
+import { useGroupDiscussionWS } from '../../contexts/GroupDiscussionWSContext';
 import useGoal from '../../hooks/goal/useGoal';
 import BoardView from './components/BoardView';
 import GoalTabs from './components/GoalTabs';
 import OutcomeView from './components/OutcomeView';
 import RightPanel from './components/rightPanel/RightPanel';
-import { GroupDiscussionWSProvider, useGroupDiscussionWS } from '../../contexts/GroupDiscussionWSContext';
-import useWorkspaceSlug from '../../hooks/params/useWorkspaceSlug';
-import useGoalId from '../../hooks/params/useGoalId';
-import RightPanelToggleBtn from '../../components/goal/RightPanelToggleBtn';
 
 
 export default function GoalDashboard({ goalTitle }) {
@@ -110,7 +107,6 @@ export default function GoalDashboard({ goalTitle }) {
         </div>
       </div>
 
-      {/* Floating Button for Right Panel Toggle */}
       {
         !isRightPanelOpen &&
         <RightPanelToggleBtn onOpen={handleOpenPanel} />

@@ -7,14 +7,20 @@ class DiscussionListView(MemberBaseView):
 
     def get(self, request, **kwargs):
 
-        messages = discussion_services.list_discussion_messages(
-            workspace=request.workspace, goal_id=kwargs["goal_id"]
+        print("query params: ",request.query_params)
+
+        discussion_res = discussion_services.list_discussion_messages(
+            workspace=request.workspace, 
+            goal_id=kwargs["goal_id"],
+            page=request.query_params.get('page', None),
         )
 
         return success_response(
             data={
                 "messages": serializers.ReadDiscussionMessageSerializer(
-                    messages, many=True
-                ).data
+                    discussion_res["messages"], many=True
+                ).data,
+                "has_more": discussion_res["has_more"],
+                "total": discussion_res["total"],
             }
         )

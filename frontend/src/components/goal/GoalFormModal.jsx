@@ -20,8 +20,8 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
         }
     })
 
-    const { mutate: createGoal } = useCreateGoal()
-    const { mutate: updateGoal } = useUpdateGoal()
+    const { mutate: createGoal, isPending: creatingGoal } = useCreateGoal()
+    const { mutate: updateGoal, isPending: updaingGoal } = useUpdateGoal()
 
     useEffect(() => {
         if (isEditMode && goal) {
@@ -125,7 +125,8 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
                 <CancelButton onClick={handleCloseModal} className="flex-none"  />
                 <AppButton
                     onClick={handleSubmit(handleGoalFormSubmit)}
-                    disabled={!isDirty}
+                    disabled={!isDirty || creatingGoal || updaingGoal}
+                    loading={creatingGoal || updaingGoal}
                 >
                     {isEditMode ? "Save Changes" : "Create Goal"}
                 </AppButton>
