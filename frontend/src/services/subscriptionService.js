@@ -14,7 +14,13 @@ export const subscriptionService = {
     },
 
     fetchCurrentPlan: async (slug) => {
-        const res = await api.get(`/workspaces/${slug}/subscriptions/current`)
+        const res = await api.get(`/workspaces/${slug}/subscriptions/current/`)
+        return res.data
+    },
+
+    downgradeToFree: async (slug) => {
+        const res = await api.post(`/workspaces/${slug}/subscriptions/downgrade-to-free/`)
+        return res.data
     },
 
 }

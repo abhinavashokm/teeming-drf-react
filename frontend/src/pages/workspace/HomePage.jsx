@@ -31,7 +31,21 @@ function HomePage() {
 
   const { data: currentUser } = useAuth()
 
-  const { data: Goals, isPending:isGoalsLoading } = useGoals()
+  const {
+    data,
+    isPending: isGoalsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGoals()
+
+  const goals =
+    data?.pages.flatMap(
+      page => page.goals
+    ) ?? []
+
+  const totalGoals =
+    data?.pages?.[0]?.pagination?.count ?? 0
 
   const canManageGoals = useCan(PERMISSIONS.MANAGE_GOALS)
 
@@ -52,6 +66,10 @@ function HomePage() {
     }
 
     setIsGoalFormModalOpen(true)
+  }
+
+  const handleLoadMoreGoals = () => {
+
   }
 
   return (
@@ -125,8 +143,8 @@ function HomePage() {
                 [...Array(4)].map((_, i) => (
                   <GoalCard key={i} loading />
                 )) :
-                Goals?.length > 0 ? (
-                  Goals.map((goal) => (
+                goals?.length > 0 ? (
+                  goals.map((goal) => (
                     <GoalCard key={goal.id} goal={goal} />
                   ))
                 ) : (
@@ -157,9 +175,37 @@ function HomePage() {
                 )
             }
 
-          </div>
-        </section>
 
+
+          </div>
+
+          {hasNextPage && (
+            <div className="mt-8 flex flex-col items-center gap-3">
+
+              <p className="text-sm text-gray-500">
+                Showing{" "}
+                <span className="font-medium text-gray-900">
+                  {goals.length}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium text-gray-900">
+                  {totalGoals}
+                </span>{" "}
+                goals
+              </p>
+
+              <AppButton
+                loading={isFetchingNextPage}
+                onClick={() => fetchNextPage()}
+              >
+                Load More
+              </AppButton>
+
+            </div>
+          )}
+
+        </section>
+        {/* 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
           <section>
@@ -258,7 +304,7 @@ function HomePage() {
               </div>
             </div>
           </section>
-        </div>
+        </div> */}
 
       </div>
 

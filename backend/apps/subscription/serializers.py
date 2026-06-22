@@ -101,4 +101,5 @@ class WorkspaceSubscriptionSerializer(serializers.ModelSerializer):
             "status",
             "expires_at",
             "plan",
+            "cancel_at_period_end",
         ]

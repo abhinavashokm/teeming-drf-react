@@ -8,6 +8,7 @@ from core.responses.api_response import success_response
 from rest_framework import status
 from .serializers import GoalWriteSerializer, GoalReadSerializer
 from . import goal_services
+from .pagination import GoalPagination
 
 
 class GoalListCreateView(WorkspacePermissionBaseView):
@@ -40,18 +41,31 @@ class GoalListCreateView(WorkspacePermissionBaseView):
 
     def get(self, request, **kwargs):
 
-        params = request.query_params
-
         goals = goal_services.list_workspace_goals(
             workspace=request.workspace,
             user=request.user,
-            limit=params.get("limit"),
         )
 
-        goals_data = GoalReadSerializer(goals, many=True).data
+        paginator = GoalPagination()
+        paginated_goals = paginator.paginate_queryset(
+            goals,
+            request,
+        )
+
+        serializer = GoalReadSerializer(
+            paginated_goals,
+            many=True,
+        )
 
         return success_response(
-            status_code=status.HTTP_200_OK, data={"goals": goals_data}
+            data={
+                "pagination": {
+                    "count": paginator.page.paginator.count,
+                    "next": paginator.get_next_link(),
+                    "previous": paginator.get_previous_link(),
+                },
+                "goals": serializer.data,
+            }
         )
 
 
@@ -73,7 +87,6 @@ class GoalDetailView(WorkspacePermissionBaseView):
         serializer = GoalReadSerializer(goal)
 
         return success_response(status_code=status.HTTP_200_OK, data=serializer.data)
-    
 
     def patch(self, request, **kwargs):
         serializer = GoalWriteSerializer(data=request.data, partial=True)

@@ -166,7 +166,7 @@ function MoveToPlannedModal({ isOpen, onClose, onBack, currentIdea }) {
                     <AppButton
                         shadow
                         variant="primary"
-                        disabled={selectedMembers.length === 0}
+                        disabled={selectedMembers.length === 0 || isPending}
                         onClick={handleMoveToPlanned}
                         loading={isPending}
                     >

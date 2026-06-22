@@ -12,7 +12,7 @@ import IdeaDetailModal from './IdeaDetailModal'
 import IdeaFormModal from './IdeaFormModal.jsx'
 import MoveToDoneModal from './MoveToDoneModal'
 import MoveToPlannedModal from './MoveToPlannedModal.jsx'
-import MoveToProgressModal from './MoveToProgressModal'
+
 
 const STATE_STYLES = {
     draft: {

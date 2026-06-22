@@ -8,6 +8,7 @@ from .models import WorkspaceSubscription
 from .helpers.subscription_helper import get_plan_or_raise
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from django.utils import timezone
+import stripe
 
 
 def create_plan(data):
@@ -84,3 +85,24 @@ def create_free_plan_subscription(workspace):
         raise NotFoundException("Free plan not found")
 
     WorkspaceSubscription.objects.create(workspace=workspace, plan=free_plan)
+
+
+def downgrade_to_free(workspace):
+
+    subscription = WorkspaceSubscription.objects.get(
+        workspace=workspace,
+        status=WorkspaceSubscription.StatusChoices.ACTIVE,
+    )
+
+    if not subscription.stripe_subscription_id:
+        raise ValueError("No Stripe subscription found")
+
+    stripe.Subscription.modify(
+        subscription.stripe_subscription_id,
+        cancel_at_period_end=True,
+    )
+
+    subscription.cancel_at_period_end = True
+    subscription.save(update_fields=["cancel_at_period_end"])
+
+    return subscription

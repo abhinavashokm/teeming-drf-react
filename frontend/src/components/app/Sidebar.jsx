@@ -82,7 +82,8 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
   const { data: currentUser } = useAuth()
   const { data: currentWorkspace } = useWorkspace()
   const { mutate: logoutUser, isPending: isSigningOut } = useLogout()
-  const { data: goals } = useGoals()
+  const { data } = useGoals()
+  const goals = data?.goals ?? []
 
   const currentPlan = currentWorkspace?.subscription?.plan
 

@@ -3,6 +3,7 @@ import { currencySymbols } from '../../constants/subscriptionConstants';
 import useCreateCheckoutSession from '../../hooks/subscription/useCreateCheckoutSession';
 import AppButton from "../../components/ui/buttons/AppButton"
 import useWorkspace from '../../hooks/workspace/useWorkspace';
+import useDowngradeToFree from '../../hooks/subscription/useDowngradeToFree';
 
 
 function PlanCard({ plan, loading }) {
@@ -15,11 +16,33 @@ function PlanCard({ plan, loading }) {
     const isCurrentPlan =
         currentPlanCode === plan?.code
 
+    const currentSubscription = currentWorkspace?.subscription;
+
+    const isScheduledForDowngrade =
+        currentSubscription?.cancelAtPeriodEnd;
+
+    const isEndingPlan =
+        isCurrentPlan && isScheduledForDowngrade;
+
+    const isScheduledPlan =
+        isScheduledForDowngrade &&
+        plan.code === "FREE";
+
 
     const { mutate: createCheckoutSession, isPending } = useCreateCheckoutSession()
 
     const handleCreateCheckoutSession = () => {
+        if(plan.code === 'FREE'){
+            return handleDowngradeToFree()
+        }
+
         createCheckoutSession({ plan_id: plan?.id })
+    }
+
+    const { mutate: downgradeToFree, isPending: loadingDowngradeToFree } = useDowngradeToFree()
+
+    const handleDowngradeToFree = () => {
+        downgradeToFree()
     }
 
     if (loading) {
@@ -29,22 +52,39 @@ function PlanCard({ plan, loading }) {
     return (
         <div
             className={`
-        w-full
-        lg:flex-1 lg:min-w-[280px]
-        lg:snap-center
-        bg-white rounded-xl relative flex flex-col border-2 shadow-md
-        ${isCurrentPlan
+    w-full
+    lg:flex-1 lg:min-w-[280px]
+    lg:snap-center
+    bg-white rounded-xl relative flex flex-col border-2 shadow-md
+
+    ${isCurrentPlan
                     ? 'border-[#1A9E6E] ring-2 ring-[#1A9E6E]/10'
-                    : 'border-gray-200'
+                    : isScheduledPlan
+                        ? 'border-amber-300 ring-2 ring-amber-100'
+                        : 'border-gray-200'
                 }
-    `}
+`}
         >
             {/* Badge */}
             <div className="absolute -top-3 right-4 flex gap-2">
 
                 {isCurrentPlan && (
-                    <span className="bg-[#1A9E6E] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                        Current Plan
+                    <span
+                        className={`
+                text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm
+                ${isEndingPlan
+                                ? 'bg-amber-500'
+                                : 'bg-[#1A9E6E]'
+                            }
+            `}
+                    >
+                        {isEndingPlan ? 'Ends Soon' : 'Current Plan'}
+                    </span>
+                )}
+
+                {isScheduledPlan && (
+                    <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                        Scheduled
                     </span>
                 )}
 
@@ -168,23 +208,50 @@ function PlanCard({ plan, loading }) {
                 {/* Button */}
                 <div className="mt-8 pt-6 border-t border-gray-100">
 
+                    {isScheduledPlan && (
+                        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                            <p className="text-xs text-amber-800">
+                                This plan will become active when your current subscription ends.
+                            </p>
+                        </div>
+                    )}
+
                     {isCurrentPlan ? (
+                        isEndingPlan ? (
+                            <AppButton
+                                fullWidth
+                                // onClick={handleResumeSubscription}
+                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
+                            >
+                                Resume Subscription
+                            </AppButton>
+                        ) : (
+                            <AppButton
+                                fullWidth
+                                disabled
+                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-gray-100 text-gray-500 cursor-not-allowed"
+                            >
+                                Current Plan
+                            </AppButton>
+                        )
+                    ) : isScheduledPlan ? (
                         <AppButton
                             fullWidth
                             disabled
-                            className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-gray-100 text-gray-500 cursor-not-allowed"
+                            className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-amber-50 text-amber-700 border border-amber-200 cursor-not-allowed"
                         >
-                            Current Plan
+                            Scheduled
                         </AppButton>
                     ) : (
                         <AppButton
                             fullWidth
-                            loading={isPending}
+                            loading={isPending || loadingDowngradeToFree}
                             onClick={handleCreateCheckoutSession}
                             className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white shadow-sm"
                         >
-                            {plan.tier < currentWorkspace.subscription.plan.tier ? `Downgrade to ${plan.name}` :
-                                `Upgrade to ${plan.name}`}
+                            {plan.tier < currentWorkspace.subscription.plan.tier
+                                ? `Downgrade to ${plan.name}`
+                                : `Upgrade to ${plan.name}`}
                         </AppButton>
                     )}
 

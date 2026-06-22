@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from . import subscription_services
 from datetime import datetime, timezone
-import json
 
 
 

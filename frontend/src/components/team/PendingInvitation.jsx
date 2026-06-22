@@ -3,7 +3,7 @@ import { formatDateTime } from "../../utils/timeUtils"
 import useCancelnvitation from "../../hooks/invite/useCancelnvitation"
 
 function PendingInvitation({ invitation }) {
-    const { mutate: cancelInvitation } = useCancelnvitation()
+    const { mutate: cancelInvitation, isPending } = useCancelnvitation()
     const invitedTime = formatDateTime(invitation.createdAt)
 
     const handleCancelInvitation = () => {
@@ -36,9 +36,10 @@ function PendingInvitation({ invitation }) {
             </div>
             <button
                 onClick={handleCancelInvitation}
+                disabled={isPending}
                 className="px-2.5 py-1.5 border border-transparent rounded-lg text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors shrink-0"
             >
-                Cancel
+                {isPending ? "Canceling" : "Cancel"}
             </button>
         </div>
     )

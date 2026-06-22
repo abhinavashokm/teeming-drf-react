@@ -91,7 +91,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
     const canDeleteOthersIdea = useCan(PERMISSIONS.DELETE_OTHERS_IDEA)
     const canDropIdea = useCan(PERMISSIONS.DROP_IDEA)
 
-    const { mutate: moveToProgress } = useMoveIdeaToProgress()
+    const { mutate: moveToProgress, isPending: moveToProgressPending } = useMoveIdeaToProgress()
     const handleMoveToProgress = () => {
         moveToProgress(currentIdea.id, { onSuccess: onClose })
     }
@@ -424,7 +424,12 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                             </AppButton>
                         )}
                         {isPlanned && canMoveIdeaToProgress && (
-                            <AppButton variant="primary" onClick={handleMoveToProgress}>
+                            <AppButton 
+                            variant="primary" 
+                            onClick={handleMoveToProgress}
+                            disabled={moveToProgressPending}
+                            loading={moveToProgressPending}
+                            >
                                 <ChevronRight className="w-4 h-4" /> Move to In Progress
                             </AppButton>
                         )}

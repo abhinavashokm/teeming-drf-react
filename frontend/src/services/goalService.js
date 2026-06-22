@@ -8,8 +8,8 @@ export const goalService = {
         return res.data
     },
 
-    fetchAllGoals: async (slug, limit) => {
-        const res = await api.get(`/workspaces/${slug}/goals/?limit=${limit}`,)
+    fetchAllGoals: async (slug, page=1) => {
+        const res = await api.get(`/workspaces/${slug}/goals/?page=${page}`,)
         return res.data
     },
 

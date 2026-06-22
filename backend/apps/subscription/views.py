@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from core.responses.api_response import success_response
 from . import serializers, subscription_services
 from rest_framework import status
-from core.permission_views import MemberBaseView
+from core.permission_views import MemberBaseView, AdminBaseView
 
 
 #test mode - staff permission pending to add
@@ -41,7 +41,7 @@ class AdminPlanDetailView(APIView):
         return success_response(message="Plan deleted")
 
 
-class UserListPlanView(APIView):
+class UserListPlanView(AdminBaseView):
 
     def get(self, requset, **kwargs):
 
@@ -54,7 +54,7 @@ class UserListPlanView(APIView):
         )
     
 
-class SubscriptionCheckoutView(MemberBaseView):
+class SubscriptionCheckoutView(AdminBaseView):
 
     def post(self, request, **kwargs):
 
@@ -75,7 +75,7 @@ class SubscriptionCheckoutView(MemberBaseView):
         )
     
 
-class CurrentPlanView(MemberBaseView):
+class CurrentPlanView(AdminBaseView):
 
     def get(self, request, **kwargs):
 
@@ -83,11 +83,17 @@ class CurrentPlanView(MemberBaseView):
             workspace=request.workspace
         )
 
-        print(current_subscription)
-
         return success_response(
             data=serializers.WorkspaceSubscriptionSerializer(current_subscription).data
         )
 
+
+class SubscriptionDowngradeToFreeView(AdminBaseView):
+
+    def post(self, request, **kwargs):
+        
+        subscription_services.downgrade_to_free(workspace=request.workspace)
+
+        return success_response()
 
     

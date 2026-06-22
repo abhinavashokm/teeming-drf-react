@@ -64,6 +64,7 @@ class WorkspaceSubscription(BaseAbstractModel):
     status = models.CharField(
         max_length=20, choices=StatusChoices.choices, default=StatusChoices.ACTIVE
     )
+    cancel_at_period_end = models.BooleanField(default=False)
 
     stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
     stripe_subscription_id = models.CharField(max_length=255, null=True, blank=True,)
