@@ -6,6 +6,7 @@ import useAIAssistant from '../../../../hooks/ai/useAIAssistant';
 import useAuth from "../../../../hooks/auth/useAuth";
 import AIAssistant from './AIAssistant';
 import GroupDiscussion from './GroupDiscussion';
+import useWorkspace from '../../../../hooks/workspace/useWorkspace';
 
 const MessageStatus = ({ status = 'sent' }) => {
     if (status === 'sent') return (
@@ -56,6 +57,9 @@ function RightPanel({ onClose, isMobile }) {
         setInput('');
     };
 
+    const { data: currentWorkspace } = useWorkspace()
+    const isAiAssistantAvailable = currentWorkspace?.features?.aiAssistant
+
     return (
         <div className="flex flex-col flex-1 min-h-0 bg-white">
             {/* Header */}
@@ -74,16 +78,19 @@ function RightPanel({ onClose, isMobile }) {
                                     Discussion
                                 </button>
 
-                                <button
-                                    onClick={() => setMode('ai')}
-                                    className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-md transition ${mode === 'ai'
-                                        ? 'bg-white shadow text-gray-900'
-                                        : 'text-gray-500'
-                                        }`}
-                                >
-                                    <Sparkles className="w-3 h-3" />
-                                    Assistant
-                                </button>
+                                <span title={!isAiAssistantAvailable ? "Not available on your current plan" : undefined}>
+                                    <button
+                                        onClick={() => isAiAssistantAvailable && setMode('ai')}
+                                        disabled={!isAiAssistantAvailable}
+                                        className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-md transition ${mode === 'ai'
+                                            ? 'bg-white shadow text-gray-900'
+                                            : 'text-gray-500'
+                                            } ${!isAiAssistantAvailable ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                    >
+                                        <Sparkles className="w-3 h-3" />
+                                        Assistant
+                                    </button>
+                                </span>
                             </div>
                         </div>
 
@@ -106,7 +113,7 @@ function RightPanel({ onClose, isMobile }) {
 
                 {mode === 'discussion' ? (
 
-                    <GroupDiscussion /> 
+                    <GroupDiscussion />
 
                 ) : (
 

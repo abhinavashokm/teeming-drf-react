@@ -22,6 +22,8 @@ import MemberAvatar from '../team/MemberAvatar';
 import LeaveWorkspaceModal from '../workspace/LeaveWorkspaceModal';
 import SwitchWorkspaceModal from '../workspace/SwitchWorkspaceModal';
 import WorkspaceAvatar from '../workspace/WorkspaceAvatar';
+import { workspaceRoles } from '../../constants/workspaceConstants';
+import { planCodes } from '../../constants/subscriptionConstants';
 
 const getGoalColors = (goalName) => {
   const colorSets = [
@@ -83,7 +85,10 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
   const { data: currentWorkspace } = useWorkspace()
   const { mutate: logoutUser, isPending: isSigningOut } = useLogout()
   const { data } = useGoals()
-  const goals = data?.goals ?? []
+  const goals =
+    data?.pages.flatMap(
+      page => page.goals
+    ) ?? []
 
   const currentPlan = currentWorkspace?.subscription?.plan
 
@@ -98,9 +103,9 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
   const [isSwitchWorkspaceModalOpen, setIsSwitchWorkspaceModalOpen] = useState(false);
 
   const roleColors = {
-    Owner: 'text-emerald-600',
-    Admin: 'text-blue-600',
-    Member: 'text-gray-500'
+    [workspaceRoles.OWNER]: 'text-emerald-600',
+    [workspaceRoles.ADMIN]: 'text-blue-600',
+    [workspaceRoles.MEMBER]: 'text-gray-500'
   };
 
   const starredGoals = goals?.filter(g => g.isStarred) ?? []
@@ -143,17 +148,24 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                 workspace={currentWorkspace}
                 size="sm"
               />
-              
+
               {sidebarContentExpanded && (
                 <div className="flex flex-col min-w-0 text-left">
                   <div className="flex items-center gap-1.5 overflow-hidden">
                     <span className="font-semibold text-[14px] text-gray-900 tracking-tight truncate leading-tight">{currentWorkspace.name}</span>
                     <ChevronDown className="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 shrink-0" />
                   </div>
-                  <div className="flex items-center text-[11px] mt-0.5">
-                    <span className="text-gray-500 truncate">{currentPlan?.name} plan</span>
-                    <span className="text-gray-300 mx-1">·</span>
-                    <span className={`truncate ${roleColors[currentWorkspace.role] || 'text-gray-500'}`}>{currentWorkspace.role}</span>
+                  <div className="flex items-center gap-2 text-[11px] mt-0.5 min-w-0">
+                    <span className="text-gray-500 truncate">
+                      {currentPlan?.name} {currentPlan.code !== planCodes.ENTERPRISE && "plan"}
+                    </span>
+
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium flex-shrink-0 ${roleColors[currentWorkspace.role] || "text-gray-500"
+                        }`}
+                    >
+                      {currentWorkspace.role}
+                    </span>
                   </div>
                 </div>
               )}

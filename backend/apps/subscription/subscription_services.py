@@ -103,6 +103,24 @@ def downgrade_to_free(workspace):
     )
 
     subscription.cancel_at_period_end = True
-    subscription.save(update_fields=["cancel_at_period_end"])
+    subscription.scheduled_plan = Plan.objects.get(code="FREE")
+    subscription.save(update_fields=["cancel_at_period_end", "scheduled_plan"])
+
+    return subscription
+
+
+def resume_current_subscription(workspace):
+
+    subscription = WorkspaceSubscription.objects.get(
+        workspace=workspace,
+        status=WorkspaceSubscription.StatusChoices.ACTIVE,
+    )
+
+    if not subscription.stripe_subscription_id:
+        raise ValueError("No Stripe subscription found")
+    
+    subscription.cancel_at_period_end = False
+    subscription.scheduled_plan = None
+    subscription.save(update_fields=["cancel_at_period_end", "scheduled_plan"])
 
     return subscription

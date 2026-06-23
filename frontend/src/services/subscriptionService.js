@@ -23,4 +23,11 @@ export const subscriptionService = {
         return res.data
     },
 
+    resumeSubscription: async (slug) => {
+        console.log("here")
+        const res = await api.patch(`/workspaces/${slug}/subscriptions/resume/`)
+        console.log(res.data)
+        return res.data
+    },
+
 }

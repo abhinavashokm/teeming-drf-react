@@ -14,6 +14,7 @@ import useAddIdea from '../../hooks/idea/useAddIdea';
 import useUpdateIdea from '../../hooks/idea/useUpdateIdea';
 import useGoalId from "../../hooks/params/useGoalId";
 import { errorCodes } from '../../constants/errorCodes';
+import useWorkspace from "../../hooks/workspace/useWorkspace"
 
 function IdeaFormModal({
     isOpen,
@@ -81,6 +82,10 @@ function IdeaFormModal({
     };
 
     //---------------------AI FEATURE--------------------------
+
+    const { data: currentWorkspace } = useWorkspace()
+    const isAiEnhacementsAvailable = currentWorkspace?.features?.aiIdeaSuggestions
+
     const { mutate: improveIdeaWithAI } = useImproveIdea()
 
     const [isEnhancingIdea, setIsEnhancingIdea] = useState(false);
@@ -315,16 +320,19 @@ function IdeaFormModal({
                             type="button"
                             size="sm"
                             variant="secondary"
-                            disabled={
-                                !watch("title")?.trim()
-                                || isEnhancingIdea
-                            }
-                            loading={isEnhancingIdea}
+                            disabled={!isAiEnhacementsAvailable}
                             onClick={handleSubmit(handleImproveIdea)}
+                            loading={isEnhancingIdea}
                         >
                             <Sparkles className="w-4 h-4" />
-
                             Enhance Idea
+                            {
+                                !isAiEnhacementsAvailable &&
+                                <span className="ml-1 rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-bold text-violet-700">
+                                    PRO
+                                </span>
+                            }
+
                         </AppButton>
 
                     </div>

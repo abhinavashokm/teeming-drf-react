@@ -11,6 +11,7 @@ import AppButton from '../ui/buttons/AppButton.jsx';
 import BaseModal from '../ui/modal/BaseModal';
 import useMoveIdeaToPlanned from '../../hooks/idea/useMoveIdeaToPlanned.js';
 import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress.js';
+import DeleteConfirmationModal from '../ui/modal/DeleteConfirmationModal.jsx';
 
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -70,9 +71,6 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
     const isDone = ideaStatus === IDEA_STATUS.DONE;
     const isDraft = ideaStatus === IDEA_STATUS.DRAFT;
 
-    const { mutate: deleteIdea, isPending } = useDeleteIdea();
-    const handleDeleteIdea = () => deleteIdea(currentIdea.id, { onSuccess: onClose });
-
     const formattedDate = new Date(currentIdea.createdAt).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric'
     });
@@ -96,353 +94,374 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
         moveToProgress(currentIdea.id, { onSuccess: onClose })
     }
 
+    const { mutate: deleteIdea, isPending: isDeleting } = useDeleteIdea();
+    const [isDeleteConfirmModalOpen, setisDeleteConfirmModalOpen] = useState(false)
+
+    const handleDeleteIdea = () => {deleteIdea(currentIdea.id, { onSuccess: onClose })};
+
     return (
-        <BaseModal isOpen={isOpen} onClose={onClose}>
+        <>
+            <BaseModal isOpen={isOpen} onClose={onClose}>
 
-            {/* Header */}
-            <BaseModal.Header onClose={onClose}>
-                <span className={`px-2.5 py-1 border rounded-md text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 ${badge.className}`}>
-                    {badge.icon} {badge.label}
-                </span>
-            </BaseModal.Header>
+                {/* Header */}
+                <BaseModal.Header onClose={onClose}>
+                    <span className={`px-2.5 py-1 border rounded-md text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 ${badge.className}`}>
+                        {badge.icon} {badge.label}
+                    </span>
+                </BaseModal.Header>
 
-            {/* Body */}
-            <BaseModal.Body className="space-y-5">
+                {/* Body */}
+                <BaseModal.Body className="space-y-5">
 
-                {/* Hero */}
-                <section className="space-y-3">
+                    {/* Hero */}
+                    <section className="space-y-3">
 
-                    <div className="flex items-center justify-between gap-3">
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-700 leading-tight">
-                                {currentIdea.title}
-                            </h2>
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <h2 className="text-xl font-semibold text-gray-700 leading-tight">
+                                    {currentIdea.title}
+                                </h2>
 
-                            <p className="text-sm text-gray-500 mt-1">
-                                Added by {isIdeaCreator ? "You" : createdBy?.fullName} · {formattedDate}
-                            </p>
-                        </div>
-
-                        <div className=" items-center gap-2">
-                            <span className="text-[13px] text-gray-500 flex items-center gap-1.5">
-                                <ThumbsUp className="w-4 h-4" /> {thumbsUp}
-                            </span>
-                            {/* thumbsUp avatars — map from real data if available */}
-                        </div>
-                    </div>
-
-                    {/* Summary Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-
-                        {/* Goal - 60% */}
-                        <div className="md:col-span-3 rounded-lg bg-gray-50/70 px-3 py-3">
-                            <div className="flex items-start gap-2">
-
-                                <Flag className="w-4 h-4 text-gray-400 mt-0.5 shrink-0 mt-1" />
-
-                                <p className="text-sm font-small text-gray-600 leading-relaxed">
-                                    {currentIdea.goal.name}
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Added by {isIdeaCreator ? "You" : createdBy?.fullName} · {formattedDate}
                                 </p>
+                            </div>
 
+                            <div className=" items-center gap-2">
+                                <span className="text-[13px] text-gray-500 flex items-center gap-1.5">
+                                    <ThumbsUp className="w-4 h-4" /> {thumbsUp}
+                                </span>
+                                {/* thumbsUp avatars — map from real data if available */}
                             </div>
                         </div>
 
-                        {/* Deadline - 40% */}
-                        <div className="md:col-span-2 rounded-lg bg-gray-50/70 px-3 py-3">
-                            <div className="flex items-start gap-2">
+                        {/* Summary Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
 
-                                <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                            {/* Goal - 60% */}
+                            <div className="md:col-span-3 rounded-lg bg-gray-50/70 px-3 py-3">
+                                <div className="flex items-start gap-2">
 
-                                <div>
-                                    <p className="text-[11px] uppercase tracking-wide text-gray-500">
-                                        Deadline
+                                    <Flag className="w-4 h-4 text-gray-400 mt-0.5 shrink-0 mt-1" />
+
+                                    <p className="text-sm font-small text-gray-600 leading-relaxed">
+                                        {currentIdea.goal.name}
                                     </p>
 
-                                    <p className="text-sm   text-gray-700">
-                                        {deadline || '—'}
-                                    </p>
+                                </div>
+                            </div>
 
-                                    {/* {isInProgress && (
+                            {/* Deadline - 40% */}
+                            <div className="md:col-span-2 rounded-lg bg-gray-50/70 px-3 py-3">
+                                <div className="flex items-start gap-2">
+
+                                    <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+
+                                    <div>
+                                        <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                                            Deadline
+                                        </p>
+
+                                        <p className="text-sm   text-gray-700">
+                                            {deadline || '—'}
+                                        </p>
+
+                                        {/* {isInProgress && (
                                         <p className="text-xs text-amber-600   mt-0.5">
                                             6 days left
                                         </p>
                                     )} */}
+                                    </div>
+
                                 </div>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                </section>
-
-                {/* Description */}
-                <section>
-
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                        Description
-                    </h3>
-
-                    <p className="text-sm leading-6 text-gray-700">
-                        {currentIdea.description ||
-                            'No description provided for this idea yet.'}
-                    </p>
-
-                </section>
-
-                {isDone && currentIdea.completionNote && (
-                    <section>
-
-                        <div className="rounded-xl bg-amber-50 border border-amber-100 p-4">
-
-                            <div className="flex items-start gap-2">
-
-                                <div className="text-amber-500 mt-0.5">
-                                    📝
-                                </div>
-
-                                <div>
-                                    <h3 className="text-sm font-semibold text-amber-900 mb-2">
-                                        Completion Note
-                                    </h3>
-
-                                    <p className="text-sm text-amber-800 leading-6">
-                                        {currentIdea.completionNote}
-                                    </p>
-                                </div>
-
                             </div>
 
                         </div>
 
                     </section>
-                )}
 
-                {/* Team */}
-                {assignees?.length > 0 && (
-                    <section className="rounded-xl bg-gray-50 p-4">
+                    {/* Description */}
+                    <section>
 
-                        <button
-                            type="button"
-                            onClick={() => setShowAssignees(prev => !prev)}
-                            className="w-full flex items-center justify-between text-left"
-                        >
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-700">
-                                    Assignees
-                                </h3>
+                        <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                            Description
+                        </h3>
 
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {assignees.length} member{assignees.length > 1 ? 's' : ''}
-                                </p>
+                        <p className="text-sm leading-6 text-gray-700">
+                            {currentIdea.description ||
+                                'No description provided for this idea yet.'}
+                        </p>
+
+                    </section>
+
+                    {isDone && currentIdea.completionNote && (
+                        <section>
+
+                            <div className="rounded-xl bg-amber-50 border border-amber-100 p-4">
+
+                                <div className="flex items-start gap-2">
+
+                                    <div className="text-amber-500 mt-0.5">
+                                        📝
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-amber-900 mb-2">
+                                            Completion Note
+                                        </h3>
+
+                                        <p className="text-sm text-amber-800 leading-6">
+                                            {currentIdea.completionNote}
+                                        </p>
+                                    </div>
+
+                                </div>
+
                             </div>
 
-                            <div className="flex items-center gap-3">
+                        </section>
+                    )}
 
-                                <div className="flex -space-x-2">
-                                    {assignees.slice(0, 3).map(member => (
-                                        <MemberAvatar
+                    {/* Team */}
+                    {assignees?.length > 0 && (
+                        <section className="rounded-xl bg-gray-50 p-4">
+
+                            <button
+                                type="button"
+                                onClick={() => setShowAssignees(prev => !prev)}
+                                className="w-full flex items-center justify-between text-left"
+                            >
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-700">
+                                        Assignees
+                                    </h3>
+
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                        {assignees.length} member{assignees.length > 1 ? 's' : ''}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+
+                                    <div className="flex -space-x-2">
+                                        {assignees.slice(0, 3).map(member => (
+                                            <MemberAvatar
+                                                key={member.id}
+                                                user={member}
+                                                className="ring-2 ring-gray-50"
+                                            />
+                                        ))}
+
+                                        {assignees.length > 3 && (
+                                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs   text-gray-600 ring-2 ring-gray-50">
+                                                +{assignees.length - 3}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <ChevronDown
+                                        className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${showAssignees ? 'rotate-180' : ''
+                                            }`}
+                                    />
+                                </div>
+                            </button>
+
+                            <div
+                                className={`overflow-hidden transition-all duration-300 ${showAssignees
+                                    ? 'max-h-[400px] opacity-100 mt-4'
+                                    : 'max-h-0 opacity-0'
+                                    }`}
+                            >
+                                <div className="space-y-2">
+
+                                    {assignees.map(member => (
+                                        <div
                                             key={member.id}
-                                            user={member}
-                                            className="ring-2 ring-gray-50"
-                                        />
+                                            className="flex items-center gap-3 rounded-lg bg-gray-100/70 px-3 py-2.5"
+                                        >
+                                            <MemberAvatar
+                                                user={member}
+                                            />
+
+                                            <div className="min-w-0">
+                                                <p className="text-sm  text-gray-700 truncate">
+                                                    {member.fullName}
+                                                </p>
+
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {member.email}
+                                                </p>
+                                            </div>
+                                        </div>
                                     ))}
 
-                                    {assignees.length > 3 && (
-                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs   text-gray-600 ring-2 ring-gray-50">
-                                            +{assignees.length - 3}
-                                        </div>
-                                    )}
+                                </div>
+                            </div>
+
+                        </section>
+                    )}
+
+                    {/* Activity */}
+                    {
+                        ideaStatus !== IDEA_STATUS.DRAFT &&
+
+                        <section className="mt-5 rounded-xl bg-gray-50 p-4">
+
+                            <button
+                                type="button"
+                                onClick={() => setShowActivity(prev => !prev)}
+                                className="w-full flex items-center justify-between text-left"
+                            >
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-700">
+                                        Activity
+                                    </h3>
+
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                        {[
+                                            true,
+                                            !!movedToPlannedBy,
+                                            !!movedToProgressBy,
+                                            !!movedToDoneBy,
+                                        ].filter(Boolean).length} events
+                                    </p>
                                 </div>
 
                                 <ChevronDown
-                                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${showAssignees ? 'rotate-180' : ''
+                                    className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${showActivity ? 'rotate-180' : ''
                                         }`}
                                 />
-                            </div>
-                        </button>
+                            </button>
 
-                        <div
-                            className={`overflow-hidden transition-all duration-300 ${showAssignees
-                                ? 'max-h-[400px] opacity-100 mt-4'
-                                : 'max-h-0 opacity-0'
-                                }`}
-                        >
-                            <div className="space-y-2">
+                            <div
+                                className={`overflow-hidden transition-all duration-300 ${showActivity
+                                    ? 'max-h-[500px] opacity-100 mt-4'
+                                    : 'max-h-0 opacity-0'
+                                    }`}
+                            >
+                                <div className="space-y-4">
 
-                                {assignees.map(member => (
-                                    <div
-                                        key={member.id}
-                                        className="flex items-center gap-3 rounded-lg bg-gray-100/70 px-3 py-2.5"
-                                    >
-                                        <MemberAvatar
-                                            user={member}
-                                        />
+                                    {/* Created */}
+                                    <div className="rounded-lg bg-white px-3 py-2.5">
+                                        <p className="text-sm   text-gray-700">
+                                            Created by {createdBy?.fullName}
+                                        </p>
 
-                                        <div className="min-w-0">
-                                            <p className="text-sm  text-gray-700 truncate">
-                                                {member.fullName}
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {formattedDate}
+                                        </p>
+                                    </div>
+
+                                    {/* Moved To Planned */}
+                                    {movedToPlannedBy && (
+                                        <div className="rounded-lg bg-white px-3 py-2.5">
+                                            <p className="text-sm   text-gray-700">
+                                                Moved to Planned by {movedToPlannedBy.fullName}
                                             </p>
 
-                                            <p className="text-xs text-gray-500 truncate">
-                                                {member.email}
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {dateToHuman(currentIdea.movedToPlannedAt)}
                                             </p>
                                         </div>
-                                    </div>
-                                ))}
+                                    )}
+                                    {/* Moved to Progress */}
+                                    {(isInProgress || isDone) && movedToProgressBy && (
+                                        <div className="rounded-lg bg-white px-3 py-2.5">
+                                            <p className="text-sm   text-gray-700">
+                                                Moved to In Progress by {movedToProgressBy.fullName}
+                                            </p>
 
-                            </div>
-                        </div>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {dateToHuman(currentIdea.movedToProgressAt)}
+                                            </p>
+                                        </div>
+                                    )}
 
-                    </section>
-                )}
+                                    {/* Done */}
+                                    {isDone && movedToDoneBy && (
+                                        <div className="rounded-lg bg-white px-3 py-2.5">
+                                            <p className="text-sm   text-gray-700">
+                                                Marked Done by {movedToDoneBy.fullName}
+                                            </p>
 
-                {/* Activity */}
-                {
-                    ideaStatus !== IDEA_STATUS.DRAFT &&
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {dateToHuman(currentIdea.movedToDoneAt)}
+                                            </p>
+                                        </div>
+                                    )}
 
-                    <section className="mt-5 rounded-xl bg-gray-50 p-4">
-
-                        <button
-                            type="button"
-                            onClick={() => setShowActivity(prev => !prev)}
-                            className="w-full flex items-center justify-between text-left"
-                        >
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-700">
-                                    Activity
-                                </h3>
-
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {[
-                                        true,
-                                        !!movedToPlannedBy,
-                                        !!movedToProgressBy,
-                                        !!movedToDoneBy,
-                                    ].filter(Boolean).length} events
-                                </p>
-                            </div>
-
-                            <ChevronDown
-                                className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${showActivity ? 'rotate-180' : ''
-                                    }`}
-                            />
-                        </button>
-
-                        <div
-                            className={`overflow-hidden transition-all duration-300 ${showActivity
-                                ? 'max-h-[500px] opacity-100 mt-4'
-                                : 'max-h-0 opacity-0'
-                                }`}
-                        >
-                            <div className="space-y-4">
-
-                                {/* Created */}
-                                <div className="rounded-lg bg-white px-3 py-2.5">
-                                    <p className="text-sm   text-gray-700">
-                                        Created by {createdBy?.fullName}
-                                    </p>
-
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {formattedDate}
-                                    </p>
                                 </div>
-
-                                {/* Moved To Planned */}
-                                {movedToPlannedBy && (
-                                    <div className="rounded-lg bg-white px-3 py-2.5">
-                                        <p className="text-sm   text-gray-700">
-                                            Moved to Planned by {movedToPlannedBy.fullName}
-                                        </p>
-
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {dateToHuman(currentIdea.movedToPlannedAt)}
-                                        </p>
-                                    </div>
-                                )}
-                                {/* Moved to Progress */}
-                                {(isInProgress || isDone) && movedToProgressBy && (
-                                    <div className="rounded-lg bg-white px-3 py-2.5">
-                                        <p className="text-sm   text-gray-700">
-                                            Moved to In Progress by {movedToProgressBy.fullName}
-                                        </p>
-
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {dateToHuman(currentIdea.movedToProgressAt)}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {/* Done */}
-                                {isDone && movedToDoneBy && (
-                                    <div className="rounded-lg bg-white px-3 py-2.5">
-                                        <p className="text-sm   text-gray-700">
-                                            Marked Done by {movedToDoneBy.fullName}
-                                        </p>
-
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {dateToHuman(currentIdea.movedToDoneAt)}
-                                        </p>
-                                    </div>
-                                )}
-
                             </div>
-                        </div>
 
-                    </section>
-                }
-
-            </BaseModal.Body>
-
-            {/* Footer */}
-            {!isDone && (
-                <BaseModal.Footer className="flex items-center gap-2">
-                    {
-                        isDraft && (canDeleteOthersIdea || isIdeaCreator) &&
-                        <AppButton variant="danger" onClick={handleDeleteIdea} loading={isDraft && isPending}>
-                            Delete
-                        </AppButton>
-                    }
-                    {
-                        isInProgress && canDropIdea &&
-                        <AppButton variant="danger" onClick={undefined} loading={isDraft && isPending}>
-                            Drop Idea
-                        </AppButton>
+                        </section>
                     }
 
+                </BaseModal.Body>
 
-                    {/* {isIdeaCreator && isDraft && (
+                {/* Footer */}
+                {!isDone && (
+                    <BaseModal.Footer className="flex items-center gap-2">
+                        {
+                            isDraft && (canDeleteOthersIdea || isIdeaCreator) &&
+                            <AppButton variant="danger" onClick={() => setisDeleteConfirmModalOpen(true)}>
+                                Delete
+                            </AppButton>
+                        }
+                        {
+                            (isInProgress || isPlanned) && canDropIdea &&
+                            <AppButton variant="danger" onClick={() => setisDeleteConfirmModalOpen(true)}>
+                                Drop Idea
+                            </AppButton>
+                        }
+
+
+                        {/* {isIdeaCreator && isDraft && (
                         <AppButton variant="secondary" >
                             Edit
                         </AppButton>
                     )} */}
 
-                    <div className="ml-auto">
-                        {isDraft && canMoveIdeaToPlanned && (
-                            <AppButton variant="primary" onClick={onMove}>
-                                <ChevronRight className="w-4 h-4" /> Move to In Planned
-                            </AppButton>
-                        )}
-                        {isPlanned && canMoveIdeaToProgress && (
-                            <AppButton 
-                            variant="primary" 
-                            onClick={handleMoveToProgress}
-                            disabled={moveToProgressPending}
-                            loading={moveToProgressPending}
-                            >
-                                <ChevronRight className="w-4 h-4" /> Move to In Progress
-                            </AppButton>
-                        )}
-                        {isInProgress && canMoveIdeaToDone && (
-                            <AppButton variant="primary" onClick={onMove}>
-                                <Check className="w-4 h-4" /> Mark as Done
-                            </AppButton>
-                        )}
-                    </div>
-                </BaseModal.Footer>
-            )}
+                        <div className="ml-auto">
+                            {isDraft && canMoveIdeaToPlanned && (
+                                <AppButton variant="primary" onClick={onMove}>
+                                    <ChevronRight className="w-4 h-4" /> Move to In Planned
+                                </AppButton>
+                            )}
+                            {isPlanned && canMoveIdeaToProgress && (
+                                <AppButton
+                                    variant="primary"
+                                    onClick={handleMoveToProgress}
+                                    disabled={moveToProgressPending}
+                                    loading={moveToProgressPending}
+                                >
+                                    <ChevronRight className="w-4 h-4" /> Move to In Progress
+                                </AppButton>
+                            )}
+                            {isInProgress && canMoveIdeaToDone && (
+                                <AppButton variant="primary" onClick={onMove}>
+                                    <Check className="w-4 h-4" /> Mark as Done
+                                </AppButton>
+                            )}
+                        </div>
+                    </BaseModal.Footer>
+                )}
 
-        </BaseModal>
+            </BaseModal>
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteConfirmModalOpen}
+                onClose={() => setisDeleteConfirmModalOpen(false)}
+                isLoading={isDeleting}
+                onConfirm={handleDeleteIdea}
+                title={isIdeaCreator ? "Delete Idea" : `Delete ${currentIdea.createdBy.fullName}'s Idea`}
+                description={
+                    isIdeaCreator
+                        ? "This idea will be completely removed from this goal."
+                        : `You are deleting an idea submitted by ${currentIdea.createdBy.fullName}. This cannot be undone.`
+                }
+                confirmButtonText="Delete Idea"
+            />
+        </>
     );
 }
 

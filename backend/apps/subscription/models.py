@@ -37,7 +37,7 @@ class Plan(BaseAbstractModel):
     stripe_product_id = models.CharField(max_length=255, null=True, blank=True)
     stripe_price_id = models.CharField(max_length=255, null=True, blank=True)
 
-    #field to determine plan sorting order
+    # field to determine plan sorting order
     tier = models.PositiveIntegerField(unique=True)
 
     class Meta:
@@ -47,6 +47,7 @@ class Plan(BaseAbstractModel):
 
 ACTIVE_STATUS = "active"
 
+
 class WorkspaceSubscription(BaseAbstractModel):
 
     class StatusChoices(models.TextChoices):
@@ -55,19 +56,35 @@ class WorkspaceSubscription(BaseAbstractModel):
         CANCELLED = ("cancelled", "cancelled")
         TRIALING = "trialing", "Trialing"
 
-    workspace = models.ForeignKey("workspace.Workspace", on_delete=models.CASCADE, related_name="subscriptions")
+    workspace = models.ForeignKey(
+        "workspace.Workspace", on_delete=models.CASCADE, related_name="subscriptions"
+    )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
     started_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(blank=True, null=True) #it's a required field. made it option for temporary
+    expires_at = models.DateTimeField(
+        blank=True, null=True
+    )  # it's a required field. made it option for temporary
     cancelled_at = models.DateTimeField(blank=True, null=True)
 
     status = models.CharField(
         max_length=20, choices=StatusChoices.choices, default=StatusChoices.ACTIVE
     )
+
     cancel_at_period_end = models.BooleanField(default=False)
+    scheduled_plan = models.ForeignKey(
+        Plan,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="scheduled_subscriptions",
+    )
 
     stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
-    stripe_subscription_id = models.CharField(max_length=255, null=True, blank=True,)
+    stripe_subscription_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = "workspace_subscription"

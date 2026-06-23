@@ -89,7 +89,11 @@ function GoalCard({ goal, loading = false }) {
             <div onClick={handleOpenGoal} className="group border border-gray-200 rounded-[12px] overflow-hidden hover:border-gray-300 transform hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col bg-white">
                 <div className={`h-28 ${getGoalCardColorClass(goal.id)} p-4 flex flex-col justify-between`}>
                     <div className="flex justify-between items-start">
-                        <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-[20px] font-medium leading-none">no ideas yet</span>
+
+                        <span className="text-[12px] text-white bg-black/20 px-3 py-1 rounded-full font-medium leading-none">
+                         {goal.ideasCount === 0 ?  "No ideas yet" :  `${goal.ideasCount} ${goal.ideasCount === 1 ? "idea" : "ideas"}`}
+                        </span>
+
 
                         {/* Three dot menu */}
                         <div className="relative" ref={menuRef}>
@@ -157,7 +161,7 @@ function GoalCard({ goal, loading = false }) {
                 isLoading={isDeleting}
                 onConfirm={handleDeleteGoal}
                 title={"Delete Goal"}
-                description={ "This goal will be completely removed from this workspace."}
+                description={"This goal will be completely removed from this workspace."}
                 confirmButtonText="Delete Goal"
             />
         </>

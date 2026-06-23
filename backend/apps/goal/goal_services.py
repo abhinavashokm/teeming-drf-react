@@ -1,6 +1,6 @@
 from .models import Goal, StarredGoal
 from .helpers.goal_helper import get_goal_or_raise
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Count, Q
 
 
 def create_goal(data):
@@ -28,10 +28,18 @@ def list_workspace_goals(workspace, user):
         goal = OuterRef("pk")
     )
 
-    return  Goal.objects.in_workspace(workspace).annotate(
-        is_starred = Exists(starred_goals)
+    return (
+        Goal.objects
+        .in_workspace(workspace)
+        .annotate(
+            is_starred=Exists(starred_goals),
+            ideas_count=Count(
+                "ideas",
+                filter=Q(ideas__is_deleted=False),
+            ),
+        )
+        .order_by("-is_starred", "-created_at")
     )
-
 
 def update_goal(workspace, goal_id, data):
     "update goal with given fields"

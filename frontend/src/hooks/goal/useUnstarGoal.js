@@ -16,12 +16,29 @@ function useUnstarGoal() {
             const previousGoals =
                 queryClient.getQueryData(workspaceKeys.goals);
 
-            queryClient.setQueryData(workspaceKeys.goals, old =>
-                old.map(goal =>
-                    goal.id === goalId
-                        ? { ...goal, isStarred: false }
-                        : goal
-                )
+            queryClient.setQueryData(
+                workspaceKeys.goals,
+                (old) => {
+
+                    if (!old) return old;
+
+                    return {
+                        ...old,
+
+                        pages: old.pages.map(page => ({
+                            ...page,
+
+                            goals: page.goals.map(goal =>
+                                goal.id === goalId
+                                    ? {
+                                        ...goal,
+                                        isStarred: false,
+                                    }
+                                    : goal
+                            ),
+                        })),
+                    };
+                }
             );
 
             return { previousGoals };

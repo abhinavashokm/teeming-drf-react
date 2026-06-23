@@ -95,5 +95,18 @@ class SubscriptionDowngradeToFreeView(AdminBaseView):
         subscription_services.downgrade_to_free(workspace=request.workspace)
 
         return success_response()
+    
+
+class ResumeCurrentSubscription(AdminBaseView):
+
+    def patch(self, request, **kwargs):
+
+        subscription_services.resume_current_subscription(
+            workspace=request.workspace
+        )
+
+        return success_response(
+            message="Current plan resumed"
+        )
 
     

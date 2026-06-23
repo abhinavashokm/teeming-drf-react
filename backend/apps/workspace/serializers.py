@@ -90,10 +90,11 @@ class GetCurrentWorkspaceSerializer(
     subscription = serializers.SerializerMethodField()
     limits = serializers.SerializerMethodField()
     logo_url = serializers.SerializerMethodField()
+    features = serializers.SerializerMethodField()
 
     class Meta:
         model = Workspace
-        fields = ["id", "name", "slug", "role", "subscription", "limits", "logo_url"]
+        fields = ["id", "name", "slug", "role", "subscription", "limits", "logo_url", "features"]
 
     def get_role(self, obj):
         return self.context["member"].role
@@ -105,6 +106,9 @@ class GetCurrentWorkspaceSerializer(
 
     def get_limits(self, obj):
         return self.context["limits"]
+    
+    def get_features(self, obj):
+        return self.context["features"]
 
 
 class WorkspaceMemberSerializer(serializers.ModelSerializer):

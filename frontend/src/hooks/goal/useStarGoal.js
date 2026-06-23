@@ -16,12 +16,29 @@ function useStarGoal() {
             const previousGoals =
                 queryClient.getQueryData(workspaceKeys.goals);
 
-            queryClient.setQueryData(workspaceKeys.goals, old =>
-                old.map(goal =>
-                    goal.id === goalId
-                        ? { ...goal, isStarred: true }
-                        : goal
-                )
+            queryClient.setQueryData(
+                workspaceKeys.goals,
+                (old) => {
+
+                    if (!old) return old;
+
+                    return {
+                        ...old,
+
+                        pages: old.pages.map(page => ({
+                            ...page,
+
+                            goals: page.goals.map(goal =>
+                                goal.id === goalId
+                                    ? {
+                                        ...goal,
+                                        isStarred: true,
+                                    }
+                                    : goal
+                            ),
+                        })),
+                    };
+                }
             );
 
             return { previousGoals };
@@ -29,7 +46,6 @@ function useStarGoal() {
         invalidateKeys: [workspaceKeys.goals],
         passWorkspaceSlug: true,
         apiSuccessToast: false,
-
     })
 }
 

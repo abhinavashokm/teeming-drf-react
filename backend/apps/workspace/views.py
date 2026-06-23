@@ -37,7 +37,9 @@ class ListUserWorkspacesView(APIView):
 
         return success_response(
             data={
-                "workspaces": serializers.BaseWorkspaceSerializer(membership_workspaces, many=True).data,
+                "workspaces": serializers.BaseWorkspaceSerializer(
+                    membership_workspaces, many=True
+                ).data,
             }
         )
 
@@ -70,6 +72,12 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
             },
         }
 
+        features = {
+            "ai_idea_suggestions": subscription.plan.can_use_ai_idea_suggestions,
+            "ai_assistant": subscription.plan.can_use_ai_assistant,
+            "export_workspace_data": subscription.plan.can_export_workspace_data,
+        }
+
         user_services.update_last_visited_workspace(
             current_user=request.user,
             workspace=request.workspace,
@@ -81,6 +89,7 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
                 "member": request.member,
                 "subscription": subscription,
                 "limits": limits,
+                "features": features,
             },
         ).data
 
@@ -216,19 +225,17 @@ class LeaveWorkspaceView(MemberBaseView):
 class WorkspaceLogoUploadURLView(MemberBaseView):
 
     def post(self, request, **kwargs):
-        
+
         serializer = serializers.WorkspaceLogoUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         data = s3_service.generate_workspace_logo_upload_url(
             workspace=request.workspace,
-            content_type=serializer.validated_data["content_type"]
+            content_type=serializer.validated_data["content_type"],
         )
 
-        return success_response(
-            data=data
-        )
-    
+        return success_response(data=data)
+
 
 class SaveWorkspaceLogoUrlView(MemberBaseView):
 
@@ -238,8 +245,7 @@ class SaveWorkspaceLogoUrlView(MemberBaseView):
         serializer.is_valid(raise_exception=True)
 
         workspace_services.save_workspace_logo_url(
-            workspace=request.workspace,
-            logo_key=serializer.validated_data["logo_key"]
+            workspace=request.workspace, logo_key=serializer.validated_data["logo_key"]
         )
 
         return success_response()

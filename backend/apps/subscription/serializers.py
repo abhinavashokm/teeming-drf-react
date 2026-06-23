@@ -62,7 +62,7 @@ class UserReadPlanSerializer(serializers.ModelSerializer):
         return [
             {
                 "key": "ai_idea_suggestions",
-                "name": "AI Idea Suggestions",
+                "name": "AI Enhancements",
                 "enabled": obj.can_use_ai_idea_suggestions,
             },
             {
@@ -85,7 +85,7 @@ class CreateCheckoutSerializer(serializers.Serializer):
     )
 
 
-class GetCurrentPlanSerializer(serializers.ModelSerializer):
+class GetPlanSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Plan
@@ -93,7 +93,8 @@ class GetCurrentPlanSerializer(serializers.ModelSerializer):
 
 
 class WorkspaceSubscriptionSerializer(serializers.ModelSerializer):
-    plan = GetCurrentPlanSerializer()
+    plan = GetPlanSerializer()
+    scheduled_plan = GetPlanSerializer()
 
     class Meta:
         model = WorkspaceSubscription
@@ -102,4 +103,5 @@ class WorkspaceSubscriptionSerializer(serializers.ModelSerializer):
             "expires_at",
             "plan",
             "cancel_at_period_end",
+            "scheduled_plan",
         ]

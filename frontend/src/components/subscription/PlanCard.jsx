@@ -1,38 +1,40 @@
 import { Check, X } from 'lucide-react';
-import { currencySymbols } from '../../constants/subscriptionConstants';
+import { currencySymbols, planCodes } from '../../constants/subscriptionConstants';
 import useCreateCheckoutSession from '../../hooks/subscription/useCreateCheckoutSession';
 import AppButton from "../../components/ui/buttons/AppButton"
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import useDowngradeToFree from '../../hooks/subscription/useDowngradeToFree';
+import useResumeSubscription from '../../hooks/subscription/useResumeSubscription';
 
 
 function PlanCard({ plan, loading }) {
 
     const { data: currentWorkspace } = useWorkspace()
 
-    const currentPlanCode =
-        currentWorkspace?.subscription?.plan?.code
+    const currentSubscription =
+        currentWorkspace?.subscription;
+
+    const currentPlan =
+        currentSubscription?.plan;
+
+    const scheduledPlan =
+        currentSubscription?.scheduledPlan;
 
     const isCurrentPlan =
-        currentPlanCode === plan?.code
-
-    const currentSubscription = currentWorkspace?.subscription;
-
-    const isScheduledForDowngrade =
-        currentSubscription?.cancelAtPeriodEnd;
-
-    const isEndingPlan =
-        isCurrentPlan && isScheduledForDowngrade;
+        currentPlan?.code === plan?.code;
 
     const isScheduledPlan =
-        isScheduledForDowngrade &&
-        plan.code === "FREE";
+        scheduledPlan?.code === plan?.code;
 
+    const hasPendingChange =
+        !!scheduledPlan;
+
+    const isDisabled = (plan?.tier < currentPlan?.tier) && plan?.code !== planCodes.FREE;
 
     const { mutate: createCheckoutSession, isPending } = useCreateCheckoutSession()
 
     const handleCreateCheckoutSession = () => {
-        if(plan.code === 'FREE'){
+        if (plan?.code === 'FREE') {
             return handleDowngradeToFree()
         }
 
@@ -40,9 +42,14 @@ function PlanCard({ plan, loading }) {
     }
 
     const { mutate: downgradeToFree, isPending: loadingDowngradeToFree } = useDowngradeToFree()
+    const { mutate: resumeCurrentSubscription, isPending: loadingResumeSubscription } = useResumeSubscription()
 
     const handleDowngradeToFree = () => {
         downgradeToFree()
+    }
+
+    const handleResumeCurrentSubscritpion = () => {
+        resumeCurrentSubscription()
     }
 
     if (loading) {
@@ -60,25 +67,17 @@ function PlanCard({ plan, loading }) {
     ${isCurrentPlan
                     ? 'border-[#1A9E6E] ring-2 ring-[#1A9E6E]/10'
                     : isScheduledPlan
-                        ? 'border-amber-300 ring-2 ring-amber-100'
+                        ? 'border-amber-400 ring-2 ring-amber-100'
                         : 'border-gray-200'
                 }
-`}
+    `}
         >
             {/* Badge */}
-            <div className="absolute -top-3 right-4 flex gap-2">
+            <div className="absolute -top-3 right-4">
 
                 {isCurrentPlan && (
-                    <span
-                        className={`
-                text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm
-                ${isEndingPlan
-                                ? 'bg-amber-500'
-                                : 'bg-[#1A9E6E]'
-                            }
-            `}
-                    >
-                        {isEndingPlan ? 'Ends Soon' : 'Current Plan'}
+                    <span className="bg-[#1A9E6E] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                        Current
                     </span>
                 )}
 
@@ -99,7 +98,7 @@ function PlanCard({ plan, loading }) {
                     </h3>
 
                     {
-                        plan.code === "PRO" && (
+                        plan?.code === "PRO" && (
                             <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md uppercase">
                                 Popular
                             </span>
@@ -122,7 +121,7 @@ function PlanCard({ plan, loading }) {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-2 mb-6">
+                <div className="grid grid-cols-2 gap-2 mb-6">
                     <div className="border border-gray-200 rounded-lg p-2 text-center flex flex-col justify-center bg-gray-50/50">
                         <span className="text-[9px] text-gray-500 uppercase font-semibold mb-1 tracking-wider">
                             Members
@@ -153,7 +152,7 @@ function PlanCard({ plan, loading }) {
                         </span>
                     </div>
 
-                    <div className="border border-gray-200 rounded-lg p-2 text-center flex flex-col justify-center bg-gray-50/50">
+                    {/* <div className="border border-gray-200 rounded-lg p-2 text-center flex flex-col justify-center bg-gray-50/50">
                         <span className="text-[9px] text-gray-500 uppercase font-semibold mb-1 tracking-wider">
                             Checks
                         </span>
@@ -162,7 +161,7 @@ function PlanCard({ plan, loading }) {
                             <span className="sm:hidden">∞</span>
                             <span className="hidden sm:inline">Unlimited</span>
                         </span>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Features */}
@@ -205,54 +204,74 @@ function PlanCard({ plan, loading }) {
                     </ul>
                 </div>
 
+                {isCurrentPlan && hasPendingChange && (
+                    <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                        <p className="text-xs text-blue-700">
+                            A plan change has been scheduled.
+                        </p>
+                    </div>
+                )}
+
+                {isScheduledPlan && (
+                    <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                        <p className="text-xs text-amber-800">
+                            This plan will become active when your current billing period ends.
+                        </p>
+                    </div>
+                )}
+
                 {/* Button */}
                 <div className="mt-8 pt-6 border-t border-gray-100">
-
-                    {isScheduledPlan && (
-                        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                            <p className="text-xs text-amber-800">
-                                This plan will become active when your current subscription ends.
-                            </p>
-                        </div>
-                    )}
-
                     {isCurrentPlan ? (
-                        isEndingPlan ? (
+
+                        hasPendingChange ? (
                             <AppButton
                                 fullWidth
-                                // onClick={handleResumeSubscription}
-                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
+                                onClick={handleResumeCurrentSubscritpion}
+                                loading={loadingResumeSubscription}
+                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px]"
                             >
-                                Resume Subscription
+                                Keep {plan.name}
                             </AppButton>
                         ) : (
                             <AppButton
                                 fullWidth
                                 disabled
-                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-gray-100 text-gray-500 cursor-not-allowed"
+                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-gray-100 text-gray-500"
                             >
                                 Current Plan
                             </AppButton>
                         )
+
                     ) : isScheduledPlan ? (
+
                         <AppButton
                             fullWidth
                             disabled
-                            className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-amber-50 text-amber-700 border border-amber-200 cursor-not-allowed"
+                            className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-amber-50 text-amber-700 border border-amber-200"
                         >
                             Scheduled
                         </AppButton>
+
                     ) : (
-                        <AppButton
-                            fullWidth
-                            loading={isPending || loadingDowngradeToFree}
-                            onClick={handleCreateCheckoutSession}
-                            className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white shadow-sm"
-                        >
-                            {plan.tier < currentWorkspace.subscription.plan.tier
-                                ? `Downgrade to ${plan.name}`
-                                : `Upgrade to ${plan.name}`}
-                        </AppButton>
+                        
+                        <span title={isDisabled ? "Only downgrade possible after current plan ends" : undefined}>
+                            <AppButton
+                                fullWidth
+                                disabled={isDisabled}
+                                loading={isPending || loadingDowngradeToFree}
+                                onClick={handleCreateCheckoutSession}
+                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white"
+                            >
+                                {hasPendingChange
+                                    ? `Switch to ${plan.name}`
+                                    : plan.tier < currentPlan.tier
+                                        ? `Downgrade to ${plan.name}`
+                                        : `Upgrade to ${plan.name}`
+                                }
+                            </AppButton>
+                        </span>
+
                     )}
 
                 </div>

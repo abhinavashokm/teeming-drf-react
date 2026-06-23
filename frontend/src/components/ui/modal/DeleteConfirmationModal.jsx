@@ -26,7 +26,7 @@ export default function DeleteConfirmationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-78 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
         {/* Header */}

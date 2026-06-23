@@ -11,8 +11,12 @@ function CurrentSubscriptionCard({
     className,
     onResumeSubscription,
 }) {
-    const isScheduledForDowngrade = subscription.cancelAtPeriodEnd;
-    const isFreePlan = subscription.plan.code === planCodes.FREE;
+    const scheduledPlan = subscription.scheduledPlan;
+
+    const hasScheduledChange = !!scheduledPlan;
+
+    const isFreePlan =
+        subscription.plan.code === planCodes.FREE;
 
     return (
         <div
@@ -32,28 +36,18 @@ function CurrentSubscriptionCard({
                             {subscription.plan.name} Plan
                         </h2>
 
-                        {isScheduledForDowngrade ? (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                                Ending Soon
-                            </span>
-                        ) : (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-                                Active
-                            </span>
-                        )}
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                            Active
+                        </span>
                     </div>
 
                     {!isFreePlan && (
                         <p className="text-sm text-gray-500 mt-1">
-                            {isScheduledForDowngrade
-                                ? `Active until ${dateToHuman(
-                                    subscription.expiresAt
-                                )}`
-                                : `Renews on ${dateToHuman(
-                                    subscription.expiresAt
-                                )}`}
+                            Current billing period ends on{" "}
+                            {dateToHuman(subscription.expiresAt)}
                         </p>
                     )}
+
                 </div>
 
                 <div className="text-sm text-gray-500">
@@ -63,35 +57,40 @@ function CurrentSubscriptionCard({
                 </div>
             </div>
 
-            {isScheduledForDowngrade && (
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                    <div className="flex gap-3">
-                        <AlertTriangle
-                            size={18}
-                            className="text-amber-600 shrink-0 mt-0.5"
-                        />
+            {hasScheduledChange && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
 
-                        <div>
-                            <p className="text-sm font-medium text-amber-900">
-                                Subscription will not renew
+                    <div className="flex items-start gap-3">
+
+                        <div className="mt-1 h-2 w-2 rounded-full bg-blue-500 shrink-0" />
+
+                        <div className="flex-1">
+
+                            <p className="text-sm font-semibold text-blue-900">
+                                Scheduled Change
                             </p>
 
-                            <p className="text-sm text-amber-700 mt-1">
-                                Your workspace will be moved to the Free plan
-                                on{' '}
+                            <p className="text-sm text-blue-700 mt-1">
+                                <span className="font-medium">
+                                    {scheduledPlan.name} Plan
+                                </span>{" "}
+                                will become active on{" "}
                                 {dateToHuman(subscription.expiresAt)}.
                             </p>
+
                         </div>
+
                     </div>
 
                     {onResumeSubscription && (
                         <button
                             onClick={onResumeSubscription}
-                            className="px-4 py-2 text-sm font-medium rounded-lg border border-amber-300 bg-white text-amber-800 hover:bg-amber-100 transition-colors"
+                            className="mt-4 px-4 py-2 text-sm font-medium rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 transition-colors"
                         >
-                            Resume Subscription
+                            Keep {subscription.plan.name}
                         </button>
                     )}
+
                 </div>
             )}
         </div>

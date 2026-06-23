@@ -1,5 +1,5 @@
 from rest_framework.urls import path
-from .views import UserListPlanView, SubscriptionCheckoutView, CurrentPlanView, SubscriptionDowngradeToFreeView
+from .views import UserListPlanView, SubscriptionCheckoutView, CurrentPlanView, SubscriptionDowngradeToFreeView, ResumeCurrentSubscription
 from .webhook_views import StripeWebhookView
 
 
@@ -9,4 +9,5 @@ urlpatterns = [
     path("webhook/",StripeWebhookView.as_view()),
     path("current/", CurrentPlanView.as_view()),
     path("downgrade-to-free/", SubscriptionDowngradeToFreeView.as_view()),
+    path("resume/", ResumeCurrentSubscription.as_view()),
 ]

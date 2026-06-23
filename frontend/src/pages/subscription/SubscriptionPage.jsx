@@ -7,6 +7,7 @@ import { dateToHuman } from "../../utils/timeUtils"
 import { currencySymbols, planCodes } from '../../constants/subscriptionConstants';
 import CurrentSubscriptionCard from '../../components/subscription/CurrentSubscriptionCard';
 
+
 function SubscriptionPage() {
 
     const { data: plans, isPending: isPlansLoading } = usePlans()
