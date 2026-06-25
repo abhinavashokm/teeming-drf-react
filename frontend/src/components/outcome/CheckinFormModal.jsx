@@ -133,8 +133,8 @@ export default function CheckinFormModal({
         }
     }, [isOpen, currentCheckin?.id]);
 
-    const { mutate: createCheckin } = useCreateCheckin();
-    const { mutate: updateCheckin } = useUpdateCheckin()
+    const { mutate: createCheckin, isPending: isCreatePending } = useCreateCheckin();
+    const { mutate: updateCheckin, isPending: isUpdatePending } = useUpdateCheckin()
 
     const handleCreateCheckin = (data) => {
         const payload = {
@@ -322,6 +322,8 @@ export default function CheckinFormModal({
                     <AppButton
                         type="button"
                         onClick={handleSubmit(isEdit ? handleEditCheckin : handleCreateCheckin)}
+                        loading={ isCreatePending || isUpdatePending }
+                        disabled={ isCreatePending || isUpdatePending }
                     >
                         {isEdit ? 'Save Changes' : 'Save Check-in'}
                     </AppButton>

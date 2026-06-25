@@ -93,7 +93,7 @@ def list_goal_checkins(workspace, goal_id):
                 queryset=CheckInMetricValue.objects.select_related("metric"),
             )
         )
-        .filter(goal=goal)
+        .filter(goal=goal).order_by("-created_at")
     )
 
 

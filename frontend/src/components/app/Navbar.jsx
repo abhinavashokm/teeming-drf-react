@@ -60,7 +60,7 @@ function Navbar({ isNavbarVisible, isScrolled, showShadow = false, setIsGoalInfo
 
         </div>
 
-        <div className="flex items-center pr-4 mr-2 justify-end">
+        <div className="flex items-center pr-4 mr-2 justify-end z-1000">
           {/* <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
             <Bell className="h-[17px] w-[17px]" strokeWidth={1.5} />
             <span className="absolute top-1.5 right-1.5 block h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span>

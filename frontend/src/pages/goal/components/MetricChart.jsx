@@ -24,8 +24,8 @@ ChartJS.register(
 );
 
 function MetricChart() {
-    const { data: metrics } = useMetrics();
-    const { data: checkins = [] } = useCheckins();
+    const { data: metrics, isPending: metricsLoading } = useMetrics();
+    const { data: checkins = [], isPending: checkinsLoading } = useCheckins();
 
     const [selectedMetricId, setSelectedMetricId] = useState(null);
 
@@ -37,23 +37,23 @@ function MetricChart() {
 
     const selectedMetric = metrics?.find(m => m.id === selectedMetricId);
 
-const chartData = [
-    ...(selectedMetric?.baselineValue !== undefined && selectedMetric?.baselineValue !== null
-        ? [{ date: 'Base', value: selectedMetric.baselineValue }]
-        : []
-    ),
-    ...checkins
-        .filter(c => c.metricValues?.length)
-        .map(c => {
-            const metricValue = c.metricValues.find(v => v.metricId === selectedMetricId);
-            return {
-                date: dateToHuman(c.createdAt),
-                value: metricValue?.value,
-            };
-        })
-        .filter(item => item.value !== undefined)
-        .reverse(),
-];
+    const chartData = [
+        ...(selectedMetric?.baselineValue !== undefined && selectedMetric?.baselineValue !== null
+            ? [{ date: 'Base', value: selectedMetric.baselineValue }]
+            : []
+        ),
+        ...checkins
+            .filter(c => c.metricValues?.length)
+            .map(c => {
+                const metricValue = c.metricValues.find(v => v.metricId === selectedMetricId);
+                return {
+                    date: dateToHuman(c.createdAt),
+                    value: metricValue?.value,
+                };
+            })
+            .filter(item => item.value !== undefined)
+            .reverse(),
+    ];
 
     const firstValue = chartData[0]?.value;
     const latestValue = chartData.at(-1)?.value;
@@ -155,6 +155,52 @@ const chartData = [
         },
     };
 
+    const isLoading = metricsLoading || checkinsLoading;
+
+    if (isLoading) {
+        return (
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm animate-pulse">
+                {/* Tabs + badge row */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-1 bg-gray-50/50">
+                        <div className="h-7 w-20 bg-gray-200 rounded-md" />
+                        <div className="h-7 w-20 bg-gray-100 rounded-md" />
+                        <div className="h-7 w-20 bg-gray-100 rounded-md" />
+                    </div>
+                    <div className="h-8 w-48 bg-gray-100 rounded-lg" />
+                </div>
+
+                {/* Chart area */}
+                <div className="h-[280px] relative">
+                    {/* Y-axis grid lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pb-6">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="w-full h-px bg-gray-100" />
+                        ))}
+                    </div>
+
+                    {/* SVG line */}
+                    <svg className="absolute inset-0 w-full h-full pb-6" preserveAspectRatio="none">
+                        <polyline
+                            points="0,180 80,140 160,160 240,100 320,120 400,70 480,90 560,50"
+                            fill="none"
+                            stroke="#e5e7eb"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+
+                    {/* X-axis labels */}
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-between">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="h-3 w-10 bg-gray-100 rounded-full" />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

@@ -1,16 +1,16 @@
 import { Info, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
-import CheckinRow from '../../../components/outcome/CheckinRow';
 import CheckinFormModal from '../../../components/outcome/CheckinFormModal';
+import CheckinRow from '../../../components/outcome/CheckinRow';
 import MetricFormModal from '../../../components/outcome/MetricFormModal';
 import MetricRow from '../../../components/outcome/MetricRow';
 import AppButton from "../../../components/ui/buttons/AppButton";
+import { PERMISSIONS } from '../../../constants/permissions';
+import useGoal from "../../../hooks/goal/useGoal";
 import useCheckins from '../../../hooks/outcome/useCheckins';
 import useMetrics from '../../../hooks/outcome/useMetrics';
+import { useCan } from "../../../hooks/permissions/useCan";
 import MetricChart from './MetricChart';
-import { useCan } from "../../../hooks/permissions/useCan"
-import { PERMISSIONS } from '../../../constants/permissions';
-import useGoal from "../../../hooks/goal/useGoal"
 
 
 function OutcomeView() {

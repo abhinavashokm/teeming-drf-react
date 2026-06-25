@@ -74,6 +74,7 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
 
     return (
         <BaseModal isOpen={isOpen} onClose={onClose} size="lg">
+
             <BaseModal.Header onClose={onClose}>
                 <span className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-[11px] font-bold uppercase tracking-wider">
                     {isEdit ? 'Edit Metric' : 'Metrics'}
@@ -124,6 +125,7 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
                         + Add another metric
                     </button>
                 )}
+                
             </BaseModal.Body>
 
             <BaseModal.Footer className="justify-between">

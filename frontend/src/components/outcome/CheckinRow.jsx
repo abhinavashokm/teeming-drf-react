@@ -90,8 +90,7 @@ function CheckinRow({
                         <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                                 <MemberAvatar
-                                    name={createdBy.fullName}
-                                    email={createdBy.email}
+                                    user={createdBy}
                                     size="sm"
                                 />
 
