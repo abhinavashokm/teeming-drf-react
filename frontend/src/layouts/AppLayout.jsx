@@ -4,8 +4,7 @@ import { Outlet, useLocation } from "react-router-dom"
 import FullPageLoader from "../components/ui/FullPageLoader"
 import { errorCodes } from "../constants/errorCodes"
 import useAuth from "../hooks/auth/useAuth"
-import { showApiError, showError, showSuccess } from '../utils/toast'
-import ErrorPage from "../pages/error/ErrorPage"
+import { showError, showSuccess } from '../utils/toast'
 
 
 function AppLayout() {

@@ -1,23 +1,20 @@
-import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import AuthButton from '../../components/auth/AuthButton'
 import AuthDivider from '../../components/auth/AuthDivider'
 import AuthFormError from '../../components/auth/AuthFormError'
-import AuthInput from '../../components/auth/AuthInput'
 import AuthLogo from '../../components/auth/AuthLogo'
 import GoogleLogin from '../../components/auth/GoogleLogin'
-import PasswordInput from '../../components/ui/form/PasswordInput.jsx'
-import { useLogin } from '../../hooks/auth/useLogin'
-import { getErrorMsg } from '../../utils/apiParser.js'
-import { showSuccess } from '../../utils/toast'
-import { validations } from '../../utils/validations'
-import useInviteToken from '../../hooks/invite/useInvitationToken'
-import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
-import FullPageLoader from '../../components/ui/FullPageLoader'
-import { ROUTE_PATHS } from '../../constants/routePaths.js'
 import FormField from '../../components/ui/form/FormField.jsx'
 import InputField from '../../components/ui/form/InputField.jsx'
+import PasswordInput from '../../components/ui/form/PasswordInput.jsx'
+import FullPageLoader from '../../components/ui/FullPageLoader'
+import { ROUTE_PATHS } from '../../constants/routePaths.js'
+import { useLogin } from '../../hooks/auth/useLogin'
+import useInviteToken from '../../hooks/invite/useInvitationToken'
+import useResolveInvitation from '../../hooks/invite/useResolveInvitation'
+import { getErrorMsg } from '../../utils/apiParser.js'
+import { validations } from '../../utils/validations'
 
 
 function LoginPage() {
@@ -39,19 +36,6 @@ function LoginPage() {
     const handleLogin = async (data) => {
         login(data)
     }
-
-
-    //success msg after signup (when redirecting after signup)
-    // const toastShown = useRef(false)
-    // const location = useLocation()
-
-    // useEffect(() => {
-    //     if (location.state?.verified && !toastShown.current) {
-    //         showSuccess("Email verified successfully, you can now login")
-    //         toastShown.current = true
-    //         window.history.replaceState({}, '')
-    //     }
-    // }, [])
 
     if (!!invitationToken && isResolveTokenPending) return <FullPageLoader />
 
