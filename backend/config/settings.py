@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.discussion",
     "apps.subscription",
     "apps.ai",
+    "apps.staff",
 ]
 
 ASGI_APPLICATION = "config.asgi.application"

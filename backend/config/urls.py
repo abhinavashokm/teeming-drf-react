@@ -5,6 +5,7 @@ urlpatterns = [
         "api/",
         include(
             [
+                path("admin/", include('apps.staff.urls')),
                 path("auth/", include("apps.user.urls")),
                 path("invitations/", include("apps.invitation.public_urls")),
                 path("workspaces/", include("apps.workspace.urls")),

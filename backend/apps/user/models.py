@@ -30,21 +30,11 @@ class UserManager(BaseUserManager):
 
 class User(BaseAbstractModel, AbstractUser):
 
-    class PlanChoices(models.TextChoices):
-        FREE = "FREE", "Free"
-        PRO = "PRO", "Pro"
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
     avatar_key = models.CharField(max_length=500, blank=True, null=True)
-
-    current_plan = models.CharField(
-        default=PlanChoices.FREE,
-        choices=PlanChoices.choices,
-        help_text="Pro subscription status",
-    )
 
     last_workspace = models.ForeignKey(
         "workspace.Workspace",

@@ -25,7 +25,7 @@ class MeSerilaizer(GetAvatarUrlMixin, serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'full_name', 'email', "last_workspace", "avatar_url")
+        fields = ('id', 'full_name', 'email', "last_workspace", "avatar_url", "is_staff")
         
 
 class RegisterSerializer(serializers.ModelSerializer):
