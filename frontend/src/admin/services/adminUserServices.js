@@ -17,6 +17,12 @@ export const adminUserService = {
     adminSuspendUser: async (userId) => {
         const res = await api.patch(`/admin/users/${userId}/suspend/`)
         return res.data
-    }
+    },
+
+    adminGetUserDetails: async (userId) => {
+        const res = await api.get(`/admin/users/${userId}/`)
+        return res.data
+    },
+    
 }
 

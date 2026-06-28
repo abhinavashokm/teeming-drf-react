@@ -3,6 +3,9 @@ import { Search, ChevronDown, SlidersHorizontal, Download, MoreHorizontal, X, Al
 import useAdminUsers from '../hooks/users/useAdminUsers';
 import useAdminSuspendUser from '../hooks/users/useAdminSuspendUser';
 import { format } from 'date-fns';
+import MemberAvatar from '../../components/team/MemberAvatar';
+import AdminUserDetails from '../components/adminUsers/AdminUserDetails';
+
 
 const avatarColors = ['bg-blue-500', 'bg-pink-500', 'bg-purple-500', 'bg-amber-500', 'bg-emerald-500']
 
@@ -27,9 +30,8 @@ export default function AdminUsers() {
     })
 
     const { mutate: suspendUser, isPending: isSuspending } = useAdminSuspendUser()
-    console.log(data)
+
     const users = data?.users ?? []
-    console.log(users)
     const totalCount = data?.total ?? 0
 
     const toggleDropdown = (e, id) => {
@@ -133,9 +135,7 @@ export default function AdminUsers() {
                                         <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-8 h-8 rounded-full ${getAvatarColor(user.id)} flex items-center justify-center text-[11px] font-bold text-white shrink-0`}>
-                                                        {getInitials(user.fullName)}
-                                                    </div>
+                                                    <MemberAvatar user={user} />
                                                     <span className="text-[14px] font-medium text-slate-900">{user.fullName}</span>
                                                 </div>
                                             </td>
@@ -263,49 +263,7 @@ export default function AdminUsers() {
 
             {/* View Details Modal */}
             {viewDetailsUser && (
-                <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="p-6 border-b border-slate-100 relative">
-                            <button
-                                onClick={() => setViewDetailsUser(null)}
-                                className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                            <div className="flex items-center gap-5">
-                                <div className={`w-20 h-20 rounded-full ${getAvatarColor(viewDetailsUser.id)} flex items-center justify-center text-2xl font-bold text-white shadow-sm shrink-0`}>
-                                    {getInitials(viewDetailsUser.fullName)}
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-slate-900 mb-1">{viewDetailsUser.fullName}</h2>
-                                    <div className="text-sm text-slate-500 mb-2">{viewDetailsUser.email}</div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
-                                            Joined {format(new Date(viewDetailsUser.createdAt), 'MMM dd, yyyy')}
-                                        </span>
-                                        <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider ${
-                                            viewDetailsUser.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
-                                            viewDetailsUser.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                                            'bg-red-100 text-red-700'
-                                        }`}>
-                                            {viewDetailsUser.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-6 overflow-y-auto">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Workspaces</h3>
-                                <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
-                                    {viewDetailsUser.workspaceCount} Total
-                                </span>
-                            </div>
-                            {/* workspace list renders here from a separate query when needed */}
-                        </div>
-                    </div>
-                </div>
+              <AdminUserDetails userDetails={viewDetailsUser} onClose={() => setViewDetailsUser(null)} />
             )}
         </>
     );
