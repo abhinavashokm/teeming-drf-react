@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from core.responses.api_response import success_response
 from .import serializers, staff_services
 from apps.workspace import workspace_services
+from apps.subscription import subscription_services
 
 
 class AdminBaseView(APIView):
@@ -53,5 +54,17 @@ class AdminWorkspaceListView(AdminBaseView):
         return success_response(
             data={
                 "workspaces": serializers.AdminWorkspaceListSerializer(workspaces, many=True).data
+            }
+        )
+    
+
+class AdminPlanListView(AdminBaseView):
+
+    def get(self, request):
+        plans = subscription_services.list_plans()
+
+        return success_response(
+            data={
+                "plans": serializers.AdminPlanListSerializer(plans, many=True).data
             }
         )

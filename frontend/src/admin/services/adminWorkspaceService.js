@@ -1,5 +1,3 @@
-// services/adminWorkspaceServices.js
-
 import api from "../../api/axios"
 
 export const adminWorkspaceService = {

@@ -16,28 +16,28 @@ class AdminUserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id',
-            'full_name',
-            'email',
-            'avatar_key',
-            'workspace_count',
-            'is_active',
-            'status',
-            'is_staff',
-            'created_at',
-            'avatar_url',
+            "id",
+            "full_name",
+            "email",
+            "avatar_key",
+            "workspace_count",
+            "is_active",
+            "status",
+            "is_staff",
+            "created_at",
+            "avatar_url",
         ]
 
     def get_status(self, obj):
         if not obj.is_active:
-            return 'suspended'
+            return "suspended"
         if obj.is_staff:
-            return 'staff'
-        return 'active'
-    
+            return "staff"
+        return "active"
+
     def get_avatar_url(self, obj):
         return s3_service.build_s3_url(obj.avatar_key)
-    
+
 
 class AdminUserWorkspaceSerializer(serializers.Serializer):
     id = serializers.UUIDField()
@@ -48,8 +48,8 @@ class AdminUserWorkspaceSerializer(serializers.Serializer):
 
     def get_role(self, obj):
         # obj is a Workspace annotated with the user's role
-        return getattr(obj, 'user_role', None)
-    
+        return getattr(obj, "user_role", None)
+
 
 class AdminUserDetailSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
@@ -59,43 +59,45 @@ class AdminUserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id',
-            'full_name',
-            'email',
-            'avatar_key',
-            'status',
-            'is_staff',
-            'created_at',
-            'workspace_count',
-            'workspaces',
+            "id",
+            "full_name",
+            "email",
+            "avatar_key",
+            "status",
+            "is_staff",
+            "created_at",
+            "workspace_count",
+            "workspaces",
         ]
 
     def get_status(self, obj):
         if not obj.is_active:
-            return 'suspended'
+            return "suspended"
         if obj.is_staff:
-            return 'staff'
-        return 'active'
+            return "staff"
+        return "active"
 
     def get_workspaces(self, obj):
         from apps.workspace.models import WorkspaceMember
+
         workspaces = (
-            WorkspaceMember.objects
-            .filter(user=obj)
-            .select_related('workspace')
-            .annotate(member_count=Count('workspace__members'))
+            WorkspaceMember.objects.filter(user=obj)
+            .select_related("workspace")
+            .annotate(member_count=Count("workspace__members"))
         )
         return [
             {
-                'id': str(m.workspace.id),
-                'name': m.workspace.name,
-                'slug': m.workspace.slug,
-                'role': m.role,
-                'memberCount': WorkspaceMember.objects.filter(workspace=m.workspace).count(),
+                "id": str(m.workspace.id),
+                "name": m.workspace.name,
+                "slug": m.workspace.slug,
+                "role": m.role,
+                "memberCount": WorkspaceMember.objects.filter(
+                    workspace=m.workspace
+                ).count(),
             }
             for m in workspaces
         ]
-    
+
 
 class AdminWorkspacePlanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -119,7 +121,6 @@ class AdminWorkspaceListSerializer(serializers.ModelSerializer):
     is_suspended = serializers.BooleanField(read_only=True)
     logo_url = serializers.SerializerMethodField()
 
-
     class Meta:
         model = Workspace
         fields = [
@@ -137,4 +138,23 @@ class AdminWorkspaceListSerializer(serializers.ModelSerializer):
 
     def get_logo_url(self, obj):
         return s3_service.build_s3_url(obj.logo_key)
-    
+
+
+class AdminPlanListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = [
+            "id",
+            "code",
+            "name",
+            "description",
+            "tier",
+            "monthly_price",
+            "currency",
+            "max_goals",
+            "max_members",
+            "can_use_ai_idea_suggestions",
+            "can_use_ai_assistant",
+            "can_export_workspace_data",
+            "is_active",
+        ]
