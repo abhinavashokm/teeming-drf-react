@@ -1,9 +1,9 @@
 from .models import WorkspaceMember, Workspace
 from django.db import transaction
-from django.db.models import Case, When, Value, IntegerField
+from django.db.models import Case, When, Value, IntegerField, Q, Count, Prefetch
 from . import exceptions
 from apps.subscription import subscription_services
-from .helpers.workspace_helper import get_workspace_or_raise
+from apps.subscription.models import WorkspaceSubscription
 
 
 def create_workspace_with_free_plan(current_user, data):
@@ -115,3 +115,71 @@ def save_workspace_logo_url(workspace, logo_key):
 
     workspace.logo_key = logo_key
     workspace.save()
+
+
+def list_workspaces(search: str = "", status: str = "all", plan: str = "all"):
+    current_subscription_qs = (
+        WorkspaceSubscription.objects.select_related("plan")
+        .filter(
+            Q(status=WorkspaceSubscription.StatusChoices.ACTIVE)
+            | Q(status=WorkspaceSubscription.StatusChoices.TRIALING),
+            is_deleted=False,
+        )
+        .order_by("-started_at")
+    )
+
+    qs = (
+        Workspace.objects.filter(is_deleted=False)
+        .select_related("owner")
+        .prefetch_related(
+            Prefetch(
+                "subscriptions",
+                queryset=current_subscription_qs,
+                to_attr="_current_subscriptions",
+            )
+        )
+        .annotate(
+            member_count=Count(
+                "members",
+                filter=Q(members__is_deleted=False),
+                distinct=True,
+            ),
+            goal_count=Count(
+                "goals",
+                filter=Q(goals__is_deleted=False),
+                distinct=True,
+            ),
+        )
+        .order_by("-created_at")
+    )
+
+    if search:
+        qs = qs.filter(
+            Q(name__icontains=search)
+            | Q(slug__icontains=search)
+            | Q(owner__email__icontains=search)
+            | Q(owner__full_name__icontains=search)
+        )
+
+    if status == "suspended":
+        return []
+
+    if plan != "all":
+        qs = qs.filter(
+            Q(subscriptions__status=WorkspaceSubscription.StatusChoices.ACTIVE)
+            | Q(subscriptions__status=WorkspaceSubscription.StatusChoices.TRIALING),
+            subscriptions__plan__code__iexact=plan,
+            subscriptions__is_deleted=False,
+        ).distinct()
+
+    workspaces = list(qs)
+
+    for workspace in workspaces:
+        workspace.active_subscription = (
+            workspace._current_subscriptions[0]
+            if workspace._current_subscriptions
+            else None
+        )
+        workspace.is_suspended = False
+
+    return workspaces

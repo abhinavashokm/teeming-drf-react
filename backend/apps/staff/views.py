@@ -2,13 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from core.responses.api_response import success_response
 from .import serializers, staff_services
+from apps.workspace import workspace_services
 
 
 class AdminBaseView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
 
-class UserManagementView(AdminBaseView):
+class AdminUserListView(AdminBaseView):
 
     def get(self, request):
         search = request.query_params.get('search', '').strip()
@@ -33,4 +34,24 @@ class UserDetailView(AdminBaseView):
 
         return success_response(
             data=serializers.AdminUserDetailSerializer(user).data
+        )
+    
+
+class AdminWorkspaceListView(AdminBaseView):
+
+    def get(self, request):
+        search = request.query_params.get('search', '').strip()
+        status = request.query_params.get('status', 'all').lower()
+        plan = request.query_params.get('plan', 'all').lower()
+
+        workspaces = workspace_services.list_workspaces(
+            search=search,
+            status=status,
+            plan=plan,
+        )
+
+        return success_response(
+            data={
+                "workspaces": serializers.AdminWorkspaceListSerializer(workspaces, many=True).data
+            }
         )

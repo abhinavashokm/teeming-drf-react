@@ -11,7 +11,7 @@ import useWorkspace from '../../hooks/workspace/useWorkspace';
 import useWorkspaceSlug from '../../hooks/params/useWorkspaceSlug';
 import { getGoalCardColorClass } from '../../utils/styleUtils';
 import GoalFormModal from './GoalFormModal';
-import DeleteConfirmationModal from '../ui/modal/DeleteConfirmationModal';
+import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal';
 
 
 function GoalCardSkeleton() {
@@ -155,7 +155,7 @@ function GoalCard({ goal, loading = false }) {
 
             </div>
             <GoalFormModal goal={goal} isEditMode={true} isOpen={isEditGoalModalOpen} onClose={() => setIsEditGoalModalOpen(false)} />
-            <DeleteConfirmationModal
+            <DangerConfirmationModal
                 isOpen={isDeleteConfirmModalOpen}
                 onClose={() => setIsDeleteConfirmModalOpen(false)}
                 isLoading={isDeleting}

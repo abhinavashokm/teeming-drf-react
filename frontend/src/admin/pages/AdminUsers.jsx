@@ -5,6 +5,7 @@ import useAdminSuspendUser from '../hooks/users/useAdminSuspendUser';
 import { format } from 'date-fns';
 import MemberAvatar from '../../components/team/MemberAvatar';
 import AdminUserDetails from '../components/adminUsers/AdminUserDetails';
+import DangerConfirmationModal from "../../components/ui/modal/DangerConfirmationModal"
 
 
 const avatarColors = ['bg-blue-500', 'bg-pink-500', 'bg-purple-500', 'bg-amber-500', 'bg-emerald-500']
@@ -50,6 +51,8 @@ export default function AdminUsers() {
         document.addEventListener('click', closeDropdown);
         return () => document.removeEventListener('click', closeDropdown);
     }, []);
+
+    const [isConfirmSuspendOpen, setIsConfirmSuspendOpen] = useState(false)
 
     return (
         <>
@@ -148,14 +151,12 @@ export default function AdminUsers() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className={`w-2 h-2 rounded-full ${
-                                                        user.status === 'active' ? 'bg-emerald-500' :
-                                                        user.status === 'pending' ? 'bg-amber-500' :
-                                                        'bg-red-500'
-                                                    }`} />
-                                                    <span className={`text-[14px] font-medium capitalize ${
-                                                        user.status === 'suspended' ? 'text-red-600' : 'text-slate-900'
-                                                    }`}>
+                                                    <div className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500' :
+                                                            user.status === 'pending' ? 'bg-amber-500' :
+                                                                'bg-red-500'
+                                                        }`} />
+                                                    <span className={`text-[14px] font-medium capitalize ${user.status === 'suspended' ? 'text-red-600' : 'text-slate-900'
+                                                        }`}>
                                                         {user.status}
                                                     </span>
                                                 </div>
@@ -177,7 +178,7 @@ export default function AdminUsers() {
                                                             View Details
                                                         </button>
                                                         <button
-                                                            onClick={() => { setSuspendConfirmUser(user); setDropdownOpenId(null); }}
+                                                            onClick={() => setIsConfirmSuspendOpen(true)}
                                                             disabled={user.status === 'suspended'}
                                                             className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center text-left font-medium disabled:opacity-40 disabled:pointer-events-none"
                                                         >
@@ -227,44 +228,21 @@ export default function AdminUsers() {
                 </div>
             </div>
 
-            {/* Suspend Confirmation Modal */}
-            {suspendConfirmUser && (
-                <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-                        <div className="p-6">
-                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
-                                <AlertTriangle className="w-6 h-6 text-red-600" />
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-2">Suspend User Account</h3>
-                            <p className="text-sm text-slate-500">
-                                Are you sure you want to suspend{' '}
-                                <span className="font-bold text-slate-700">{suspendConfirmUser.fullName}</span>?
-                                They will immediately lose access to all their workspaces.
-                            </p>
-                        </div>
-                        <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                            <button
-                                onClick={() => setSuspendConfirmUser(null)}
-                                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200/50 rounded-lg transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSuspendConfirm}
-                                disabled={isSuspending}
-                                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors disabled:opacity-70"
-                            >
-                                {isSuspending ? 'Suspending...' : 'Yes, Suspend User'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* View Details Modal */}
             {viewDetailsUser && (
-              <AdminUserDetails userDetails={viewDetailsUser} onClose={() => setViewDetailsUser(null)} />
+                <AdminUserDetails userDetails={viewDetailsUser} onClose={() => setViewDetailsUser(null)} />
             )}
+
+            <DangerConfirmationModal
+                isOpen={isConfirmSuspendOpen}
+                onClose={() => setIsConfirmSuspendOpen(false)}
+                onConfirm={() => null}
+                title="Suspend User"
+                description="The user will immediately lose access to all workspaces."
+                confirmButtonText="Yes, Suspend"
+                // isLoading={isLoading}
+            />
+
         </>
     );
 }

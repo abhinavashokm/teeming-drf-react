@@ -11,7 +11,7 @@ import AppButton from '../ui/buttons/AppButton.jsx';
 import BaseModal from '../ui/modal/BaseModal';
 import useMoveIdeaToPlanned from '../../hooks/idea/useMoveIdeaToPlanned.js';
 import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress.js';
-import DeleteConfirmationModal from '../ui/modal/DeleteConfirmationModal.jsx';
+import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal.jsx';
 
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -448,7 +448,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
 
             </BaseModal>
 
-            <DeleteConfirmationModal
+            <DangerConfirmationModal
                 isOpen={isDeleteConfirmModalOpen}
                 onClose={() => setisDeleteConfirmModalOpen(false)}
                 isLoading={isDeleting}

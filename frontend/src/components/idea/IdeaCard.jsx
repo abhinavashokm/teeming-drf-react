@@ -7,7 +7,7 @@ import useDeleteIdea from '../../hooks/idea/useDeleteIdea.js'
 import { useCan } from '../../hooks/permissions/useCan.js'
 import { formatDateTime } from "../../utils/timeUtils"
 import MemberAvatar from '../team/MemberAvatar.jsx'
-import DeleteConfirmationModal from '../ui/modal/DeleteConfirmationModal.jsx'
+import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal.jsx'
 import IdeaDetailModal from './IdeaDetailModal'
 import IdeaFormModal from './IdeaFormModal.jsx'
 import MoveToDoneModal from './MoveToDoneModal'
@@ -219,7 +219,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                 currentIdea={currentIdea}
             />
 
-            <DeleteConfirmationModal
+            <DangerConfirmationModal
                 isOpen={isDeleteConfirmModalOpen}
                 onClose={() => setisDeleteConfirmModalOpen(false)}
                 isLoading={isDeleting}

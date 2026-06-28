@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function DeleteConfirmationModal({
+export default function DangerConfirmationModal({
   isOpen,
   onClose,
   onConfirm,

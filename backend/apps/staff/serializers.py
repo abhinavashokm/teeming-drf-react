@@ -2,6 +2,10 @@ from rest_framework import serializers
 from apps.user.models import User
 from core.services import s3_service
 from django.db.models import Count
+from apps.user.models import User
+from apps.subscription.models import Plan, WorkspaceSubscription
+from apps.workspace.models import Workspace
+from apps.user.serializers import UserBasicSerializer
 
 
 class AdminUserListSerializer(serializers.ModelSerializer):
@@ -91,4 +95,46 @@ class AdminUserDetailSerializer(serializers.ModelSerializer):
             }
             for m in workspaces
         ]
+    
+
+class AdminWorkspacePlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = ["id", "code", "name", "tier"]
+
+
+class AdminWorkspaceSubscriptionSerializer(serializers.ModelSerializer):
+    plan = AdminWorkspacePlanSerializer(read_only=True)
+
+    class Meta:
+        model = WorkspaceSubscription
+        fields = ["id", "plan", "status", "expires_at", "started_at"]
+
+
+class AdminWorkspaceListSerializer(serializers.ModelSerializer):
+    owner = UserBasicSerializer(read_only=True)
+    member_count = serializers.IntegerField(read_only=True)
+    goal_count = serializers.IntegerField(read_only=True)
+    active_subscription = AdminWorkspaceSubscriptionSerializer(read_only=True)
+    is_suspended = serializers.BooleanField(read_only=True)
+    logo_url = serializers.SerializerMethodField()
+
+
+    class Meta:
+        model = Workspace
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "logo_url",
+            "owner",
+            "member_count",
+            "goal_count",
+            "active_subscription",
+            "is_suspended",
+            "created_at",
+        ]
+
+    def get_logo_url(self, obj):
+        return s3_service.build_s3_url(obj.logo_key)
     

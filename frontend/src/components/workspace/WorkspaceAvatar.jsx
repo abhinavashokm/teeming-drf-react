@@ -10,6 +10,7 @@ function WorkspaceAvatar({
         sm: "w-8 h-8 rounded-[8px] text-[12px]",
         md: "w-12 h-12 rounded-xl text-[16px]",
         lg: "w-16 h-16 rounded-xl text-xl",
+        xl: "w-20 h-20 rounded-xl text-3xl",
     };
 
     const imageSrc =

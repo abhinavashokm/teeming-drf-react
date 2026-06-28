@@ -10,7 +10,7 @@ import { useState } from "react";
 import useDeleteMetric from "../../hooks/outcome/useDeleteMetric";
 import MetricFormModal from "./MetricFormModal";
 import { UNIT_SHORT_LABELS } from "../../constants/outcomeConstants";
-import DeleteConfirmationModal from "../ui/modal/DeleteConfirmationModal";
+import DangerConfirmationModal from "../ui/modal/DangerConfirmationModal";
 
 export default function MetricRow({ currentMetric, canManageMetrics }) {
 
@@ -117,7 +117,7 @@ export default function MetricRow({ currentMetric, canManageMetrics }) {
                 currentMetric={currentMetric}
             />
 
-            <DeleteConfirmationModal
+            <DangerConfirmationModal
                 isOpen={isDeleteConfirmModalOpen}
                 onClose={() => setisDeleteConfirmModalOpen(false)}
                 onConfirm={handleDeleteMetric}
