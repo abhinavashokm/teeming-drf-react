@@ -3,33 +3,6 @@ from core.responses.api_response import success_response
 from . import serializers, subscription_services
 from rest_framework import status
 from core.permission_views import MemberBaseView, AdminBaseView
-
-
-#test mode - staff permission pending to add
-class AdminPlanListCreateView(APIView):
-
-    def get(self, request):
-
-        plans = subscription_services.list_plans()
-
-        return success_response(
-            data={
-                "plans": serializers.AdminReadPlanSerializer(plans, many=True).data
-            }
-        )
-    
-    def post(self, request):
-
-        serializer = serializers.AdminWritePlanSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        new_plan = subscription_services.create_plan(serializer.validated_data)
-
-        return success_response(
-            message="Plan created",
-            data=serializers.AdminReadPlanSerializer(new_plan).data,
-            status_code=status.HTTP_201_CREATED,
-        )
     
 
 class AdminPlanDetailView(APIView):

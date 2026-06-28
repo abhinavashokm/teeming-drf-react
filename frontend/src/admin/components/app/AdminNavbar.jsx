@@ -34,9 +34,6 @@ function AdminNavbar({ title = "Dashboard", setIsMobileMenuOpen }) {
                         </span>
                         <span className="text-[11px] font-medium text-slate-500 leading-none">System Access</span>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
-                        {initials}
-                    </div>
                 </div>
             </div>
         </header>

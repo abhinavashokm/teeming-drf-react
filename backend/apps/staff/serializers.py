@@ -140,21 +140,3 @@ class AdminWorkspaceListSerializer(serializers.ModelSerializer):
         return s3_service.build_s3_url(obj.logo_key)
 
 
-class AdminPlanListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Plan
-        fields = [
-            "id",
-            "code",
-            "name",
-            "description",
-            "tier",
-            "monthly_price",
-            "currency",
-            "max_goals",
-            "max_members",
-            "can_use_ai_idea_suggestions",
-            "can_use_ai_assistant",
-            "can_export_workspace_data",
-            "is_active",
-        ]

@@ -1,9 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework import status
+
 from core.responses.api_response import success_response
 from .import serializers, staff_services
 from apps.workspace import workspace_services
 from apps.subscription import subscription_services
+from apps.subscription import serializers as subscription_serializer
+
 
 
 class AdminBaseView(APIView):
@@ -65,6 +69,21 @@ class AdminPlanListView(AdminBaseView):
 
         return success_response(
             data={
-                "plans": serializers.AdminPlanListSerializer(plans, many=True).data
+                "plans": subscription_serializer.AdminPlanListSerializer(plans, many=True).data
             }
         )
+    
+    def post(self, request):
+
+        print(request.data)
+        serializer = subscription_serializer.AdminWritePlanSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        new_plan = subscription_services.create_plan(serializer.validated_data)
+
+        return success_response(
+            message="Plan created",
+            data=subscription_serializer.AdminPlanListSerializer(new_plan).data,
+            status_code=status.HTTP_201_CREATED,
+        )
+        return success_response()

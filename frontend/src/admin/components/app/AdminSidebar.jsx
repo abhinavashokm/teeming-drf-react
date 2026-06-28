@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import useAuth from '../../../hooks/auth/useAuth';
 import useLogout from '../../../hooks/auth/useLogout';
+import AuthLogo from '../../../components/auth/AuthLogo'
 
 const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -75,9 +76,7 @@ function AdminSidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen,
                     ${expanded ? 'justify-between px-4' : 'justify-center px-0'}
                 `}>
                     <div className={`flex items-center gap-3 ${!expanded ? 'mx-auto' : ''}`}>
-                        <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
-                            T
-                        </div>
+                        <AuthLogo size='sm' />
                         {expanded && (
                             <div className="flex flex-col">
                                 <span className="font-bold text-[18px] leading-tight tracking-tight">Teeming</span>

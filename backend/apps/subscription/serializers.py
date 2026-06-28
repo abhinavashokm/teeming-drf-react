@@ -16,11 +16,11 @@ class AdminWritePlanSerializer(serializers.ModelSerializer):
             "can_use_ai_assistant",
             "can_export_workspace_data",
             "monthly_price",
+            "tier",
         ]
 
 
-class AdminReadPlanSerializer(serializers.ModelSerializer):
-
+class AdminPlanListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan
         fields = [
@@ -28,16 +28,17 @@ class AdminReadPlanSerializer(serializers.ModelSerializer):
             "code",
             "name",
             "description",
+            "tier",
+            "monthly_price",
+            "currency",
             "max_goals",
             "max_members",
             "can_use_ai_idea_suggestions",
             "can_use_ai_assistant",
             "can_export_workspace_data",
-            "monthly_price",
-            "stripe_product_id",
-            "stripe_price_id",
-            "currency",
+            "is_active",
         ]
+
 
 
 class UserReadPlanSerializer(serializers.ModelSerializer):

@@ -1,17 +1,17 @@
-import logo from '/src/assets/logo.png'
 import teemingFavicon from "/src/assets/teemingFavicon.png"
-import teemingLogo from "/src/assets/teeming.png"
 
+const sizeClasses = {
+    sm: "h-8 w-8",
+    md: "h-14 w-auto",
+}
 
-const AuthLogo = () => {
+const AuthLogo = ({ size = "md" }) => {
     return (
-        <div className="mb-4 flex justify-center">
-            <img
-                src={teemingFavicon}
-                alt="Teeming Logo"
-                className="w-auto h-14 object-contain"
-            />
-        </div>
+        <img
+            src={teemingFavicon}
+            alt="Teeming Logo"
+            className={`${sizeClasses[size]} object-contain`}
+        />
     )
 }
 

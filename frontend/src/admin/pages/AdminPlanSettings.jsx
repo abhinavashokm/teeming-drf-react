@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Check, AlertTriangle, Pencil, Ban, X, Plus } from 'lucide-react';
+import { Check, AlertTriangle, Pencil, Ban, Plus } from 'lucide-react';
 import usePlans from '../hooks/adminPlans/usePlans';
 import DangerConfirmationModal from '../../components/ui/modal/DangerConfirmationModal';
 import AdminButton from '../components/form/AdminButton';
+import CreatePlanModal from '../components/adminPlans/CreatePlanModal';
 
 const getPlanAccent = (code = '') => {
   const map = {
@@ -232,102 +233,10 @@ export default function AdminPlanSettings() {
         confirmButtonText="Yes, Suspend"
       />
 
-      {/* Create Plan Modal */}
-      {isCreatePlanOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between shrink-0">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900">Create New Plan</h3>
-                <p className="text-sm text-slate-500 mt-1">Configure pricing, limits, and features for a new subscription tier.</p>
-              </div>
-              <button
-                onClick={() => setIsCreatePlanOpen(false)}
-                className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto flex-1 space-y-6">
-              {/* Basic Info */}
-              <div className="space-y-4">
-                <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-wider">Basic Details</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700">Plan Name</label>
-                    <input type="text" placeholder="e.g. Enterprise" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700">Monthly Price ($)</label>
-                    <input type="number" placeholder="0.00" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Usage Limits */}
-              <div className="space-y-4">
-                <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-wider">Usage Limits</h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700">Members</label>
-                    <input type="number" placeholder="e.g. 50" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" />
-                    <p className="text-[11px] text-slate-500">Leave blank for unlimited</p>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700">Active Goals</label>
-                    <input type="number" placeholder="e.g. 100" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700">Weekly Checks</label>
-                    <input type="number" placeholder="e.g. 1" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Features List */}
-              <div className="space-y-4">
-                <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-wider">Included Features</h4>
-
-                <div className="space-y-3 bg-slate-50 border border-slate-200 rounded-xl p-4">
-                  {[
-                    { id: 1, name: 'Basic collaboration tools', included: true },
-                    { id: 2, name: 'Discussion feed', included: true },
-                    { id: 3, name: 'Advanced analytics dashboard', included: false },
-                    { id: 4, name: 'Advanced AI Chat Assistant', included: false },
-                    { id: 5, name: 'Export report as CSV', included: false },
-                    { id: 6, name: 'AI Idea suggestions', included: false },
-                    { id: 7, name: 'Custom branding', included: false },
-                  ].map((feature) => (
-                    <div key={feature.id} className="flex items-center justify-between pb-3 border-b border-slate-200 last:border-0 last:pb-0">
-                      <span className="text-sm text-slate-700 font-medium">{feature.name}</span>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked={feature.included} />
-                        <div className="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
-              <button
-                onClick={() => setIsCreatePlanOpen(false)}
-                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200/70 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => setIsCreatePlanOpen(false)}
-                className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
-              >
-                Create Plan
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreatePlanModal
+        isOpen={isCreatePlanOpen}
+        onClose={() => setIsCreatePlanOpen(false)}
+      />
 
     </>
   );
