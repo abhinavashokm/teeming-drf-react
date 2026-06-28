@@ -9,7 +9,6 @@ urlpatterns = [
                 path("auth/", include("apps.user.urls")),
                 path("invitations/", include("apps.invitation.public_urls")),
                 path("workspaces/", include("apps.workspace.urls")),
-                path("admin/subscriptions/", include("apps.subscription.admin_urls")),
                 path("webhooks/", include("apps.subscription.webhook_urls")),
                 path(
                     "workspaces/<slug:slug>/",

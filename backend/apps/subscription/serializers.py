@@ -36,7 +36,8 @@ class AdminPlanListSerializer(serializers.ModelSerializer):
             "can_use_ai_idea_suggestions",
             "can_use_ai_assistant",
             "can_export_workspace_data",
-            "is_active",
+            "is_archived",
+            "version",
         ]
 
 
@@ -81,7 +82,7 @@ class UserReadPlanSerializer(serializers.ModelSerializer):
 
 class CreateCheckoutSerializer(serializers.Serializer):
     plan_id = serializers.PrimaryKeyRelatedField(
-        queryset=Plan.objects.filter(is_active=True),
+        queryset=Plan.objects.filter(is_archived=False),
         source="plan",
     )
 

@@ -16,7 +16,7 @@ class Plan(BaseAbstractModel):
         SGD = "SGD", "Singapore Dollar (S$)"
         JPY = "JPY", "Japanese Yen (¥)"
 
-    code = models.CharField(max_length=255, unique=True)
+    code = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
 
@@ -27,8 +27,6 @@ class Plan(BaseAbstractModel):
     can_use_ai_assistant = models.BooleanField(default=False)
     can_export_workspace_data = models.BooleanField(default=False)
 
-    is_active = models.BooleanField(default=True)
-
     monthly_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     currency = models.CharField(
         max_length=3, choices=CurrencyChoices.choices, default=CurrencyChoices.INR
@@ -38,11 +36,35 @@ class Plan(BaseAbstractModel):
     stripe_price_id = models.CharField(max_length=255, null=True, blank=True)
 
     # field to determine plan sorting order
-    tier = models.PositiveIntegerField(unique=True)
+    tier = models.PositiveIntegerField()
+
+    # --- new versioning fields ---
+    version = models.PositiveIntegerField(default=1)
+    is_archived = models.BooleanField(default=False)
+    archived_at = models.DateTimeField(null=True, blank=True)
+    replaced_by = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="previous_versions",
+    )
 
     class Meta:
         db_table = "plans"
-        ordering = ["tier"]
+        ordering = ["tier", "version"]
+        constraints = [
+            # only one active version per code at a time
+            models.UniqueConstraint(
+                fields=["code", "version"],
+                name="unique_plan_code_version"
+            ),
+            models.UniqueConstraint(
+                fields=["code"],
+                condition=models.Q(is_archived=False),
+                name="unique_active_plan_code"
+            ),
+        ]
 
 
 ACTIVE_STATUS = "active"
