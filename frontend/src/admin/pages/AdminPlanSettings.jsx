@@ -1,10 +1,11 @@
 import { AlertTriangle, Plus } from 'lucide-react';
 import { useState } from 'react';
 import DangerConfirmationModal from '../../components/ui/modal/DangerConfirmationModal';
-import CreatePlanModal from '../components/adminPlans/CreatePlanModal';
+import CreatePlanModal from '../components/adminPlans/PlanFormModal';
 import PlanCard from '../components/adminPlans/PlanCard';
 import AdminButton from '../components/form/AdminButton';
 import usePlans from '../hooks/adminPlans/usePlans';
+import PlanFormModal from '../components/adminPlans/PlanFormModal';
 
 
 export default function AdminPlanSettings() {
@@ -13,6 +14,13 @@ export default function AdminPlanSettings() {
   const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false);
   const { data: plansData, isPending: isPlansLoading, isError: isPlansError } = usePlans();
   const plans = plansData?.plans ?? [];
+
+  const [planModal, setPlanModal] = useState({ isOpen: false, mode: 'create', plan: null });
+
+  const openCreate = () => setPlanModal({ isOpen: true, mode: 'create', plan: null });
+  const openEdit = (plan) => setPlanModal({ isOpen: true, mode: 'edit', plan });
+  const openNewVersion = (plan) => setPlanModal({ isOpen: true, mode: 'new_version', plan });
+  const closePlanModal = () => setPlanModal((prev) => ({ ...prev, isOpen: false }));
 
   const activePlans = plans.filter((plan) => !plan.isArchived);
   const archivedPlans = plans.filter((plan) => plan.isArchived);
@@ -23,7 +31,7 @@ export default function AdminPlanSettings() {
 
         <div className="flex justify-end">
           <div className="w-fit">
-            <AdminButton onClick={() => setIsCreatePlanOpen(true)} className="px-4">
+            <AdminButton onClick={openCreate} className="px-4">
               <Plus className="w-4 h-4" />
               Add New Plan
             </AdminButton>
@@ -53,7 +61,8 @@ export default function AdminPlanSettings() {
                 {activePlans.map((plan) => (
                   <PlanCard
                     plan={plan}
-                    key={plan.id}
+                    onEdit={openEdit}           // passes the plan object automatically
+                    onNewVersion={openNewVersion} // passes the plan object automatically
                     onSuspend={(plan) => setSuspendConfirmPlan(plan)}
                   />
                 ))}
@@ -132,9 +141,12 @@ export default function AdminPlanSettings() {
         confirmButtonText="Yes, Suspend"
       />
 
-      <CreatePlanModal
-        isOpen={isCreatePlanOpen}
-        onClose={() => setIsCreatePlanOpen(false)}
+      {/* Single modal for all three modes */}
+      <PlanFormModal
+        isOpen={planModal.isOpen}
+        mode={planModal.mode}       // 'create' | 'edit' | 'new_version'
+        plan={planModal.plan}       // null for create, plan object for edit/new_version
+        onClose={closePlanModal}
       />
 
     </>
