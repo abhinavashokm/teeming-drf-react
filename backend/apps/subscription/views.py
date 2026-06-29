@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from core.responses.api_response import success_response
 from . import serializers, subscription_services
 from rest_framework import status
-from core.permission_views import MemberBaseView, AdminBaseView
+from core.permission_views import AdminBaseView
     
 
 class AdminPlanDetailView(APIView):
@@ -18,7 +18,7 @@ class UserListPlanView(AdminBaseView):
 
     def get(self, requset, **kwargs):
 
-        plans = subscription_services.list_plans()
+        plans = subscription_services.list_active_plans()
 
         return success_response(
             data={

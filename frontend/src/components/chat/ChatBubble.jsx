@@ -1,6 +1,6 @@
 import MemberAvatar from "../team/MemberAvatar";
 import {cn} from "../../utils/cn"
-import { formatDateTime } from "../../utils/timeUtils";
+import { formatTimeAgo } from "../../utils/timeUtils";
 
 function ChatBubble({
     content,
@@ -68,7 +68,7 @@ function ChatBubble({
                     isMine ? (
                         <div className="flex items-center gap-1 px-1">
                             <span className="text-[11px] text-gray-400">
-                                {formatDateTime(createdAt)}
+                                {formatTimeAgo(createdAt)}
                             </span>
 
                             {status && (
@@ -77,7 +77,7 @@ function ChatBubble({
                         </div>
                     ) : (
                         <span className="text-[11px] text-gray-400 px-1">
-                            {formatDateTime(createdAt)}
+                            {formatTimeAgo(createdAt)}
                         </span>
                     )
                 )}

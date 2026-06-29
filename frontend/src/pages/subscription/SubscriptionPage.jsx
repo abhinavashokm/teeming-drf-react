@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import usePlans from '../../hooks/subscription/usePlans';
 import PlanCard from '../../components/subscription/PlanCard';
 import useWorkspace from "../../hooks/workspace/useWorkspace"
-import { dateToHuman } from "../../utils/timeUtils"
+import { formatDate } from "../../utils/timeUtils"
 import { currencySymbols, planCodes } from '../../constants/subscriptionConstants';
 import CurrentSubscriptionCard from '../../components/subscription/CurrentSubscriptionCard';
 

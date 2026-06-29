@@ -1,4 +1,7 @@
-import { Ban, Check, GitBranch, Archive, Pencil } from 'lucide-react';
+import { Ban, Check, GitBranch, Archive, Pencil, Lock } from 'lucide-react';
+import useSuspendPlan from '../../hooks/adminPlans/useSuspendPlan';
+import useRestorePlan from '../../hooks/adminPlans/useRestorePlan';
+import { formatDate } from "../../../utils/timeUtils"
 
 const getPlanAccent = (code = '') => {
     const map = {
@@ -7,21 +10,23 @@ const getPlanAccent = (code = '') => {
             body: 'bg-slate-50/50 border-slate-200',
             metric: 'border-slate-200',
             badge: 'bg-slate-100 text-slate-700',
+            version: 'bg-slate-100 text-slate-500',
         },
         PRO: {
-            card: 'border-blue-500 shadow-md',
-            body: 'bg-blue-50/50 border-blue-100',
+            card: 'border-blue-400',
+            body: 'bg-blue-50/40 border-blue-100',
             metric: 'border-blue-100',
             badge: 'bg-blue-100 text-blue-700',
+            version: 'bg-blue-50 text-blue-400',
         },
         ENTERPRISE: {
-            card: 'border-purple-500 shadow-md',
-            body: 'bg-purple-50/50 border-purple-100',
+            card: 'border-purple-400',
+            body: 'bg-purple-50/40 border-purple-100',
             metric: 'border-purple-100',
             badge: 'bg-purple-100 text-purple-700',
+            version: 'bg-purple-50 text-purple-400',
         },
     };
-
     return map[code?.toUpperCase()] ?? map.FREE;
 };
 
@@ -32,7 +37,7 @@ const formatPlanPrice = (plan) =>
         maximumFractionDigits: 0,
     }).format(Number(plan.monthlyPrice ?? 0));
 
-const formatLimit = (value) => (value ?? null) === null ? 'Unlimited' : value;
+const formatLimit = (value) => (value ?? null) === null ? '∞' : value;
 
 const planFeatures = (plan) => [
     { label: 'AI idea suggestions', enabled: plan.canUseAiIdeaSuggestions },
@@ -40,71 +45,108 @@ const planFeatures = (plan) => [
     { label: 'Export workspace data', enabled: plan.canExportWorkspaceData },
 ];
 
-function PlanCard({ plan, onEdit, onNewVersion, onSuspend }) {
+function PlanCard({ plan, onEdit, onNewVersion, canSuspend }) {
     const accent = getPlanAccent(plan.code);
     const features = planFeatures(plan);
-    const isArchived = plan.isArchived;  // use the actual field
+    const isArchived = plan.isArchived;
+    const isFreePlan = plan.code?.toUpperCase() === 'FREE';
+    const suspendBlocked = isFreePlan || !canSuspend;
+
+    const getSuspendTooltip = () => {
+        if (isFreePlan) return 'Free plan cannot be suspended';
+        if (!canSuspend) return 'At least 2 active plans must remain';
+        return 'Suspend this plan';
+    };
+
+    const { mutate: suspendPlan, isPending: isSuspending } = useSuspendPlan();
+    const { mutate: restorePlan, isPending: isRestoring } = useRestorePlan();
+
+    const handleSuspend = () => {
+        suspendPlan({ planId: plan.id });
+    };
+
+    const handleRestore = () => {
+        restorePlan({ planId: plan.id });
+    };
 
     return (
-        <div
-            className={`bg-white border ${accent.card} rounded-2xl shadow-sm flex flex-col overflow-hidden transition-shadow
-                ${isArchived ? 'opacity-60 grayscale-[30%]' : 'hover:shadow-md'}`}
+        <div className={`bg-white border ${accent.card} rounded-2xl shadow-sm flex flex-col overflow-hidden transition-shadow
+            ${isArchived ? 'opacity-55' : 'hover:shadow-md'}`}
         >
-            <div className={`p-6 border-b flex-1 ${accent.body}`}>
+            <div className={`p-5 border-b flex-1 ${accent.body}`}>
 
-                {/* Header */}
-                <div className="flex items-start justify-between gap-4 mb-5">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-[18px] font-bold text-slate-900">{plan.name}</h3>
-                            <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${accent.badge}`}>
-                                {plan.code}
+                {/* Header row */}
+                <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${accent.badge}`}>
+                            {plan.code}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${accent.version}`}>
+                            v{plan.version}
+                        </span>
+                        {isArchived && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-400 flex items-center gap-1">
+                                <Archive className="w-[9px] h-[9px]" />
+                                Archived
                             </span>
-                            {isArchived && (
-                                <span className="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 flex items-center gap-1">
-                                    <Archive className="w-[10px] h-[10px]" />
-                                    Archived
-                                </span>
-                            )}
-                        </div>
-                        <p className="text-[13px] text-slate-500 line-clamp-2">{plan.description}</p>
+                        )}
+                        {isFreePlan && !isArchived && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 flex items-center gap-1">
+                                <Lock className="w-[9px] h-[9px]" />
+                                Protected
+                            </span>
+                        )}
                     </div>
-                    <span className={`text-[11px] font-bold shrink-0 ${!isArchived ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        {isArchived ? 'Archived' : 'Active'}
+                    <span className={`text-[11px] font-semibold shrink-0 mt-0.5 ${!isArchived ? 'text-emerald-500' : 'text-slate-400'}`}>
+                        {isArchived ? 'Inactive' : '● Active'}
                     </span>
                 </div>
 
+                {/* Plan name + description */}
+                <div className="mb-5">
+                    <h3 className="text-[17px] font-bold text-slate-900 leading-tight">{plan.name}</h3>
+                    {plan.description && (
+                        <p className="text-[12px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{plan.description}</p>
+                    )}
+                </div>
+
                 {/* Price */}
-                <div className="flex items-end gap-1 mb-6">
-                    <span className="text-[28px] font-bold text-slate-900 leading-none">{formatPlanPrice(plan)}</span>
-                    <span className="text-[12px] font-semibold text-slate-500 mb-1">/mo</span>
+                <div className="flex items-end gap-1 mb-5">
+                    <span className="text-[30px] font-extrabold text-slate-900 leading-none tracking-tight">
+                        {formatPlanPrice(plan)}
+                    </span>
+                    <span className="text-[12px] font-medium text-slate-400 mb-1.5">/mo</span>
                 </div>
 
                 {/* Metrics */}
-                <div className="flex items-center gap-3 mb-8 h-[53px]">
-                    <div className={`flex-1 bg-white border ${accent.metric} rounded-lg p-2 flex flex-col items-center justify-center`}>
-                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-0.5">Members</span>
-                        <span className="text-[14px] font-bold text-slate-900">{formatLimit(plan.maxMembers)}</span>
-                    </div>
-                    <div className={`flex-1 bg-white border ${accent.metric} rounded-lg p-2 flex flex-col items-center justify-center`}>
-                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-0.5">Goals</span>
-                        <span className="text-[14px] font-bold text-slate-900">{formatLimit(plan.maxGoals)}</span>
-                    </div>
-                    <div className={`flex-1 bg-white border ${accent.metric} rounded-lg p-2 flex flex-col items-center justify-center`}>
-                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-0.5">Tier</span>
-                        <span className="text-[14px] font-bold text-slate-900">{plan.tier}</span>
-                    </div>
+                <div className="grid grid-cols-3 gap-2 mb-5">
+                    {[
+                        { label: 'Members', value: formatLimit(plan.maxMembers) },
+                        { label: 'Goals', value: formatLimit(plan.maxGoals) },
+                        { label: 'Tier', value: plan.tier },
+                    ].map(({ label, value }) => (
+                        <div key={label} className={`bg-white border ${accent.metric} rounded-lg py-2 px-1 flex flex-col items-center justify-center`}>
+                            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{label}</span>
+                            <span className="text-[13px] font-bold text-slate-800">{value}</span>
+                        </div>
+                    ))}
                 </div>
 
+                {/* Divider */}
+                <div className="border-t border-slate-200/70 mb-4" />
+
                 {/* Features */}
-                <ul className="space-y-3">
+                <ul className="space-y-2">
                     {features.map((feature) => (
-                        <li key={feature.label} className={`flex items-start gap-2 ${feature.enabled ? '' : 'opacity-50'}`}>
-                            <Check
-                                className={`w-[14px] h-[14px] shrink-0 mt-0.5 ${feature.enabled ? 'text-emerald-500' : 'text-slate-400'}`}
-                                strokeWidth={3}
-                            />
-                            <span className={`text-[14px] ${feature.enabled ? 'text-slate-600' : 'text-slate-400 line-through'}`}>
+                        <li key={feature.label} className="flex items-center gap-2">
+                            <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0
+                                ${feature.enabled ? 'bg-emerald-100' : 'bg-slate-100'}`}>
+                                <Check
+                                    className={`w-[9px] h-[9px] ${feature.enabled ? 'text-emerald-600' : 'text-slate-300'}`}
+                                    strokeWidth={3}
+                                />
+                            </span>
+                            <span className={`text-[13px] ${feature.enabled ? 'text-slate-600' : 'text-slate-300 line-through'}`}>
                                 {feature.label}
                             </span>
                         </li>
@@ -114,41 +156,74 @@ function PlanCard({ plan, onEdit, onNewVersion, onSuspend }) {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between">
+            <div className="px-5 py-3 bg-white border-t border-slate-100 flex items-center justify-between">
                 {isArchived ? (
                     <>
                         <span className="text-[11px] text-slate-400">
-                            {plan.currency} · archived {plan.archivedAt ? `on ${new Date(plan.archivedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+                            {plan.archivedAt
+                                ? `Archived at ${formatDate(plan.archivedAt)}`
+                                : `archived`}
                         </span>
-                        <span className="text-[11px] font-semibold text-slate-400">
-                            {plan.subscriberCount ?? 0} active subscriber{(plan.subscriberCount ?? 0) !== 1 ? 's' : ''}
-                        </span>
+                        <button
+                            className="flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={handleRestore}
+                            disabled={isRestoring}
+                        >
+                            {isRestoring ? (
+                                <span className="text-[11px] font-medium">Restoring...</span>
+                            ) : (
+                                <>
+                                    <Archive className="w-[13px] h-[13px]" />
+                                    <span className="text-[11px] font-medium">Restore</span>
+                                </>
+                            )}
+                        </button>
                     </>
                 ) : (
                     <>
-                        <span className="text-[11px] text-slate-400">{plan.currency} · v{plan.version}</span>
-                        <div className="flex items-center gap-2">
+                        {/* <span className="text-[11px] text-slate-400">{plan.currency}</span> */}
+                        <div className="flex items-center divide-x divide-slate-100">
+
                             <button
-                                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                title="Edit name & description"
+                                className="group flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-l transition-colors"
+                                title="Edit name & description only"
                                 onClick={() => onEdit?.(plan)}
                             >
-                                <Pencil className="w-[14px] h-[14px]" />
+                                <Pencil className="w-[13px] h-[13px]" />
+                                <span className="text-[11px] font-medium">Edit</span>
+                                <Lock className="w-[9px] h-[9px] opacity-40 group-hover:opacity-70" />
                             </button>
+
                             <button
-                                className="p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded transition-colors"
-                                title="Create New Version"
+                                className="flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                                title="Create new version with updated pricing or features"
                                 onClick={() => onNewVersion?.(plan)}
                             >
-                                <GitBranch className="w-[14px] h-[14px]" />
+                                <GitBranch className="w-[13px] h-[13px]" />
+                                <span className="text-[11px] font-medium">New Version</span>
                             </button>
-                            <button
-                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                                title="Suspend Plan"
-                                onClick={() => onSuspend?.(plan)}
-                            >
-                                <Ban className="w-[14px] h-[14px]" />
-                            </button>
+
+                            {/* Hidden for FREE plan */}
+                            {!isFreePlan && (
+                                <div className="relative group">
+                                    <button
+                                        className="flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-r transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                                        onClick={handleSuspend}
+                                        disabled={suspendBlocked || isSuspending}
+                                        title={getSuspendTooltip()}
+                                    >
+                                        {isSuspending ? (
+                                            <span className="text-[11px] font-medium">Suspending...</span>
+                                        ) : (
+                                            <>
+                                                <Ban className="w-[13px] h-[13px]" />
+                                                <span className="text-[11px] font-medium">Suspend</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
                         </div>
                     </>
                 )}

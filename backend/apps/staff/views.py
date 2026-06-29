@@ -97,14 +97,16 @@ class AdminPlanDetailView(AdminBaseView):
 
     def patch(self, request, plan_id):
 
-        serializer = subscription_serializer.AdminPlanEditSerializer(data=request.data)
+        serializer = subscription_serializer.AdminPlanEditSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         subscription_services.update_plan(
             plan_id=plan_id, data=serializer.validated_data
         )
 
-        return success_response()
+        return success_response(
+            message="Plan updated"
+        )
 
 
 class AdminCreateNewPlanVersionView(AdminBaseView):
@@ -132,7 +134,7 @@ class AdminPlanArchiveView(AdminBaseView):
 
     def post(self, request, plan_id):
 
-        subscription_services.archieve_plan(plan_id=plan_id)
+        subscription_services.archive_plan(plan_id=plan_id)
 
         return success_response(message="Plan archived.")
 

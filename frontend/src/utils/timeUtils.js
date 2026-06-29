@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from "date-fns"
 
 
-export const formatDateTime = (dateTime) => {
+export const formatTimeAgo = (dateTime) => {
     if(!dateTime) return ""
     const distance = formatDistanceToNow(new Date(dateTime), {
         locale: {
@@ -27,7 +27,7 @@ export const formatDateTime = (dateTime) => {
     return distance === 'just now' ? 'just now' : `${distance} ago`
 }
 
-export const dateToHuman = (date) => {
+export const formatDate = (date) => {
     //'2026-06-30') → "Jun 30, 2026"
 
     return new Date(date).toLocaleDateString('en-US', {

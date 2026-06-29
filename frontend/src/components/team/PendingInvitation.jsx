@@ -1,10 +1,10 @@
 import { Clock, Mail } from "lucide-react"
-import { formatDateTime } from "../../utils/timeUtils"
+import { formatTimeAgo } from "../../utils/timeUtils"
 import useCancelnvitation from "../../hooks/invite/useCancelnvitation"
 
 function PendingInvitation({ invitation }) {
     const { mutate: cancelInvitation, isPending } = useCancelnvitation()
-    const invitedTime = formatDateTime(invitation.createdAt)
+    const invitedTime = formatTimeAgo(invitation.createdAt)
 
     const handleCancelInvitation = () => {
         cancelInvitation(invitation.id)

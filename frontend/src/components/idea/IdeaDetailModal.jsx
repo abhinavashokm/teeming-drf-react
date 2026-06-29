@@ -5,7 +5,7 @@ import { PERMISSIONS } from '../../constants/permissions.js';
 import useAuth from '../../hooks/auth/useAuth.js';
 import useDeleteIdea from '../../hooks/idea/useDeleteIdea.js';
 import { useCan } from '../../hooks/permissions/useCan.js';
-import { dateToHuman } from '../../utils/timeUtils.js';
+import { formatDate } from '../../utils/timeUtils.js';
 import MemberAvatar from '../team/MemberAvatar.jsx';
 import AppButton from '../ui/buttons/AppButton.jsx';
 import BaseModal from '../ui/modal/BaseModal';
@@ -360,7 +360,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                             </p>
 
                                             <p className="text-xs text-gray-500 mt-1">
-                                                {dateToHuman(currentIdea.movedToPlannedAt)}
+                                                {formatDate(currentIdea.movedToPlannedAt)}
                                             </p>
                                         </div>
                                     )}
@@ -372,7 +372,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                             </p>
 
                                             <p className="text-xs text-gray-500 mt-1">
-                                                {dateToHuman(currentIdea.movedToProgressAt)}
+                                                {formatDate(currentIdea.movedToProgressAt)}
                                             </p>
                                         </div>
                                     )}
@@ -385,7 +385,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                             </p>
 
                                             <p className="text-xs text-gray-500 mt-1">
-                                                {dateToHuman(currentIdea.movedToDoneAt)}
+                                                {formatDate(currentIdea.movedToDoneAt)}
                                             </p>
                                         </div>
                                     )}

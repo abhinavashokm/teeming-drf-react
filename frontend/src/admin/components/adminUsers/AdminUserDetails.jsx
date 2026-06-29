@@ -2,7 +2,7 @@ import { X } from 'lucide-react';
 import useAdminUserDetail from "../../hooks/users/useAdminUserDetails";
 import { getAvatarColor } from '../../../utils/styleUtils';
 import MemberAvatar from '../../../components/team/MemberAvatar';
-import { dateToHuman } from '../../../utils/timeUtils';
+import { formatDate } from '../../../utils/timeUtils';
 
 
 function AdminUserDetails({onClose, userDetails}) {
@@ -27,7 +27,7 @@ function AdminUserDetails({onClose, userDetails}) {
                             <div className="text-sm text-slate-500 mb-2">{userDetails.email}</div>
                             <div className="flex items-center gap-3">
                                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
-                                    Joined {dateToHuman(userDetails.createdAt)}
+                                    Joined {formatDate(userDetails.createdAt)}
                                 </span>
                                 <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider ${userDetails.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
                                         userDetails.status === 'pending' ? 'bg-amber-100 text-amber-700' :

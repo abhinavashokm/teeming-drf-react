@@ -5,6 +5,8 @@ import BaseModal from '../../../components/ui/modal/BaseModal';
 import AdminFormField from '../form/AdminFormField';
 import AdminInputField from '../form/AdminInputField';
 import useCreatePlan from '../../hooks/adminPlans/useCreatePlan';
+import useUpdatePlan from '../../hooks/adminPlans/useUpdatePlan';
+import useCreateNewPlanVersion from '../../hooks/adminPlans/useCreateNewPlanVersion';
 import AdminButton from '../form/AdminButton';
 
 const FEATURES = [
@@ -34,17 +36,16 @@ const MODE_CONFIG = {
   },
   edit: {
     title: 'Edit Plan',
-    subtitle: null, // we'll render a custom banner instead
+    subtitle: null,
     submitLabel: 'Save Changes',
   },
   new_version: {
     title: 'Create New Version',
-    subtitle: null, // custom banner
+    subtitle: null,
     submitLabel: 'Create New Version',
   },
 };
 
-// Locked field wrapper — visually distinct from editable fields
 function LockedField({ label, value }) {
   return (
     <div className="flex flex-col gap-1">
@@ -61,8 +62,10 @@ function LockedField({ label, value }) {
 
 function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
   const { mutate: createPlan, isPending: isCreating } = useCreatePlan();
-  // const { mutate: editPlan, isPending: isEditing } = useEditPlan();
-  const isPending = isCreating;
+  const { mutate: updatePlan, isPending: isUpdating } = useUpdatePlan();
+  const { mutate: createNewPlanVersion, isPending: isVersioning } = useCreateNewPlanVersion();
+
+  const isPending = isCreating || isUpdating || isVersioning;
 
   const config = MODE_CONFIG[mode];
   const isEditMode = mode === 'edit';
@@ -101,17 +104,36 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
   };
 
   const onSubmit = (data) => {
+    if (isEditMode) {
+      updatePlan(
+        {
+          planId: plan.id,
+          data: {
+            name: data.name,
+            description: data.description,
+          },
+        },
+        { onSuccess: handleClose }
+      );
+      return;
+    }
+
     const payload = {
       ...data,
       monthlyPrice: data.monthlyPrice || '0.00',
       maxMembers: data.maxMembers ? Number(data.maxMembers) : null,
       maxGoals: data.maxGoals ? Number(data.maxGoals) : null,
     };
-    if (isEditMode) {
-      // editPlan({ id: plan.id, data: { name: payload.name, description: payload.description } }, { onSuccess: handleClose });
-    } else {
-      createPlan(payload, { onSuccess: handleClose });
+
+    if (isNewVersion) {
+      createNewPlanVersion(
+        { planId: plan.id, data: payload },
+        { onSuccess: handleClose }
+      );
+      return;
     }
+
+    createPlan(payload, { onSuccess: handleClose });
   };
 
   const isLocked = (field) => {
@@ -132,15 +154,12 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-500 mt-1">
-            {config.subtitle}
-          </p>
+          <p className="text-sm text-slate-500 mt-1">{config.subtitle}</p>
         </div>
       </BaseModal.Header>
 
       <BaseModal.Body className="space-y-6">
 
-        {/* Mode-specific info banner */}
         {isEditMode && (
           <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
             <Lock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
@@ -170,10 +189,8 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
         {/* Basic Details */}
         <div className="space-y-4">
           <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Basic Details</h4>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            {/* Name — always shown as input (editable in all modes) */}
             <AdminFormField label="Plan Name" error={errors.name?.message}>
               <AdminInputField
                 placeholder="e.g. Enterprise"
@@ -181,7 +198,6 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
               />
             </AdminFormField>
 
-            {/* Code — locked in edit + new_version */}
             {isLocked('code') ? (
               <LockedField label="Plan Code" value={plan?.code} />
             ) : (
@@ -193,9 +209,8 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
               </AdminFormField>
             )}
 
-            {/* Monthly Price — locked in edit mode */}
             {isLocked('monthlyPrice') ? (
-              <LockedField label="Monthly Price" value={plan?.monthlyPrice ? `${plan.monthlyPrice}` : '0.00'} />
+              <LockedField label="Monthly Price" value={plan?.monthlyPrice ?? '0.00'} />
             ) : (
               <AdminFormField label="Monthly Price ($)" error={errors.monthlyPrice?.message}>
                 <AdminInputField
@@ -208,7 +223,6 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
               </AdminFormField>
             )}
 
-            {/* Tier — locked in edit + new_version */}
             {isLocked('tier') ? (
               <LockedField label="Tier" value={plan?.tier} />
             ) : (
@@ -222,7 +236,6 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
               </AdminFormField>
             )}
 
-            {/* Description — full width, locked only in new_version? No, it's editable everywhere */}
             <AdminFormField label="Description" error={errors.description?.message} optional className="md:col-span-2">
               <textarea
                 placeholder="Brief description of this plan..."

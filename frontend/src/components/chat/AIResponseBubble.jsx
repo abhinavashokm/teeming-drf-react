@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { formatDateTime } from "../../utils/timeUtils";
+import { formatTimeAgo } from "../../utils/timeUtils";
 
 import React from 'react'
 
@@ -20,7 +20,7 @@ function AIResponseBubble({ response, actionMap }) {
                 </div>
 
                 <span className="text-[11px] text-slate-400">
-                    {formatDateTime(response.createdAt)}
+                    {formatTimeAgo(response.createdAt)}
                 </span>
             </div> */}
 

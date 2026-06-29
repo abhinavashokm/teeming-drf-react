@@ -3,7 +3,7 @@ import {
     currencySymbols,
     planCodes,
 } from '../../constants/subscriptionConstants';
-import { dateToHuman } from '../../utils/timeUtils';
+import { formatDate } from '../../utils/timeUtils';
 import { cn } from '../../utils/cn';
 
 function CurrentSubscriptionCard({
@@ -44,7 +44,7 @@ function CurrentSubscriptionCard({
                     {!isFreePlan && (
                         <p className="text-sm text-gray-500 mt-1">
                             Current billing period ends on{" "}
-                            {dateToHuman(subscription.expiresAt)}
+                            {formatDate(subscription.expiresAt)}
                         </p>
                     )}
 
@@ -75,7 +75,7 @@ function CurrentSubscriptionCard({
                                     {scheduledPlan.name} Plan
                                 </span>{" "}
                                 will become active on{" "}
-                                {dateToHuman(subscription.expiresAt)}.
+                                {formatDate(subscription.expiresAt)}.
                             </p>
 
                         </div>

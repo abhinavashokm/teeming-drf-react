@@ -37,6 +37,7 @@ class AdminPlanListSerializer(serializers.ModelSerializer):
             "can_use_ai_assistant",
             "can_export_workspace_data",
             "is_archived",
+            "archived_at",
             "version",
         ]
 

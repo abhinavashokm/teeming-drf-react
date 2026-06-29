@@ -25,6 +25,9 @@ export default function AdminPlanSettings() {
   const activePlans = plans.filter((plan) => !plan.isArchived);
   const archivedPlans = plans.filter((plan) => plan.isArchived);
 
+  // suspend is blocked if: only 2 or fewer active plans remain
+  const canSuspend = activePlans.length > 2;
+
   return (
     <>
       <div className="max-w-5xl mx-auto space-y-6 pb-12">
@@ -64,6 +67,7 @@ export default function AdminPlanSettings() {
                     onEdit={openEdit}           // passes the plan object automatically
                     onNewVersion={openNewVersion} // passes the plan object automatically
                     onSuspend={(plan) => setSuspendConfirmPlan(plan)}
+                    canSuspend={canSuspend} 
                   />
                 ))}
               </div>
@@ -73,6 +77,24 @@ export default function AdminPlanSettings() {
                 <p className="text-[13px] text-slate-500 mt-1">All plans are archived. Create a new plan to get started.</p>
               </div>
             )}
+
+            {/* Implementation Alert */}
+            <div className="mt-8 bg-[#FEF9EC] border border-orange-300/30 rounded-xl p-5 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-lg bg-orange-400/10 flex items-center justify-center shrink-0 mt-0.5">
+                <AlertTriangle className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="flex-1 flex flex-col">
+                <h4 className="text-[14px] font-bold text-slate-900 mb-1">Important Implementation Detail</h4>
+                <p className="text-[14px] text-slate-600 leading-relaxed max-w-3xl">
+                  Existing plans cannot be edited directly. Use <strong>Create New Version</strong> to update pricing or features — current subscribers stay on their original plan until they upgrade or cancel.
+                </p>
+                <div className="mt-2">
+                  <button className="text-[12px] font-bold text-orange-500 uppercase tracking-wide hover:text-orange-600 transition-colors">
+                    View History
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Archived Plans */}
             {archivedPlans.length > 0 && (
@@ -100,23 +122,6 @@ export default function AdminPlanSettings() {
           </div>
         )}
 
-        {/* Implementation Alert */}
-        <div className="mt-8 bg-[#FEF9EC] border border-orange-300/30 rounded-xl p-5 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-orange-400/10 flex items-center justify-center shrink-0 mt-0.5">
-            <AlertTriangle className="w-5 h-5 text-orange-500" />
-          </div>
-          <div className="flex-1 flex flex-col">
-            <h4 className="text-[14px] font-bold text-slate-900 mb-1">Important Implementation Detail</h4>
-            <p className="text-[14px] text-slate-600 leading-relaxed max-w-3xl">
-              Existing plans cannot be edited directly. Use <strong>Create New Version</strong> to update pricing or features — current subscribers stay on their original plan until they upgrade or cancel.
-            </p>
-            <div className="mt-2">
-              <button className="text-[12px] font-bold text-orange-500 uppercase tracking-wide hover:text-orange-600 transition-colors">
-                View History
-              </button>
-            </div>
-          </div>
-        </div>
 
         {/* Footer */}
         <div className="pt-4 border-t border-slate-200 flex items-center justify-between">

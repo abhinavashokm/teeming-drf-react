@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import useCheckins from '../../../hooks/outcome/useCheckins';
 import useMetrics from '../../../hooks/outcome/useMetrics';
-import { dateToHuman } from '../../../utils/timeUtils';
+import { formatDate } from '../../../utils/timeUtils';
 
 ChartJS.register(
     CategoryScale,
@@ -47,7 +47,7 @@ function MetricChart() {
             .map(c => {
                 const metricValue = c.metricValues.find(v => v.metricId === selectedMetricId);
                 return {
-                    date: dateToHuman(c.createdAt),
+                    date: formatDate(c.createdAt),
                     value: metricValue?.value,
                 };
             })

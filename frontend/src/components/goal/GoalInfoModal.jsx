@@ -1,6 +1,6 @@
 import { Activity, Calendar, MessageSquare, Target, Users } from 'lucide-react'
 import useGoal from '../../hooks/goal/useGoal'
-import { dateToHuman } from '../../utils/timeUtils'
+import { formatDate } from '../../utils/timeUtils'
 import BaseModal from '../ui/modal/BaseModal'
 
 function GoalInfoModal({ isOpen, onClose }) {
@@ -32,7 +32,7 @@ function GoalInfoModal({ isOpen, onClose }) {
                         <div className="flex flex-col min-w-0">
                             <span className="text-[11px] text-gray-500 font-medium">Due Date</span>
                             <span className="text-[13px] font-semibold truncate">
-                                {currentGoal.targetDate ? dateToHuman(currentGoal.targetDate) : 'No Due Date'}
+                                {currentGoal.targetDate ? formatDate(currentGoal.targetDate) : 'No Due Date'}
                             </span>
                         </div>
                     </div>

@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import useAIAssistant from '../../../../hooks/ai/useAIAssistant';
 import useAIAssistantResponses from '../../../../hooks/ai/useAIAssistantResponses';
 import useClearAllAIResponses from '../../../../hooks/ai/useClearAllAIResponses';
-import { formatDateTime } from '../../../../utils/timeUtils';
+import { formatTimeAgo } from '../../../../utils/timeUtils';
 import ChatBubble from '../../../../components/chat/ChatBubble';
 import useAuth from '../../../../hooks/auth/useAuth';
 import AIResponseBubble from '../../../../components/chat/AIResponseBubble';

@@ -91,6 +91,10 @@ def list_plans():
     return Plan.objects.all()
 
 
+def list_active_plans():
+    return Plan.objects.filter(is_archived=False)
+
+
 def get_plan(plan_id):
     return get_plan_or_raise(plan_id=plan_id)
 
@@ -102,16 +106,36 @@ def delete_plan(plan_id):
 
 def update_plan(plan_id, data):
     plan = get_plan_or_raise(plan_id=plan_id)
-    plan.name = data["name"]
-    plan.description = data["description"]
+    
+    name = data.get("name", None)
+    description = data.get("description", None)
+
+    if name:
+        plan.name = name
+
+    if description:
+        plan.description = description
+
     plan.save(update_fields=["name", "description"])
 
 
-def archieve_plan(plan_id):
+def archive_plan(plan_id):
     plan = get_plan_or_raise(plan_id=plan_id)
+
+    if plan.code.upper() == 'FREE':
+        raise ValidationError("The Free plan cannot be archived. It must always remain active.")
+
+    active_plans = Plan.objects.filter(is_archived=False)
+    active_count = active_plans.count()
+
+    if active_count <= 2:
+        raise ValidationError(
+            "Cannot archive this plan. There must always be at least two active plans including the Free plan."
+        )
+
     plan.is_archived = True
     plan.archived_at = timezone.now()
-    plan.save()
+    plan.save(update_fields=['is_archived', 'archived_at'])
 
 
 def restore_plan(plan_id):

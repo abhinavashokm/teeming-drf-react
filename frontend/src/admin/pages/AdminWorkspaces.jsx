@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminWorkspaceService } from '../services/adminWorkspaceService';
 import { ADMIN_QUERY_KEYS } from '../constants/queryKeys';
 import WorkspaceAvatar from "../../components/workspace/WorkspaceAvatar"
-import { dateToHuman } from "../../utils/timeUtils"
+import { formatDate } from "../../utils/timeUtils"
 import AdminWorkspaceDetailModal from '../components/adminWorkspaces/AdminWorkspaceDetailModal';
 import DangerConfirmationModal from "../../components/ui/modal/DangerConfirmationModal"
 
@@ -46,7 +46,7 @@ const transformWorkspace = (ws) => ({
   planColor: getPlanColor(ws.activeSubscription?.plan?.code),
   members: ws.memberCount,
   goals: ws.goalCount,
-  created: dateToHuman(ws.createdAt),
+  created: formatDate(ws.createdAt),
   owner: {
     ...ws.owner,
     name: ws.owner?.fullName || ws.owner?.email || 'Unknown',

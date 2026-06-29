@@ -5,7 +5,7 @@ import { PERMISSIONS } from '../../constants/permissions.js'
 import useAuth from '../../hooks/auth/useAuth.js'
 import useDeleteIdea from '../../hooks/idea/useDeleteIdea.js'
 import { useCan } from '../../hooks/permissions/useCan.js'
-import { formatDateTime } from "../../utils/timeUtils"
+import { formatTimeAgo } from "../../utils/timeUtils"
 import MemberAvatar from '../team/MemberAvatar.jsx'
 import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal.jsx'
 import IdeaDetailModal from './IdeaDetailModal'
@@ -140,7 +140,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[11.5px] font-medium text-gray-600">{isIdeaCreator ? "You" : currentIdea.createdBy.fullName}</span>
-                                <span className="text-[11px] text-gray-400">· {formatDateTime(currentIdea.createdAt)}</span>
+                                <span className="text-[11px] text-gray-400">· {formatTimeAgo(currentIdea.createdAt)}</span>
                             </div>
                         </>
                     )}
@@ -157,7 +157,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                             </div>
 
                             <span className="text-[11px] text-gray-400">
-                                Assigned {formatDateTime(currentIdea.updatedAt)}
+                                Assigned {formatTimeAgo(currentIdea.updatedAt)}
                             </span>
                         </>
                     )}
@@ -184,7 +184,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                                     ))}
                                 </div>
                             </div>
-                            <span className="text-[11px] text-gray-400">{formatDateTime(currentIdea.updatedAt)}</span>
+                            <span className="text-[11px] text-gray-400">{formatTimeAgo(currentIdea.updatedAt)}</span>
                         </>
                     )}
                 </div>

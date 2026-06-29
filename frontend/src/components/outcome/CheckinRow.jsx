@@ -5,7 +5,7 @@ import {
     AlertTriangle,
 } from "lucide-react";
 import { CHECKIN_STATUS_LABELS } from "../../constants/outcomeConstants";
-import { dateToHuman } from "../../utils/timeUtils";
+import { formatDate } from "../../utils/timeUtils";
 import MemberAvatar from "../team/MemberAvatar";
 import CheckinActions from "./CheckinActions";
 import CheckinFormModal from "./CheckinFormModal";
@@ -101,7 +101,7 @@ function CheckinRow({
                                 <span className="text-gray-300">•</span>
 
                                 <span className="text-[12px] text-gray-500">
-                                    {dateToHuman(checkin.createdAt)}
+                                    {formatDate(checkin.createdAt)}
                                 </span>
                             </div>
 
