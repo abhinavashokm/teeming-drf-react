@@ -41,7 +41,6 @@ class AdminPlanListSerializer(serializers.ModelSerializer):
         ]
 
 
-
 class UserReadPlanSerializer(serializers.ModelSerializer):
     features = serializers.SerializerMethodField()
 
@@ -91,7 +90,14 @@ class GetPlanSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Plan
-        fields = ["id", "code", "name", "monthly_price", "currency", "tier",]
+        fields = [
+            "id",
+            "code",
+            "name",
+            "monthly_price",
+            "currency",
+            "tier",
+        ]
 
 
 class WorkspaceSubscriptionSerializer(serializers.ModelSerializer):
@@ -107,3 +113,67 @@ class WorkspaceSubscriptionSerializer(serializers.ModelSerializer):
             "cancel_at_period_end",
             "scheduled_plan",
         ]
+
+
+class AdminPlanEditSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Plan
+        fields = ["name", "description"]
+
+
+class AdminPlanNewVersionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Plan
+        fields = [
+            "name",
+            "description",
+            "monthly_price",
+            "max_members",
+            "max_goals",
+            "can_use_ai_idea_suggestions",
+            "can_use_ai_assistant",
+            "can_export_workspace_data",
+        ]
+
+    #at least one of these structural fields must be different to create a new version
+    STRUCTURAL_FIELDS = [
+        "monthly_price",
+        "max_members",
+        "max_goals",
+        "can_use_ai_idea_suggestions",
+        "can_use_ai_assistant",
+        "can_export_workspace_data",
+    ]
+
+    def validate(self, attrs):
+        plan = self.context.get("plan")
+        if plan:
+            changed = any(
+                attrs.get(field) != getattr(plan, field)
+                for field in self.STRUCTURAL_FIELDS
+                if field in attrs
+            )
+            if not changed:
+                raise serializers.ValidationError(
+                    "New version must change at least one structural field "
+                    "(price, limits, or features). "
+                    "To update name or description, use the Edit endpoint instead."
+                )
+        return attrs
+
+    def validate_monthly_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Price cannot be negative.")
+        return value
+
+    def validate_max_members(self, value):
+        if value is not None and value < 1:
+            raise serializers.ValidationError("Max members must be at least 1.")
+        return value
+
+    def validate_max_goals(self, value):
+        if value is not None and value < 1:
+            raise serializers.ValidationError("Max goals must be at least 1.")
+        return value

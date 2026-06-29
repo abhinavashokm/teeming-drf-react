@@ -3,7 +3,7 @@ from core.exceptions.base import NotFoundException
 
 def get_object_or_raise(
     model,
-    workspace,
+    workspace=None,
     error_message="Object not found",
     select_for_update=False,
     select_related=None,
@@ -12,8 +12,10 @@ def get_object_or_raise(
 ):
 
     try:
+        qs = model.objects.all()
 
-        qs = model.objects.in_workspace(workspace)
+        if workspace:
+            qs = model.objects.in_workspace(workspace)
 
         # when using select for update the query must be inside a transaction block
         if select_for_update:

@@ -1,14 +1,19 @@
+import stripe
+import uuid
+from rest_framework.exceptions import ValidationError
+
 from django.db.models import Q
 from django.db import transaction
+from django.db.models import Max
+from django.utils import timezone
 
+from .models import Plan
 from core.exceptions.base import NotFoundException
 from .models import Plan
 from . import strip_services
 from .models import WorkspaceSubscription
 from .helpers.subscription_helper import get_plan_or_raise
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
-from django.utils import timezone
-import stripe
 
 
 def create_plan(data):
@@ -26,13 +31,94 @@ def create_plan(data):
     return plan
 
 
+def create_new_plan_version(plan_id: uuid.UUID, data: dict) -> Plan:
+
+    plan = get_plan_or_raise(
+        plan_id=plan_id,
+        error_message="Plan not found or already archived.",
+        is_archived=False,
+    )
+
+    # get next version number for this plan code family
+    latest_version = (
+        Plan.objects.filter(code=plan.code).aggregate(max_version=Max("version"))[
+            "max_version"
+        ]
+        or 0
+    )
+
+    with transaction.atomic():
+
+        # archive the old plan and point it to the new one
+        plan.is_archived = True
+        plan.archived_at = timezone.now()
+        plan.save(update_fields=["is_archived", "archived_at"])
+
+        # create new plan — carry over locked fields, apply new data
+        new_plan = Plan.objects.create(
+            # locked fields copied from old plan
+            code=plan.code,
+            tier=plan.tier,
+            currency=plan.currency,
+            stripe_product_id=plan.stripe_product_id,
+            # versioning
+            version=latest_version + 1,
+            is_archived=False,
+            # structural fields from request (new data overrides, fallback to old)
+            name=data.get("name", plan.name),
+            description=data.get("description", plan.description),
+            monthly_price=data.get("monthly_price", plan.monthly_price),
+            max_members=data.get("max_members", plan.max_members),
+            max_goals=data.get("max_goals", plan.max_goals),
+            can_use_ai_idea_suggestions=data.get(
+                "can_use_ai_idea_suggestions", plan.can_use_ai_idea_suggestions
+            ),
+            can_use_ai_assistant=data.get(
+                "can_use_ai_assistant", plan.can_use_ai_assistant
+            ),
+            can_export_workspace_data=data.get(
+                "can_export_workspace_data", plan.can_export_workspace_data
+            ),
+        )
+
+        plan.replaced_by = new_plan
+        plan.save(update_fields=['replaced_by'])
+
+    return new_plan
+
+
 def list_plans():
     return Plan.objects.all()
+
+
+def get_plan(plan_id):
+    return get_plan_or_raise(plan_id=plan_id)
 
 
 def delete_plan(plan_id):
     plan = get_plan_or_raise(plan_id=plan_id)
     plan.soft_delete()
+
+
+def update_plan(plan_id, data):
+    plan = get_plan_or_raise(plan_id=plan_id)
+    plan.name = data["name"]
+    plan.description = data["description"]
+    plan.save(update_fields=["name", "description"])
+
+
+def archieve_plan(plan_id):
+    plan = get_plan_or_raise(plan_id=plan_id)
+    plan.is_archived = True
+    plan.archived_at = timezone.now()
+    plan.save()
+
+
+def restore_plan(plan_id):
+    plan = get_plan_or_raise(plan_id=plan_id)
+    plan.is_archived = False
+    plan.archived_at = None
+    plan.save()
 
 
 def create_checkout_session(workspace, plan):
@@ -53,7 +139,11 @@ def get_current_plan(workspace):
 
 
 def create_workspace_subscription(
-    workspace_id, plan_id, stripe_customer_id, stripe_subscription_id, expires_at,
+    workspace_id,
+    plan_id,
+    stripe_customer_id,
+    stripe_subscription_id,
+    expires_at,
 ):
     """upgrade workspace subscription plan"""
 
@@ -118,7 +208,7 @@ def resume_current_subscription(workspace):
 
     if not subscription.stripe_subscription_id:
         raise ValueError("No Stripe subscription found")
-    
+
     subscription.cancel_at_period_end = False
     subscription.scheduled_plan = None
     subscription.save(update_fields=["cancel_at_period_end", "scheduled_plan"])
