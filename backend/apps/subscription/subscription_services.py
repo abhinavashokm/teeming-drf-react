@@ -12,7 +12,6 @@ from .models import Plan, WorkspaceSubscription, SubscriptionTransaction
 from core.exceptions.base import NotFoundException
 from core.constants.plan_codes import PlanCode
 from . import strip_services
-from .models import WorkspaceSubscription
 from .helpers.subscription_helper import get_plan_or_raise
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from apps.workspace.models import Workspace, WorkspaceMember
@@ -427,3 +426,64 @@ def _get_top_paying_workspaces(limit=5):
         }
         for row in top
     ]
+
+
+@transaction.atomic
+def sync_workspace_subscription(
+    *,
+    stripe_subscription_id: str,
+    stripe_status: str,
+    expires_at,
+    cancel_at_period_end: bool,
+):
+    subscription = (
+        WorkspaceSubscription.objects
+        .select_related("scheduled_plan")
+        .get(stripe_subscription_id=stripe_subscription_id)
+    )
+
+    # Has Stripe moved the subscription into a new billing period?
+    period_renewed = (
+        subscription.expires_at is not None
+        and expires_at > subscription.expires_at
+    )
+
+    subscription.expires_at = expires_at
+    subscription.cancel_at_period_end = cancel_at_period_end
+
+    status_map = {
+        "active": WorkspaceSubscription.StatusChoices.ACTIVE,
+        "trialing": WorkspaceSubscription.StatusChoices.TRIALING,
+        "canceled": WorkspaceSubscription.StatusChoices.CANCELLED,
+        "unpaid": WorkspaceSubscription.StatusChoices.EXPIRED,
+        "past_due": WorkspaceSubscription.StatusChoices.EXPIRED,
+        "incomplete_expired": WorkspaceSubscription.StatusChoices.EXPIRED,
+    }
+
+    subscription.status = status_map.get(
+        stripe_status,
+        WorkspaceSubscription.StatusChoices.EXPIRED,
+    )
+
+    if subscription.status == WorkspaceSubscription.StatusChoices.CANCELLED:
+        if subscription.cancelled_at is None:
+            subscription.cancelled_at = timezone.now()
+
+    # Apply scheduled downgrade/upgrade only after a successful renewal
+    if period_renewed and subscription.scheduled_plan:
+        subscription.plan = subscription.scheduled_plan
+        subscription.scheduled_plan = None
+        subscription.cancel_at_period_end = False
+
+    subscription.save(
+        update_fields=[
+            "plan",
+            "status",
+            "expires_at",
+            "cancel_at_period_end",
+            "scheduled_plan",
+            "cancelled_at",
+        ]
+    )
+
+    return subscription

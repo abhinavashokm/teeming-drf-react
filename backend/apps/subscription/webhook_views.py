@@ -59,41 +59,81 @@ class StripeWebhookView(APIView):
                                 stripe_subscription_id=session["subscription"],
                                 amount=invoice["amount_paid"],
                                 currency=invoice["currency"].upper(),
-                                billing_period_start=datetime.fromtimestamp(invoice["period_start"], timezone.utc),
-                                billing_period_end=datetime.fromtimestamp(invoice["period_end"], timezone.utc),
+                                billing_period_start=datetime.fromtimestamp(
+                                    invoice["period_start"], timezone.utc
+                                ),
+                                billing_period_end=datetime.fromtimestamp(
+                                    invoice["period_end"], timezone.utc
+                                ),
                                 gateway_invoice_id=invoice["id"],
-                                invoice_url=invoice["hosted_invoice_url"] if "hosted_invoice_url" in invoice else None,
+                                invoice_url=(
+                                    invoice["hosted_invoice_url"]
+                                    if "hosted_invoice_url" in invoice
+                                    else None
+                                ),
                                 is_renewal=False,
                             )
                 except Exception:
                     traceback.print_exc()  # dumps full traceback to console/terminal
                     raise
 
-            elif event["type"] == "invoice.payment_succeeded":
+            elif event["type"] == "invoice.paid":
                 invoice = event["data"]["object"]
 
-                # skip initial payment — handled in checkout.session.completed
+                # Skip the initial subscription payment.
+                # It is already handled in checkout.session.completed.
                 if invoice["billing_reason"] == "subscription_create":
                     return Response(status=200)
 
-                # only process renewals here
+                # Ignore invoices that didn't collect any payment.
                 if invoice["amount_paid"] == 0:
                     return Response(status=200)
-                
+
+                # Subscription invoice line
+                line = invoice["lines"]["data"][0]
+
+                stripe_subscription_id = invoice["parent"]["subscription_details"][
+                    "subscription"
+                ]
+
                 subscription_services.create_transaction_log(
-                    stripe_subscription_id=invoice["subscription"],
+                    stripe_subscription_id=stripe_subscription_id,
                     amount=invoice["amount_paid"],
                     currency=invoice["currency"].upper(),
-                    billing_period_start=datetime.fromtimestamp(invoice["period_start"], timezone.utc),
-                    billing_period_end=datetime.fromtimestamp(invoice["period_end"], timezone.utc),
+                    billing_period_start=datetime.fromtimestamp(
+                        line["period"]["start"],
+                        timezone.utc,
+                    ),
+                    billing_period_end=datetime.fromtimestamp(
+                        line["period"]["end"],
+                        timezone.utc,
+                    ),
                     gateway_invoice_id=invoice["id"],
-                    invoice_url=invoice.get("hosted_invoice_url"),
-                    # first payment = PAYMENT, subsequent = RENEWAL
+                    invoice_url=(
+                        invoice["hosted_invoice_url"]
+                        if "hosted_invoice_url" in invoice
+                        else None
+                    ),
                     is_renewal=True,
                 )
 
+            elif event["type"] == "customer.subscription.updated":
+                stripe_subscription = event["data"]["object"]
+
+                item = stripe_subscription["items"]["data"][0]
+
+                subscription_services.sync_workspace_subscription(
+                    stripe_subscription_id=stripe_subscription["id"],
+                    stripe_status=stripe_subscription["status"],
+                    cancel_at_period_end=stripe_subscription["cancel_at_period_end"],
+                    expires_at=datetime.fromtimestamp(
+                        item["current_period_end"],
+                        timezone.utc,
+                    ),
+                )
+
         except Exception as e:
-            print(e)
+            traceback.print_exc()  # dumps full traceback to console/terminal
             return Response(status=400)
 
         print("EVENT:", event["type"])
