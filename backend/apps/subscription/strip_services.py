@@ -29,7 +29,7 @@ def create_checkout_session(workspace, plan):
         mode="subscription",
         line_items=[{"price": plan.stripe_price_id, "quantity": 1}],
         success_url=f"{settings.FRONTEND_URL}/w/{workspace.slug}/upgrade-plan/success",
-        cancel_url=f"{settings.FRONTEND_URL}/cancel",
+        cancel_url=f"{settings.FRONTEND_URL}/w/{workspace.slug}/upgrade-plan/failed",
         metadata={"workspace_id": str(workspace.id), "plan_id": str(plan.id)},
     )
 

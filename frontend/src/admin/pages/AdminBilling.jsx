@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Download, DollarSign, Users, LineChart, Clock, TrendingUp, BarChart3, ChevronDown, Activity, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
-import AdminSidebar from '../components/app/AdminSidebar';
+import { Clock, DollarSign, TrendingUp, Users } from 'lucide-react';
+import TransactionsTable from '../components/billing/TransactionsTable';
 
 const mockTransactions = [
   { id: 1, workspace: 'Acme Design Studio', owner: 'Sarah Jenkins', plan: 'Pro', amount: '$29.00', status: 'Paid', date: 'Jan 18, 2025' },
@@ -21,37 +20,6 @@ const mockTransactions = [
 ];
 
 export default function AdminBilling() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [monthFilter, setMonthFilter] = useState('All');
-  const [yearFilter, setYearFilter] = useState('All');
-  const [isMonthOpen, setIsMonthOpen] = useState(false);
-  const [isYearOpen, setIsYearOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  const filteredTransactions = mockTransactions.filter(t => {
-    const matchesSearch = t.workspace.toLowerCase().includes(searchQuery.toLowerCase());
-
-    // t.date format: 'Jan 18, 2025'
-    const parts = t.date.split(' ');
-    const txMonth = parts[0];
-    const txYear = parts[2];
-
-    const matchesMonth = monthFilter === 'All' || txMonth === monthFilter;
-    const matchesYear = yearFilter === 'All' || txYear === yearFilter;
-
-    return matchesSearch && matchesMonth && matchesYear;
-  });
-
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage) || 1;
-  const paginatedTransactions = filteredTransactions.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, monthFilter, yearFilter]);
 
   return (
 
@@ -215,150 +183,7 @@ export default function AdminBilling() {
       </div>
 
       {/* Recent Transactions Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mt-6">
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
-          <div>
-            <h3 className="text-[16px] font-bold text-slate-900">Recent Transactions</h3>
-            <p className="text-[13px] text-slate-500 mt-1">Full transaction log</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <button
-                onClick={() => { setIsYearOpen(!isYearOpen); setIsMonthOpen(false); }}
-                className="flex items-center justify-between w-[110px] h-[36px] bg-white border border-slate-200 rounded-lg px-3 text-[13px] font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm"
-              >
-                {yearFilter === 'All' ? 'All Years' : yearFilter}
-                <ChevronDown className="h-4 w-4 text-slate-400" />
-              </button>
-              {isYearOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsYearOpen(false)} />
-                  <div className="absolute top-full mt-1 left-0 w-full bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto py-1">
-                    {['All', '2025', '2024'].map(y => (
-                      <button
-                        key={y}
-                        onClick={() => { setYearFilter(y); setIsYearOpen(false); }}
-                        className={`w-full text-left px-3 py-1.5 text-[13px] ${yearFilter === y ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50 font-medium'}`}
-                      >
-                        {y === 'All' ? 'All Years' : y}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => { setIsMonthOpen(!isMonthOpen); setIsYearOpen(false); }}
-                className="flex items-center justify-between w-[120px] h-[36px] bg-white border border-slate-200 rounded-lg px-3 text-[13px] font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm"
-              >
-                {monthFilter === 'All' ? 'All Months' : monthFilter}
-                <ChevronDown className="h-4 w-4 text-slate-400" />
-              </button>
-              {isMonthOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsMonthOpen(false)} />
-                  <div className="absolute top-full mt-1 left-0 w-full bg-white border border-slate-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto py-1">
-                    {['All', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(m => (
-                      <button
-                        key={m}
-                        onClick={() => { setMonthFilter(m); setIsMonthOpen(false); }}
-                        className={`w-full text-left px-3 py-1.5 text-[13px] ${monthFilter === m ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50 font-medium'}`}
-                      >
-                        {m === 'All' ? 'All Months' : m}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="relative w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-[14px] w-[14px] text-slate-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search workspace..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-[36px] bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200">
-                <th className="px-6 py-3 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Workspace</th>
-                <th className="px-6 py-3 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Owner</th>
-                <th className="px-6 py-3 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Plan</th>
-                <th className="px-6 py-3 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-3 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {paginatedTransactions.length > 0 ? (
-                paginatedTransactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 text-[14px] font-bold text-slate-900">{tx.workspace}</td>
-                    <td className="px-6 py-4 text-[14px] font-medium text-slate-600">{tx.owner}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md ${tx.plan === 'Enterprise' ? 'bg-purple-100 text-purple-700' :
-                          tx.plan === 'Pro' ? 'bg-blue-100 text-blue-700' :
-                            'bg-slate-200 text-slate-700'
-                        }`}>
-                        {tx.plan}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[14px] font-bold text-slate-900">{tx.amount}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md ${tx.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' :
-                          tx.status === 'Pending' ? 'bg-amber-100 text-amber-700' :
-                            'bg-red-100 text-red-700'
-                        }`}>
-                        {tx.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[14px] font-medium text-slate-500">{tx.date}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-slate-500 text-sm">
-                    No transactions found matching your filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-          <span className="text-[13px] text-slate-500">
-            Showing {paginatedTransactions.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, filteredTransactions.length)} of {filteredTransactions.length} transactions
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="p-1.5 border border-slate-200 rounded-md text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-[13px] font-medium text-slate-700 px-2">Page {currentPage} of {totalPages}</span>
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="p-1.5 border border-slate-200 rounded-md text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <TransactionsTable transactions={mockTransactions} />
 
     </div>
 

@@ -3,4 +3,5 @@ export const ADMIN_QUERY_KEYS = {
     USER_DETAIL: (userId) => ['admin', 'users', userId],
     WORKSPACES: ['admin', 'workspaces'],
     PLANS: ['admin', 'plans'],
+    TRANSACTIONS: ['admin', 'transactions'],
 }

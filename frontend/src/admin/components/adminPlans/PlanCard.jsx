@@ -157,28 +157,29 @@ function PlanCard({ plan, onEdit, onNewVersion, canSuspend }) {
 
             {/* Footer */}
             <div className="px-5 py-3 bg-white border-t border-slate-100 flex items-center justify-between">
-                {isArchived ? (
-                    <>
-                        <span className="text-[11px] text-slate-400">
-                            {plan.archivedAt
-                                ? `Archived at ${formatDate(plan.archivedAt)}`
-                                : `archived`}
-                        </span>
-                        <button
-                            className="flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={handleRestore}
-                            disabled={isRestoring}
-                        >
-                            {isRestoring ? (
-                                <span className="text-[11px] font-medium">Restoring...</span>
-                            ) : (
-                                <>
-                                    <Archive className="w-[13px] h-[13px]" />
-                                    <span className="text-[11px] font-medium">Restore</span>
-                                </>
-                            )}
-                        </button>
-                    </>
+{isArchived ? (
+    <div className="w-full space-y-2">
+        <div className="flex items-center justify-between">
+            <span className="text-[11px] text-slate-400">
+                {plan.archivedAt ? `Archived ${formatDate(plan.archivedAt)}` : 'Archived'}
+            </span>
+            <span className="text-[11px] font-semibold text-slate-500">
+                {plan.subscriberCount ?? 0} active subscriber{(plan.subscriberCount ?? 0) !== 1 ? 's' : ''}
+            </span>
+        </div>
+        <button
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[11px] font-medium"
+            onClick={handleRestore}
+            disabled={isRestoring}
+        >
+            {isRestoring ? 'Restoring...' : (
+                <>
+                    <Archive className="w-[13px] h-[13px]" />
+                    Restore Plan
+                </>
+            )}
+        </button>
+    </div>
                 ) : (
                     <>
                         {/* <span className="text-[11px] text-slate-400">{plan.currency}</span> */}

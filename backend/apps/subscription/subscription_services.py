@@ -2,14 +2,12 @@ import stripe
 import uuid
 from rest_framework.exceptions import ValidationError
 
-from django.db.models import Q
+from django.db.models import Q, Max, Count
 from django.db import transaction
-from django.db.models import Max
 from django.utils import timezone
 
-from .models import Plan
+from .models import Plan, WorkspaceSubscription, SubscriptionTransaction
 from core.exceptions.base import NotFoundException
-from .models import Plan
 from . import strip_services
 from .models import WorkspaceSubscription
 from .helpers.subscription_helper import get_plan_or_raise
@@ -82,13 +80,21 @@ def create_new_plan_version(plan_id: uuid.UUID, data: dict) -> Plan:
         )
 
         plan.replaced_by = new_plan
-        plan.save(update_fields=['replaced_by'])
+        plan.save(update_fields=["replaced_by"])
 
     return new_plan
 
 
 def list_plans():
     return Plan.objects.all()
+
+
+def admin_list_plans():
+    return Plan.objects.annotate(
+        subscriber_count=Count(
+            "subscriptions", filter=Q(subscriptions__status=WorkspaceSubscription.StatusChoices.ACTIVE)
+        )
+    ).order_by("tier", "version")
 
 
 def list_active_plans():
@@ -106,7 +112,7 @@ def delete_plan(plan_id):
 
 def update_plan(plan_id, data):
     plan = get_plan_or_raise(plan_id=plan_id)
-    
+
     name = data.get("name", None)
     description = data.get("description", None)
 
@@ -122,8 +128,10 @@ def update_plan(plan_id, data):
 def archive_plan(plan_id):
     plan = get_plan_or_raise(plan_id=plan_id)
 
-    if plan.code.upper() == 'FREE':
-        raise ValidationError("The Free plan cannot be archived. It must always remain active.")
+    if plan.code.upper() == "FREE":
+        raise ValidationError(
+            "The Free plan cannot be archived. It must always remain active."
+        )
 
     active_plans = Plan.objects.filter(is_archived=False)
     active_count = active_plans.count()
@@ -135,7 +143,7 @@ def archive_plan(plan_id):
 
     plan.is_archived = True
     plan.archived_at = timezone.now()
-    plan.save(update_fields=['is_archived', 'archived_at'])
+    plan.save(update_fields=["is_archived", "archived_at"])
 
 
 def restore_plan(plan_id):
@@ -150,7 +158,7 @@ def create_checkout_session(workspace, plan):
 
 
 def get_current_plan(workspace):
-    return (
+    subscription = (
         WorkspaceSubscription.objects.select_related("plan")
         .filter(workspace=workspace)
         .filter(
@@ -160,6 +168,20 @@ def get_current_plan(workspace):
         .order_by("-started_at")
         .first()
     )
+
+    if subscription:
+        return subscription
+
+    # fallback to free plan if no active subscription found
+    free_plan = Plan.objects.filter(code='FREE', is_archived=False).first()
+    if free_plan:
+        return WorkspaceSubscription(
+            workspace=workspace,
+            plan=free_plan,
+            status=WorkspaceSubscription.StatusChoices.ACTIVE,
+        )
+
+    return None
 
 
 def create_workspace_subscription(
@@ -189,6 +211,37 @@ def create_workspace_subscription(
             stripe_subscription_id=stripe_subscription_id,
             expires_at=expires_at,
         )
+
+
+def create_transaction_log(
+    stripe_subscription_id,
+    amount,
+    currency,
+    billing_period_start,
+    billing_period_end,
+    gateway_invoice_id,
+    invoice_url,
+    is_renewal,
+):
+    subscription = WorkspaceSubscription.objects.select_related('plan').filter(
+        stripe_subscription_id=stripe_subscription_id
+    ).first()
+
+    if not subscription:
+        raise ValidationError(f"No subscription found for stripe id: {stripe_subscription_id}")
+
+    SubscriptionTransaction.objects.create(
+        workspace=subscription.workspace,
+        subscription=subscription,
+        plan=subscription.plan,
+        type=SubscriptionTransaction.TypeChoices.RENEWAL if is_renewal else SubscriptionTransaction.TypeChoices.PAYMENT,
+        amount=amount / 100,  # stripe sends amount in paise/cents
+        currency=currency,
+        billing_period_start=billing_period_start,
+        billing_period_end=billing_period_end,
+        gateway_invoice_id=gateway_invoice_id,
+        invoice_url=invoice_url,
+    )
 
 
 def create_free_plan_subscription(workspace):
@@ -238,3 +291,22 @@ def resume_current_subscription(workspace):
     subscription.save(update_fields=["cancel_at_period_end", "scheduled_plan"])
 
     return subscription
+
+
+def admin_list_transactions(year=None, month=None, search=None):
+    qs = (
+        SubscriptionTransaction.objects
+        .select_related("workspace", "workspace__owner", "plan")
+        .order_by("-created_at")
+    )
+
+    if year and year != "all":
+        qs = qs.filter(created_at__year=year)
+
+    if month and month != "all":
+        qs = qs.filter(created_at__month=month)
+
+    if search:
+        qs = qs.filter(workspace__name__icontains=search)
+
+    return qs

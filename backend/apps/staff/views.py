@@ -60,7 +60,7 @@ class AdminWorkspaceListView(AdminBaseView):
 class AdminPlanListView(AdminBaseView):
 
     def get(self, request):
-        plans = subscription_services.list_plans()
+        plans = subscription_services.admin_list_plans()
 
         return success_response(
             data={
@@ -72,7 +72,6 @@ class AdminPlanListView(AdminBaseView):
 
     def post(self, request):
 
-        print(request.data)
         serializer = subscription_serializer.AdminWritePlanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -97,16 +96,16 @@ class AdminPlanDetailView(AdminBaseView):
 
     def patch(self, request, plan_id):
 
-        serializer = subscription_serializer.AdminPlanEditSerializer(data=request.data, partial=True)
+        serializer = subscription_serializer.AdminPlanEditSerializer(
+            data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
         subscription_services.update_plan(
             plan_id=plan_id, data=serializer.validated_data
         )
 
-        return success_response(
-            message="Plan updated"
-        )
+        return success_response(message="Plan updated")
 
 
 class AdminCreateNewPlanVersionView(AdminBaseView):
@@ -126,7 +125,7 @@ class AdminCreateNewPlanVersionView(AdminBaseView):
 
         return success_response(
             message="New version created",
-            data=subscription_serializer.AdminPlanNewVersionSerializer(new_plan).data
+            data=subscription_serializer.AdminPlanNewVersionSerializer(new_plan).data,
         )
 
 
@@ -146,3 +145,25 @@ class AdminPlanRestoreView(AdminBaseView):
         subscription_services.restore_plan(plan_id=plan_id)
 
         return success_response(message="Plan restored.")
+
+
+class AdminTransactionListView(AdminBaseView):
+
+    def get(self, request):
+        year = request.query_params.get("year", "all").lower()
+        month = request.query_params.get("month", "all").lower()
+        search = request.query_params.get("search", "").strip()
+
+        transactions = subscription_services.admin_list_transactions(
+            year=year,
+            month=month,
+            search=search,
+        )
+
+        return success_response(
+            data={
+                "transactions": subscription_serializer.AdminTransactionListSerializer(
+                    transactions, many=True
+                ).data
+            }
+        )

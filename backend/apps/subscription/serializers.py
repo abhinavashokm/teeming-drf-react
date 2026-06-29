@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Plan, WorkspaceSubscription
+from .models import Plan, WorkspaceSubscription, SubscriptionTransaction
 
 
 class AdminWritePlanSerializer(serializers.ModelSerializer):
@@ -21,6 +21,8 @@ class AdminWritePlanSerializer(serializers.ModelSerializer):
 
 
 class AdminPlanListSerializer(serializers.ModelSerializer):
+    subscriber_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Plan
         fields = [
@@ -39,6 +41,7 @@ class AdminPlanListSerializer(serializers.ModelSerializer):
             "is_archived",
             "archived_at",
             "version",
+            "subscriber_count",
         ]
 
 
@@ -178,3 +181,34 @@ class AdminPlanNewVersionSerializer(serializers.ModelSerializer):
         if value is not None and value < 1:
             raise serializers.ValidationError("Max goals must be at least 1.")
         return value
+
+
+
+class TransactionWorkspaceSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    owner_email = serializers.SerializerMethodField()
+
+    def get_owner_email(self, obj):
+        owner = getattr(obj, "owner", None)
+        if not owner:
+            return "-"
+        return owner.email
+
+class AdminTransactionListSerializer(serializers.ModelSerializer):
+    workspace = TransactionWorkspaceSerializer()
+    plan = GetPlanSerializer()
+    date = serializers.DateTimeField(source="created_at", format="%b %d, %Y")
+
+    class Meta:
+        model = SubscriptionTransaction
+        fields = [
+            "id",
+            "workspace",
+            "plan",
+            "amount",
+            "currency",
+            "type",
+            "date",
+            "gateway_invoice_id",
+            "invoice_url",
+        ]
