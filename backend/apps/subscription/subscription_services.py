@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from .models import Plan, WorkspaceSubscription, SubscriptionTransaction
 from core.exceptions.base import NotFoundException
+from core.constants.plan_codes import PlanCode
 from . import strip_services
 from .models import WorkspaceSubscription
 from .helpers.subscription_helper import get_plan_or_raise
@@ -48,6 +49,17 @@ def create_new_plan_version(plan_id: uuid.UUID, data: dict) -> Plan:
         or 0
     )
 
+    new_monthly_price = data.get("monthly_price", plan.monthly_price)
+    price_changed = new_monthly_price != plan.monthly_price
+    new_stripe_price_id = plan.stripe_price_id
+
+    if price_changed:
+        new_stripe_price_id = strip_services.create_price_for_product(
+            product_id=plan.stripe_product_id,
+            monthly_price=new_monthly_price,
+            currency=plan.currency,
+        )
+
     with transaction.atomic():
 
         # archive the old plan and point it to the new one
@@ -62,6 +74,7 @@ def create_new_plan_version(plan_id: uuid.UUID, data: dict) -> Plan:
             tier=plan.tier,
             currency=plan.currency,
             stripe_product_id=plan.stripe_product_id,
+            stripe_price_id=new_stripe_price_id,
             # versioning
             version=latest_version + 1,
             is_archived=False,
@@ -128,11 +141,20 @@ def update_plan(plan_id, data):
 
     plan.save(update_fields=["name", "description"])
 
+    if plan.stripe_product_id:
+        strip_services.modify_product(
+            product_id=plan.stripe_product_id,
+            name=plan.name,
+            description=plan.description or "",
+        )
+
+    return plan
+
 
 def archive_plan(plan_id):
     plan = get_plan_or_raise(plan_id=plan_id)
 
-    if plan.code.upper() == "FREE":
+    if plan.code.upper() == PlanCode.FREE:
         raise ValidationError(
             "The Free plan cannot be archived. It must always remain active."
         )
@@ -177,7 +199,7 @@ def get_current_plan(workspace):
         return subscription
 
     # fallback to free plan if no active subscription found
-    free_plan = Plan.objects.filter(code="FREE", is_archived=False).first()
+    free_plan = Plan.objects.filter(code=PlanCode.FREE, is_archived=False).first()
     if free_plan:
         return WorkspaceSubscription(
             workspace=workspace,
@@ -259,7 +281,7 @@ def create_transaction_log(
 def create_free_plan_subscription(workspace):
 
     try:
-        free_plan = Plan.objects.get(code="FREE", is_archived=False)
+        free_plan = Plan.objects.get(code=PlanCode.FREE, is_archived=False)
     except Plan.DoesNotExist:
         raise NotFoundException("Free plan not found")
 
@@ -282,7 +304,7 @@ def downgrade_to_free(workspace):
     )
 
     subscription.cancel_at_period_end = True
-    subscription.scheduled_plan = Plan.objects.get(code="FREE")
+    subscription.scheduled_plan = Plan.objects.get(code=PlanCode.FREE)
     subscription.save(update_fields=["cancel_at_period_end", "scheduled_plan"])
 
     return subscription
@@ -333,7 +355,7 @@ def get_billing_overview():
 def _get_overview():
     active_subscriptions = WorkspaceSubscription.objects.filter(
         status=WorkspaceSubscription.StatusChoices.ACTIVE
-    )
+    ).exclude(plan__code=PlanCode.FREE)
 
     total_revenue = SubscriptionTransaction.objects.aggregate(
         total=Coalesce(
@@ -380,22 +402,28 @@ def _get_plan_distribution():
     ]
 
 
-def _get_top_paying_workspaces():
-    subscriptions = (
-        WorkspaceSubscription.objects.filter(
-            status=WorkspaceSubscription.StatusChoices.ACTIVE
-        )
-        .exclude(plan__monthly_price=0)
-        .select_related("workspace", "plan")
-        .order_by("-plan__monthly_price")[:5]
+def _get_top_paying_workspaces(limit=5):
+    top = (
+        SubscriptionTransaction.objects
+        .values("workspace_id", "workspace__name")
+        .annotate(total_revenue=Sum("amount"))
+        .order_by("-total_revenue")[:limit]
+    )
+
+    workspace_ids = [row["workspace_id"] for row in top]
+
+    current_plans = dict(
+        WorkspaceSubscription.objects
+        .filter(workspace_id__in=workspace_ids, status=WorkspaceSubscription.StatusChoices.ACTIVE)
+        .values_list("workspace_id", "plan__name")
     )
 
     return [
         {
-            "id": subscription.workspace.id,
-            "name": subscription.workspace.name,
-            "plan": subscription.plan.name,
-            "amount": subscription.plan.monthly_price,
+            "id": row["workspace_id"],
+            "name": row["workspace__name"],
+            "plan": current_plans.get(row["workspace_id"], "—"),
+            "amount": row["total_revenue"],
         }
-        for subscription in subscriptions
+        for row in top
     ]

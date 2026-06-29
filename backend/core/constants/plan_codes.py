@@ -1,0 +1,2 @@
+class PlanCode:
+    FREE = "FREE"

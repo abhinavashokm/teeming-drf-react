@@ -1,6 +1,7 @@
 import { DollarSign, Users, Building2, UserPlus } from 'lucide-react';
 import TransactionsTable from '../components/billing/TransactionsTable';
 import useBillingOverview from '../hooks/adminBilling/useBillingOverview';
+import WorkspaceAvatar from '../../components/workspace/WorkspaceAvatar';
 
 const PLAN_COLORS = {
   FREE: { stroke: '#E2E8F0', dot: 'bg-slate-300', border: 'border-slate-100', bg: 'bg-slate-50/50', text: 'text-slate-700' },
@@ -133,21 +134,26 @@ export default function AdminBilling() {
           </div>
 
           <div className="space-y-4">
-            {topPayingWorkspaces.map((ws) => (
+            {topPayingWorkspaces.map((ws, index) => (
+
               <div key={ws.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-[13px] font-bold bg-indigo-100 text-indigo-700">
-                    {ws.name.slice(0, 2).toUpperCase()}
+                  <div className="w-6 text-[13px] font-bold text-slate-400 text-center">
+                    #{index + 1}
                   </div>
+
+                  <WorkspaceAvatar workspace={ws} size='sm' />
+
                   <div>
                     <h4 className="text-[14px] font-bold text-slate-900">{ws.name}</h4>
                     <span className="text-[12px] font-semibold text-slate-500">{ws.plan}</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[14px] font-bold text-slate-900">₹{Number(ws.amount).toLocaleString()}/mo</div>
+                  <div className="text-[14px] font-bold text-slate-900">₹{Number(ws.amount).toLocaleString()}</div>
                 </div>
               </div>
+
             ))}
           </div>
         </div>
