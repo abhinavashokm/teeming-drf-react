@@ -212,3 +212,30 @@ class AdminTransactionListSerializer(serializers.ModelSerializer):
             "gateway_invoice_id",
             "invoice_url",
         ]
+
+
+class BillingOverviewCardsSerializer(serializers.Serializer):
+    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
+    active_subscriptions = serializers.IntegerField()
+    total_workspaces = serializers.IntegerField()
+    total_members = serializers.IntegerField()
+
+
+class PlanDistributionSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    name = serializers.CharField()
+    count = serializers.IntegerField()
+    percentage = serializers.FloatField()
+
+
+class TopPayingWorkspaceSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    plan = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+
+
+class BillingOverviewSerializer(serializers.Serializer):
+    overview = BillingOverviewCardsSerializer()
+    plan_distribution = PlanDistributionSerializer(many=True)
+    top_paying_workspaces = TopPayingWorkspaceSerializer(many=True)

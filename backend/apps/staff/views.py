@@ -167,3 +167,16 @@ class AdminTransactionListView(AdminBaseView):
                 ).data
             }
         )
+    
+
+class AdminBillingOverviewView(AdminBaseView):
+
+    def get(self, request):
+
+        data = subscription_services.get_billing_overview()
+
+        serializer = subscription_serializer.BillingOverviewSerializer(data)
+
+        return success_response(
+            data=serializer.data
+        )

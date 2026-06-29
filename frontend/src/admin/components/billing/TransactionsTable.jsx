@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Search, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import useTransactions from "../../hooks/adminSubscriptions/useTransactions";
+import useTransactions from "../../hooks/adminBilling/useTransactions";
 
 const PLAN_BADGE = {
   Enterprise: "bg-purple-100 text-purple-700",

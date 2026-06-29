@@ -1,8 +1,10 @@
 import stripe
 import uuid
 from rest_framework.exceptions import ValidationError
+from decimal import Decimal
 
-from django.db.models import Q, Max, Count
+from django.db.models.functions import Coalesce
+from django.db.models import Q, Max, Count, Sum, DecimalField, Value
 from django.db import transaction
 from django.utils import timezone
 
@@ -12,6 +14,7 @@ from . import strip_services
 from .models import WorkspaceSubscription
 from .helpers.subscription_helper import get_plan_or_raise
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
+from apps.workspace.models import Workspace, WorkspaceMember
 
 
 def create_plan(data):
@@ -92,7 +95,8 @@ def list_plans():
 def admin_list_plans():
     return Plan.objects.annotate(
         subscriber_count=Count(
-            "subscriptions", filter=Q(subscriptions__status=WorkspaceSubscription.StatusChoices.ACTIVE)
+            "subscriptions",
+            filter=Q(subscriptions__status=WorkspaceSubscription.StatusChoices.ACTIVE),
         )
     ).order_by("tier", "version")
 
@@ -173,7 +177,7 @@ def get_current_plan(workspace):
         return subscription
 
     # fallback to free plan if no active subscription found
-    free_plan = Plan.objects.filter(code='FREE', is_archived=False).first()
+    free_plan = Plan.objects.filter(code="FREE", is_archived=False).first()
     if free_plan:
         return WorkspaceSubscription(
             workspace=workspace,
@@ -223,18 +227,26 @@ def create_transaction_log(
     invoice_url,
     is_renewal,
 ):
-    subscription = WorkspaceSubscription.objects.select_related('plan').filter(
-        stripe_subscription_id=stripe_subscription_id
-    ).first()
+    subscription = (
+        WorkspaceSubscription.objects.select_related("plan")
+        .filter(stripe_subscription_id=stripe_subscription_id)
+        .first()
+    )
 
     if not subscription:
-        raise ValidationError(f"No subscription found for stripe id: {stripe_subscription_id}")
+        raise ValidationError(
+            f"No subscription found for stripe id: {stripe_subscription_id}"
+        )
 
     SubscriptionTransaction.objects.create(
         workspace=subscription.workspace,
         subscription=subscription,
         plan=subscription.plan,
-        type=SubscriptionTransaction.TypeChoices.RENEWAL if is_renewal else SubscriptionTransaction.TypeChoices.PAYMENT,
+        type=(
+            SubscriptionTransaction.TypeChoices.RENEWAL
+            if is_renewal
+            else SubscriptionTransaction.TypeChoices.PAYMENT
+        ),
         amount=amount / 100,  # stripe sends amount in paise/cents
         currency=currency,
         billing_period_start=billing_period_start,
@@ -247,7 +259,7 @@ def create_transaction_log(
 def create_free_plan_subscription(workspace):
 
     try:
-        free_plan = Plan.objects.get(code="FREE")
+        free_plan = Plan.objects.get(code="FREE", is_archived=False)
     except Plan.DoesNotExist:
         raise NotFoundException("Free plan not found")
 
@@ -294,11 +306,9 @@ def resume_current_subscription(workspace):
 
 
 def admin_list_transactions(year=None, month=None, search=None):
-    qs = (
-        SubscriptionTransaction.objects
-        .select_related("workspace", "workspace__owner", "plan")
-        .order_by("-created_at")
-    )
+    qs = SubscriptionTransaction.objects.select_related(
+        "workspace", "workspace__owner", "plan"
+    ).order_by("-created_at")
 
     if year and year != "all":
         qs = qs.filter(created_at__year=year)
@@ -310,3 +320,82 @@ def admin_list_transactions(year=None, month=None, search=None):
         qs = qs.filter(workspace__name__icontains=search)
 
     return qs
+
+
+def get_billing_overview():
+    return {
+        "overview": _get_overview(),
+        "plan_distribution": _get_plan_distribution(),
+        "top_paying_workspaces": _get_top_paying_workspaces(),
+    }
+
+
+def _get_overview():
+    active_subscriptions = WorkspaceSubscription.objects.filter(
+        status=WorkspaceSubscription.StatusChoices.ACTIVE
+    )
+
+    total_revenue = SubscriptionTransaction.objects.aggregate(
+        total=Coalesce(
+            Sum("amount"),
+            Value(Decimal("0.00")),
+            output_field=DecimalField(max_digits=10, decimal_places=2),
+        )
+    )["total"]
+
+    return {
+        "total_revenue": total_revenue,
+        "active_subscriptions": active_subscriptions.count(),
+        "total_workspaces": Workspace.objects.count(),
+        "total_members": WorkspaceMember.objects.count(),
+    }
+
+
+def _get_plan_distribution():
+    total = WorkspaceSubscription.objects.filter(
+        status=WorkspaceSubscription.StatusChoices.ACTIVE
+    ).count()
+
+    plans = (
+        Plan.objects.filter(is_archived=False)
+        .annotate(
+            count=Count(
+                "subscriptions",
+                filter=Q(
+                    subscriptions__status=WorkspaceSubscription.StatusChoices.ACTIVE
+                ),
+            )
+        )
+        .order_by("tier")
+    )
+
+    return [
+        {
+            "code": plan.code,
+            "name": plan.name,
+            "count": plan.count,
+            "percentage": round((plan.count / total) * 100, 1) if total else 0,
+        }
+        for plan in plans
+    ]
+
+
+def _get_top_paying_workspaces():
+    subscriptions = (
+        WorkspaceSubscription.objects.filter(
+            status=WorkspaceSubscription.StatusChoices.ACTIVE
+        )
+        .exclude(plan__monthly_price=0)
+        .select_related("workspace", "plan")
+        .order_by("-plan__monthly_price")[:5]
+    )
+
+    return [
+        {
+            "id": subscription.workspace.id,
+            "name": subscription.workspace.name,
+            "plan": subscription.plan.name,
+            "amount": subscription.plan.monthly_price,
+        }
+        for subscription in subscriptions
+    ]

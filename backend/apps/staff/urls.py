@@ -9,6 +9,7 @@ from .views import (
     AdminPlanRestoreView,
     AdminCreateNewPlanVersionView,
     AdminTransactionListView,
+    AdminBillingOverviewView,
 )
 
 urlpatterns = [
@@ -21,4 +22,5 @@ urlpatterns = [
     path("plans/<uuid:plan_id>/restore/", AdminPlanRestoreView.as_view()),
     path("plans/<uuid:plan_id>/new-version/", AdminCreateNewPlanVersionView.as_view()),
     path("transactions/", AdminTransactionListView.as_view()),
+    path("billing-overview/", AdminBillingOverviewView.as_view()),
 ]
