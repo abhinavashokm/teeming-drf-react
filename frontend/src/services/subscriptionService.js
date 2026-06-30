@@ -30,9 +30,13 @@ export const subscriptionService = {
         return res.data
     },
 
-    previewUpgrade : async (slug, planId ) => {
+    previewUpgrade: async (slug, planId) => {
         const res = await api.get(`/workspaces/${slug}/subscriptions/upgrade/${planId}/preview/`)
         return res.data
+    },
+
+    upgradePlan: (slug, data) => {
+        return api.post(`/workspaces/${slug}/subscriptions/upgrade/`, data)
     },
 
 }

@@ -1,8 +1,6 @@
 import uuid
 from rest_framework.exceptions import ValidationError
 from decimal import Decimal
-import stripe
-from django.conf import settings
 
 from django.db.models.functions import Coalesce
 from django.db.models import Q, Max, Count, Sum, DecimalField, Value
@@ -182,7 +180,6 @@ def create_checkout_session(workspace, plan):
     return stripe_services.create_checkout_session(workspace, plan)
 
 
-
 # def upgrade_subscription(workspace, new_plan):
 #     subscription = WorkspaceSubscription.objects.get(
 #         workspace=workspace,
@@ -325,7 +322,7 @@ def downgrade_to_free(workspace):
 
     if not subscription.stripe_subscription_id:
         raise ValueError("No Stripe subscription found")
-    
+
     stripe_services.cancel_subscription(
         stripe_subscription_id=subscription.stripe_subscription_id
     )
@@ -344,10 +341,10 @@ def resume_current_subscription(workspace):
         status=WorkspaceSubscription.StatusChoices.ACTIVE,
     )
 
-    #free plan will not contain stripe subscription
+    # free plan will not contain stripe subscription
     if not subscription.stripe_subscription_id:
         raise ValueError("No Stripe subscription found")
-    
+
     stripe_services.resume_subscription(
         stripe_subscription_id=subscription.stripe_subscription_id
     )
@@ -525,24 +522,58 @@ def preview_upgrade(workspace, plan_id):
     workspace's active subscription were upgraded to `plan`. Read-only —
     does not modify the subscription or charge anything.
     """
- 
+
     subscription = WorkspaceSubscription.objects.get(
         workspace=workspace,
         status=WorkspaceSubscription.StatusChoices.ACTIVE,
     )
 
     plan = get_plan_or_raise(plan_id=plan_id)
- 
+
     if not subscription.stripe_subscription_id:
         raise ValueError("No active Stripe subscription found")
- 
+
     if not plan.stripe_price_id:
         raise ValueError("Selected plan is not configured for billing")
- 
+
     preview = stripe_services.get_upcoming_invoice_preview(
         stripe_subscription_id=subscription.stripe_subscription_id,
         new_price_id=plan.stripe_price_id,
     )
- 
+
     return preview
- 
+
+
+def upgrade_plan(workspace, plan):
+    """
+    Upgrades the workspace's active subscription to `plan` immediately,
+    charging the prorated difference on the customer's saved card via
+    Stripe. Local subscription state is updated optimistically here, and
+    will also be reconciled by the customer.subscription.updated webhook.
+    """
+
+    subscription = WorkspaceSubscription.objects.get(
+        workspace=workspace,
+        status=WorkspaceSubscription.StatusChoices.ACTIVE,
+    )
+
+    if not subscription.stripe_subscription_id:
+        raise ValueError("No active Stripe subscription found")
+
+    if not plan.stripe_price_id:
+        raise ValueError("Selected plan is not configured for billing")
+
+    if subscription.plan_id == plan.id:
+        raise ValueError("Workspace is already on this plan")
+
+    stripe_services.change_subscription_price(
+        stripe_subscription_id=subscription.stripe_subscription_id,
+        new_price_id=plan.stripe_price_id,
+    )
+
+    subscription.plan = plan
+    subscription.cancel_at_period_end = False
+    subscription.scheduled_plan = None
+    subscription.save(update_fields=["plan", "cancel_at_period_end", "scheduled_plan"])
+
+    return subscription

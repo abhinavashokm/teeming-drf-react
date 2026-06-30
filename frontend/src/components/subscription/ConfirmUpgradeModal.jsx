@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { currencySymbols } from "../../constants/subscriptionConstants";
 import usePreviewUpgrade from "../../hooks/subscription/usePreviewUpgrade";
+import useUpgradePlan from "../../hooks/subscription/useUpgradePlan";
+import AppButton from "../ui/buttons/AppButton";
 
 /**
  * Confirmation modal for upgrading to a higher plan. On open, fetches the
@@ -10,7 +12,6 @@ import usePreviewUpgrade from "../../hooks/subscription/usePreviewUpgrade";
 export default function ConfirmUpgradeModal({
     isOpen,
     onClose,
-    onConfirm,
     plan,                 // { name, monthlyPrice, currency }
     preview,               // { amountDue, currency } | null
     isPreviewLoading = false,
@@ -27,11 +28,20 @@ export default function ConfirmUpgradeModal({
     const formattedAmountDue =
         preview && preview.amountDue != null
             ? `${currencySymbols[preview.currency] || ""}${(
-                  preview.amountDue / 100
-              ).toFixed(2)}`
+                preview.amountDue / 100
+            ).toFixed(2)}`
             : null;
 
-    
+
+    const { mutate: upgradePlan, isPending: isUpgradePending } = useUpgradePlan()
+
+    const handleUpgradePlan = () => {
+        upgradePlan({ planId: plan.id }, {
+            onSettled: () => {
+                onClose()
+            }
+        })
+    }
 
     return (
         <div className="fixed inset-0 z-78 flex items-center justify-center">
@@ -117,17 +127,17 @@ export default function ConfirmUpgradeModal({
                     >
                         Cancel
                     </button>
-                    <button
-                        onClick={onConfirm}
-                        disabled={isPreviewLoading || isConfirmLoading || !!previewError}
-                        className="px-4 py-2 text-[13px] font-medium text-white bg-green-600 hover:bg-green-700 rounded-[10px] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    <AppButton
+                        onClick={handleUpgradePlan}
+                        disabled={isPreviewLoading || isUpgradePending || !!previewError}
+                        loading={isUpgradePending}
                     >
                         {isConfirmLoading
                             ? "Upgrading..."
                             : formattedAmountDue
-                            ? `Pay ${formattedAmountDue} & Upgrade`
-                            : "Confirm Upgrade"}
-                    </button>
+                                ? `Pay ${formattedAmountDue} & Upgrade`
+                                : "Confirm Upgrade"}
+                    </AppButton>
                 </div>
             </div>
         </div>

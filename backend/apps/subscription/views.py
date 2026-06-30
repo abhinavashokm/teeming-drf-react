@@ -102,5 +102,27 @@ class ResumeCurrentSubscription(AdminBaseView):
         return success_response(
             message="Current plan resumed"
         )
+    
+
+class SubscriptionUpgradeView(AdminBaseView):
+ 
+    def post(self, request, **kwargs):
+ 
+        serializer = serializers.UpgradePlanSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+ 
+        subscription = subscription_services.upgrade_plan(
+            workspace=request.workspace,
+            plan=serializer.validated_data["plan"],
+        )
+ 
+        return success_response(
+            message="Subscription upgraded",
+            data={
+                "subscription_id": subscription.id,
+                "plan_id": subscription.plan_id,
+            },
+        )
+ 
 
     

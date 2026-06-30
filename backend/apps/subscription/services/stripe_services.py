@@ -76,7 +76,7 @@ def get_upcoming_invoice_preview(stripe_subscription_id, new_price_id):
     with prorations applied. Does NOT charge anything or modify the
     subscription — read-only preview.
     """
- 
+
     stripe_subscription = stripe.Subscription.retrieve(stripe_subscription_id)
     item_id = stripe_subscription["items"]["data"][0]["id"]
 
@@ -92,4 +92,23 @@ def get_upcoming_invoice_preview(stripe_subscription_id, new_price_id):
         "amount_due": upcoming_invoice["amount_due"],
         "currency": upcoming_invoice["currency"].upper(),
     }
- 
+
+
+def change_subscription_price(stripe_subscription_id, new_price_id):
+    """
+    Switches the subscription's price to `new_price_id`, charging the
+    prorated difference immediately via an invoice. This is the real,
+    billing version of get_upcoming_invoice_preview — it actually
+    modifies the subscription and charges the customer's saved card.
+    """
+
+    stripe_subscription = stripe.Subscription.retrieve(stripe_subscription_id)
+    item_id = stripe_subscription["items"]["data"][0]["id"]
+
+    updated_subscription = stripe.Subscription.modify(
+        stripe_subscription_id,
+        items=[{"id": item_id, "price": new_price_id}],
+        proration_behavior="always_invoice",
+    )
+
+    return updated_subscription

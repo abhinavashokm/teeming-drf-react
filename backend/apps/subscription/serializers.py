@@ -239,3 +239,18 @@ class BillingOverviewSerializer(serializers.Serializer):
     overview = BillingOverviewCardsSerializer()
     plan_distribution = PlanDistributionSerializer(many=True)
     top_paying_workspaces = TopPayingWorkspaceSerializer(many=True)
+
+
+class UpgradePlanSerializer(serializers.Serializer):
+ 
+    plan_id = serializers.UUIDField()
+ 
+    def validate_plan_id(self, value):
+        if not Plan.objects.filter(id=value, is_archived=False).exists():
+            raise serializers.ValidationError("Invalid or archived plan.")
+        return value
+ 
+    def validate(self, attrs):
+        plan = Plan.objects.get(id=attrs["plan_id"], is_archived=False)
+        attrs["plan"] = plan
+        return attrs

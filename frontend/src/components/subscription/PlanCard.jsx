@@ -45,12 +45,8 @@ function PlanCard({ plan, loading }) {
         } else if (plan?.tier > currentPlan?.tier && currentPlan?.code !== 'FREE') {
             fetchPreviewUpgrade(plan.id, {
                 onSuccess: (res) => {
-                    console.log(res.data)
                     setUpgradePreview(res.data)
                 },
-                onError: (err) => {
-                    console.log(err)
-                }
             })
             return
         }
@@ -256,7 +252,7 @@ function PlanCard({ plan, loading }) {
                                 <AppButton
                                     fullWidth
                                     disabled={isDisabled}
-                                    loading={isPending || loadingDowngradeToFree|| isPreviewLoading}
+                                    loading={isPending || loadingDowngradeToFree || isPreviewLoading}
                                     onClick={handleCreateCheckoutSession}
                                     className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white"
                                 >
