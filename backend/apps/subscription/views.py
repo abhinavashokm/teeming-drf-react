@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
+from .services import subscription_services
 from core.responses.api_response import success_response
-from . import serializers, subscription_services
+from . import serializers
 from rest_framework import status
 from core.permission_views import AdminBaseView
     
@@ -48,6 +49,24 @@ class SubscriptionCheckoutView(AdminBaseView):
         )
     
 
+class SubscriptionUpgradePreviewView(AdminBaseView):
+ 
+    def get(self, request, **kwargs):
+
+        preview = subscription_services.preview_upgrade(
+            workspace=request.workspace,
+            plan_id=kwargs["plan_id"],
+        )
+ 
+        return success_response(
+            message="Upgrade preview calculated",
+            data={
+                "amount_due": int(preview["amount_due"]),
+                "currency": preview["currency"],
+            },
+        )
+    
+
 class CurrentPlanView(AdminBaseView):
 
     def get(self, request, **kwargs):
@@ -61,13 +80,15 @@ class CurrentPlanView(AdminBaseView):
         )
 
 
-class SubscriptionDowngradeToFreeView(AdminBaseView):
+class CancelCurrentSubscriptionView(AdminBaseView):
 
     def post(self, request, **kwargs):
         
         subscription_services.downgrade_to_free(workspace=request.workspace)
 
-        return success_response()
+        return success_response(
+            message="Subscription cancelled"
+        )
     
 
 class ResumeCurrentSubscription(AdminBaseView):

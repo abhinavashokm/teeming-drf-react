@@ -5,7 +5,7 @@ from rest_framework import status
 from core.responses.api_response import success_response
 from . import serializers, staff_services
 from apps.workspace import workspace_services
-from apps.subscription import subscription_services
+from apps.subscription.services import subscription_services
 from apps.subscription import serializers as subscription_serializer
 
 

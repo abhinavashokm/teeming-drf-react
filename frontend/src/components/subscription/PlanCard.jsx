@@ -3,8 +3,11 @@ import { currencySymbols, planCodes } from '../../constants/subscriptionConstant
 import useCreateCheckoutSession from '../../hooks/subscription/useCreateCheckoutSession';
 import AppButton from "../../components/ui/buttons/AppButton"
 import useWorkspace from '../../hooks/workspace/useWorkspace';
-import useDowngradeToFree from '../../hooks/subscription/useDowngradeToFree';
+import useCancelSubscription from '../../hooks/subscription/useCancelSubscription';
 import useResumeSubscription from '../../hooks/subscription/useResumeSubscription';
+import ConfirmUpgradeModal from './ConfirmUpgradeModal';
+import { useState } from 'react';
+import usePreviewUpgrade from '../../hooks/subscription/usePreviewUpgrade';
 
 
 function PlanCard({ plan, loading }) {
@@ -24,7 +27,7 @@ function PlanCard({ plan, loading }) {
         currentPlan?.code === plan?.code;
 
     const isScheduledPlan =
-        scheduledPlan?.code === plan?.code;
+        scheduledPlan?.code === plan?.code && scheduledPlan?.code !== 'FREE';
 
     const hasPendingChange =
         !!scheduledPlan;
@@ -33,23 +36,32 @@ function PlanCard({ plan, loading }) {
 
     const { mutate: createCheckoutSession, isPending } = useCreateCheckoutSession()
 
+    const [upgradePreview, setUpgradePreview] = useState(null)
+    const { mutate: fetchPreviewUpgrade, isPending: isPreviewLoading } = usePreviewUpgrade()
+
     const handleCreateCheckoutSession = () => {
         if (plan?.code === 'FREE') {
             return handleDowngradeToFree()
+        } else if (plan?.tier > currentPlan?.tier && currentPlan?.code !== 'FREE') {
+            fetchPreviewUpgrade(plan.id, {
+                onSuccess: (res) => {
+                    console.log(res.data)
+                    setUpgradePreview(res.data)
+                },
+                onError: (err) => {
+                    console.log(err)
+                }
+            })
+            return
         }
 
         createCheckoutSession({ plan_id: plan?.id })
     }
 
-    const { mutate: downgradeToFree, isPending: loadingDowngradeToFree } = useDowngradeToFree()
-    const { mutate: resumeCurrentSubscription, isPending: loadingResumeSubscription } = useResumeSubscription()
+    const { mutate: downgradeToFree, isPending: loadingDowngradeToFree } = useCancelSubscription()
 
     const handleDowngradeToFree = () => {
         downgradeToFree()
-    }
-
-    const handleResumeCurrentSubscritpion = () => {
-        resumeCurrentSubscription()
     }
 
     if (loading) {
@@ -204,14 +216,6 @@ function PlanCard({ plan, loading }) {
                     </ul>
                 </div>
 
-                {isCurrentPlan && hasPendingChange && (
-                    <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
-                        <p className="text-xs text-blue-700">
-                            A plan change has been scheduled.
-                        </p>
-                    </div>
-                )}
-
                 {isScheduledPlan && (
                     <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
                         <p className="text-xs text-amber-800">
@@ -221,62 +225,63 @@ function PlanCard({ plan, loading }) {
                 )}
 
                 {/* Button */}
-                <div className="mt-8 pt-6 border-t border-gray-100">
-                    {isCurrentPlan ? (
+                {
+                    plan?.code !== "FREE" &&
 
-                        hasPendingChange ? (
-                            <AppButton
-                                fullWidth
-                                onClick={handleResumeCurrentSubscritpion}
-                                loading={loadingResumeSubscription}
-                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px]"
-                            >
-                                Keep {plan.name}
-                            </AppButton>
-                        ) : (
+                    <div className="mt-8 pt-6 border-t border-gray-100">
+                        {isCurrentPlan ? (
+                            (
+                                <AppButton
+                                    fullWidth
+                                    disabled
+                                    className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-gray-100 text-gray-500"
+                                >
+                                    Current Plan
+                                </AppButton>
+                            )
+
+                        ) : isScheduledPlan ? (
+
                             <AppButton
                                 fullWidth
                                 disabled
-                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-gray-100 text-gray-500"
+                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-amber-50 text-amber-700 border border-amber-200"
                             >
-                                Current Plan
+                                Scheduled
                             </AppButton>
-                        )
 
-                    ) : isScheduledPlan ? (
+                        ) : (
 
-                        <AppButton
-                            fullWidth
-                            disabled
-                            className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-amber-50 text-amber-700 border border-amber-200"
-                        >
-                            Scheduled
-                        </AppButton>
+                            <span title={isDisabled ? "Only downgrade possible after current plan ends" : undefined}>
+                                <AppButton
+                                    fullWidth
+                                    disabled={isDisabled}
+                                    loading={isPending || loadingDowngradeToFree|| isPreviewLoading}
+                                    onClick={handleCreateCheckoutSession}
+                                    className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white"
+                                >
+                                    {hasPendingChange
+                                        ? `Switch to ${plan.name}`
+                                        : plan.tier < currentPlan.tier
+                                            ? `Downgrade to ${plan.name}`
+                                            : `Upgrade to ${plan.name}`
+                                    }
+                                </AppButton>
+                            </span>
 
-                    ) : (
-                        
-                        <span title={isDisabled ? "Only downgrade possible after current plan ends" : undefined}>
-                            <AppButton
-                                fullWidth
-                                disabled={isDisabled}
-                                loading={isPending || loadingDowngradeToFree}
-                                onClick={handleCreateCheckoutSession}
-                                className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white"
-                            >
-                                {hasPendingChange
-                                    ? `Switch to ${plan.name}`
-                                    : plan.tier < currentPlan.tier
-                                        ? `Downgrade to ${plan.name}`
-                                        : `Upgrade to ${plan.name}`
-                                }
-                            </AppButton>
-                        </span>
+                        )}
 
-                    )}
-
-                </div>
+                    </div>
+                }
 
             </div>
+            <ConfirmUpgradeModal
+                isOpen={!!upgradePreview}
+                onClose={() => setUpgradePreview(null)}
+                preview={upgradePreview}
+                plan={plan}
+                isPreviewLoading={isPreviewLoading}
+            />
         </div>
     )
 }

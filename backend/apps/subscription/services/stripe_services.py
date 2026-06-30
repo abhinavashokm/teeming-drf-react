@@ -53,3 +53,43 @@ def modify_product(product_id, name, description):
         name=name,
         description=description or "",
     )
+
+
+def cancel_subscription(stripe_subscription_id):
+    stripe.Subscription.modify(
+        stripe_subscription_id,
+        cancel_at_period_end=True,
+    )
+
+
+def resume_subscription(stripe_subscription_id):
+    stripe.Subscription.modify(
+        stripe_subscription_id,
+        cancel_at_period_end=False,
+    )
+
+
+def get_upcoming_invoice_preview(stripe_subscription_id, new_price_id):
+    """
+    Asks Stripe what the next invoice would look like if the given
+    subscription's price were changed to `new_price_id` right now,
+    with prorations applied. Does NOT charge anything or modify the
+    subscription — read-only preview.
+    """
+ 
+    stripe_subscription = stripe.Subscription.retrieve(stripe_subscription_id)
+    item_id = stripe_subscription["items"]["data"][0]["id"]
+
+    upcoming_invoice = stripe.Invoice.create_preview(
+        subscription=stripe_subscription_id,
+        subscription_details={
+            "items": [{"id": item_id, "price": new_price_id}],
+            "proration_behavior": "always_invoice",
+        },
+    )
+
+    return {
+        "amount_due": upcoming_invoice["amount_due"],
+        "currency": upcoming_invoice["currency"].upper(),
+    }
+ 

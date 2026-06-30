@@ -1,22 +1,45 @@
-import { AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
 import {
     currencySymbols,
     planCodes,
 } from '../../constants/subscriptionConstants';
 import { formatDate } from '../../utils/timeUtils';
 import { cn } from '../../utils/cn';
+import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal';
+import useCancelSubscription from '../../hooks/subscription/useCancelSubscription';
+import useResumeSubscription from '../../hooks/subscription/useResumeSubscription';
 
 function CurrentSubscriptionCard({
     subscription,
     className,
-    onResumeSubscription,
 }) {
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+
+    const { mutate: downgradeToFree, isPending: isCancelling } =
+        useCancelSubscription();
+
     const scheduledPlan = subscription.scheduledPlan;
 
     const hasScheduledChange = !!scheduledPlan;
 
     const isFreePlan =
         subscription.plan.code === planCodes.FREE;
+
+    const canCancel = !isFreePlan && !hasScheduledChange;
+
+    const handleConfirmCancel = () => {
+        downgradeToFree(undefined, {
+            onSettled: () => {
+                setIsCancelModalOpen(false);
+            },
+        });
+    };
+
+    const { mutate: resumeCurrentSubscription, isPending: loadingResumeSubscription } = useResumeSubscription()
+
+    const handleResumeCurrentSubscritpion = () => {
+        resumeCurrentSubscription()
+    }
 
     return (
         <div
@@ -50,10 +73,31 @@ function CurrentSubscriptionCard({
 
                 </div>
 
-                <div className="text-sm text-gray-500">
-                    {currencySymbols[subscription.plan.currency]}
-                    {subscription.plan.monthlyPrice}
-                    /month
+                <div className="flex flex-col items-start sm:items-end gap-2">
+                    <div className="text-sm text-gray-500 ">
+                        {currencySymbols[subscription.plan.currency]}
+                        {subscription.plan.monthlyPrice}
+                        /month
+                    </div>
+
+                    {canCancel && (
+                        <button
+                            onClick={() => setIsCancelModalOpen(true)}
+                            className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                        >
+                            Cancel Subscription
+                        </button>
+                    )}
+                    {scheduledPlan && (
+                        <button
+                            onClick={handleResumeCurrentSubscritpion}
+                            className="px-3 py-1.5 text-sm font-medium rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 transition-colors"
+                        >
+                            {loadingResumeSubscription ? "Resuming.." : "Resume Subscription"}
+                            
+                            {/* Keep {subscription.plan.name} */}
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -82,17 +126,21 @@ function CurrentSubscriptionCard({
 
                     </div>
 
-                    {onResumeSubscription && (
-                        <button
-                            onClick={onResumeSubscription}
-                            className="mt-4 px-4 py-2 text-sm font-medium rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 transition-colors"
-                        >
-                            Keep {subscription.plan.name}
-                        </button>
-                    )}
-
                 </div>
             )}
+
+            <DangerConfirmationModal
+                isOpen={isCancelModalOpen}
+                onClose={() => setIsCancelModalOpen(false)}
+                onConfirm={handleConfirmCancel}
+                title="Cancel Subscription"
+                description={
+                    `Your monthly auto-renewal will be turned off. You'll continue to have full access to the ${subscription.plan.name} plan until your current billing period ends on ${formatDate(subscription.expiresAt)}, after which your workspace will move to the Free plan.`
+                }
+                confirmButtonText="Cancel Subscription"
+                confirmButtonTextOnLoading="Canceling.."
+                isLoading={isCancelling}
+            />
         </div>
     );
 }

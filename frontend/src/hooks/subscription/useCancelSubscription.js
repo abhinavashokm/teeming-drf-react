@@ -3,15 +3,15 @@ import useAppMutation from "../base/useAppMutation";
 import useWorkspaceQueryKeys from '../helper/useWorkspaceQueryKeys';
 
 
-const useDowngradeToFree = () => {
+const useCancelSubscription = () => {
 
     const workspaceKeys = useWorkspaceQueryKeys()
 
     return useAppMutation({
-        mutationFn: subscriptionService.downgradeToFree,
+        mutationFn: subscriptionService.cancelSubscription,
         passWorkspaceSlug: true,
         invalidateKeys: [workspaceKeys.root],
     })
 }
 
-export default useDowngradeToFree
+export default useCancelSubscription

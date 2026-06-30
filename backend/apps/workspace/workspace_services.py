@@ -2,30 +2,28 @@ from .models import WorkspaceMember, Workspace
 from django.db import transaction
 from django.db.models import Case, When, Value, IntegerField, Q, Count, Prefetch
 from . import exceptions
-from apps.subscription import subscription_services
+from apps.subscription.services import subscription_services
 from apps.subscription.models import WorkspaceSubscription
 
 
+@transaction.atomic
 def create_workspace_with_free_plan(current_user, data):
     """
     create workspace with free plan, add current user as owner of the workspace
     """
+    workspace = Workspace.objects.create(**data)
 
-    with transaction.atomic():
+    #add current user a membership to workspace as role owner
+    WorkspaceMember.objects.create(
+        user=current_user,
+        workspace=workspace,
+        role=WorkspaceMember.RoleChoices.OWNER,
+    )
 
-        workspace = Workspace.objects.create(**data)
+    #create free plan subscription
+    subscription_services.create_free_plan_subscription(workspace=workspace)
 
-        #add current user a membership to workspace as role owner
-        WorkspaceMember.objects.create(
-            user=current_user,
-            workspace=workspace,
-            role=WorkspaceMember.RoleChoices.OWNER,
-        )
-
-        #create free plan subscription
-        subscription_services.create_free_plan_subscription(workspace=workspace)
-
-        return workspace
+    return workspace
 
 
 def fetch_user_workspace_list(user):

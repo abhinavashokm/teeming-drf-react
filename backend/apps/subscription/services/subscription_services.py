@@ -1,24 +1,24 @@
-import stripe
 import uuid
 from rest_framework.exceptions import ValidationError
 from decimal import Decimal
+import stripe
+from django.conf import settings
 
 from django.db.models.functions import Coalesce
 from django.db.models import Q, Max, Count, Sum, DecimalField, Value
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Plan, WorkspaceSubscription, SubscriptionTransaction
-from core.exceptions.base import NotFoundException
+from ..models import Plan, WorkspaceSubscription, SubscriptionTransaction
 from core.constants.plan_codes import PlanCode
-from . import strip_services
-from .helpers.subscription_helper import get_plan_or_raise
+from . import stripe_services
+from ..helpers.subscription_helper import get_plan_or_raise, get_free_plan
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from apps.workspace.models import Workspace, WorkspaceMember
 
 
 def create_plan(data):
-    stripe_data = strip_services.create_plan_in_stripe(
+    stripe_data = stripe_services.create_plan_in_stripe(
         name=data["name"],
         description=data["description"],
         monthly_price=data["monthly_price"],
@@ -53,7 +53,7 @@ def create_new_plan_version(plan_id: uuid.UUID, data: dict) -> Plan:
     new_stripe_price_id = plan.stripe_price_id
 
     if price_changed:
-        new_stripe_price_id = strip_services.create_price_for_product(
+        new_stripe_price_id = stripe_services.create_price_for_product(
             product_id=plan.stripe_product_id,
             monthly_price=new_monthly_price,
             currency=plan.currency,
@@ -141,7 +141,7 @@ def update_plan(plan_id, data):
     plan.save(update_fields=["name", "description"])
 
     if plan.stripe_product_id:
-        strip_services.modify_product(
+        stripe_services.modify_product(
             product_id=plan.stripe_product_id,
             name=plan.name,
             description=plan.description or "",
@@ -179,7 +179,38 @@ def restore_plan(plan_id):
 
 
 def create_checkout_session(workspace, plan):
-    return strip_services.create_checkout_session(workspace, plan)
+    return stripe_services.create_checkout_session(workspace, plan)
+
+
+
+# def upgrade_subscription(workspace, new_plan):
+#     subscription = WorkspaceSubscription.objects.get(
+#         workspace=workspace,
+#         status=WorkspaceSubscription.StatusChoices.ACTIVE,
+#     )
+
+#     if not subscription.stripe_subscription_id:
+#         raise ValueError("No active Stripe subscription found")
+
+#     stripe_subscription = stripe.Subscription.retrieve(
+#         subscription.stripe_subscription_id
+#     )
+#     item_id = stripe_subscription["items"]["data"][0]["id"]
+
+#     stripe.Subscription.modify(
+#         subscription.stripe_subscription_id,
+#         items=[{"id": item_id, "price": new_plan.stripe_price_id}],
+#         proration_behavior="always_invoice",  # charge prorated diff now
+#     )
+
+#     # Local state will be confirmed by the webhook (customer.subscription.updated),
+#     # but update optimistically here so the UI reflects it immediately.
+#     subscription.plan = new_plan
+#     subscription.cancel_at_period_end = False
+#     subscription.scheduled_plan = None
+#     subscription.save(update_fields=["plan", "cancel_at_period_end", "scheduled_plan"])
+
+#     return subscription
 
 
 def get_current_plan(workspace):
@@ -198,15 +229,12 @@ def get_current_plan(workspace):
         return subscription
 
     # fallback to free plan if no active subscription found
-    free_plan = Plan.objects.filter(code=PlanCode.FREE, is_archived=False).first()
-    if free_plan:
-        return WorkspaceSubscription(
-            workspace=workspace,
-            plan=free_plan,
-            status=WorkspaceSubscription.StatusChoices.ACTIVE,
-        )
-
-    return None
+    free_plan = get_free_plan()
+    return WorkspaceSubscription(
+        workspace=workspace,
+        plan=free_plan,
+        status=WorkspaceSubscription.StatusChoices.ACTIVE,
+    )
 
 
 def create_workspace_subscription(
@@ -279,15 +307,16 @@ def create_transaction_log(
 
 def create_free_plan_subscription(workspace):
 
-    try:
-        free_plan = Plan.objects.get(code=PlanCode.FREE, is_archived=False)
-    except Plan.DoesNotExist:
-        raise NotFoundException("Free plan not found")
-
+    free_plan = get_free_plan()
     WorkspaceSubscription.objects.create(workspace=workspace, plan=free_plan)
 
 
 def downgrade_to_free(workspace):
+    """
+    Cancel auto-renewal on the workspace's active Stripe subscription.
+    Access continues until the current period ends, then the
+    workspace downgrades to Free.
+    """
 
     subscription = WorkspaceSubscription.objects.get(
         workspace=workspace,
@@ -296,14 +325,13 @@ def downgrade_to_free(workspace):
 
     if not subscription.stripe_subscription_id:
         raise ValueError("No Stripe subscription found")
-
-    stripe.Subscription.modify(
-        subscription.stripe_subscription_id,
-        cancel_at_period_end=True,
+    
+    stripe_services.cancel_subscription(
+        stripe_subscription_id=subscription.stripe_subscription_id
     )
 
     subscription.cancel_at_period_end = True
-    subscription.scheduled_plan = Plan.objects.get(code=PlanCode.FREE)
+    subscription.scheduled_plan = get_free_plan()
     subscription.save(update_fields=["cancel_at_period_end", "scheduled_plan"])
 
     return subscription
@@ -316,8 +344,13 @@ def resume_current_subscription(workspace):
         status=WorkspaceSubscription.StatusChoices.ACTIVE,
     )
 
+    #free plan will not contain stripe subscription
     if not subscription.stripe_subscription_id:
         raise ValueError("No Stripe subscription found")
+    
+    stripe_services.resume_subscription(
+        stripe_subscription_id=subscription.stripe_subscription_id
+    )
 
     subscription.cancel_at_period_end = False
     subscription.scheduled_plan = None
@@ -403,8 +436,7 @@ def _get_plan_distribution():
 
 def _get_top_paying_workspaces(limit=5):
     top = (
-        SubscriptionTransaction.objects
-        .values("workspace_id", "workspace__name")
+        SubscriptionTransaction.objects.values("workspace_id", "workspace__name")
         .annotate(total_revenue=Sum("amount"))
         .order_by("-total_revenue")[:limit]
     )
@@ -412,9 +444,10 @@ def _get_top_paying_workspaces(limit=5):
     workspace_ids = [row["workspace_id"] for row in top]
 
     current_plans = dict(
-        WorkspaceSubscription.objects
-        .filter(workspace_id__in=workspace_ids, status=WorkspaceSubscription.StatusChoices.ACTIVE)
-        .values_list("workspace_id", "plan__name")
+        WorkspaceSubscription.objects.filter(
+            workspace_id__in=workspace_ids,
+            status=WorkspaceSubscription.StatusChoices.ACTIVE,
+        ).values_list("workspace_id", "plan__name")
     )
 
     return [
@@ -436,16 +469,13 @@ def sync_workspace_subscription(
     expires_at,
     cancel_at_period_end: bool,
 ):
-    subscription = (
-        WorkspaceSubscription.objects
-        .select_related("scheduled_plan")
-        .get(stripe_subscription_id=stripe_subscription_id)
+    subscription = WorkspaceSubscription.objects.select_related("scheduled_plan").get(
+        stripe_subscription_id=stripe_subscription_id
     )
 
     # Has Stripe moved the subscription into a new billing period?
     period_renewed = (
-        subscription.expires_at is not None
-        and expires_at > subscription.expires_at
+        subscription.expires_at is not None and expires_at > subscription.expires_at
     )
 
     subscription.expires_at = expires_at
@@ -487,3 +517,32 @@ def sync_workspace_subscription(
     )
 
     return subscription
+
+
+def preview_upgrade(workspace, plan_id):
+    """
+    Returns the prorated amount that would be charged right now if the
+    workspace's active subscription were upgraded to `plan`. Read-only —
+    does not modify the subscription or charge anything.
+    """
+ 
+    subscription = WorkspaceSubscription.objects.get(
+        workspace=workspace,
+        status=WorkspaceSubscription.StatusChoices.ACTIVE,
+    )
+
+    plan = get_plan_or_raise(plan_id=plan_id)
+ 
+    if not subscription.stripe_subscription_id:
+        raise ValueError("No active Stripe subscription found")
+ 
+    if not plan.stripe_price_id:
+        raise ValueError("Selected plan is not configured for billing")
+ 
+    preview = stripe_services.get_upcoming_invoice_preview(
+        stripe_subscription_id=subscription.stripe_subscription_id,
+        new_price_id=plan.stripe_price_id,
+    )
+ 
+    return preview
+ 

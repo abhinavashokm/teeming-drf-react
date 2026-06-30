@@ -16,7 +16,7 @@ from core.permission_views import (
     WorkspacePermissionBaseView,
 )
 from core.permissions import IsWorkspaceMember, IsWorkspaceAdmin, IsWorkspaceOwner
-from apps.subscription import subscription_services
+from apps.subscription.services import subscription_services
 from apps.goal import goal_services
 from apps.user import user_services
 from core.services import s3_service

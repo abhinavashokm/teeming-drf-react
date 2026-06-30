@@ -9,6 +9,7 @@ export default function DangerConfirmationModal({
   confirmationLabel = "Type the workspace slug to confirm",
   confirmationValue,         // the value user must type (e.g. workspace slug)
   confirmButtonText = "Delete",
+  confirmButtonTextOnLoading = "Deleting..",
   isLoading = false,
 }) {
   const [inputValue, setInputValue] = useState("");
@@ -75,7 +76,7 @@ export default function DangerConfirmationModal({
             }
             className="px-4 py-2 text-[13px] font-medium text-white bg-red-600 hover:bg-red-700 rounded-[10px] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Deleting..." : confirmButtonText}
+            {isLoading ? confirmButtonTextOnLoading : confirmButtonText}
           </button>
         </div>
       </div>
