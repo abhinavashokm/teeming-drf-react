@@ -31,7 +31,7 @@ class IdeaListCreateView(MemberBaseView):
     def get(self, request, **kwargs):
 
         ideas = idea_services.list_goal_ideas(
-            workspace=request.workspace, goal_id=kwargs["goal_id"]
+            current_user=request.user, workspace=request.workspace, goal_id=kwargs["goal_id"]
         )
 
         return success_response(
@@ -135,3 +135,26 @@ class IdeaMoveToDoneView(MemberBaseView):
             status_code=status.HTTP_201_CREATED,
             data=serializers.IdeaReadSerializer(updated_idea).data,
         )
+
+
+class IdeaLikeView(MemberBaseView):
+
+    def post(self, request, **kwargs):
+
+        idea_services.like_idea(
+            workspace=request.workspace,
+            current_user=request.user,
+            idea_id=kwargs["idea_id"],
+        )
+
+        return success_response(message="liked", status_code=status.HTTP_201_CREATED)
+
+    def delete(self, request, **kwargs):
+
+        idea_services.unlike_idea(
+            workspace=request.workspace,
+            current_user=request.user,
+            idea_id=kwargs["idea_id"],
+        )
+
+        return success_response(message="unliked")

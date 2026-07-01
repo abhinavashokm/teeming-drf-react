@@ -129,7 +129,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
 
                             <div className=" items-center gap-2">
                                 <span className="text-[13px] text-gray-500 flex items-center gap-1.5">
-                                    <ThumbsUp className="w-4 h-4" /> {thumbsUp}
+                                    <ThumbsUp className="w-4 h-4" /> {currentIdea.likeCount}
                                 </span>
                                 {/* thumbsUp avatars — map from real data if available */}
                             </div>

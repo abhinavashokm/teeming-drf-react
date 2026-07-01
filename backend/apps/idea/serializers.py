@@ -57,6 +57,9 @@ class IdeaReadSerializer(serializers.ModelSerializer):
     )
     goal = GoalBasicSerializer()
 
+    like_count = serializers.IntegerField(read_only=True)
+    is_liked = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = Idea
         fields = (
@@ -77,6 +80,8 @@ class IdeaReadSerializer(serializers.ModelSerializer):
             "moved_to_done_at",
             "completion_note",
             "goal",
+            "like_count",
+            "is_liked",
         )
 
     def get_assigned_by(self, obj):

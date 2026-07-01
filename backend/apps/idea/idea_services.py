@@ -1,10 +1,10 @@
-from .models import Idea
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from apps.goal.helpers.goal_helper import get_goal_or_raise
 from .helpers.idea_helper import get_idea_or_raise
-from .models import Idea, IdeaStatusHistory, IdeaAssignment
+from .models import Idea, IdeaStatusHistory, IdeaAssignment, IdeaLike
 from django.db import transaction
 from apps.notification import notification_services
+from django.db.models import Count, Exists, OuterRef
 
 
 def create_idea(created_by, workspace, goal_id, data):
@@ -28,12 +28,22 @@ def create_idea(created_by, workspace, goal_id, data):
     return created_idea
 
 
-def list_goal_ideas(workspace, goal_id):
+def list_goal_ideas(current_user, workspace, goal_id):
     """list all ideas under a single goal"""
 
     goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
 
-    return Idea.objects.in_workspace(workspace).filter(goal=goal)
+    return (
+        Idea.objects.in_workspace(workspace)
+        .filter(goal=goal)
+        .annotate(
+            like_count=Count("likes", distinct=True),
+            is_liked=Exists(
+                IdeaLike.objects.filter(idea=OuterRef("pk"), user=current_user)
+            ),
+        )
+        .select_related("created_by")
+    )
 
 
 def get_idea(workspace, idea_id):
@@ -141,3 +151,15 @@ def move_idea_to_done(current_user, workspace, idea_id, note):
         )
 
         return idea
+
+
+def like_idea(current_user, workspace, idea_id):
+    idea = get_idea_or_raise(workspace=workspace, idea_id=idea_id)
+    _, created = IdeaLike.objects.get_or_create(idea=idea, user=current_user)
+    return {"liked": True, "created": created}
+
+
+def unlike_idea(current_user, workspace, idea_id):
+    idea = get_idea_or_raise(workspace=workspace, idea_id=idea_id)
+    deleted_count, _ = IdeaLike.objects.filter(idea=idea, user=current_user).delete()
+    return {"liked": False, "deleted": deleted_count > 0}

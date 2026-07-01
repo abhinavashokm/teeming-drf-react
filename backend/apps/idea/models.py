@@ -1,6 +1,6 @@
 from django.db import models
 
-from core.models import WorkspaceScopedBaseModel
+from core.models import WorkspaceScopedBaseModel, UUIDAbstractModel, TimeStampAbstractModel
 
 
 class Idea(WorkspaceScopedBaseModel):
@@ -31,9 +31,7 @@ class Idea(WorkspaceScopedBaseModel):
 
     @property
     def move_to_planned_history(self):
-        return self.status_history.filter(
-            to_status=self.StatusChoices.PLANNED
-        ).first()
+        return self.status_history.filter(to_status=self.StatusChoices.PLANNED).first()
 
     @property
     def moved_to_progress_history(self):
@@ -91,3 +89,19 @@ class IdeaAssignment(WorkspaceScopedBaseModel):
     class Meta:
         db_table = "idea_assignments"
         unique_together = ("idea", "assignee")
+
+
+class IdeaLike(UUIDAbstractModel, TimeStampAbstractModel):
+    idea = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name="likes")
+    user = models.ForeignKey(
+        "user.User", on_delete=models.CASCADE, related_name="idea_likes"
+    )
+
+    #remove unwanted field from base model
+    updated_at = None
+
+    class Meta:
+        db_table = "idea_likes"
+        constraints = [
+            models.UniqueConstraint(fields=["idea", "user"], name="unique_idea_like")
+        ]

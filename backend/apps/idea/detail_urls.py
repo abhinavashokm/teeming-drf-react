@@ -1,11 +1,17 @@
 from django.urls import path
 
-from .views import IdeaDetailView, IdeaMoveToProgressView, IdeaMoveToDoneView, IdeaMoveToPlannedView
-
+from .views import (
+    IdeaDetailView,
+    IdeaMoveToProgressView,
+    IdeaMoveToDoneView,
+    IdeaMoveToPlannedView,
+    IdeaLikeView,
+)
 
 urlpatterns = [
     path("<uuid:idea_id>/", IdeaDetailView.as_view()),
     path("<uuid:idea_id>/move-progress/", IdeaMoveToProgressView.as_view()),
     path("<uuid:idea_id>/move-done/", IdeaMoveToDoneView.as_view()),
-    path("<uuid:idea_id>/move-planned/", IdeaMoveToPlannedView.as_view())
+    path("<uuid:idea_id>/move-planned/", IdeaMoveToPlannedView.as_view()),
+    path("<uuid:idea_id>/like/", IdeaLikeView.as_view()),
 ]

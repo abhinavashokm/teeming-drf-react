@@ -35,6 +35,16 @@ export const ideaService = {
     moveIdeaToPlanned: async (slug, ideaId, data) => {
         const res = await api.post(`/workspaces/${slug}/ideas/${ideaId}/move-planned/`, data)
         return res.data
-    }
+    },
+
+    likeIdea: async (slug, ideaId) => {
+        const res = await api.post(`/workspaces/${slug}/ideas/${ideaId}/like/`)
+        return res.data
+    },
+
+    unlikeIdea: async (slug, ideaId) => {
+        const res = await api.delete(`/workspaces/${slug}/ideas/${ideaId}/like/`)
+        return res.data
+    },
 
 }
