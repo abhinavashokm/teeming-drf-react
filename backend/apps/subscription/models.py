@@ -56,13 +56,12 @@ class Plan(BaseAbstractModel):
         constraints = [
             # only one active version per code at a time
             models.UniqueConstraint(
-                fields=["code", "version"],
-                name="unique_plan_code_version"
+                fields=["code", "version"], name="unique_plan_code_version"
             ),
             models.UniqueConstraint(
                 fields=["code"],
                 condition=models.Q(is_archived=False),
-                name="unique_active_plan_code"
+                name="unique_active_plan_code",
             ),
         ]
 
@@ -81,7 +80,9 @@ class WorkspaceSubscription(BaseAbstractModel):
     workspace = models.ForeignKey(
         "workspace.Workspace", on_delete=models.CASCADE, related_name="subscriptions"
     )
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="subscriptions")
+    plan = models.ForeignKey(
+        Plan, on_delete=models.PROTECT, related_name="subscriptions"
+    )
     started_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(
         blank=True, null=True
@@ -113,39 +114,47 @@ class WorkspaceSubscription(BaseAbstractModel):
         db_table = "workspace_subscription"
         indexes = [models.Index(fields=["workspace", "status"])]
         constraints = [
+            # models.UniqueConstraint(
+            #     fields=["workspace"],
+            #     name="one_subscription_per_workspace",
+            # ),
             models.UniqueConstraint(
                 fields=["workspace"],
                 condition=Q(status=ACTIVE_STATUS),
                 name="one_active_subscription_per_workspace",
-            )
+            ),
         ]
 
 
 class SubscriptionTransaction(BaseAbstractModel):
 
     class TypeChoices(models.TextChoices):
-        PAYMENT   = 'payment',   'Payment'
-        RENEWAL   = 'renewal',   'Renewal'
-        UPGRADE   = 'upgrade',   'Upgrade'
-        DOWNGRADE = 'downgrade', 'Downgrade'
+        PAYMENT = "payment", "Payment"
+        RENEWAL = "renewal", "Renewal"
+        UPGRADE = "upgrade", "Upgrade"
+        DOWNGRADE = "downgrade", "Downgrade"
 
-    workspace    = models.ForeignKey('workspace.Workspace', on_delete=models.CASCADE, related_name='transactions')
-    subscription = models.ForeignKey(WorkspaceSubscription, on_delete=models.PROTECT, related_name='transactions')
-    plan         = models.ForeignKey(Plan, on_delete=models.PROTECT)
+    workspace = models.ForeignKey(
+        "workspace.Workspace", on_delete=models.CASCADE, related_name="transactions"
+    )
+    subscription = models.ForeignKey(
+        WorkspaceSubscription, on_delete=models.PROTECT, related_name="transactions"
+    )
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT)
 
-    type     = models.CharField(max_length=20, choices=TypeChoices.choices)
-    amount   = models.DecimalField(max_digits=10, decimal_places=2)
+    type = models.CharField(max_length=20, choices=TypeChoices.choices)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3)
 
     billing_period_start = models.DateTimeField()
-    billing_period_end   = models.DateTimeField()
+    billing_period_end = models.DateTimeField()
 
     gateway_invoice_id = models.CharField(max_length=255, null=True, blank=True)
-    invoice_url        = models.URLField(null=True, blank=True)
+    invoice_url = models.URLField(null=True, blank=True)
 
     class Meta:
-        db_table = 'subscription_transactions'
-        ordering = ['-created_at']
+        db_table = "subscription_transactions"
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['workspace']),
+            models.Index(fields=["workspace"]),
         ]

@@ -5,7 +5,7 @@ from rest_framework import status
 from core.responses.api_response import success_response
 from . import serializers, staff_services
 from apps.workspace import workspace_services
-from apps.subscription.services import subscription_services
+from apps.subscription.services import subscription_services, plan_services, billing_services
 from apps.subscription import serializers as subscription_serializer
 
 
@@ -60,7 +60,7 @@ class AdminWorkspaceListView(AdminBaseView):
 class AdminPlanListView(AdminBaseView):
 
     def get(self, request):
-        plans = subscription_services.admin_list_plans()
+        plans = plan_services.admin_list_plans()
 
         return success_response(
             data={
@@ -75,7 +75,7 @@ class AdminPlanListView(AdminBaseView):
         serializer = subscription_serializer.AdminWritePlanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        new_plan = subscription_services.create_plan(serializer.validated_data)
+        new_plan = plan_services.create_plan(serializer.validated_data)
 
         return success_response(
             message="Plan created",
@@ -88,7 +88,7 @@ class AdminPlanDetailView(AdminBaseView):
 
     def get(self, request, plan_id):
 
-        plan = subscription_services.get_plan(plan_id=plan_id)
+        plan = plan_services.get_plan(plan_id=plan_id)
 
         return success_response(
             data=subscription_serializer.AdminPlanListSerializer(plan).data
@@ -101,7 +101,7 @@ class AdminPlanDetailView(AdminBaseView):
         )
         serializer.is_valid(raise_exception=True)
 
-        subscription_services.update_plan(
+        plan_services.update_plan(
             plan_id=plan_id, data=serializer.validated_data
         )
 
@@ -112,14 +112,14 @@ class AdminCreateNewPlanVersionView(AdminBaseView):
 
     def post(self, request, plan_id):
 
-        plan = subscription_services.get_plan(plan_id=plan_id)
+        plan = plan_services.get_plan(plan_id=plan_id)
 
         serializer = subscription_serializer.AdminPlanNewVersionSerializer(
             data=request.data, context={"plan": plan}
         )
         serializer.is_valid(raise_exception=True)
 
-        new_plan = subscription_services.create_new_plan_version(
+        new_plan = plan_services.create_new_plan_version(
             plan_id=plan_id, data=serializer.validated_data
         )
 
@@ -133,7 +133,7 @@ class AdminPlanArchiveView(AdminBaseView):
 
     def post(self, request, plan_id):
 
-        subscription_services.archive_plan(plan_id=plan_id)
+        plan_services.archive_plan(plan_id=plan_id)
 
         return success_response(message="Plan archived.")
 
@@ -142,7 +142,7 @@ class AdminPlanRestoreView(AdminBaseView):
 
     def post(self, request, plan_id):
 
-        subscription_services.restore_plan(plan_id=plan_id)
+        plan_services.restore_plan(plan_id=plan_id)
 
         return success_response(message="Plan restored.")
 
@@ -173,7 +173,7 @@ class AdminBillingOverviewView(AdminBaseView):
 
     def get(self, request):
 
-        data = subscription_services.get_billing_overview()
+        data = billing_services.get_billing_overview()
 
         serializer = subscription_serializer.BillingOverviewSerializer(data)
 

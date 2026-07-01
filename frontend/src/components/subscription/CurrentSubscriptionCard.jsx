@@ -3,11 +3,12 @@ import {
     currencySymbols,
     planCodes,
 } from '../../constants/subscriptionConstants';
-import { formatDate } from '../../utils/timeUtils';
-import { cn } from '../../utils/cn';
-import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal';
 import useCancelSubscription from '../../hooks/subscription/useCancelSubscription';
 import useResumeSubscription from '../../hooks/subscription/useResumeSubscription';
+import { cn } from '../../utils/cn';
+import { formatDate } from '../../utils/timeUtils';
+import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal';
+
 
 function CurrentSubscriptionCard({
     subscription,
@@ -89,7 +90,7 @@ function CurrentSubscriptionCard({
                             Cancel Subscription
                         </button>
                     )}
-                    {scheduledPlan && !isCancelAtPeriodEnd && (
+                    {scheduledPlan && (
                         <button
                             onClick={handleResumeCurrentSubscritpion}
                             className="px-3 py-1.5 text-sm font-medium rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 transition-colors"

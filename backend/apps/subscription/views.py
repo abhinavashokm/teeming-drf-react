@@ -1,25 +1,16 @@
 from rest_framework.views import APIView
-from .services import subscription_services
+from .services import subscription_services, plan_services
 from core.responses.api_response import success_response
 from . import serializers
 from rest_framework import status
 from core.permission_views import AdminBaseView
-    
-
-class AdminPlanDetailView(APIView):
-
-    def delete(self, request, **kwargs):
-
-        subscription_services.delete_plan(plan_id=kwargs["plan_id"])
-
-        return success_response(message="Plan deleted")
 
 
 class UserListPlanView(AdminBaseView):
 
     def get(self, requset, **kwargs):
 
-        plans = subscription_services.list_active_plans()
+        plans = plan_services.list_active_plans()
 
         return success_response(
             data={
