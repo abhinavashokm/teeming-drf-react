@@ -70,6 +70,9 @@ class CurrentPlanView(AdminBaseView):
 
 
 class CancelCurrentSubscriptionView(AdminBaseView):
+    """
+    Cancel current subscription, automatically expire at end time
+    """
 
     def post(self, request, **kwargs):
         
@@ -81,6 +84,9 @@ class CancelCurrentSubscriptionView(AdminBaseView):
     
 
 class ResumeCurrentSubscription(AdminBaseView):
+    """
+    resume current subscription plan if subscription is cancelled or scheduled downgrade
+    """
 
     def patch(self, request, **kwargs):
 
@@ -94,6 +100,10 @@ class ResumeCurrentSubscription(AdminBaseView):
     
 
 class SubscriptionUpgradeView(AdminBaseView):
+    """
+    upgrade subscription from an existing paid plan to higher tier plan. 
+    so we have their stripe customer id. we can pay directly
+    """
  
     def post(self, request, **kwargs):
  
@@ -115,6 +125,10 @@ class SubscriptionUpgradeView(AdminBaseView):
     
 
 class SubscriptionDowngradeView(AdminBaseView):
+    """
+    downgrade subscription from an existing paid plan to lower tier plan. 
+    we schedule the downgrade until existing high tier plan ends
+    """
  
     def post(self, request, **kwargs):
  

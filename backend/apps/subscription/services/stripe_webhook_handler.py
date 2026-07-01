@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from django.db import transaction
 
 from . import subscription_services
-from apps.workspace.helpers import workspace_helper
 from .integrations import stripe_client
 from ..models import WorkspaceSubscription
 from ..helpers.subscription_helper import get_free_plan
@@ -28,16 +27,12 @@ def _handle_checkout_session_completed(session):
     plan_id = session["metadata"]["plan_id"]
 
     stripe_subscription = stripe_client.retrieve_subscription(session["subscription"])
+
     expires_at = _to_datetime(
         stripe_subscription["items"]["data"][0]["current_period_end"]
     )
 
     with transaction.atomic():
-
-        workspace = workspace_helper.get_workspace_or_raise(workspace_id=workspace_id)
-        current_plan = subscription_services.get_current_subscription(
-            workspace=workspace
-        )
 
         subscription_services.create_workspace_subscription(
             workspace_id=workspace_id,
@@ -48,6 +43,7 @@ def _handle_checkout_session_completed(session):
         )
 
         invoice = stripe_client.retrieve_invoice(session["invoice"])
+
         if invoice and invoice["amount_paid"] > 0:
             subscription_services.create_transaction_log(
                 stripe_subscription_id=session["subscription"],
@@ -109,31 +105,22 @@ def _handle_subscription_ended(stripe_subscription):
     Called when a Stripe subscription fully expires. Moves the workspace
     to the Free plan and clears all Stripe subscription state.
     """
-
-    subscription = WorkspaceSubscription.objects.get(
-        stripe_subscription_id=stripe_subscription["id"]
+    current = WorkspaceSubscription.objects.get(
+        stripe_subscription_id=stripe_subscription["id"],
+        status=WorkspaceSubscription.StatusChoices.ACTIVE,
     )
 
     free_plan = get_free_plan()
 
-    subscription.plan = free_plan
-    subscription.stripe_subscription_id = None
-    subscription.stripe_schedule_id = None
-    subscription.cancel_at_period_end = False
-    subscription.scheduled_plan = None
-    subscription.expires_at = None
-    subscription.save(
-        update_fields=[
-            "plan",
-            "stripe_subscription_id",
-            "stripe_schedule_id",
-            "cancel_at_period_end",
-            "scheduled_plan",
-            "expires_at",
-        ]
-    )
+    with transaction.atomic():
+        current.status = WorkspaceSubscription.StatusChoices.EXPIRED
+        current.save(update_fields=["status"])
 
-    return subscription
+        WorkspaceSubscription.objects.create(
+            workspace=current.workspace,
+            plan=free_plan,
+            stripe_customer_id=current.stripe_customer_id,
+        )
 
 
 def _to_datetime(timestamp):
@@ -143,8 +130,10 @@ def _to_datetime(timestamp):
 # Registry of event type -> handler. Add new Stripe event types here
 # without touching the view or the dispatch logic.
 _EVENT_HANDLERS = {
-    "checkout.session.completed": _handle_checkout_session_completed,
-    "invoice.paid": _handle_invoice_paid,
-    "customer.subscription.updated": _handle_subscription_updated,
-    "customer.subscription.deleted": _handle_subscription_ended,
+    "checkout.session.completed": _handle_checkout_session_completed,  # call when a checkout completed
+    "invoice.paid": _handle_invoice_paid,  # call when money is debited from card
+    "customer.subscription.updated": _handle_subscription_updated,  # fires on any subscription field change — period renewal, price change,
+    # cancel_at_period_end toggle, schedule phase transition, payment status change
+    # when downgrade plan actives it will trigger
+    "customer.subscription.deleted": _handle_subscription_ended,  # call when a canceled subscription expired
 }

@@ -43,14 +43,14 @@ function PlanCard({ plan, loading }) {
     const handleCreateCheckoutSession = () => {
         if (isFreePlan) {
             return handleDowngradeToFree()
-        } else if (plan?.tier > currentPlan?.tier) {
+        } else if (plan?.tier > currentPlan?.tier && currentPlan?.code !== planCodes.FREE) {
             fetchPreviewUpgrade(plan.id, {
                 onSuccess: (res) => {
                     setUpgradePreview(res.data)
                 },
             })
             return
-        } else if (plan?.tier < currentPlan?.tier) {
+        } else if (plan?.tier < currentPlan?.tier && currentPlan?.code !== planCodes.FREE) {
             return setIsDowngradeConfrimOpen(true)
         }
 
@@ -217,7 +217,7 @@ function PlanCard({ plan, loading }) {
 
                 {/* Button */}
                 {
-                    isFreePlan &&
+                    !isFreePlan &&
 
                     <div className="mt-8 pt-6 border-t border-gray-100">
                         {isCurrentPlan ? (
