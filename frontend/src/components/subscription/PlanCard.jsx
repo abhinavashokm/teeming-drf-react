@@ -8,6 +8,7 @@ import useResumeSubscription from '../../hooks/subscription/useResumeSubscriptio
 import ConfirmUpgradeModal from './ConfirmUpgradeModal';
 import { useState } from 'react';
 import usePreviewUpgrade from '../../hooks/subscription/usePreviewUpgrade';
+import ConfirmPlanChangeModal from './ConfirmPlanChangeModal';
 
 
 function PlanCard({ plan, loading }) {
@@ -32,10 +33,11 @@ function PlanCard({ plan, loading }) {
     const hasPendingChange =
         !!scheduledPlan;
 
-    const isDisabled = (plan?.tier < currentPlan?.tier) && plan?.code !== planCodes.FREE;
+    const isDisabled = plan?.code !== planCodes.FREE;
 
     const { mutate: createCheckoutSession, isPending } = useCreateCheckoutSession()
 
+    const [isDowngradeConfrimOpen, setIsDowngradeConfrimOpen] = useState(false)
     const [upgradePreview, setUpgradePreview] = useState(null)
     const { mutate: fetchPreviewUpgrade, isPending: isPreviewLoading } = usePreviewUpgrade()
 
@@ -49,6 +51,8 @@ function PlanCard({ plan, loading }) {
                 },
             })
             return
+        } else if (plan?.tier < currentPlan?.tier && currentPlan?.code !== 'FREE') {
+            return setIsDowngradeConfrimOpen(true)
         }
 
         createCheckoutSession({ plan_id: plan?.id })
@@ -212,14 +216,6 @@ function PlanCard({ plan, loading }) {
                     </ul>
                 </div>
 
-                {isScheduledPlan && (
-                    <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                        <p className="text-xs text-amber-800">
-                            This plan will become active when your current billing period ends.
-                        </p>
-                    </div>
-                )}
-
                 {/* Button */}
                 {
                     plan?.code !== "FREE" &&
@@ -248,10 +244,9 @@ function PlanCard({ plan, loading }) {
 
                         ) : (
 
-                            <span title={isDisabled ? "Only downgrade possible after current plan ends" : undefined}>
+                            <span>
                                 <AppButton
                                     fullWidth
-                                    disabled={isDisabled}
                                     loading={isPending || loadingDowngradeToFree || isPreviewLoading}
                                     onClick={handleCreateCheckoutSession}
                                     className="w-full py-2.5 px-4 rounded-lg font-medium text-[13px] bg-[#1A9E6E] hover:bg-[#15825f] text-white"
@@ -271,12 +266,27 @@ function PlanCard({ plan, loading }) {
                 }
 
             </div>
-            <ConfirmUpgradeModal
+            {/* <ConfirmUpgradeModal
                 isOpen={!!upgradePreview}
                 onClose={() => setUpgradePreview(null)}
                 preview={upgradePreview}
                 plan={plan}
                 isPreviewLoading={isPreviewLoading}
+            /> */}
+            <ConfirmPlanChangeModal
+                mode="upgrade"
+                isOpen={!!upgradePreview}
+                onClose={() => setUpgradePreview(null)}
+                preview={upgradePreview}
+                plan={plan}
+                isPreviewLoading={isPreviewLoading}
+
+            />
+            <ConfirmPlanChangeModal
+                mode="downgrade"
+                isOpen={isDowngradeConfrimOpen}
+                onClose={() => setIsDowngradeConfrimOpen(false)}
+                plan={plan}
             />
         </div>
     )

@@ -18,9 +18,10 @@ function CurrentSubscriptionCard({
     const { mutate: downgradeToFree, isPending: isCancelling } =
         useCancelSubscription();
 
+    const isCancelAtPeriodEnd = subscription.cancelAtPeriodEnd
     const scheduledPlan = subscription.scheduledPlan;
 
-    const hasScheduledChange = !!scheduledPlan;
+    const hasScheduledChange = subscription.scheduledPlan || isCancelAtPeriodEnd;
 
     const isFreePlan =
         subscription.plan.code === planCodes.FREE;
@@ -88,12 +89,13 @@ function CurrentSubscriptionCard({
                             Cancel Subscription
                         </button>
                     )}
-                    {scheduledPlan && (
+                    {scheduledPlan && !isCancelAtPeriodEnd && (
                         <button
                             onClick={handleResumeCurrentSubscritpion}
                             className="px-3 py-1.5 text-sm font-medium rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-100 transition-colors"
                         >
-                            {loadingResumeSubscription ? "Resuming.." : "Resume Subscription"}
+
+                            {loadingResumeSubscription ?  "Resuming.." : isCancelAtPeriodEnd ? "Resume Subscription" : `Keep ${subscription.plan.name}`}
                             
                             {/* Keep {subscription.plan.name} */}
                         </button>

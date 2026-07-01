@@ -7,6 +7,7 @@ from .views import (
     ResumeCurrentSubscription,
     SubscriptionUpgradePreviewView,
     SubscriptionUpgradeView,
+    SubscriptionDowngradeView,
 )
 from .webhook_views import StripeWebhookView
 
@@ -19,4 +20,5 @@ urlpatterns = [
     path("resume/", ResumeCurrentSubscription.as_view()),
     path("upgrade/<uuid:plan_id>/preview/", SubscriptionUpgradePreviewView.as_view()),
     path("upgrade/", SubscriptionUpgradeView.as_view()),
+    path("downgrade/", SubscriptionDowngradeView.as_view()),
 ]

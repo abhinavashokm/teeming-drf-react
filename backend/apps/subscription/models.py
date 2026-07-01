@@ -100,6 +100,7 @@ class WorkspaceSubscription(BaseAbstractModel):
         blank=True,
         related_name="scheduled_subscriptions",
     )
+    stripe_schedule_id = models.CharField(max_length=255, null=True, blank=True)
 
     stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
     stripe_subscription_id = models.CharField(

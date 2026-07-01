@@ -35,8 +35,14 @@ export const subscriptionService = {
         return res.data
     },
 
-    upgradePlan: (slug, data) => {
-        return api.post(`/workspaces/${slug}/subscriptions/upgrade/`, data)
+    upgradePlan: async (slug, data) => {
+        const res = await api.post(`/workspaces/${slug}/subscriptions/upgrade/`, data)
+        return res.data
     },
+
+    downgradePlan: async (slug, data) => {
+        const res = await api.post(`/workspaces/${slug}/subscriptions/downgrade/`, data)
+        return res.data
+    }
 
 }

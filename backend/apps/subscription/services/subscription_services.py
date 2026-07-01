@@ -335,23 +335,36 @@ def downgrade_to_free(workspace):
 
 
 def resume_current_subscription(workspace):
+    """
+    Undoes any pending plan change — whether a scheduled downgrade or a
+    pending cancellation — and keeps the workspace on its current plan.
+    """
 
     subscription = WorkspaceSubscription.objects.get(
         workspace=workspace,
         status=WorkspaceSubscription.StatusChoices.ACTIVE,
     )
 
-    # free plan will not contain stripe subscription
     if not subscription.stripe_subscription_id:
         raise ValueError("No Stripe subscription found")
 
-    stripe_services.resume_subscription(
-        stripe_subscription_id=subscription.stripe_subscription_id
-    )
+    if subscription.stripe_schedule_id:
+        stripe_services.release_subscription_schedule(
+            subscription.stripe_schedule_id
+        )
+    elif subscription.cancel_at_period_end:
+        stripe_services.resume_subscription(
+            stripe_subscription_id=subscription.stripe_subscription_id
+        )
 
     subscription.cancel_at_period_end = False
     subscription.scheduled_plan = None
-    subscription.save(update_fields=["cancel_at_period_end", "scheduled_plan"])
+    subscription.stripe_schedule_id = None
+    subscription.save(update_fields=[
+        "cancel_at_period_end",
+        "scheduled_plan",
+        "stripe_schedule_id",
+    ])
 
     return subscription
 
@@ -458,58 +471,48 @@ def _get_top_paying_workspaces(limit=5):
     ]
 
 
+
+# In sync_workspace_subscription (called from customer.subscription.updated):
 @transaction.atomic
 def sync_workspace_subscription(
-    *,
-    stripe_subscription_id: str,
-    stripe_status: str,
+    stripe_subscription_id,
+    stripe_status,
+    cancel_at_period_end,
+    stripe_price_id,
     expires_at,
-    cancel_at_period_end: bool,
 ):
-    subscription = WorkspaceSubscription.objects.select_related("scheduled_plan").get(
+    subscription = WorkspaceSubscription.objects.get(
         stripe_subscription_id=stripe_subscription_id
     )
 
-    # Has Stripe moved the subscription into a new billing period?
-    period_renewed = (
-        subscription.expires_at is not None and expires_at > subscription.expires_at
-    )
+    plan = Plan.objects.filter(
+        stripe_price_id=stripe_price_id, is_archived=False
+    ).first()
 
-    subscription.expires_at = expires_at
-    subscription.cancel_at_period_end = cancel_at_period_end
-
-    status_map = {
-        "active": WorkspaceSubscription.StatusChoices.ACTIVE,
-        "trialing": WorkspaceSubscription.StatusChoices.TRIALING,
-        "canceled": WorkspaceSubscription.StatusChoices.CANCELLED,
-        "unpaid": WorkspaceSubscription.StatusChoices.EXPIRED,
-        "past_due": WorkspaceSubscription.StatusChoices.EXPIRED,
-        "incomplete_expired": WorkspaceSubscription.StatusChoices.EXPIRED,
-    }
-
-    subscription.status = status_map.get(
-        stripe_status,
-        WorkspaceSubscription.StatusChoices.EXPIRED,
-    )
-
-    if subscription.status == WorkspaceSubscription.StatusChoices.CANCELLED:
-        if subscription.cancelled_at is None:
-            subscription.cancelled_at = timezone.now()
-
-    # Apply scheduled downgrade/upgrade only after a successful renewal
-    if period_renewed and subscription.scheduled_plan:
-        subscription.plan = subscription.scheduled_plan
+    if plan and subscription.plan_id != plan.id:
+        # The schedule's phase transition (or any direct price change)
+        # has taken effect on Stripe's side — apply it locally and
+        # clear the scheduled state, since it's no longer "pending".
+        subscription.plan = plan
         subscription.scheduled_plan = None
-        subscription.cancel_at_period_end = False
+        subscription.stripe_schedule_id = None
+
+    subscription.status = (
+        WorkspaceSubscription.StatusChoices.ACTIVE
+        if stripe_status == "active"
+        else WorkspaceSubscription.StatusChoices.EXPIRED
+    )
+    subscription.cancel_at_period_end = cancel_at_period_end
+    subscription.expires_at = expires_at
 
     subscription.save(
         update_fields=[
             "plan",
-            "status",
-            "expires_at",
-            "cancel_at_period_end",
             "scheduled_plan",
-            "cancelled_at",
+            "stripe_schedule_id",
+            "status",
+            "cancel_at_period_end",
+            "expires_at",
         ]
     )
 
@@ -576,4 +579,62 @@ def upgrade_plan(workspace, plan):
     subscription.scheduled_plan = None
     subscription.save(update_fields=["plan", "cancel_at_period_end", "scheduled_plan"])
 
+    return subscription
+
+
+def downgrade_plan(workspace, plan):
+    """
+    Schedules the workspace's subscription to switch to a lower-tier
+    `plan` at the end of the current billing period. Access to the
+    current plan continues until then — no proration, no immediate
+    feature changes.
+    """
+ 
+    subscription = get_current_plan(workspace=workspace)
+    if not subscription.stripe_subscription_id:
+        raise ValueError("No active Stripe subscription found")
+ 
+    if not plan.stripe_price_id:
+        raise ValueError("Selected plan is not configured for billing")
+ 
+    if subscription.plan_id == plan.id:
+        raise ValueError("Workspace is already on this plan")
+ 
+    schedule = stripe_services.schedule_plan_change(
+        stripe_subscription_id=subscription.stripe_subscription_id,
+        new_price_id=plan.stripe_price_id,
+    )
+ 
+    subscription.scheduled_plan = plan
+    subscription.stripe_schedule_id = schedule.id
+    subscription.save(update_fields=["scheduled_plan", "stripe_schedule_id"])
+ 
+    return subscription
+ 
+ 
+def cancel_scheduled_downgrade(workspace):
+    """
+    Cancels a pending scheduled downgrade (or scheduled cancel-to-free)
+    by releasing the Stripe Subscription Schedule, and clears the local
+    scheduled state. The subscription continues on its current plan.
+    """
+ 
+    subscription = get_current_plan(workspace=workspace)
+ 
+    if subscription.stripe_schedule_id:
+        stripe_services.release_subscription_schedule(
+            subscription.stripe_schedule_id
+        )
+ 
+    subscription.scheduled_plan = None
+    subscription.cancel_at_period_end = False
+    subscription.stripe_schedule_id = None
+    subscription.save(
+        update_fields=[
+            "scheduled_plan",
+            "cancel_at_period_end",
+            "stripe_schedule_id",
+        ]
+    )
+ 
     return subscription

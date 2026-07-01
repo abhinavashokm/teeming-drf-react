@@ -123,6 +123,26 @@ class SubscriptionUpgradeView(AdminBaseView):
                 "plan_id": subscription.plan_id,
             },
         )
+    
+
+class SubscriptionDowngradeView(AdminBaseView):
+ 
+    def post(self, request, **kwargs):
+ 
+        serializer = serializers.UpgradePlanSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+ 
+        subscription = subscription_services.downgrade_plan(
+            workspace=request.workspace,
+            plan=serializer.validated_data["plan"],
+        )
+ 
+        return success_response(
+            message="Downgrade scheduled",
+            data={
+                "scheduled_plan_id": subscription.scheduled_plan_id,
+            },
+        )
  
 
     

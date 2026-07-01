@@ -112,3 +112,53 @@ def change_subscription_price(stripe_subscription_id, new_price_id):
     )
 
     return updated_subscription
+
+
+def schedule_plan_change(stripe_subscription_id, new_price_id):
+    """
+    Creates a Stripe Subscription Schedule from the existing subscription
+    with two phases: the current plan running until the current period
+    ends, then the new (lower) price taking over from the next cycle.
+    No proration is applied at the transition — the user simply starts
+    being billed the new price from the next billing date.
+ 
+    Returns the created schedule.
+    """
+ 
+    stripe_subscription = stripe.Subscription.retrieve(stripe_subscription_id)
+    current_price_id = stripe_subscription["items"]["data"][0]["price"]["id"]
+    current_period_end = stripe_subscription["items"]["data"][0]["current_period_end"]
+ 
+    schedule = stripe.SubscriptionSchedule.create(
+        from_subscription=stripe_subscription_id,
+    )
+ 
+    stripe.SubscriptionSchedule.modify(
+        schedule.id,
+        end_behavior="release",
+        phases=[
+            {
+                "items": [{"price": current_price_id, "quantity": 1}],
+                "start_date": schedule["phases"][0]["start_date"],
+                "end_date": current_period_end,
+                "proration_behavior": "none",
+            },
+            {
+                "items": [{"price": new_price_id, "quantity": 1}],
+                "start_date": current_period_end,
+                "proration_behavior": "none",
+            },
+        ],
+    )
+ 
+    return schedule
+ 
+ 
+def release_subscription_schedule(schedule_id):
+    """
+    Cancels a pending downgrade by releasing the Subscription Schedule.
+    The underlying subscription reverts to being managed directly,
+    continuing on its current (un-downgraded) price.
+    """
+ 
+    return stripe.SubscriptionSchedule.release(schedule_id)

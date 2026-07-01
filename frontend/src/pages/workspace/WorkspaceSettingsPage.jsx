@@ -15,7 +15,7 @@ import WorkspaceAvatar from '../../components/workspace/WorkspaceAvatar';
 function WorkspaceSettingsPage() {
 
     const { data: currentWorkspace } = useWorkspace()
-    const { mutate: deleteWorkspace } = useDeleteWorkspace()
+    const { mutate: deleteWorkspace, isPending: isDeleteWorkspacePending } = useDeleteWorkspace()
     const { mutate: uploadLogo } = useUploadWorkspaceLogo()
 
     const { register, handleSubmit, reset, resetField, setValue, formState: { isDirty } } = useForm({
@@ -306,13 +306,14 @@ function WorkspaceSettingsPage() {
                             >
                                 Cancel
                             </button>
-                            <button
+                            <AppButton
+                                variant='danger'
                                 onClick={handleDeleteWorkspace}
-                                disabled={deleteConfirmationText !== currentWorkspace.slug}
-                                className="px-4 py-2 text-[13px] font-medium text-white bg-red-600 hover:bg-red-700 rounded-[10px] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={deleteConfirmationText !== currentWorkspace.slug || isDeleteWorkspacePending}
+                                loading={isDeleteWorkspacePending}
                             >
                                 Delete Workspace
-                            </button>
+                            </AppButton>
                         </div>
 
                     </div>

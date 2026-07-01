@@ -119,18 +119,18 @@ class StripeWebhookView(APIView):
 
             elif event["type"] == "customer.subscription.updated":
                 stripe_subscription = event["data"]["object"]
-
                 item = stripe_subscription["items"]["data"][0]
-
+            
                 subscription_services.sync_workspace_subscription(
                     stripe_subscription_id=stripe_subscription["id"],
                     stripe_status=stripe_subscription["status"],
                     cancel_at_period_end=stripe_subscription["cancel_at_period_end"],
+                    stripe_price_id=item["price"]["id"],
                     expires_at=datetime.fromtimestamp(
-                        item["current_period_end"],
-                        timezone.utc,
+                        item["current_period_end"], timezone.utc,
                     ),
                 )
+ 
 
         except Exception as e:
             traceback.print_exc()  # dumps full traceback to console/terminal
