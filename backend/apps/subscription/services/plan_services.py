@@ -7,12 +7,12 @@ from django.utils import timezone
 
 from ..models import Plan, WorkspaceSubscription
 from core.constants.plan_codes import PlanCode
-from . import stripe_services
+from .integrations import stripe_client
 from ..helpers.subscription_helper import get_plan_or_raise
 
 
 def create_plan(data):
-    stripe_data = stripe_services.create_plan_in_stripe(
+    stripe_data = stripe_client.create_plan_in_stripe(
         name=data["name"],
         description=data["description"],
         monthly_price=data["monthly_price"],
@@ -58,7 +58,7 @@ def update_plan(plan_id, data):
     plan.save(update_fields=["name", "description"])
 
     if plan.stripe_product_id:
-        stripe_services.modify_product(
+        stripe_client.modify_product(
             product_id=plan.stripe_product_id,
             name=plan.name,
             description=plan.description or "",
@@ -88,7 +88,7 @@ def create_new_plan_version(plan_id: uuid.UUID, data: dict) -> Plan:
     new_stripe_price_id = plan.stripe_price_id
 
     if price_changed:
-        new_stripe_price_id = stripe_services.create_price_for_product(
+        new_stripe_price_id = stripe_client.create_price_for_product(
             product_id=plan.stripe_product_id,
             monthly_price=new_monthly_price,
             currency=plan.currency,

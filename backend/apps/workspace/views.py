@@ -55,7 +55,7 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
 
     def get(self, request, **kwargs):
 
-        subscription = subscription_services.get_current_plan(
+        subscription = subscription_services.get_current_subscription(
             workspace=request.workspace
         )
 

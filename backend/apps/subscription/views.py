@@ -1,8 +1,6 @@
-from rest_framework.views import APIView
 from .services import subscription_services, plan_services
 from core.responses.api_response import success_response
 from . import serializers
-from rest_framework import status
 from core.permission_views import AdminBaseView
 
 
@@ -62,7 +60,7 @@ class CurrentPlanView(AdminBaseView):
 
     def get(self, request, **kwargs):
 
-        current_subscription = subscription_services.get_current_plan(
+        current_subscription = subscription_services.get_current_subscription(
             workspace=request.workspace
         )
 
@@ -102,7 +100,7 @@ class SubscriptionUpgradeView(AdminBaseView):
         serializer = serializers.UpgradePlanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
  
-        subscription = subscription_services.upgrade_plan(
+        subscription = subscription_services.upgrade_subscription_plan(
             workspace=request.workspace,
             plan=serializer.validated_data["plan"],
         )
@@ -123,7 +121,7 @@ class SubscriptionDowngradeView(AdminBaseView):
         serializer = serializers.UpgradePlanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
  
-        subscription = subscription_services.downgrade_plan(
+        subscription = subscription_services.downgrade_subscription_plan(
             workspace=request.workspace,
             plan=serializer.validated_data["plan"],
         )

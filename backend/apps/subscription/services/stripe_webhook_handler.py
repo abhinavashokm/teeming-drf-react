@@ -1,0 +1,150 @@
+from datetime import datetime, timezone
+
+from django.db import transaction
+
+from . import subscription_services
+from apps.workspace.helpers import workspace_helper
+from .integrations import stripe_client
+from ..models import WorkspaceSubscription
+from ..helpers.subscription_helper import get_free_plan
+
+
+def process_event(event):
+    """
+    Entry point for the webhook view. Looks up a handler for the event
+    type and runs it. Unrecognized event types are acknowledged (no-op)
+    rather than raising, so Stripe doesn't retry events we don't care about.
+    """
+    handler = _EVENT_HANDLERS.get(event["type"])
+
+    if handler is None:
+        return
+
+    handler(event["data"]["object"])
+
+
+def _handle_checkout_session_completed(session):
+    workspace_id = session["metadata"]["workspace_id"]
+    plan_id = session["metadata"]["plan_id"]
+
+    stripe_subscription = stripe_client.retrieve_subscription(session["subscription"])
+    expires_at = _to_datetime(
+        stripe_subscription["items"]["data"][0]["current_period_end"]
+    )
+
+    with transaction.atomic():
+
+        workspace = workspace_helper.get_workspace_or_raise(workspace_id=workspace_id)
+        current_plan = subscription_services.get_current_subscription(
+            workspace=workspace
+        )
+
+        subscription_services.create_workspace_subscription(
+            workspace_id=workspace_id,
+            plan_id=plan_id,
+            stripe_customer_id=session["customer"],
+            stripe_subscription_id=session["subscription"],
+            expires_at=expires_at,
+        )
+
+        invoice = stripe_client.retrieve_invoice(session["invoice"])
+        if invoice and invoice["amount_paid"] > 0:
+            subscription_services.create_transaction_log(
+                stripe_subscription_id=session["subscription"],
+                amount=invoice["amount_paid"],
+                currency=invoice["currency"].upper(),
+                billing_period_start=_to_datetime(invoice["period_start"]),
+                billing_period_end=_to_datetime(invoice["period_end"]),
+                gateway_invoice_id=invoice["id"],
+                invoice_url=(
+                    invoice["hosted_invoice_url"]
+                    if "hosted_invoice_url" in invoice
+                    else None
+                ),
+                is_renewal=False,
+            )
+
+
+def _handle_invoice_paid(invoice):
+    # The first invoice for a new subscription is already handled by
+    # checkout.session.completed, so skip it here.
+    if invoice["billing_reason"] == "subscription_create":
+        return
+
+    # Nothing was actually collected (e.g. a $0 invoice); nothing to log.
+    if invoice["amount_paid"] == 0:
+        return
+
+    line = invoice["lines"]["data"][0]
+    stripe_subscription_id = invoice["parent"]["subscription_details"]["subscription"]
+
+    subscription_services.create_transaction_log(
+        stripe_subscription_id=stripe_subscription_id,
+        amount=invoice["amount_paid"],
+        currency=invoice["currency"].upper(),
+        billing_period_start=_to_datetime(line["period"]["start"]),
+        billing_period_end=_to_datetime(line["period"]["end"]),
+        gateway_invoice_id=invoice["id"],
+        invoice_url=(
+            invoice["hosted_invoice_url"] if "hosted_invoice_url" in invoice else None
+        ),
+        is_renewal=True,
+    )
+
+
+def _handle_subscription_updated(stripe_subscription):
+    item = stripe_subscription["items"]["data"][0]
+
+    subscription_services.sync_workspace_subscription(
+        stripe_subscription_id=stripe_subscription["id"],
+        stripe_status=stripe_subscription["status"],
+        cancel_at_period_end=stripe_subscription["cancel_at_period_end"],
+        stripe_price_id=item["price"]["id"],
+        expires_at=_to_datetime(item["current_period_end"]),
+    )
+
+
+def _handle_subscription_ended(stripe_subscription):
+    """
+    Called when a Stripe subscription fully expires. Moves the workspace
+    to the Free plan and clears all Stripe subscription state.
+    """
+
+    subscription = WorkspaceSubscription.objects.get(
+        stripe_subscription_id=stripe_subscription["id"]
+    )
+
+    free_plan = get_free_plan()
+
+    subscription.plan = free_plan
+    subscription.stripe_subscription_id = None
+    subscription.stripe_schedule_id = None
+    subscription.cancel_at_period_end = False
+    subscription.scheduled_plan = None
+    subscription.expires_at = None
+    subscription.save(
+        update_fields=[
+            "plan",
+            "stripe_subscription_id",
+            "stripe_schedule_id",
+            "cancel_at_period_end",
+            "scheduled_plan",
+            "expires_at",
+        ]
+    )
+
+    return subscription
+
+
+def _to_datetime(timestamp):
+    return datetime.fromtimestamp(timestamp, timezone.utc)
+
+
+# Registry of event type -> handler. Add new Stripe event types here
+# without touching the view or the dispatch logic.
+_EVENT_HANDLERS = {
+    "checkout.session.completed": _handle_checkout_session_completed,
+    "invoice.paid": _handle_invoice_paid,
+    "customer.subscription.updated": _handle_subscription_updated,
+    "customer.subscription.deleted": _handle_subscription_ended,
+}

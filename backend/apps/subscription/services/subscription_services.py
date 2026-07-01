@@ -5,13 +5,13 @@ from django.db import transaction
 from django.utils import timezone
 
 from ..models import Plan, WorkspaceSubscription, SubscriptionTransaction
-from . import stripe_services
+from .integrations import stripe_client
 from ..helpers.subscription_helper import get_plan_or_raise, get_free_plan
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 
 
 def create_checkout_session(workspace, plan):
-    return stripe_services.create_checkout_session(workspace, plan)
+    return stripe_client.create_checkout_session(workspace, plan)
 
 
 # def upgrade_subscription(workspace, new_plan):
@@ -44,7 +44,7 @@ def create_checkout_session(workspace, plan):
 #     return subscription
 
 
-def get_current_plan(workspace):
+def get_current_subscription(workspace):
     subscription = (
         WorkspaceSubscription.objects.select_related("plan")
         .filter(workspace=workspace)
@@ -59,7 +59,7 @@ def get_current_plan(workspace):
     if subscription:
         return subscription
 
-    # fallback to free plan if no active subscription found
+    # fallback to free plan if no active subscription found - test mode only
     free_plan = get_free_plan()
     return WorkspaceSubscription(
         workspace=workspace,
@@ -75,26 +75,34 @@ def create_workspace_subscription(
     stripe_subscription_id,
     expires_at,
 ):
-    """upgrade workspace subscription plan"""
+    """
+    Called after a successful Stripe checkout. Updates the workspace's
+    existing Free subscription row with the new paid plan details.
+    """
 
     workspace = get_workspace_or_raise(workspace_id=workspace_id)
+    subscription = get_current_subscription(workspace=workspace)
 
-    active_subscription = get_current_plan(workspace=workspace)
+    subscription.plan_id = plan_id
+    subscription.stripe_customer_id = stripe_customer_id
+    subscription.stripe_subscription_id = stripe_subscription_id
+    subscription.expires_at = expires_at
+    subscription.cancel_at_period_end = False
+    subscription.scheduled_plan = None
+    subscription.stripe_schedule_id = None
+    subscription.status = WorkspaceSubscription.StatusChoices.ACTIVE
+    subscription.save(update_fields=[
+        "plan",
+        "stripe_customer_id",
+        "stripe_subscription_id",
+        "expires_at",
+        "cancel_at_period_end",
+        "scheduled_plan",
+        "stripe_schedule_id",
+        "status",
+    ])
 
-    with transaction.atomic():
-
-        if active_subscription:
-            active_subscription.status = WorkspaceSubscription.StatusChoices.CANCELLED
-            active_subscription.cancelled_at = timezone.now()
-            active_subscription.save(update_fields=["status", "expires_at"])
-
-        WorkspaceSubscription.objects.create(
-            workspace_id=workspace_id,
-            plan_id=plan_id,
-            stripe_customer_id=stripe_customer_id,
-            stripe_subscription_id=stripe_subscription_id,
-            expires_at=expires_at,
-        )
+    return subscription
 
 
 def create_transaction_log(
@@ -157,7 +165,7 @@ def downgrade_to_free(workspace):
     if not subscription.stripe_subscription_id:
         raise ValueError("No Stripe subscription found")
 
-    stripe_services.cancel_subscription(
+    stripe_client.cancel_subscription(
         stripe_subscription_id=subscription.stripe_subscription_id
     )
 
@@ -183,11 +191,11 @@ def resume_current_subscription(workspace):
         raise ValueError("No Stripe subscription found")
 
     if subscription.stripe_schedule_id:
-        stripe_services.release_subscription_schedule(
+        stripe_client.release_subscription_schedule(
             subscription.stripe_schedule_id
         )
     elif subscription.cancel_at_period_end:
-        stripe_services.resume_subscription(
+        stripe_client.resume_subscription(
             stripe_subscription_id=subscription.stripe_subscription_id
         )
 
@@ -291,7 +299,7 @@ def preview_upgrade(workspace, plan_id):
     if not plan.stripe_price_id:
         raise ValueError("Selected plan is not configured for billing")
 
-    preview = stripe_services.get_upcoming_invoice_preview(
+    preview = stripe_client.get_upcoming_invoice_preview(
         stripe_subscription_id=subscription.stripe_subscription_id,
         new_price_id=plan.stripe_price_id,
     )
@@ -299,7 +307,44 @@ def preview_upgrade(workspace, plan_id):
     return preview
 
 
-def upgrade_plan(workspace, plan):
+def create_workspace_subscription(
+    workspace_id,
+    plan_id,
+    stripe_customer_id,
+    stripe_subscription_id,
+    expires_at,
+):
+    """
+    Called after a successful Stripe checkout. Updates the workspace's
+    existing Free subscription row with the new paid plan details.
+    """
+
+    workspace = get_workspace_or_raise(workspace_id=workspace_id)
+    subscription = get_current_subscription(workspace=workspace)
+
+    subscription.plan_id = plan_id
+    subscription.stripe_customer_id = stripe_customer_id
+    subscription.stripe_subscription_id = stripe_subscription_id
+    subscription.expires_at = expires_at
+    subscription.cancel_at_period_end = False
+    subscription.scheduled_plan = None
+    subscription.stripe_schedule_id = None
+    subscription.status = WorkspaceSubscription.StatusChoices.ACTIVE
+    subscription.save(update_fields=[
+        "plan",
+        "stripe_customer_id",
+        "stripe_subscription_id",
+        "expires_at",
+        "cancel_at_period_end",
+        "scheduled_plan",
+        "stripe_schedule_id",
+        "status",
+    ])
+
+    return subscription
+
+
+def upgrade_subscription_plan(workspace, plan):
     """
     Upgrades the workspace's active subscription to `plan` immediately,
     charging the prorated difference on the customer's saved card via
@@ -307,10 +352,7 @@ def upgrade_plan(workspace, plan):
     will also be reconciled by the customer.subscription.updated webhook.
     """
 
-    subscription = WorkspaceSubscription.objects.get(
-        workspace=workspace,
-        status=WorkspaceSubscription.StatusChoices.ACTIVE,
-    )
+    subscription = get_current_subscription(workspace=workspace)
 
     if not subscription.stripe_subscription_id:
         raise ValueError("No active Stripe subscription found")
@@ -321,7 +363,7 @@ def upgrade_plan(workspace, plan):
     if subscription.plan_id == plan.id:
         raise ValueError("Workspace is already on this plan")
 
-    stripe_services.change_subscription_price(
+    stripe_client.change_subscription_price(
         stripe_subscription_id=subscription.stripe_subscription_id,
         new_price_id=plan.stripe_price_id,
     )
@@ -334,7 +376,7 @@ def upgrade_plan(workspace, plan):
     return subscription
 
 
-def downgrade_plan(workspace, plan):
+def downgrade_subscription_plan(workspace, plan):
     """
     Schedules the workspace's subscription to switch to a lower-tier
     `plan` at the end of the current billing period. Access to the
@@ -342,7 +384,7 @@ def downgrade_plan(workspace, plan):
     feature changes.
     """
  
-    subscription = get_current_plan(workspace=workspace)
+    subscription = get_current_subscription(workspace=workspace)
     if not subscription.stripe_subscription_id:
         raise ValueError("No active Stripe subscription found")
  
@@ -352,7 +394,7 @@ def downgrade_plan(workspace, plan):
     if subscription.plan_id == plan.id:
         raise ValueError("Workspace is already on this plan")
  
-    schedule = stripe_services.schedule_plan_change(
+    schedule = stripe_client.schedule_plan_change(
         stripe_subscription_id=subscription.stripe_subscription_id,
         new_price_id=plan.stripe_price_id,
     )
@@ -371,10 +413,10 @@ def cancel_scheduled_downgrade(workspace):
     scheduled state. The subscription continues on its current plan.
     """
  
-    subscription = get_current_plan(workspace=workspace)
+    subscription = get_current_subscription(workspace=workspace)
  
     if subscription.stripe_schedule_id:
-        stripe_services.release_subscription_schedule(
+        stripe_client.release_subscription_schedule(
             subscription.stripe_schedule_id
         )
  
