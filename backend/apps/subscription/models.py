@@ -77,7 +77,7 @@ class WorkspaceSubscription(BaseAbstractModel):
         CANCELLED = ("cancelled", "cancelled")
         TRIALING = "trialing", "Trialing"
 
-    workspace = models.OneToOneField(
+    workspace = models.ForeignKey(
         "workspace.Workspace", on_delete=models.CASCADE, related_name="subscriptions"
     )
     plan = models.ForeignKey(

@@ -27,6 +27,11 @@ export const adminPlanService = {
         return res.data
     },
 
+    updateFreePlan: async (data) => {
+        const res = await api.patch('/admin/plans/free/', data)
+        return res.data
+    },
+
     createNewPlanVersion: async (planId, data) => {
         const res = await api.post(`/admin/plans/${planId}/new-version/`, data)
         return res.data

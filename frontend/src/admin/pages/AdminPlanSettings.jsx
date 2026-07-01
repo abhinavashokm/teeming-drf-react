@@ -2,10 +2,10 @@ import { AlertTriangle, Plus } from 'lucide-react';
 import { useState } from 'react';
 import DangerConfirmationModal from '../../components/ui/modal/DangerConfirmationModal';
 import CreatePlanModal from '../components/adminPlans/PlanFormModal';
-import PlanCard from '../components/adminPlans/PlanCard';
 import AdminButton from '../components/form/AdminButton';
 import usePlans from '../hooks/adminPlans/usePlans';
 import PlanFormModal from '../components/adminPlans/PlanFormModal';
+import PlanCardAdmin from '../components/adminPlans/PlanCardAdmin';
 
 
 export default function AdminPlanSettings() {
@@ -62,7 +62,7 @@ export default function AdminPlanSettings() {
             {activePlans.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activePlans.map((plan) => (
-                  <PlanCard
+                  <PlanCardAdmin
                     plan={plan}
                     onEdit={openEdit}           // passes the plan object automatically
                     onNewVersion={openNewVersion} // passes the plan object automatically
@@ -109,7 +109,7 @@ export default function AdminPlanSettings() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {archivedPlans.map((plan) => (
-                    <PlanCard plan={plan} key={plan.id} />
+                    <PlanCardAdmin plan={plan} key={plan.id} />
                   ))}
                 </div>
               </div>

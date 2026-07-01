@@ -5,7 +5,6 @@ import AppButton from "../../components/ui/buttons/AppButton"
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import useCancelSubscription from '../../hooks/subscription/useCancelSubscription';
 import useResumeSubscription from '../../hooks/subscription/useResumeSubscription';
-import ConfirmUpgradeModal from './ConfirmUpgradeModal';
 import { useState } from 'react';
 import usePreviewUpgrade from '../../hooks/subscription/usePreviewUpgrade';
 import ConfirmPlanChangeModal from './ConfirmPlanChangeModal';
@@ -28,12 +27,12 @@ function PlanCard({ plan, loading }) {
         currentPlan?.code === plan?.code;
 
     const isScheduledPlan =
-        scheduledPlan?.code === plan?.code && scheduledPlan?.code !== 'FREE';
+        scheduledPlan?.code === plan?.code && scheduledPlan?.code !== planCodes.FREE;
 
     const hasPendingChange =
         !!scheduledPlan;
 
-    const isDisabled = plan?.code !== planCodes.FREE;
+    const isFreePlan = plan?.code === planCodes.FREE
 
     const { mutate: createCheckoutSession, isPending } = useCreateCheckoutSession()
 
@@ -42,16 +41,16 @@ function PlanCard({ plan, loading }) {
     const { mutate: fetchPreviewUpgrade, isPending: isPreviewLoading } = usePreviewUpgrade()
 
     const handleCreateCheckoutSession = () => {
-        if (plan?.code === 'FREE') {
+        if (isFreePlan) {
             return handleDowngradeToFree()
-        } else if (plan?.tier > currentPlan?.tier && currentPlan?.code !== 'FREE') {
+        } else if (plan?.tier > currentPlan?.tier) {
             fetchPreviewUpgrade(plan.id, {
                 onSuccess: (res) => {
                     setUpgradePreview(res.data)
                 },
             })
             return
-        } else if (plan?.tier < currentPlan?.tier && currentPlan?.code !== 'FREE') {
+        } else if (plan?.tier < currentPlan?.tier) {
             return setIsDowngradeConfrimOpen(true)
         }
 
@@ -218,7 +217,7 @@ function PlanCard({ plan, loading }) {
 
                 {/* Button */}
                 {
-                    plan?.code !== "FREE" &&
+                    isFreePlan &&
 
                     <div className="mt-8 pt-6 border-t border-gray-100">
                         {isCurrentPlan ? (
@@ -266,13 +265,7 @@ function PlanCard({ plan, loading }) {
                 }
 
             </div>
-            {/* <ConfirmUpgradeModal
-                isOpen={!!upgradePreview}
-                onClose={() => setUpgradePreview(null)}
-                preview={upgradePreview}
-                plan={plan}
-                isPreviewLoading={isPreviewLoading}
-            /> */}
+
             <ConfirmPlanChangeModal
                 mode="upgrade"
                 isOpen={!!upgradePreview}

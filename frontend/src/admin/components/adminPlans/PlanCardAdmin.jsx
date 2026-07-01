@@ -1,7 +1,8 @@
-import { Ban, Check, GitBranch, Archive, Pencil, Lock } from 'lucide-react';
+import { Ban, Check, GitBranch, Archive, Pencil, Lock, ImageOff } from 'lucide-react';
 import useSuspendPlan from '../../hooks/adminPlans/useSuspendPlan';
 import useRestorePlan from '../../hooks/adminPlans/useRestorePlan';
 import { formatDate } from "../../../utils/timeUtils"
+import { planCodes } from '../../../constants/subscriptionConstants';
 
 const getPlanAccent = (code = '') => {
     const map = {
@@ -45,11 +46,11 @@ const planFeatures = (plan) => [
     { label: 'Export workspace data', enabled: plan.canExportWorkspaceData },
 ];
 
-function PlanCard({ plan, onEdit, onNewVersion, canSuspend }) {
+function PlanCardAdmin({ plan, onEdit, onNewVersion, canSuspend }) {
     const accent = getPlanAccent(plan.code);
     const features = planFeatures(plan);
     const isArchived = plan.isArchived;
-    const isFreePlan = plan.code?.toUpperCase() === 'FREE';
+    const isFreePlan = plan.code?.toUpperCase() === planCodes.FREE;
     const suspendBlocked = isFreePlan || !canSuspend;
 
     const getSuspendTooltip = () => {
@@ -157,33 +158,33 @@ function PlanCard({ plan, onEdit, onNewVersion, canSuspend }) {
 
             {/* Footer */}
             <div className="px-5 py-3 bg-white border-t border-slate-100 flex items-center justify-between">
-{isArchived ? (
-    <div className="w-full space-y-2">
-        <div className="flex items-center justify-between">
-            <span className="text-[11px] text-slate-400">
-                {plan.archivedAt ? `Archived ${formatDate(plan.archivedAt)}` : 'Archived'}
-            </span>
-            <span className="text-[11px] font-semibold text-slate-500">
-                {plan.subscriberCount ?? 0} active subscriber{(plan.subscriberCount ?? 0) !== 1 ? 's' : ''}
-            </span>
-        </div>
-        <button
-            className="w-full flex items-center justify-center gap-1.5 py-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[11px] font-medium"
-            onClick={handleRestore}
-            disabled={isRestoring}
-        >
-            {isRestoring ? 'Restoring...' : (
-                <>
-                    <Archive className="w-[13px] h-[13px]" />
-                    Restore Plan
-                </>
-            )}
-        </button>
-    </div>
+                {isArchived ? (
+                    <div className="w-full space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-slate-400">
+                                {plan.archivedAt ? `Archived ${formatDate(plan.archivedAt)}` : 'Archived'}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-500">
+                                {plan.subscriberCount ?? 0} active subscriber{(plan.subscriberCount ?? 0) !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <button
+                            className="w-full flex items-center justify-center gap-1.5 py-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[11px] font-medium"
+                            onClick={handleRestore}
+                            disabled={isRestoring}
+                        >
+                            {isRestoring ? 'Restoring...' : (
+                                <>
+                                    <Archive className="w-[13px] h-[13px]" />
+                                    Restore Plan
+                                </>
+                            )}
+                        </button>
+                    </div>
                 ) : (
                     <>
                         {/* <span className="text-[11px] text-slate-400">{plan.currency}</span> */}
-                        <div className="flex items-center divide-x divide-slate-100">
+                        <div className="flex items-center justify-end w-full divide-x divide-slate-100">
 
                             <button
                                 className="group flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-l transition-colors"
@@ -192,37 +193,39 @@ function PlanCard({ plan, onEdit, onNewVersion, canSuspend }) {
                             >
                                 <Pencil className="w-[13px] h-[13px]" />
                                 <span className="text-[11px] font-medium">Edit</span>
-                                <Lock className="w-[9px] h-[9px] opacity-40 group-hover:opacity-70" />
+                              {!isFreePlan && <Lock className="w-[9px] h-[9px] opacity-40 group-hover:opacity-70" />}  
                             </button>
 
-                            <button
-                                className="flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
-                                title="Create new version with updated pricing or features"
-                                onClick={() => onNewVersion?.(plan)}
-                            >
-                                <GitBranch className="w-[13px] h-[13px]" />
-                                <span className="text-[11px] font-medium">New Version</span>
-                            </button>
-
-                            {/* Hidden for FREE plan */}
+                            {/*Suspend and New version Hidden for FREE plan */}
                             {!isFreePlan && (
-                                <div className="relative group">
+                                <>
                                     <button
-                                        className="flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-r transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-400"
-                                        onClick={handleSuspend}
-                                        disabled={suspendBlocked || isSuspending}
-                                        title={getSuspendTooltip()}
+                                        className="flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                                        title="Create new version with updated pricing or features"
+                                        onClick={() => onNewVersion?.(plan)}
                                     >
-                                        {isSuspending ? (
-                                            <span className="text-[11px] font-medium">Suspending...</span>
-                                        ) : (
-                                            <>
-                                                <Ban className="w-[13px] h-[13px]" />
-                                                <span className="text-[11px] font-medium">Suspend</span>
-                                            </>
-                                        )}
+                                        <GitBranch className="w-[13px] h-[13px]" />
+                                        <span className="text-[11px] font-medium">New Version</span>
                                     </button>
-                                </div>
+
+                                    <div className="relative group">
+                                        <button
+                                            className="flex items-center gap-1.5 px-2.5 py-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-r transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                                            onClick={handleSuspend}
+                                            disabled={suspendBlocked || isSuspending}
+                                            title={getSuspendTooltip()}
+                                        >
+                                            {isSuspending ? (
+                                                <span className="text-[11px] font-medium">Suspending...</span>
+                                            ) : (
+                                                <>
+                                                    <Ban className="w-[13px] h-[13px]" />
+                                                    <span className="text-[11px] font-medium">Suspend</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </>
                             )}
 
                         </div>
@@ -234,4 +237,4 @@ function PlanCard({ plan, onEdit, onNewVersion, canSuspend }) {
     );
 }
 
-export default PlanCard;
+export default PlanCardAdmin;

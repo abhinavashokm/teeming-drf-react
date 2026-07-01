@@ -2,11 +2,16 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework import status
 
-from core.responses.api_response import success_response
+from core.responses.api_response import success_response, error_response
 from . import serializers, staff_services
 from apps.workspace import workspace_services
-from apps.subscription.services import subscription_services, plan_services, billing_services
+from apps.subscription.services import (
+    subscription_services,
+    plan_services,
+    billing_services,
+)
 from apps.subscription import serializers as subscription_serializer
+from core.constants.plan_codes import PlanCode
 
 
 class AdminBaseView(APIView):
@@ -101,11 +106,23 @@ class AdminPlanDetailView(AdminBaseView):
         )
         serializer.is_valid(raise_exception=True)
 
-        plan_services.update_plan(
-            plan_id=plan_id, data=serializer.validated_data
-        )
+        plan_services.update_plan(plan_id=plan_id, data=serializer.validated_data)
 
         return success_response(message="Plan updated")
+
+
+class AdminFreePlanUpdateView(AdminBaseView):
+
+    def patch(self, request):
+
+        serializer = subscription_serializer.AdminFreePlanUpdateSerializer(
+            data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        plan_services.update_free_plan(data=serializer.validated_data)
+
+        return success_response(message="Free plan updated")
 
 
 class AdminCreateNewPlanVersionView(AdminBaseView):
@@ -167,7 +184,7 @@ class AdminTransactionListView(AdminBaseView):
                 ).data
             }
         )
-    
+
 
 class AdminBillingOverviewView(AdminBaseView):
 
@@ -177,6 +194,4 @@ class AdminBillingOverviewView(AdminBaseView):
 
         serializer = subscription_serializer.BillingOverviewSerializer(data)
 
-        return success_response(
-            data=serializer.data
-        )
+        return success_response(data=serializer.data)

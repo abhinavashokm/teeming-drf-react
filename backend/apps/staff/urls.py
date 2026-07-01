@@ -10,6 +10,7 @@ from .views import (
     AdminCreateNewPlanVersionView,
     AdminTransactionListView,
     AdminBillingOverviewView,
+    AdminFreePlanUpdateView,
 )
 
 urlpatterns = [
@@ -18,6 +19,7 @@ urlpatterns = [
     path("workspaces/", AdminWorkspaceListView.as_view()),
     path("plans/", AdminPlanListView.as_view()),
     path("plans/<uuid:plan_id>/", AdminPlanDetailView.as_view()),
+    path("plans/free/", AdminFreePlanUpdateView.as_view()),
     path("plans/<uuid:plan_id>/archive/", AdminPlanArchiveView.as_view()),
     path("plans/<uuid:plan_id>/restore/", AdminPlanRestoreView.as_view()),
     path("plans/<uuid:plan_id>/new-version/", AdminCreateNewPlanVersionView.as_view()),

@@ -8,7 +8,7 @@ from django.utils import timezone
 from ..models import Plan, WorkspaceSubscription
 from core.constants.plan_codes import PlanCode
 from .integrations import stripe_client
-from ..helpers.subscription_helper import get_plan_or_raise
+from ..helpers.subscription_helper import get_plan_or_raise, get_free_plan
 
 
 def create_plan(data):
@@ -63,6 +63,21 @@ def update_plan(plan_id, data):
             name=plan.name,
             description=plan.description or "",
         )
+
+    return plan
+
+
+def update_free_plan(data):
+    """
+    free plan details and features can be updated directly without creating a new version
+    """
+
+    plan = get_free_plan()
+
+    for field, value in data.items():
+        setattr(plan, field, value)
+
+    plan.save(update_fields=list(data.keys()))
 
     return plan
 

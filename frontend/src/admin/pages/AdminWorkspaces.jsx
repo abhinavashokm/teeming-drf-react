@@ -9,6 +9,7 @@ import WorkspaceAvatar from "../../components/workspace/WorkspaceAvatar"
 import { formatDate } from "../../utils/timeUtils"
 import AdminWorkspaceDetailModal from '../components/adminWorkspaces/AdminWorkspaceDetailModal';
 import DangerConfirmationModal from "../../components/ui/modal/DangerConfirmationModal"
+import { planCodes } from '../../constants/subscriptionConstants';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -42,7 +43,7 @@ const transformWorkspace = (ws) => ({
   color: colorFor(ws.id),
   status: ws.isSuspended ? 'Suspended' : 'Active',
   plan: ws.activeSubscription?.plan?.name ?? 'Free',
-  planCode: ws.activeSubscription?.plan?.code ?? 'FREE',
+  planCode: ws.activeSubscription?.plan?.code ?? planCodes.FREE,
   planColor: getPlanColor(ws.activeSubscription?.plan?.code),
   members: ws.memberCount,
   goals: ws.goalCount,

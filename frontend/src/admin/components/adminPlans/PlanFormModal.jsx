@@ -8,6 +8,8 @@ import useCreatePlan from '../../hooks/adminPlans/useCreatePlan';
 import useUpdatePlan from '../../hooks/adminPlans/useUpdatePlan';
 import useCreateNewPlanVersion from '../../hooks/adminPlans/useCreateNewPlanVersion';
 import AdminButton from '../form/AdminButton';
+import { planCodes } from '../../../constants/subscriptionConstants';
+import useUpdateFreePlan from '../../hooks/adminPlans/useUpdateFreePlan';
 
 const FEATURES = [
   { key: 'canUseAiIdeaSuggestions', name: 'AI Idea Suggestions' },
@@ -63,13 +65,17 @@ function LockedField({ label, value }) {
 function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
   const { mutate: createPlan, isPending: isCreating } = useCreatePlan();
   const { mutate: updatePlan, isPending: isUpdating } = useUpdatePlan();
+  const { mutate: updateFreePlan, isPending: isFreePlanUpdating } = useUpdateFreePlan();
   const { mutate: createNewPlanVersion, isPending: isVersioning } = useCreateNewPlanVersion();
 
-  const isPending = isCreating || isUpdating || isVersioning;
+  const isPending = isCreating || isUpdating || isFreePlanUpdating || isVersioning;
 
-  const config = MODE_CONFIG[mode];
+  const isFreePlan = plan?.code === planCodes.FREE;
   const isEditMode = mode === 'edit';
   const isNewVersion = mode === 'new_version';
+  const isFreePlanEdit = isEditMode && isFreePlan;
+
+  const config = MODE_CONFIG[mode];
 
   const {
     register,
@@ -104,6 +110,10 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
   };
 
   const onSubmit = (data) => {
+    // Free plan: update all fields except code, tier, monthlyPrice
+    if (isFreePlanEdit) updateFreePlan(data, { onSuccess: handleClose } );
+
+    // Paid plan edit: name and description only
     if (isEditMode) {
       updatePlan(
         {
@@ -136,7 +146,12 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
     createPlan(payload, { onSuccess: handleClose });
   };
 
+  // Fields locked per mode:
+  // - paid plan edit: everything except name, description
+  // - free plan edit: code, tier, monthlyPrice only
+  // - new version: code, tier only
   const isLocked = (field) => {
+    if (isFreePlanEdit) return ['code', 'tier', 'monthlyPrice'].includes(field);
     if (isEditMode) return !['name', 'description'].includes(field);
     if (isNewVersion) return ['code', 'tier'].includes(field);
     return false;
@@ -153,6 +168,11 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
                 v{plan.version} → v{plan.version + 1}
               </span>
             )}
+            {isFreePlanEdit && (
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-600">
+                Free Plan
+              </span>
+            )}
           </div>
           <p className="text-sm text-slate-500 mt-1">{config.subtitle}</p>
         </div>
@@ -160,7 +180,8 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
 
       <BaseModal.Body className="space-y-6">
 
-        {isEditMode && (
+        {/* Paid plan edit notice */}
+        {isEditMode && !isFreePlan && (
           <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
             <Lock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
             <div>
@@ -168,6 +189,20 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
               <p className="text-[12px] text-amber-600 mt-0.5">
                 Only <strong>name</strong> and <strong>description</strong> can be changed.
                 To update pricing or features, use <strong>Create New Version</strong> instead.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Free plan edit notice */}
+        {isFreePlanEdit && (
+          <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <Lock className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[13px] font-semibold text-green-800">Free plan — direct update</p>
+              <p className="text-[12px] text-green-600 mt-0.5">
+                Features and limits can be updated directly. Changes apply immediately to all Free workspaces.
+                <strong> Code, tier, and price are locked.</strong>
               </p>
             </div>
           </div>
@@ -210,7 +245,7 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
             )}
 
             {isLocked('monthlyPrice') ? (
-              <LockedField label="Monthly Price" value={plan?.monthlyPrice ?? '0.00'} />
+              <LockedField label="Monthly Price" value={isFreePlan ? '0.00 (Free)' : plan?.monthlyPrice ?? '0.00'} />
             ) : (
               <AdminFormField label="Monthly Price ($)" error={errors.monthlyPrice?.message}>
                 <AdminInputField
@@ -285,8 +320,12 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
         {/* Features */}
         <div className="space-y-4">
           <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Included Features</h4>
-          <div className={`space-y-3 border rounded-xl p-4 ${isEditMode ? 'bg-slate-50/60 border-slate-200 border-dashed' : 'bg-slate-50 border-slate-200'}`}>
-            {isEditMode && (
+          <div className={`space-y-3 border rounded-xl p-4 ${
+            isEditMode && !isFreePlanEdit
+              ? 'bg-slate-50/60 border-slate-200 border-dashed'
+              : 'bg-slate-50 border-slate-200'
+          }`}>
+            {isEditMode && !isFreePlanEdit && (
               <p className="text-[11px] text-slate-400 flex items-center gap-1 mb-1">
                 <Lock className="w-[10px] h-[10px]" />
                 Feature toggles are locked in edit mode
@@ -340,7 +379,7 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
         <AdminButton
           onClick={handleSubmit(onSubmit)}
           disabled={isPending}
-          isLoading={isPending}
+          loading={isPending}
           className="w-auto px-6"
         >
           {config.submitLabel}

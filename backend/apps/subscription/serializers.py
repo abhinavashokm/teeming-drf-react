@@ -126,6 +126,31 @@ class AdminPlanEditSerializer(serializers.ModelSerializer):
         fields = ["name", "description"]
 
 
+class AdminFreePlanUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Plan
+        fields = [
+            "name",
+            "description",
+            "max_members",
+            "max_goals",
+            "can_use_ai_idea_suggestions",
+            "can_use_ai_assistant",
+            "can_export_workspace_data",
+        ]
+    
+    def validate_max_members(self, value):
+        if value is not None and value < 1:
+            raise serializers.ValidationError("Max members must be at least 1.")
+        return value
+
+    def validate_max_goals(self, value):
+        if value is not None and value < 1:
+            raise serializers.ValidationError("Max goals must be at least 1.")
+        return value
+
+
 class AdminPlanNewVersionSerializer(serializers.ModelSerializer):
 
     class Meta:
