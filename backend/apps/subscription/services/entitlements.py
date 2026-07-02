@@ -28,7 +28,9 @@ def check_is_within_limit(workspace, limit_field: str, current_count: int) -> bo
     return current_count < limit
 
 
-def raise_if_feature_not_available(workspace, feature_code: str, feature_label: str = None):
+def raise_if_feature_not_available(
+    workspace, feature_code: str, feature_label: str = None
+):
     """Use inside services before performing the gated action — raises directly."""
 
     if not check_has_feature(workspace, feature_code):
@@ -39,9 +41,16 @@ def raise_if_feature_not_available(workspace, feature_code: str, feature_label: 
         print("undu")
 
 
-def raise_if_limit_exceeded(workspace, limit_field: str, current_count: int, resource_label: str = None):
+def raise_if_limit_exceeded(
+    workspace,
+    limit_field: str,
+    current_count: int,
+    resource_label: str = None,
+    error_message: str = None,
+):
     """Use inside services before creating a new resource — raises directly."""
     if not check_is_within_limit(workspace, limit_field, current_count):
         raise PlanLimitExceededException(
-            f"You've reached your plan's limit for {resource_label or 'this resource'}"
+            error_message
+            or f"You've reached your plan's limit for {resource_label or 'this resource'}"
         )

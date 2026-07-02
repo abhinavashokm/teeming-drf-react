@@ -1,23 +1,23 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { errorCodes } from "../../constants/errorCodes";
+import { globalQueryKeys } from "../../constants/queryKeys";
 import { ROUTE_PATHS } from "../../constants/routePaths.js";
 import useInvitationToken from "../../hooks/invite/useInvitationToken";
 import authService from "../../services/authService";
 import { setAccessToken } from "../../store/slices/authSlice";
 import { getErrorCode } from "../../utils/apiParser.js";
-import { showApiError } from "../../utils/toast";
 import useAppMutation from "../base/useAppMutation.js";
 import useWelcomeBanner from "../invite/useWelcomeBanner.js";
+import useNavigateWithToast from "../routes/useNavigateWithToast.js";
 import useWorkspaceRedirect from "../routes/useWorkspaceRedirect.js";
-import { globalQueryKeys } from "../../constants/queryKeys";
+import { showApiError } from "../../utils/toast.js";
 
 
 export function useVerifyOtp({ onError = null } = {}) {
     const dispatch = useDispatch()
     const queryClient = useQueryClient()
-    const navigate = useNavigate()
+    const navigateWithToast = useNavigateWithToast()
 
     const invitationToken = useInvitationToken()
     const { setWelcome } = useWelcomeBanner()
@@ -50,15 +50,16 @@ export function useVerifyOtp({ onError = null } = {}) {
 
             if (getErrorCode(error) === errorCodes.SIGNUP_SESSION_EXPIRED) {
                 navigateWithToast({
-                    path: ROUTE_PATHS.LOGIN,
+                    path: ROUTE_PATHS.SIGNUP,
                     message: "Signup session expired. Please sign up again.",
                     error: true,
                     replace: true,
                 })
-            } else {
+            }else{
                 showApiError(error)
             }
-        }
+        },
+        apiErrorToast: false
     })
 
 }

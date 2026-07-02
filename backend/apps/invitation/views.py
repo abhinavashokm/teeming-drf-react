@@ -6,11 +6,10 @@ from rest_framework import status
 from .serializers import JoinedWorkspaceSerializer, InvitationsReadSerializer
 from core.permission_views import AdminBaseView
 
-#
-#  Private Views
-#
 
-
+# -----------------------------------------------------------------------------
+# Private Views
+# -----------------------------------------------------------------------------
 class InvitationListCreateView(AdminBaseView):
 
     def post(self, request, **kwargs):
@@ -60,11 +59,9 @@ class CancelInvitationView(AdminBaseView):
         )
 
 
-#
-#  Public Views
-#
-
-
+# -----------------------------------------------------------------------------
+# Public Views
+# -----------------------------------------------------------------------------
 class ResolveInvitationTokenView(APIView):
     permission_classes = []
 

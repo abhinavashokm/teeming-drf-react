@@ -1,22 +1,34 @@
-import { useMutation } from "@tanstack/react-query";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { errorCodes } from "../../constants/errorCodes";
+import { ROUTE_PATHS } from "../../constants/routePaths";
 import authService from "../../services/authService";
+import { getErrorCode } from "../../utils/apiParser";
 import { showApiError, showSuccess } from "../../utils/toast";
+import useAppMutation from "../base/useAppMutation";
+import useNavigateWithToast from "../routes/useNavigateWithToast";
 
 
 export function useResendOtp() {
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
 
-    return useMutation({
-        mutationFn: (data) => authService.resendOTP(data),
+    const navigateWithToast = useNavigateWithToast()
+
+    return useAppMutation({
+        mutationFn: authService.resendOTP,
         onSuccess: (res) => {
             showSuccess("OTP resent successfully")
         },
         onError: (error) => {
-            showApiError(error)
-        }
+            if (getErrorCode(error) === errorCodes.SIGNUP_SESSION_EXPIRED) {
+                navigateWithToast({
+                    path: ROUTE_PATHS.SIGNUP,
+                    message: "Signup session expired. Please sign up again.",
+                    error: true,
+                    replace: true,
+                })
+            } else {
+                showApiError(error)
+            }
+        },
+        showApiError: false,
     })
 
 }

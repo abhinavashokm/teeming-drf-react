@@ -8,15 +8,25 @@ from django.utils import timezone
 from apps.workspace import workspace_services as workspace_services
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from django.db import transaction
+from apps.subscription.services import entitlements
+from apps.subscription.constants import Limits
 
 
 def send_workspace_invitations(emails, role, workspace, invited_by):
-    """542238
+    """
     Invite a list of users to a workspace.
 
     Each email gets a unique token and shared expiry.
     Invitations are bulk created, then invite emails are dispatched.
     """
+    #guard to ensure worksapce not exceded max member limit of current plan
+    entitlements.raise_if_limit_exceeded(
+        workspace=workspace,
+        limit_field=Limits.MAX_MEMBERS,
+        current_count=workspace_services.get_workspace_members_count(
+            workspace=workspace
+        ),
+    )
 
     invitation_token = generate_token()
     expires_at = invitationHelper.get_invitation_expiry()
@@ -98,6 +108,16 @@ def verify_token_and_accept_invitation(invitation_token, user):
     # verify workspace still exists
     workspace = get_workspace_or_raise(workspace_id=invitation.workspace.id)
 
+    #guard to ensure worksapce not exceded max member limit of current plan
+    entitlements.raise_if_limit_exceeded(
+        workspace=workspace,
+        limit_field=Limits.MAX_MEMBERS,
+        current_count=workspace_services.get_workspace_members_count(
+            workspace=workspace
+        ),
+        error_message="Workspace member limit exceeded."
+    )
+
     with transaction.atomic():
         # put role as default for now
         workspace_services.add_workspace_member(
@@ -113,18 +133,19 @@ def verify_token_and_accept_invitation(invitation_token, user):
 
 
 def fetch_pending_invitations(workspace):
-    invitations = Invitation.objects.in_workspace(workspace).filter(status=Invitation.StatusChoices.PENDING).select_related(
-        "invited_by"
+    invitations = (
+        Invitation.objects.in_workspace(workspace)
+        .filter(status=Invitation.StatusChoices.PENDING)
+        .select_related("invited_by")
     )
 
     return invitations
 
 
 def cancel_invitation(workspace, invitation_id):
-    
+
     invitation = invitationHelper.get_invitation_or_raise(
-        workspace=workspace,
-        invitation_id=invitation_id
+        workspace=workspace, invitation_id=invitation_id
     )
 
     invitation.is_deleted = True

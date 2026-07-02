@@ -181,3 +181,8 @@ def list_workspaces(search: str = "", status: str = "all", plan: str = "all"):
         workspace.is_suspended = False
 
     return workspaces
+
+
+def get_workspace_members_count(workspace):
+    
+    return WorkspaceMember.objects.in_workspace(workspace).count()

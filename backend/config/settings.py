@@ -243,7 +243,7 @@ SIMPLE_JWT = {
 REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60  # 7days (in seconds)
 
 # expiry time's configuration
-OTP_EXPIRY = 60 * 3  # in seconds. 3min
+OTP_EXPIRY = 60 * 60  # in seconds. 60min - for testing
 SIGNUP_SESSION_EXPIRY = 60 * 15  # 15 minutes
 PASSWORD_RESET_LINK_EXPIRY = 60 * 30  # 30 minutes
 
