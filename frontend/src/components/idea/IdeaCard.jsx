@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, MoreHorizontal, Pencil, ThumbsUp, Trash2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { IDEA_STATUS } from '../../constants/ideaConstants.js'
 import { PERMISSIONS } from '../../constants/permissions.js'
@@ -10,10 +10,9 @@ import MemberAvatar from '../team/MemberAvatar.jsx'
 import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal.jsx'
 import IdeaDetailModal from './IdeaDetailModal'
 import IdeaFormModal from './IdeaFormModal.jsx'
+import IdeaLikeButton from './IdeaLikeButton.jsx'
 import MoveToDoneModal from './MoveToDoneModal'
 import MoveToPlannedModal from './MoveToPlannedModal.jsx'
-import useLikeIdea from '../../hooks/idea/useLikeIdea.js'
-import useUnlikeIdea from '../../hooks/idea/useUnlikeIdea.js'
 
 
 const STATE_STYLES = {
@@ -68,21 +67,6 @@ export default function IdeaCard({ currentIdea, state, theme }) {
     const isIdeaCreator = currentUser.id === currentIdea.createdBy.id
 
     const canDeleteOthersIdea = useCan(PERMISSIONS.DELETE_OTHERS_IDEA)
-
-    /* -------------------------------------------------------------------------- */
-    /* idea like functionality */
-    /* -------------------------------------------------------------------------- */
-    const { mutate: likeIdea, isPending: isLiking } = useLikeIdea()
-    const { mutate: unlikeIdea, isPending: isUnliking } = useUnlikeIdea()
-
-    const handleToggleLike = () => {
-        if (isLiking || isUnliking) return // guard against double-fire
-        if (currentIdea.isLiked) {
-            unlikeIdea(currentIdea.id)
-        } else {
-            likeIdea(currentIdea.id)
-        }
-    }
 
     return (
         <>
@@ -152,18 +136,11 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                 <div className="flex items-center justify-between">
                     {state === IDEA_STATUS.DRAFT && (
                         <>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); handleToggleLike(); }}
-                                disabled={isLiking || isUnliking}
-                                className={`flex items-center gap-1.5 text-[12px] font-medium transition-colors ${currentIdea.isLiked ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
-                                    }`}
-                            >
-                                <ThumbsUp
-                                    className="w-3.5 h-3.5"
-                                    fill={currentIdea.isLiked ? 'currentColor' : 'none'}
-                                />
-                                {currentIdea.likeCount ?? 0}
-                            </button>
+                            <IdeaLikeButton
+                                isLiked={currentIdea.isLiked}
+                                likeCount={currentIdea.likeCount}
+                                ideaId={currentIdea.id}
+                            />
 
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[11.5px] font-medium text-gray-600">

@@ -12,6 +12,7 @@ import BaseModal from '../ui/modal/BaseModal';
 import useMoveIdeaToPlanned from '../../hooks/idea/useMoveIdeaToPlanned.js';
 import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress.js';
 import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal.jsx';
+import IdeaLikeButton from './IdeaLikeButton.jsx';
 
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -97,8 +98,7 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
     const { mutate: deleteIdea, isPending: isDeleting } = useDeleteIdea();
     const [isDeleteConfirmModalOpen, setisDeleteConfirmModalOpen] = useState(false)
 
-    const handleDeleteIdea = () => {deleteIdea(currentIdea.id, { onSuccess: onClose })};
-
+    const handleDeleteIdea = () => { deleteIdea(currentIdea.id, { onSuccess: onClose }) };
     return (
         <>
             <BaseModal isOpen={isOpen} onClose={onClose}>
@@ -127,12 +127,14 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
                                 </p>
                             </div>
 
-                            <div className=" items-center gap-2">
-                                <span className="text-[13px] text-gray-500 flex items-center gap-1.5">
-                                    <ThumbsUp className="w-4 h-4" /> {currentIdea.likeCount}
-                                </span>
-                                {/* thumbsUp avatars — map from real data if available */}
-                            </div>
+                            <IdeaLikeButton
+                                readOnly={!isDraft}
+                                size='m'
+                                likeCount={currentIdea.likeCount}
+                                isLiked={currentIdea.isLiked}
+                                ideaId={currentIdea.id}
+                            />
+
                         </div>
 
                         {/* Summary Row */}
