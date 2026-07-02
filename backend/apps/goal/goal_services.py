@@ -1,21 +1,27 @@
 from .models import Goal, StarredGoal
 from .helpers.goal_helper import get_goal_or_raise
 from django.db.models import Exists, OuterRef, Count, Q
+from apps.subscription.services import entitlements
+from apps.subscription.constants import Limits
 
 
-def create_goal(data):
+def create_goal(workspace, created_by, data):
     """create a new goal"""
 
-    return Goal.objects.create(**data)
+    # guard to check if workspace is not exceeded max goal limit of their current plan
+    entitlements.raise_if_limit_exceeded(
+        workspace=workspace,
+        current_count=get_workspace_goal_count(workspace=workspace),
+        limit_field=Limits.MAX_GOALS,
+    )
+
+    return Goal.objects.create(workspace=workspace, created_by=created_by, **data)
 
 
 def get_goal(workspace, goal_id):
     """return a single goal by id"""
-    
-    goal = get_goal_or_raise(
-        workspace=workspace,
-        goal_id=goal_id
-    )
+
+    goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
 
     return goal
 
@@ -24,13 +30,11 @@ def list_workspace_goals(workspace, user):
     """return all goals in the current workspace with is starred field annotated"""
 
     starred_goals = StarredGoal.objects.in_workspace(workspace).filter(
-        user=user,
-        goal = OuterRef("pk")
+        user=user, goal=OuterRef("pk")
     )
 
     return (
-        Goal.objects
-        .in_workspace(workspace)
+        Goal.objects.in_workspace(workspace)
         .annotate(
             is_starred=Exists(starred_goals),
             ideas_count=Count(
@@ -41,13 +45,11 @@ def list_workspace_goals(workspace, user):
         .order_by("-is_starred", "-created_at")
     )
 
+
 def update_goal(workspace, goal_id, data):
     "update goal with given fields"
 
-    goal = get_goal_or_raise(
-        workspace=workspace,
-        goal_id=goal_id
-    )
+    goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
 
     for field, value in data.items():
         setattr(goal, field, value)
@@ -59,10 +61,7 @@ def update_goal(workspace, goal_id, data):
 def delete_goal(workspace, goal_id):
     "delete goal using id"
 
-    goal = get_goal_or_raise(
-        workspace=workspace,
-        goal_id=goal_id
-    )
+    goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
 
     goal.soft_delete()
 
@@ -81,10 +80,7 @@ def star_goal(user, workspace, goal_id):
 def unstar_goal(user, workspace, goal_id):
     """unstar a goal by user"""
 
-    goal = get_goal_or_raise(
-        workspace=workspace, 
-        goal_id=goal_id
-    )
+    goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
 
     StarredGoal.objects.in_workspace(workspace).filter(goal=goal, user=user).delete()
 

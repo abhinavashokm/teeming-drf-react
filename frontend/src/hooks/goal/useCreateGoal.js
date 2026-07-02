@@ -10,7 +10,7 @@ function useCreateGoal() {
   return useAppMutation({
     mutationFn: goalService.createGoal,
     passWorkspaceSlug: true,
-    invalidateKeys:[workspaceKeys.goals],
+    invalidateKeys:[workspaceKeys.goals, workspaceKeys.root],
   })
 
 }

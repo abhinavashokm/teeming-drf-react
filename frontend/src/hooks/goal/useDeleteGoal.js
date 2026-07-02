@@ -10,7 +10,7 @@ function useDeleteGoal() {
     return useAppMutation({
         mutationFn: goalService.deleteGoal,
         passWorkspaceSlug: true,
-        invalidateKeys: [workspaceKeys.goals],
+        invalidateKeys: [workspaceKeys.goals, workspaceKeys.root],
     })
 }
 

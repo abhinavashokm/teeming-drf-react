@@ -24,11 +24,9 @@ class GoalListCreateView(WorkspacePermissionBaseView):
         serializer.is_valid(raise_exception=True)
 
         goal = goal_services.create_goal(
-            data={
-                "created_by": request.user,
-                "workspace": request.workspace,
-                **serializer.validated_data,
-            }
+            workspace=request.workspace,
+            created_by=request.user,
+            data=serializer.validated_data,
         )
 
         goal_data = GoalReadSerializer(goal).data
