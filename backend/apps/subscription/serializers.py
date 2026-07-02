@@ -12,7 +12,7 @@ class AdminWritePlanSerializer(serializers.ModelSerializer):
             "description",
             "max_goals",
             "max_members",
-            "can_use_ai_idea_suggestions",
+            "can_use_ai_enhancements",
             "can_use_ai_assistant",
             "can_export_workspace_data",
             "monthly_price",
@@ -35,7 +35,7 @@ class AdminPlanListSerializer(serializers.ModelSerializer):
             "currency",
             "max_goals",
             "max_members",
-            "can_use_ai_idea_suggestions",
+            "can_use_ai_enhancements",
             "can_use_ai_assistant",
             "can_export_workspace_data",
             "is_archived",
@@ -66,9 +66,9 @@ class UserReadPlanSerializer(serializers.ModelSerializer):
     def get_features(self, obj):
         return [
             {
-                "key": "ai_idea_suggestions",
+                "key": "AI_ENHANCEMENTS",
                 "name": "AI Enhancements",
-                "enabled": obj.can_use_ai_idea_suggestions,
+                "enabled": obj.can_use_ai_enhancements,
             },
             {
                 "key": "ai_assistant",
@@ -135,7 +135,7 @@ class AdminFreePlanUpdateSerializer(serializers.ModelSerializer):
             "description",
             "max_members",
             "max_goals",
-            "can_use_ai_idea_suggestions",
+            "can_use_ai_enhancements",
             "can_use_ai_assistant",
             "can_export_workspace_data",
         ]
@@ -161,7 +161,7 @@ class AdminPlanNewVersionSerializer(serializers.ModelSerializer):
             "monthly_price",
             "max_members",
             "max_goals",
-            "can_use_ai_idea_suggestions",
+            "can_use_ai_enhancements",
             "can_use_ai_assistant",
             "can_export_workspace_data",
         ]
@@ -171,7 +171,7 @@ class AdminPlanNewVersionSerializer(serializers.ModelSerializer):
         "monthly_price",
         "max_members",
         "max_goals",
-        "can_use_ai_idea_suggestions",
+        "can_use_ai_enhancements",
         "can_use_ai_assistant",
         "can_export_workspace_data",
     ]

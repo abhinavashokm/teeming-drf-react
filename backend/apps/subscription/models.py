@@ -23,7 +23,7 @@ class Plan(BaseAbstractModel):
     max_goals = models.PositiveIntegerField(null=True, blank=True)
     max_members = models.PositiveIntegerField(null=True, blank=True)
 
-    can_use_ai_idea_suggestions = models.BooleanField(default=False)
+    can_use_ai_enhancements = models.BooleanField(default=False)
     can_use_ai_assistant = models.BooleanField(default=False)
     can_export_workspace_data = models.BooleanField(default=False)
 

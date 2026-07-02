@@ -21,14 +21,20 @@ from apps.subscription.constants import Features
 
 class ImproveIdeaService:
 
-    def __init__(self):
+    def __init__(self, workspace):
         self.provider = ProviderRegistry.get_provider()
+        self.workspace = workspace
 
     def improve_idea(
         self,
         title: str,
         description: str,
     ):
+        #guard to check if current subscription allow ai enhancements
+        entitlements.raise_if_feature_not_available(
+            workspace=self.workspace,
+            feature_code=Features.AI_ENHANCEMENTS
+        )
 
         prompt = build_improve_idea_prompt(
             title=title,

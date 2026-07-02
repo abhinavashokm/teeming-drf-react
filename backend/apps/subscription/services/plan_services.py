@@ -133,8 +133,8 @@ def create_new_plan_version(plan_id: uuid.UUID, data: dict) -> Plan:
             monthly_price=data.get("monthly_price", plan.monthly_price),
             max_members=data.get("max_members", plan.max_members),
             max_goals=data.get("max_goals", plan.max_goals),
-            can_use_ai_idea_suggestions=data.get(
-                "can_use_ai_idea_suggestions", plan.can_use_ai_idea_suggestions
+            can_use_ai_enhancements=data.get(
+                "can_use_ai_enhancements", plan.can_use_ai_enhancements
             ),
             can_use_ai_assistant=data.get(
                 "can_use_ai_assistant", plan.can_use_ai_assistant

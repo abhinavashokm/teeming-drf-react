@@ -24,7 +24,7 @@ class ImproveIdeaView(MemberBaseView):
                 data=ImproveIdeaResponse.mock_response().model_dump()
             )
 
-        service = ai_services.ImproveIdeaService()
+        service = ai_services.ImproveIdeaService(workspace=request.workspace)
 
         try:
             result = service.improve_idea(**serializer.validated_data)

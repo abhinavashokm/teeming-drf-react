@@ -35,6 +35,8 @@ def raise_if_feature_not_available(workspace, feature_code: str, feature_label: 
         raise FeatureNotAvailableException(
             f"{feature_label or 'This feature'} is not available on your current plan"
         )
+    else:
+        print("undu")
 
 
 def raise_if_limit_exceeded(workspace, limit_field: str, current_count: int, resource_label: str = None):

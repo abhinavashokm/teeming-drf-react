@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(blank=True, null=True)),
                 ('max_goals', models.PositiveIntegerField(blank=True, null=True)),
                 ('max_members', models.PositiveIntegerField(blank=True, null=True)),
-                ('can_use_ai_idea_suggestions', models.BooleanField(default=False)),
+                ('can_use_ai_enhancements', models.BooleanField(default=False)),
                 ('can_use_ai_assistant', models.BooleanField(default=False)),
                 ('can_export_workspace_data', models.BooleanField(default=False)),
                 ('is_active', models.BooleanField(default=True)),

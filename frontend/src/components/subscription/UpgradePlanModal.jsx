@@ -68,7 +68,7 @@ function UpgradePlanModal({
 
                     <ul className="space-y-2 text-sm text-gray-600">
                         <li>• Create up to 100 goals</li>
-                        <li>• AI Idea Suggestions</li>
+                        <li>• AI Enhancements</li>
                         <li>• AI Assistant</li>
                         <li>• Export Workspace Data</li>
                     </ul>

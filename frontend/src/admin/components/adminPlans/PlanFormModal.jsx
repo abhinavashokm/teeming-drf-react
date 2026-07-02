@@ -12,7 +12,7 @@ import { planCodes } from '../../../constants/subscriptionConstants';
 import useUpdateFreePlan from '../../hooks/adminPlans/useUpdateFreePlan';
 
 const FEATURES = [
-  { key: 'canUseAiIdeaSuggestions', name: 'AI Idea Suggestions' },
+  { key: 'canUseAiEnhancements', name: 'AI Enhancements' },
   { key: 'canUseAiAssistant', name: 'Advanced AI Chat Assistant' },
   { key: 'canExportWorkspaceData', name: 'Export report as CSV' },
 ];
@@ -24,7 +24,7 @@ const defaultValues = {
   monthlyPrice: '',
   maxMembers: '',
   maxGoals: '',
-  canUseAiIdeaSuggestions: false,
+  canUseAiEnhancements: false,
   canUseAiAssistant: false,
   canExportWorkspaceData: false,
   tier: '',
@@ -94,7 +94,7 @@ function PlanFormModal({ isOpen, onClose, mode = 'create', plan = null }) {
         monthlyPrice: plan.monthlyPrice ?? '',
         maxMembers: plan.maxMembers ?? '',
         maxGoals: plan.maxGoals ?? '',
-        canUseAiIdeaSuggestions: plan.canUseAiIdeaSuggestions,
+        canUseAiEnhancements: plan.canUseAiEnhancements,
         canUseAiAssistant: plan.canUseAiAssistant,
         canExportWorkspaceData: plan.canExportWorkspaceData,
         tier: plan.tier ?? '',

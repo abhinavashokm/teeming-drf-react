@@ -41,7 +41,7 @@ const formatPlanPrice = (plan) =>
 const formatLimit = (value) => (value ?? null) === null ? '∞' : value;
 
 const planFeatures = (plan) => [
-    { label: 'AI idea suggestions', enabled: plan.canUseAiIdeaSuggestions },
+    { label: 'AI Enhancements', enabled: plan.canUseAiEnhancements },
     { label: 'AI assistant', enabled: plan.canUseAiAssistant },
     { label: 'Export workspace data', enabled: plan.canExportWorkspaceData },
 ];
