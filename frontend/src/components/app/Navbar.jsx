@@ -1,4 +1,5 @@
 import {
+  BellIcon,
   Info
 } from 'lucide-react';
 import { Link, useMatches } from 'react-router-dom';
@@ -10,7 +11,7 @@ import { NotificationBell } from './NotificationBell';
 
 
 
-function Navbar({ isNavbarVisible, isScrolled, showShadow = false, setIsGoalInfoModalOpen }) {
+function Navbar({ isNavbarVisible, isSidebarVisible, isScrolled, showShadow = false, setIsGoalInfoModalOpen }) {
 
   const { data: currentWorkspace } = useWorkspace()
   const goalId = useGoalId()
@@ -24,8 +25,9 @@ function Navbar({ isNavbarVisible, isScrolled, showShadow = false, setIsGoalInfo
   return (
     <>
       <header
-        className={`fixed top-0 bg-white transition-all duration-200 flex items-center justify-between shrink-0 w-full h-[44px] z-50
-          ${isScrolled || showShadow
+        className={`fixed top-0 right-0 left-0 bg-white transition-all duration-200 flex items-center justify-between shrink-0 h-[44px] z-30
+    ${isSidebarVisible ? 'min-[1024px]:left-64' : 'min-[1024px]:left-11'}
+    ${isScrolled || showShadow
             ? 'border-b border-gray-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)]'
             : 'border-b border-transparent'
           }`
@@ -60,13 +62,14 @@ function Navbar({ isNavbarVisible, isScrolled, showShadow = false, setIsGoalInfo
 
         </div>
 
-        <div className="flex items-center pr-4 mr-2 justify-end z-1000">
+        <div className="flex items-center pr-4 mr-2 justify-end z-40">
           {/* <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
             <Bell className="h-[17px] w-[17px]" strokeWidth={1.5} />
             <span className="absolute top-1.5 right-1.5 block h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white"></span>
           </button> */}
           <NotificationBell />
         </div>
+
 
       </header>
 

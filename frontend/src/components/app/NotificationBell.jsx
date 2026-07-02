@@ -55,10 +55,10 @@ export function NotificationBell() {
     }, []);
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative z-50" ref={dropdownRef}>
             <button
                 onClick={(e) => { setOpen(prev => !prev); e.stopPropagation(); }}
-                className="relative p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                className="relative p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors z-40"
             >
                 <Bell className="h-[17px] w-[17px]" strokeWidth={1.5} />
                 {unreadCount > 0 && (

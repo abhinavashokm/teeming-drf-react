@@ -120,14 +120,14 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
       {/* Mobile backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="min-[1024px]:hidden fixed inset-0 bg-gray-900/40 z-40"
+          className="min-[1024px]:hidden fixed inset-0 bg-gray-900/40 z-32"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       <aside className={`
-        bg-white min-[1024px]:bg-gray-50/50 flex flex-col shrink-0 h-[100dvh] z-52
-        fixed min-[1024px]:relative top-0 left-0 z-50
+        bg-white min-[1024px]:bg-gray-50/50 flex flex-col shrink-0 h-[100dvh]
+        fixed min-[1024px]:relative top-0 left-0 z-33
         transition-all duration-200
         min-[1024px]:translate-x-0
         ${isMobileMenuOpen ? 'translate-x-0 w-64 shadow-2xl min-[1024px]:shadow-none' : '-translate-x-full'}
@@ -136,7 +136,7 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
       `}>
 
         {/* Workspace Dropdown */}
-        <div className={`h-14 flex items-center ${sidebarContentExpanded ? 'justify-between px-3' : 'justify-center px-0'} shrink-0 relative border-b border-gray-200 z-50`}>
+        <div className={`h-14 flex items-center ${sidebarContentExpanded ? 'justify-between px-3' : 'justify-center px-0'} shrink-0 relative border-b border-gray-200 z-34`}>
           <button
             onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
             className={`flex items-center ${sidebarContentExpanded ? 'flex-1 justify-between p-1.5' : 'justify-center p-1.5 w-full'} rounded-lg hover:bg-gray-100/50 transition-colors group text-left min-w-0`}
