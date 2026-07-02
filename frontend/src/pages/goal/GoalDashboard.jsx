@@ -89,12 +89,7 @@ export default function GoalDashboard({ goalTitle }) {
 
         {/* Scrollable Content */}
         <div className={`flex-1 min-h-0 ${activeView === 'board' ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden scrollbar-hide'}`}>
-          <div className={`w-full transition-all duration-300 
-            ${activeView === 'board'
-              ? 'h-full pt-6'
-              : 'px-8 pt-6 md:px-12 lg:px-16 pb-8 md:pb-12'
-            }`}
-          >
+          <div className={`w-full  h-full pt-6`}>
 
             {/* Main Content Areas */}
             {activeView === 'board' ? (
