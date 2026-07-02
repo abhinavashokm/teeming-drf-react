@@ -11,7 +11,7 @@ from apps.subscription.services import (
     billing_services,
 )
 from apps.subscription import serializers as subscription_serializer
-from core.constants.plan_codes import PlanCode
+from apps.subscription.constants import PlanCode
 
 
 class AdminBaseView(APIView):

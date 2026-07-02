@@ -4,7 +4,7 @@ from django.db.models.functions import Coalesce
 from django.db.models import Q, Count, Sum, DecimalField, Value
 
 from ..models import Plan, WorkspaceSubscription, SubscriptionTransaction
-from core.constants.plan_codes import PlanCode
+from apps.subscription.constants import PlanCode
 from apps.workspace.models import Workspace, WorkspaceMember
 
 

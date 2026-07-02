@@ -6,7 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from ..models import Plan, WorkspaceSubscription
-from core.constants.plan_codes import PlanCode
+from apps.subscription.constants import PlanCode
 from .integrations import stripe_client
 from ..helpers.subscription_helper import get_plan_or_raise, get_free_plan
 

@@ -6,7 +6,6 @@ from . import serializers, exceptions
 from . import ai_services
 from django.conf import settings
 from .schemas.improve_idea import ImproveIdeaResponse
-from .schemas.ai_assistant import GoalIdeaSuggestionsResponse
 from core.constants.error_codes import ErrorCode
 
 

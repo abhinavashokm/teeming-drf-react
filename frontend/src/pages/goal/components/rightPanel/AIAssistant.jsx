@@ -7,6 +7,10 @@ import { formatTimeAgo } from '../../../../utils/timeUtils';
 import ChatBubble from '../../../../components/chat/ChatBubble';
 import useAuth from '../../../../hooks/auth/useAuth';
 import AIResponseBubble from '../../../../components/chat/AIResponseBubble';
+import useWorkspace from '../../../../hooks/workspace/useWorkspace';
+import { useNavigate } from 'react-router-dom';
+import { ROUTE_PATHS } from '../../../../constants/routePaths';
+import useNavigateUpgradePlan from '../../../../hooks/routes/useNavigateUpgradePlan';
 
 
 const quickActions = [
@@ -40,6 +44,11 @@ const actionMap = {
 
 function AIAssistant({ pendingAIMessage, setPendingAIMessage, isAIChatResGenerating }) {
 
+
+
+    const { data: currentWorkspace } = useWorkspace()
+    const isAiAssistantInPlan = currentWorkspace.features?.aiAssistant
+
     const { data: aiResponses, isPending: loadingResponses } = useAIAssistantResponses()
     const hasResponses = aiResponses?.length > 0;
 
@@ -71,6 +80,10 @@ function AIAssistant({ pendingAIMessage, setPendingAIMessage, isAIChatResGenerat
 
     const handleClearResponses = () => {
         clearAllResponses()
+    }
+
+    if (!isAiAssistantInPlan) {
+        return <AIAssistantLocked />
     }
 
     return (
@@ -146,6 +159,42 @@ function AIAssistant({ pendingAIMessage, setPendingAIMessage, isAIChatResGenerat
 
 export default AIAssistant
 
+
+/* -------------------------------------------------------------------------- */
+/* sub components - AIAssistantLocked */
+/* -------------------------------------------------------------------------- */
+
+function AIAssistantLocked() {
+    const goToUpgradePlan = useNavigateUpgradePlan();
+    
+    return (
+        <div className="flex flex-col items-center justify-center text-center p-6 h-full">
+            <div className="relative mb-4">
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-slate-400" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center border-2 border-white">
+                    <Lock className="w-2.5 h-2.5 text-white" />
+                </div>
+            </div>
+
+            <h3 className="text-sm font-semibold text-gray-900">
+                Goal Assistant is locked
+            </h3>
+
+            <p className="text-xs text-gray-500 mt-1.5 max-w-[220px]">
+                Upgrade your plan to get AI-generated summaries and idea suggestions for this goal.
+            </p>
+
+            <button
+                onClick={goToUpgradePlan}
+                className="mt-4 rounded-lg bg-[#378ADD] px-4 py-2 text-xs font-medium text-white hover:bg-[#378ADD]/90 transition-colors"
+            >
+                Upgrade plan
+            </button>
+        </div>
+    );
+}
 
 /* -------------------------------------------------------------------------- */
 /* sub components - AIResponse */

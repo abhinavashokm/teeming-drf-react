@@ -1,6 +1,6 @@
 from core.exceptions.helpers import get_object_or_raise
 from ..models import Plan
-from core.constants.plan_codes import PlanCode
+from apps.subscription.constants import PlanCode
 
 
 def get_plan_or_raise(plan_id=None, code=None, error_message=None, **filters):

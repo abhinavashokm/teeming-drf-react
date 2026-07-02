@@ -15,6 +15,8 @@ from apps.ai.schemas.ai_assistant import (
 from apps.goal.helpers.goal_helper import get_goal_or_raise
 from apps.idea.models import Idea
 from .models import AIAssistantResponse
+from apps.subscription.services import entitlements
+from apps.subscription.constants import Features
 
 
 class ImproveIdeaService:
@@ -51,6 +53,12 @@ class GoalAssistantService:
         self.context = self._build_context(self.goal)
 
     def execute(self, action, message=None):
+
+        #guard to check if current subscription allow ai assistant
+        entitlements.raise_if_feature_not_available(
+            workspace=self.workspace,
+            feature_code=Features.AI_ASSISTANT
+        )
 
         configs = {
             AIAssistantResponse.ResponseType.SUMMARY: {
