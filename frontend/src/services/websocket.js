@@ -19,6 +19,10 @@ function createSocket(path, { onOpen, onMessage, onError, onClose } = {}) {
     return socket
 }
 
+export function connectWorkspaceSocket(workspaceSlug, callbacks) {
+    return createSocket(`/ws/workspaces/${workspaceSlug}/`, callbacks)
+}
+
 export function connectNotificationSocket(workspaceSlug, callbacks) {
     return createSocket(`/ws/workspaces/${workspaceSlug}/notifications/`, callbacks)
 }

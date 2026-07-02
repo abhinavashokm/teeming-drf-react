@@ -4,10 +4,14 @@ import { useNotificationSocket } from "../../hooks/notification/useNotificationS
 import useNotifications from '../../hooks/notification/useNotifications';
 import useMarkAllNotificationAsRead from '../../hooks/notification/useMarkAllNotificationAsRead';
 import useClearAllNotifications from '../../hooks/notification/useClearAllNotifications';
+import { useWorkspaceSocketContext } from '../../contexts/WorkspaceSocketContext';
 
 export function NotificationBell() {
+
+    //web socket connection
+    const { notifications: wsNotifications } = useWorkspaceSocketContext();
+
     const { data: allNotifications } = useNotifications();
-    const { notifications: wsNotifications } = useNotificationSocket();
     const { mutate: markAllAsRead } = useMarkAllNotificationAsRead();
     const { mutate: clearAll } = useClearAllNotifications();
 

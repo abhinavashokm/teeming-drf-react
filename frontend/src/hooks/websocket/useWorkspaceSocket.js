@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
-import { connectNotificationSocket } from "../../services/websocket";
+import { connectWorkspaceSocket } from "../../services/websocket";
 import useWorkspaceSlug from "../params/useWorkspaceSlug";
 
-export function useNotificationSocket() {
+export function useWorkspaceSocket() {
     const [notifications, setNotifications] = useState([]);
     const workspaceSlug = useWorkspaceSlug()
 
     useEffect(() => {
         if (!workspaceSlug) return;
 
-        const socket = connectNotificationSocket(workspaceSlug, {
+        const socket = connectWorkspaceSocket(workspaceSlug, {
             onMessage: (data) => {
                 if (data.type === 'send_notification') {
                     setNotifications(prev => [data, ...prev])
                 }
             },
             onOpen: () => {
-                console.log("notification ws connected!!")
+                console.log("workspace ws connected!!")
             },
             onClose: () => {
-                console.log("nofication ws disconnected!!")
+                console.log("workspace ws disconnected!!")
             }
         })
 

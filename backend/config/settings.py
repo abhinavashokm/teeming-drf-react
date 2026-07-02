@@ -13,7 +13,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG") == "True"
 DEBUG_API_DELAY = DEBUG
-MOCK_RESPONSE_DELAY = float(os.getenv("MOCK_RESPONSE_DELAY")) #in seconds
+MOCK_RESPONSE_DELAY = float(os.getenv("MOCK_RESPONSE_DELAY"))  # in seconds
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -227,7 +227,7 @@ REST_FRAMEWORK = {
         "user": "500/minute",
         "auth": "50/minute",  # login, refresh, register
         "sensitive": "5/minute",  # password reset, email verify
-        "ai": "20/hour", #ai features
+        "ai": "20/hour",  # ai features
     },
 }
 
@@ -303,11 +303,55 @@ GEMINI_MODEL = os.environ.get(
     "GEMINI_MODEL",
     default="gemini-2.5-flash",
 )
-USE_MOCK_AI=os.getenv("USE_MOCK_AI", "False").lower() == "true"
+USE_MOCK_AI = os.getenv("USE_MOCK_AI", "False").lower() == "true"
 
-#S3 Bucket configuration
+# S3 Bucket configuration
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+
+# logger
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'websocket_file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'websocket.log',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'billing': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'websocket': {
+            'handlers': ['websocket_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

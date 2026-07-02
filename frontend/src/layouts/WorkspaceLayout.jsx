@@ -10,6 +10,9 @@ import { errorCodes } from '../constants/errorCodes';
 import useWorkspace from '../hooks/workspace/useWorkspace';
 import ErrorPage from '../pages/error/ErrorPage';
 import GoalInfoModal from '../components/goal/GoalInfoModal';
+import { useNotificationSocket } from '../hooks/notification/useNotificationSocket';
+import { WorkspaceSocketContext } from '../contexts/WorkspaceSocketContext';
+import { useWorkspaceSocket } from '../hooks/websocket/useWorkspaceSocket';
 
 function WorkspaceLayout() {
 
@@ -31,19 +34,8 @@ function WorkspaceLayout() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // if (isWorkspacePending) return <FullPageLoader />
-
-  // if (error?.response?.status === 404) {
-  //   if (error.response.data?.error?.code === errorCodes.WORKSPACE_NOT_FOUND) {
-  //     return <ErrorPage
-  //       type={errorCodes.WORKSPACE_NOT_FOUND}
-  //     />
-  //   }
-  //   return <ErrorPage
-  //     type={errorCodes.GENERAL}
-  //   />
-  // }
-
+  //const notificationSocket = useNotificationSocket();
+  const workspaceSocket = useWorkspaceSocket()
 
   return (
     <>
@@ -54,55 +46,59 @@ function WorkspaceLayout() {
           : errorCodes.GENERAL}
         />
       )}
+
       {!isWorkspacePending && !error && (
-        <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"
-        >
+        <WorkspaceSocketContext.Provider value={workspaceSocket}>
+          <div className="flex h-screen bg-white font-sans text-gray-900 antialiased selection:bg-teeming-green/20"
+          >
 
-          {/* Sidebar */}
-          <Sidebar
-            isSidebarVisible={isSidebarVisible}
-            setIsSidebarVisible={setIsSidebarVisible}
-            isMobileMenuOpen={isMobileMenuOpen}
-            setIsMobileMenuOpen={setIsMobileMenuOpen}
-          />
+            {/* Sidebar */}
+            <Sidebar
+              isSidebarVisible={isSidebarVisible}
+              setIsSidebarVisible={setIsSidebarVisible}
+              isMobileMenuOpen={isMobileMenuOpen}
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
 
-          {/* Main Area */}
-          <div className="flex-1 flex flex-col overflow-hidden relative">
+            {/* Main Area */}
+            <div className="flex-1 flex flex-col overflow-hidden relative">
 
-            {/* Toggle Navbar & Sidebar Buttons - Pinned to top */}
-            <div className="fixed top-0 left-0 h-[44px] flex items-center gap-1 pl-4 z-30 pointer-events-none">
-              {!isMobileMenuOpen && (
-                <button
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="pointer-events-auto min-[1024px]:hidden text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
-                >
-                  <Menu className="h-[20px] w-[20px]" strokeWidth={1.5} />
-                </button>
-              )}
+              {/* Toggle Navbar & Sidebar Buttons - Pinned to top */}
+              <div className="fixed top-0 left-0 h-[44px] flex items-center gap-1 pl-4 pointer-events-none z-50 ">
+                {!isMobileMenuOpen && (
+                  <button
+                    onClick={() => setIsMobileMenuOpen(true)}
+                    className="pointer-events-auto min-[1024px]:hidden text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-md transition-colors"
+                  >
+                    <Menu className="h-[20px] w-[20px]" strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
+
+              {/* Navbar */}
+              <Navbar
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+                isScrolled={isScrolled}
+                setIsGoalInfoModalOpen={setIsGoalInfoModalOpen}
+                isSidebarVisible={isSidebarVisible}
+              />
+              <div className="h-[44px]" />
+
+              <main
+                className={`flex-1  ${isFullBleed ? "flex flex-col overflow-hidden" : "overflow-y-auto p-8 md:p-12 lg:px-16"}`}
+                onScroll={(e) => setIsScrolled(e.target.scrollTop > 10)}
+              >
+                <Outlet context={{ setIsFullBleed, setIsGoalInfoModalOpen }} />
+              </main>
+
             </div>
 
-            {/* Navbar */}
-            <Navbar
-              setIsMobileMenuOpen={setIsMobileMenuOpen}
-              isScrolled={isScrolled}
-              setIsGoalInfoModalOpen={setIsGoalInfoModalOpen}
-              isSidebarVisible={isSidebarVisible}
-            />
-            <div className="h-[44px]" />
-
-            <main
-              className={`flex-1  ${isFullBleed ? "flex flex-col overflow-hidden" : "overflow-y-auto p-8 md:p-12 lg:px-16"}`}
-              onScroll={(e) => setIsScrolled(e.target.scrollTop > 10)}
-            >
-              <Outlet context={{ setIsFullBleed, setIsGoalInfoModalOpen }} />
-            </main>
+            <GoalInfoModal isOpen={isGoalInfoModalOpen} onClose={() => setIsGoalInfoModalOpen(false)} />
 
           </div>
-
-          <GoalInfoModal isOpen={isGoalInfoModalOpen} onClose={() => setIsGoalInfoModalOpen(false)} />
-
-        </div>
+        </WorkspaceSocketContext.Provider>
       )}
+
     </>
   )
 }

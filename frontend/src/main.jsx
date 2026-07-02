@@ -13,7 +13,7 @@ import store from './store/store.js'
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // <StrictMode>
     <Provider store={store}>
 
       <QueryClientProvider client={queryClient}>
@@ -29,5 +29,5 @@ createRoot(document.getElementById('root')).render(
       </QueryClientProvider>
 
     </Provider>
-  </StrictMode>
+  // </StrictMode>
 )
