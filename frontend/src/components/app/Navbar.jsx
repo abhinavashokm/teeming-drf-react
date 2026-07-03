@@ -8,6 +8,7 @@ import useGoal from '../../hooks/goal/useGoal';
 import useGoalId from '../../hooks/params/useGoalId';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { NotificationBell } from './NotificationBell';
+import { PresenceIndicator } from './PresenceIndicator';
 
 
 
@@ -61,7 +62,8 @@ function Navbar({ isNavbarVisible, isSidebarVisible, isScrolled, showShadow = fa
 
         </div>
 
-        <div className="flex items-center pr-4 mr-2 justify-end">
+        <div className="flex items-center gap-2 pr-4 mr-2 justify-end">
+          <PresenceIndicator />
           <NotificationBell />
         </div>
 
