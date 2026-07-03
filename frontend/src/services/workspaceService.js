@@ -52,13 +52,18 @@ export const workspaceService = {
     },
 
     createLogoUploadUrl: async (slug, contentType) => {
-        const res = await api.post(`/workspaces/${slug}/logo/upload-url/`, {"contentType": contentType})
+        const res = await api.post(`/workspaces/${slug}/logo/upload-url/`, { "contentType": contentType })
         return res.data
     },
 
     //(for saving filekey in the workspace db table)
     saveWorkspaceLogo: async (slug, fileKey) => {
-        const res = await api.post(`/workspaces/${slug}/logo/`,{ logoKey: fileKey });
+        const res = await api.post(`/workspaces/${slug}/logo/`, { logoKey: fileKey });
+        return res.data;
+    },
+
+    fetchOnlineMembers: async (slug) => {
+        const res = await api.get(`/workspaces/${slug}/online-members/`);
         return res.data;
     },
 

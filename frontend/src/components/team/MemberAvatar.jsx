@@ -10,7 +10,7 @@
  *   className   {string}  Extra classes on the wrapper
  */
 
-import clsx from "clsx";
+import { cn } from "../../utils/cn"
 import { getAvatarColor } from "../../utils/styleUtils";
 
 function deriveInitials(name = '', initialsOverride) {
@@ -61,11 +61,11 @@ function MemberAvatar({
     const hasImage = Boolean(preview || avatarUrl);
 
     return (
-        <div className={`relative inline-flex shrink-0 ${className}`}>
+        <div className={`relative flex items-center shrink-0 ${className}`}>
             <div
-                className={clsx(
-                    "rounded-full flex items-center justify-center font-medium shrink-0 overflow-hidden",
+                className={cn(
                     SIZE_CLASSES[size] ?? SIZE_CLASSES.md,
+                    "rounded-full flex items-center justify-center font-medium shrink-0 overflow-hidden",
                     !hasImage && color
                 )}
             >

@@ -10,6 +10,10 @@ export const workspaceQueryKeys = {
         ...root(slug),
         'members'
     ],
+    onlineMembers: (slug) => [
+        ...root(slug),
+        'onlineMembers'
+    ],
     pendingInvitations: (slug) => [
         ...root(slug),
         'pendingInvitations'

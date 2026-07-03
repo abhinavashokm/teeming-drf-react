@@ -13,6 +13,7 @@ function useWorkspaceQueryKeys() {
         all: workspaceQueryKeys.all,
         root: workspaceQueryKeys.root(workspaceSlug),
         members: workspaceQueryKeys.members(workspaceSlug),
+        onlineMembers: workspaceQueryKeys.onlineMembers(workspaceSlug),
         pendingInvitations: workspaceQueryKeys.pendingInvitations(workspaceSlug),
         goals: workspaceQueryKeys.goals(workspaceSlug),
         goal:  workspaceQueryKeys.goal(workspaceSlug, goalId),

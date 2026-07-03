@@ -1,25 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import MemberAvatar from "../team/MemberAvatar";
+import useOnlineMembers from "../../hooks/workspace/useOnlineMembers";
+import useAuth from "../../hooks/auth/useAuth";
 
 const MAX_STACK = 4;
-
-// ---- DUMMY DATA (remove once useWorkspaceSocketContext provides real data) ----
-const DUMMY_ONLINE_USERS = [
-    { id: "1", fullName: "Priya Sharma", email: "priya.sharma@teeming.io", avatarUrl: null },
-    { id: "2", fullName: "Arjun Mehta", email: "arjun.mehta@teeming.io", avatarUrl: null },
-    { id: "3", fullName: "Sara Khan", email: "sara.khan@teeming.io", avatarUrl: null },
-    { id: "4", fullName: "Dev Patel", email: "dev.patel@teeming.io", avatarUrl: null },
-    { id: "5", fullName: "Neha Gupta", email: "neha.gupta@teeming.io", avatarUrl: null },
-];
-// --------------------------------------------------------------------------
+const MAX_VISIBLE_ROWS = 6;
 
 export function PresenceIndicator() {
-    const onlineUsers = DUMMY_ONLINE_USERS;
+
+    const { data: currentUser } = useAuth()
+    const { data: onlineMembers } = useOnlineMembers();
+
+    const onlineUsers = (onlineMembers ?? []).filter(user => user.email !== currentUser.email);
 
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const onlineCount = onlineUsers.length;
+    const needsScroll = onlineCount > MAX_VISIBLE_ROWS;
     const visibleStack = onlineUsers.slice(0, MAX_STACK);
     const overflowCount = onlineCount - visibleStack.length;
 
@@ -75,7 +73,9 @@ export function PresenceIndicator() {
                         <h3 className="text-[11px] font-semibold text-gray-500 tracking-wider mb-2">
                             ONLINE — {onlineCount}
                         </h3>
-                        <div className="space-y-2.5 max-h-[240px] overflow-y-auto">
+                        <div
+                            className={`space-y-2.5 ${needsScroll ? "max-h-[240px] overflow-y-auto" : ""}`}
+                        >
                             {onlineUsers.map(user => (
                                 <PresenceRow key={user.id} user={user} />
                             ))}
