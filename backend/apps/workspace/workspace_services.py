@@ -4,6 +4,8 @@ from django.db.models import Case, When, Value, IntegerField, Q, Count, Prefetch
 from . import exceptions
 from apps.subscription.services import subscription_services
 from apps.subscription.models import WorkspaceSubscription
+from core import redis_store
+from .helpers.workspace_helper import make_live_presence_key
 
 
 @transaction.atomic
@@ -13,14 +15,14 @@ def create_workspace_with_free_plan(current_user, data):
     """
     workspace = Workspace.objects.create(**data)
 
-    #add current user a membership to workspace as role owner
+    # add current user a membership to workspace as role owner
     WorkspaceMember.objects.create(
         user=current_user,
         workspace=workspace,
         role=WorkspaceMember.RoleChoices.OWNER,
     )
 
-    #create free plan subscription
+    # create free plan subscription
     subscription_services.create_free_plan_subscription(workspace=workspace)
 
     return workspace
@@ -32,10 +34,7 @@ def fetch_user_workspace_list(user):
         workspace__is_deleted=False,
     ).select_related("workspace")
 
-    return [
-        m.workspace
-        for m in memberships
-    ]
+    return [m.workspace for m in memberships]
 
 
 def add_workspace_member(user, workspace, role):
@@ -184,5 +183,36 @@ def list_workspaces(search: str = "", status: str = "all", plan: str = "all"):
 
 
 def get_workspace_members_count(workspace):
-    
+
     return WorkspaceMember.objects.in_workspace(workspace).count()
+
+
+def add_online_user(workspace_slug, user_id):
+    """add live presence to redis"""
+
+    redis_store.add_to_set(
+        key=make_live_presence_key(workspace_slug=workspace_slug),
+        value=str(user_id),
+    )
+
+
+def remove_online_user(workspace_slug, user_id):
+    """remove live presence from redis"""
+
+    redis_store.remove_from_set(
+        key=make_live_presence_key(workspace_slug=workspace_slug),
+        value=str(user_id),
+    )
+
+
+def get_online_members(workspace):
+    """get members of a workspace who are currently online"""
+
+    user_ids = redis_store.get_set_members(
+        make_live_presence_key(workspace_slug=workspace.slug)
+    )
+
+    return WorkspaceMember.objects.filter(
+        workspace=workspace,
+        user_id__in=user_ids,
+    ).select_related("user")

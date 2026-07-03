@@ -21,6 +21,9 @@ from apps.goal import goal_services
 from apps.user import user_services
 from core.services import s3_service
 
+from core.redis_store import get_set_members
+from .models import WorkspaceMember
+
 
 class ListUserWorkspacesView(APIView):
     """
@@ -249,3 +252,16 @@ class SaveWorkspaceLogoUrlView(MemberBaseView):
         )
 
         return success_response()
+
+
+class WorkspaceOnlineMembersView(MemberBaseView):
+
+    def get(self, request, **kwargs):
+
+        online_members = workspace_services.get_online_members(
+            workspace=request.workspace
+        )
+
+        return success_response(
+            data=WorkspaceMemberSerializer(online_members, many=True).data,
+        )

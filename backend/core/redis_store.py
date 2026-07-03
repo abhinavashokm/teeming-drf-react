@@ -28,3 +28,22 @@ def delete_data(key: str) -> None:
 def exists(key: str) -> bool:
     """Check if a key exists in cache."""
     return cache.get(key) is not None
+
+
+def add_to_set(key: str, value: str) -> None:
+    """Add a value to a Redis set."""
+    cache.client.get_client().sadd(key, value)
+
+
+def remove_from_set(key: str, value: str) -> None:
+    """Remove a value from a Redis set."""
+    cache.client.get_client().srem(key, value)
+
+
+def get_set_members(key: str) -> list[str]:
+    """Return all members of a Redis set."""
+    members = cache.client.get_client().smembers(key)
+    return [
+        member.decode() if isinstance(member, bytes) else member
+        for member in members
+    ]

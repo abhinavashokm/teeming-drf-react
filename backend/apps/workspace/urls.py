@@ -9,6 +9,7 @@ from .views import (
     LeaveWorkspaceView,
     WorkspaceLogoUploadURLView,
     SaveWorkspaceLogoUrlView,
+    WorkspaceOnlineMembersView,
 )
 
 urlpatterns = [
@@ -27,6 +28,7 @@ urlpatterns = [
                 path("members/leave/", LeaveWorkspaceView.as_view()),
                 path("logo/", SaveWorkspaceLogoUrlView.as_view()),
                 path("logo/upload-url/", WorkspaceLogoUploadURLView.as_view()),
+                path("online-members/", WorkspaceOnlineMembersView.as_view()),
             ]),
     ),
 ]

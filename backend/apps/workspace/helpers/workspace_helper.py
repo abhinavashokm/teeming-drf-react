@@ -1,5 +1,6 @@
 from core.exceptions.base import NotFoundException
 from ..models import Workspace
+from core import redis_store
 
 
 def get_workspace_or_raise(workspace_id):
@@ -9,3 +10,5 @@ def get_workspace_or_raise(workspace_id):
         raise NotFoundException("Workspace not found")
 
 
+def make_live_presence_key(workspace_slug):
+    return redis_store.make_key(prefix="presence", identifier=workspace_slug)

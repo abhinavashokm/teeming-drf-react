@@ -1,5 +1,6 @@
 import json
 import logging
+from apps.workspace import workspace_services
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 logger = logging.getLogger("websocket")
@@ -24,6 +25,13 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.presence_group, self.channel_name)
 
         await self.accept()
+
+        # add live presence to redis
+        workspace_services.add_online_user(
+            workspace_slug=self.workspace.slug,
+            user_id=self.user.id
+        )
+
         logger.info(
             f": Workspace WS connected: user={self.user.full_name}-{self.user.email}"
         )
@@ -46,6 +54,13 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(
                 self.presence_group, self.channel_name
             )
+
+            # remove live presence from redis
+            workspace_services.remove_online_user(
+                workspace_slug=self.workspace.slug,
+                user_id=self.user.id
+            )
+
             await self.channel_layer.group_send(
                 self.presence_group,
                 {
