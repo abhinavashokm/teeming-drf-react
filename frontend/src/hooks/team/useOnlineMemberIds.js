@@ -3,7 +3,9 @@ import { workspaceService } from "../../services/workspaceService";
 import useWorkspaceSlug from "../params/useWorkspaceSlug";
 import useWorkspaceQueryKeys from "../helper/useWorkspaceQueryKeys";
 
-function useOnlineMembers() {
+function useOnlineMemberIds() {
+//returns array of userId's of currently online members
+
     const workspaceSlug = useWorkspaceSlug();
     const workspaceKeys = useWorkspaceQueryKeys();
 
@@ -16,4 +18,4 @@ function useOnlineMembers() {
     });
 }
 
-export default useOnlineMembers;
+export default useOnlineMemberIds;

@@ -1,5 +1,6 @@
 import json
 import logging
+from asgiref.sync import sync_to_async
 from apps.workspace import workspace_services
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -27,7 +28,7 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         # add live presence to redis
-        workspace_services.add_online_user(
+        await sync_to_async(workspace_services.add_online_user)(
             workspace_slug=self.workspace.slug,
             user_id=self.user.id
         )
@@ -56,7 +57,7 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
             )
 
             # remove live presence from redis
-            workspace_services.remove_online_user(
+            await sync_to_async(workspace_services.remove_online_user)(
                 workspace_slug=self.workspace.slug,
                 user_id=self.user.id
             )

@@ -59,9 +59,9 @@ function MemberRow({ member }) {
 
             {/* Status — desktop only */}
             <div className="hidden sm:flex sm:col-span-3 items-center gap-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${member.status === 'Online now' ? 'bg-teeming-green' : 'bg-gray-300'}`} />
-                <span className={`text-[12px] ${member.status === 'Online now' ? 'text-gray-600' : 'text-gray-500'}`}>
-                    {member.status ?? 'Unknown'}
+                <span className={`w-1.5 h-1.5 rounded-full ${member.isOnline ? 'bg-teeming-green' : 'bg-gray-300'}`} />
+                <span className={`text-[12px] ${member.isOnline ? 'text-gray-600' : 'text-gray-500'}`}>
+                    {member.isOnline ? "online" : 'offline'}
                 </span>
             </div>
 

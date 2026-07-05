@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import MemberAvatar from "../team/MemberAvatar";
-import useOnlineMembers from "../../hooks/workspace/useOnlineMembers";
+import useOnlineMemberIds from "../../hooks/team/useOnlineMemberIds";
 import useAuth from "../../hooks/auth/useAuth";
+import useTeamMembersWithPresence from "../../hooks/team/useTeamMembersWithPresence";
 
 const MAX_STACK = 4;
 const MAX_VISIBLE_ROWS = 6;
@@ -9,9 +10,9 @@ const MAX_VISIBLE_ROWS = 6;
 export function PresenceIndicator() {
 
     const { data: currentUser } = useAuth()
-    const { data: onlineMembers } = useOnlineMembers();
+    const { data: teamMembers } = useTeamMembersWithPresence()
 
-    const onlineUsers = (onlineMembers ?? []).filter(user => user.email !== currentUser.email);
+    const onlineUsers = (teamMembers ?? []).filter(user => user.email !== currentUser.email && user.isOnline);
 
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);

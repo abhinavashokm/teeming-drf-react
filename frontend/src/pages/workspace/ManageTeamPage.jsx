@@ -12,11 +12,12 @@ import { useCan } from '../../hooks/permissions/useCan';
 import useTeamMembers from '../../hooks/team/useTeamMembers';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import UpgradePlanModal from '../../components/subscription/UpgradePlanModal';
+import useTeamMembersWithPresence from '../../hooks/team/useTeamMembersWithPresence';
 
 
 function ManageTeamPage() {
 
-    const { data: teamMembers, isSuccess, isPending } = useTeamMembers()
+    const { data: teamMembers, isSuccess, isPending } = useTeamMembersWithPresence()
 
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');

@@ -205,14 +205,9 @@ def remove_online_user(workspace_slug, user_id):
     )
 
 
-def get_online_members(workspace):
-    """get members of a workspace who are currently online"""
+def get_online_members_user_id(workspace):
+    """get ids of workspace members who are currently online"""
 
-    user_ids = redis_store.get_set_members(
+    return redis_store.get_set_members(
         make_live_presence_key(workspace_slug=workspace.slug)
     )
-
-    return WorkspaceMember.objects.filter(
-        workspace=workspace,
-        user_id__in=user_ids,
-    ).select_related("user")

@@ -258,10 +258,9 @@ class WorkspaceOnlineMembersView(MemberBaseView):
 
     def get(self, request, **kwargs):
 
-        online_members = workspace_services.get_online_members(
+        online_members = workspace_services.get_online_members_user_id(
             workspace=request.workspace
         )
-
         return success_response(
-            data=WorkspaceMemberSerializer(online_members, many=True).data,
+            data={"online_members": online_members},
         )
