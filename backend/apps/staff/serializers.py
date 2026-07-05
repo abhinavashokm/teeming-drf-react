@@ -19,7 +19,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             "id",
             "full_name",
             "email",
-            "avatar_key",
+            "avatar_thumb_key",
             "workspace_count",
             "is_active",
             "status",
@@ -36,7 +36,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
         return "active"
 
     def get_avatar_url(self, obj):
-        return s3_service.build_s3_url(obj.avatar_key)
+        return s3_service.build_s3_url(obj.avatar_thumb_key)
 
 
 class AdminUserWorkspaceSerializer(serializers.Serializer):
@@ -62,7 +62,7 @@ class AdminUserDetailSerializer(serializers.ModelSerializer):
             "id",
             "full_name",
             "email",
-            "avatar_key",
+            "avatar_thumb_key",
             "status",
             "is_staff",
             "created_at",

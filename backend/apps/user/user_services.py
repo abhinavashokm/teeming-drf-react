@@ -230,7 +230,8 @@ def update_last_visited_workspace(current_user, workspace):
     current_user.save()
 
 
-def save_user_avatar_key(user, avatar_key):
+def save_user_avatar_thumb_key(user, avatar_thumb_key, avatar_full_key):
 
-    user.avatar_key = avatar_key
+    user.avatar_thumb_key = avatar_thumb_key
+    user.avatar_full_key = avatar_full_key
     user.save()

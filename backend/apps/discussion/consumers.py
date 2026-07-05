@@ -54,7 +54,7 @@ class DiscussionConsumer(AsyncWebsocketConsumer):
                     "id": str(message.sender.id),
                     "fullName": message.sender.full_name,
                     "email": message.sender.email,
-                    "avatarUrl": s3_service.build_s3_url(message.sender.avatar_key),
+                    "avatarUrl": s3_service.build_s3_url(message.sender.avatar_thumb_key),
                 },
                 "createdAt": message.created_at.isoformat(),
             },

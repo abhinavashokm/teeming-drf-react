@@ -123,7 +123,7 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
         fields = ["id", "role", "joined_at", "user_id", "full_name", "email", "avatar_url"]
 
     def get_avatar_url(self, obj):
-        return s3_service.build_s3_url(obj.user.avatar_key)
+        return s3_service.build_s3_url(obj.user.avatar_thumb_key)
 
 
 class WorkspaceRoleUpdateSerializer(serializers.ModelSerializer):

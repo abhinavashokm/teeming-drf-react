@@ -24,7 +24,6 @@ export function useWorkspaceSocket() {
 
                     case "presence_update": {
                         //live presence of workspace members
-                        console.log(data)
                         queryClient.setQueryData(
                             workspaceKeys.onlineMembers,
                             (old = []) => {

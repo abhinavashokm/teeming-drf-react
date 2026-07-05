@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name='user',
             old_name='avatar_url',
-            new_name='avatar_key',
+            new_name='avatar_thumb_key',
         ),
         migrations.AlterModelTable(
             name='user',

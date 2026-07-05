@@ -5,6 +5,7 @@ export const s3Service = {
             method: "PUT",
             headers: {
                 "Content-Type": file.type,
+                // "Cache-Control": "public, max-age=31536000, immutable",
             },
             body: file,
         });

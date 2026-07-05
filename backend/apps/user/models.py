@@ -34,7 +34,8 @@ class User(BaseAbstractModel, AbstractUser):
 
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
-    avatar_key = models.CharField(max_length=500, blank=True, null=True)
+    avatar_thumb_key = models.CharField(max_length=500, blank=True, null=True)
+    avatar_full_key = models.CharField(max_length=500, blank=True, null=True)
 
     last_workspace = models.ForeignKey(
         "workspace.Workspace",

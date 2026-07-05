@@ -67,15 +67,16 @@ class CompleteSignupView(APIView):
 
         refresh_token = user_services.generate_tokens_for_user(user)
 
-
         response_data = {
             "user": UserSerializer(user).data,
             "access_token": str(refresh_token.access_token),
         }
 
         if joined_workspace:
-            response_data["joined_workspace"] = JoinedWorkspaceSerializer(joined_workspace).data
-        
+            response_data["joined_workspace"] = JoinedWorkspaceSerializer(
+                joined_workspace
+            ).data
+
         response = success_response(
             message="Email verified successfully",
             data=response_data,
@@ -179,9 +180,7 @@ class MeView(APIView):
     def get(self, request):
         """retrieve authenticated user"""
 
-        return success_response(
-            data=serializers.MeSerilaizer(request.user).data
-        )
+        return success_response(data=serializers.MeSerilaizer(request.user).data)
 
     def patch(self, request):
         """update authenticated user"""
@@ -306,39 +305,33 @@ class ValidateResetTokenView(APIView):
         return success_response(
             message="password reset token verified", status_code=status.HTTP_200_OK
         )
-    
+
 
 class UserAvatarUploadURLView(APIView):
-    
+
     def post(self, request, **kwargs):
 
         serializer = serializers.UserAvatarUploadURLSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         res_data = s3_service.generate_user_avatar_upload_url(
-            user=request.user,
-            content_type=serializer.validated_data["content_type"]
+            user=request.user, content_type=serializer.validated_data["content_type"]
         )
 
-        return success_response(
-            data=res_data
-        )
+        return success_response(data=res_data)
 
 
 class SaveUserAvatarUrlView(APIView):
 
     def post(self, request, **kwargs):
 
-        print(request.data)
-
         serializer = serializers.UserAvatarUrlSaveSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        print(serializer.validated_data)
-
-        user_services.save_user_avatar_key(
+        user_services.save_user_avatar_thumb_key(
             user=request.user,
-            avatar_key=serializer.validated_data["avatar_key"]
+            avatar_thumb_key=serializer.validated_data["avatar_thumb_key"],
+            avatar_full_key=serializer.validated_data["avatar_full_key"],
         )
 
         return success_response()

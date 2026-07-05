@@ -10,7 +10,7 @@ class GetAvatarUrlMixin(serializers.Serializer):
     avatar_url = serializers.SerializerMethodField()
 
     def get_avatar_url(self, obj):
-        return s3_service.build_s3_url(obj.avatar_key)
+        return s3_service.build_s3_url(obj.avatar_thumb_key)
     
 
 class UserBasicSerializer(GetAvatarUrlMixin, serializers.ModelSerializer):
@@ -129,4 +129,4 @@ class UserAvatarUrlSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["avatar_key"]
+        fields = ["avatar_thumb_key", "avatar_full_key"]
