@@ -8,11 +8,13 @@ import InputField from '../../components/ui/form/InputField';
 import AppButton from '../../components/ui/buttons/AppButton';
 import MemberAvatar from '../../components/team/MemberAvatar';
 import useUploadProfilePic from '../../hooks/profile/useUploadProfilePic';
+import useRemoveUserAvatar from '../../hooks/profile/useRemoveUserAvatar';
 
 function MyAccountPage() {
 
     const { data: currentUser } = useAuth()
     const { mutateAsync: updateProfile, isPending: updatingProfileDetails } = useUpdateProfile()
+    const { mutate: removeUserAvatar, isPending: removingUserAvatar } = useRemoveUserAvatar()
 
     const { register, handleSubmit, reset, formState: { isDirty } } = useForm({
         defaultValues: {
@@ -55,6 +57,15 @@ function MyAccountPage() {
             }
         };
     }, [avatarPreview]);
+
+    const handleRemoveAvatar = () => {
+        removeUserAvatar(null, {
+            onSuccess: () => {
+                setAvatarFile(null);
+                setAvatarPreview(null);
+            }
+        })
+    }
 
     /* -------------------------------------------------------------------------- */
     /* update profile details */
@@ -134,16 +145,17 @@ function MyAccountPage() {
                                 >
                                     Upload new photo
                                 </button>
-                                <button
+                                <AppButton
                                     type="button"
-                                    onClick={() => {
-                                        setAvatarFile(null);
-                                        setAvatarPreview(null);
-                                    }}
-                                    className="px-3.5 py-1.5 text-[13px] font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={handleRemoveAvatar}
+                                    loading={removingUserAvatar}
+                                    disabled={!avatarFile && !currentUser?.avatarUrl}
+                                    className="!text-gray-500 hover:!text-red-600 hover:!bg-red-50 !border-transparent hover:!border-red-200"
                                 >
                                     Remove
-                                </button>
+                                </AppButton>
                             </div>
                         </div>
                         <div className="space-y-5">

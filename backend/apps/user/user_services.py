@@ -11,6 +11,7 @@ from .models import User
 from . import exceptions
 from apps.invitation import invitation_services as invitation_services
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
+from core.services import s3_service
 
 
 def register_user(full_name, email, password):
@@ -235,3 +236,18 @@ def save_user_avatar_thumb_key(user, avatar_thumb_key, avatar_full_key):
     user.avatar_thumb_key = avatar_thumb_key
     user.avatar_full_key = avatar_full_key
     user.save()
+
+
+def remove_user_avatar(user):
+    old_thumb_key = user.avatar_thumb_key
+    old_full_key = user.avatar_full_key
+
+    user.avatar_thumb_key = None
+    user.avatar_full_key = None
+    user.save(update_fields=["avatar_thumb_key", "avatar_full_key"])
+
+    # clean up S3 after DB update succeeds
+    s3_service.delete_object(old_thumb_key)
+    s3_service.delete_object(old_full_key)
+
+    return user

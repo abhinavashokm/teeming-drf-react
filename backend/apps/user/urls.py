@@ -14,6 +14,7 @@ from .views import (
     ValidateResetTokenView,
     UserAvatarUploadURLView,
     SaveUserAvatarUrlView,
+    RemoveUserAvatarUrlView,
 )
 
 urlpatterns = [
@@ -27,6 +28,7 @@ urlpatterns = [
     path("me/", MeView.as_view()),
     path("me/avatar/upload-url/", UserAvatarUploadURLView.as_view()),
     path("me/avatar/", SaveUserAvatarUrlView.as_view()),
+    path("me/avatar/remove/", RemoveUserAvatarUrlView.as_view()),
     path("logout/", CookieTokenBlacklistView.as_view(), name="logout"),
     path("validate-reset-token/", ValidateResetTokenView.as_view()),
     # google Oauth urls

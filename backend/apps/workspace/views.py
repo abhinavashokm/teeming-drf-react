@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from core.permission_views import (
     MemberBaseView,
     WorkspacePermissionBaseView,
+    AdminBaseView,
 )
 from core.permissions import IsWorkspaceMember, IsWorkspaceAdmin, IsWorkspaceOwner
 from apps.subscription.services import subscription_services
@@ -225,7 +226,7 @@ class LeaveWorkspaceView(MemberBaseView):
         )
 
 
-class WorkspaceLogoUploadURLView(MemberBaseView):
+class WorkspaceLogoUploadURLView(AdminBaseView):
 
     def post(self, request, **kwargs):
 
@@ -240,7 +241,7 @@ class WorkspaceLogoUploadURLView(MemberBaseView):
         return success_response(data=data)
 
 
-class SaveWorkspaceLogoUrlView(MemberBaseView):
+class SaveWorkspaceLogoUrlView(AdminBaseView):
 
     def post(self, request, **kwargs):
 
@@ -248,12 +249,23 @@ class SaveWorkspaceLogoUrlView(MemberBaseView):
         serializer.is_valid(raise_exception=True)
 
         workspace_services.save_workspace_logo_url(
-            workspace=request.workspace, 
+            workspace=request.workspace,
             logo_thumb_key=serializer.validated_data["logo_thumb_key"],
             logo_full_key=serializer.validated_data["logo_full_key"],
         )
 
         return success_response()
+
+
+class RemoveWorkspaceLogoUrlView(AdminBaseView):
+
+    def post(self, request, **kwargs):
+
+        workspace_services.remove_workspace_logo(workspace=request.workspace)
+
+        return success_response(
+            message="Workspace logo removed"
+        )
 
 
 class WorkspaceOnlineMembersView(MemberBaseView):

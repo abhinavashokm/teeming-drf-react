@@ -32,7 +32,18 @@ export function PresenceIndicator() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    if (onlineCount === 0) return null;
+    if (onlineCount === 0) {
+        return (
+            <div className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-lg">
+                <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-gray-100 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                </span>
+                <span className="text-[12px] font-medium text-gray-400 whitespace-nowrap">
+                   0 online
+                </span>
+            </div>
+        );
+    }
 
     return (
         <div className="relative" ref={dropdownRef}>

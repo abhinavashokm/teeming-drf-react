@@ -10,6 +10,7 @@ import useUploadWorkspaceLogo from '../../hooks/workspace/useUploadWorkspaceLogo
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { slugify } from '../../utils/slugUtils';
 import WorkspaceAvatar from '../../components/workspace/WorkspaceAvatar';
+import useRemoveWorkspaceLogo from '../../hooks/workspace/useRemoveWorkspaceLogo';
 
 
 function WorkspaceSettingsPage() {
@@ -17,6 +18,7 @@ function WorkspaceSettingsPage() {
     const { data: currentWorkspace } = useWorkspace()
     const { mutate: deleteWorkspace, isPending: isDeleteWorkspacePending } = useDeleteWorkspace()
     const { mutate: uploadLogo } = useUploadWorkspaceLogo()
+    const { mutate: removeLogo, isPending: removingLogo } = useRemoveWorkspaceLogo()
 
     const { register, handleSubmit, reset, resetField, setValue, formState: { isDirty } } = useForm({
         defaultValues: {
@@ -74,6 +76,17 @@ function WorkspaceSettingsPage() {
             }
         };
     }, [logoPreview]);
+
+    const handleRemoveLogo = () => {
+        removeLogo(null, {
+            onSuccess: () => {
+                setLogoFile(null)
+                setLogoPreview(null)
+            }
+        })
+    }
+
+
 
 
     /* -------------------------------------------------------------------------- */
@@ -163,12 +176,17 @@ function WorkspaceSettingsPage() {
                                 Upload new logo
                             </button>
 
-                            <button
-                                type='button'
-                                className="px-3.5 py-1.5 text-[13px] font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            <AppButton
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={handleRemoveLogo}
+                                loading={removingLogo}
+                                disabled={!logoFile && !currentWorkspace?.logoUrl}
+                                className="!text-gray-500 hover:!text-red-600 hover:!bg-red-50 !border-transparent hover:!border-red-200"
                             >
                                 Remove
-                            </button>
+                            </AppButton>
 
                         </div>
                     </div>

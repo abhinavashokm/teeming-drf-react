@@ -62,6 +62,11 @@ export const workspaceService = {
         return res.data;
     },
 
+    removeWorkspaceLogo: async (slug) => {
+        const res = await api.post(`/workspaces/${slug}/logo/remove/`);
+        return res.data;
+    },
+
     fetchOnlineMembers: async (slug) => {
         const res = await api.get(`/workspaces/${slug}/online-members/`);
         return res.data;

@@ -3,6 +3,9 @@ import boto3
 import time
 
 from django.conf import settings
+import logging
+
+logger = logging.getLogger("s3bucket")
 
 
 def build_s3_url(file_key):
@@ -72,3 +75,13 @@ def generate_workspace_logo_upload_url(workspace, content_type):
 def generate_user_avatar_upload_url(user, content_type):
     prefix_key = f"users/{user.email}/avatar" 
     return _generate_thumb_full_upload_urls_and_keys(prefix_key, content_type)
+
+
+def delete_object(file_key):
+    if not file_key:
+        return
+    try:
+        client = _get_client()
+        client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file_key)
+    except Exception:
+        logger.exception(f"Failed to delete S3 object: {file_key}")

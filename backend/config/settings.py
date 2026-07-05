@@ -314,44 +314,54 @@ AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
 
 # logger
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{asctime} {levelname} {module} {message}',
-            'style': '{',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname} {module} {message}",
+            "style": "{",
         },
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
-        'websocket_file': {
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'websocket.log',
-            'formatter': 'verbose',
+        "websocket_file": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "websocket.log",
+            "formatter": "verbose",
+        },
+        "s3bucket_file": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "s3bucket.log",
+            "formatter": "verbose",
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'billing': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
+        "billing": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
         },
-        'websocket': {
-            'handlers': ['websocket_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "websocket": {
+            "handlers": ["websocket_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "s3bucket": {
+            "handlers": ["s3bucket_file"],
+            "level": "ERROR",
+            "propagate": False,
         },
     },
 }

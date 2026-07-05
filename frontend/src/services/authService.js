@@ -108,6 +108,11 @@ const authService = {
         return res.data;
     },
 
+    removeProfilePic: async () => {
+        const res = await api.post(`/auth/me/avatar/remove/`);
+        return res.data;
+    },
+
 }
 
 export default authService

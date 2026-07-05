@@ -335,3 +335,14 @@ class SaveUserAvatarUrlView(APIView):
         )
 
         return success_response()
+    
+
+class RemoveUserAvatarUrlView(APIView):
+
+    def post(self, request, **kwargs):
+
+        user_services.remove_user_avatar(user=request.user)
+
+        return success_response(
+            message="User profile picture removed"
+        )

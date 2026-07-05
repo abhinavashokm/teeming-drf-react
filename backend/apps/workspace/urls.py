@@ -10,6 +10,7 @@ from .views import (
     WorkspaceLogoUploadURLView,
     SaveWorkspaceLogoUrlView,
     WorkspaceOnlineMembersView,
+    RemoveWorkspaceLogoUrlView,
 )
 
 urlpatterns = [
@@ -28,6 +29,7 @@ urlpatterns = [
                 path("members/leave/", LeaveWorkspaceView.as_view()),
                 path("logo/", SaveWorkspaceLogoUrlView.as_view()),
                 path("logo/upload-url/", WorkspaceLogoUploadURLView.as_view()),
+                path("logo/remove/", RemoveWorkspaceLogoUrlView.as_view()),
                 path("online-members/", WorkspaceOnlineMembersView.as_view()),
             ]),
     ),

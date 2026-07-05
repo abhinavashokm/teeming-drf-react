@@ -6,6 +6,7 @@ from apps.subscription.services import subscription_services
 from apps.subscription.models import WorkspaceSubscription
 from core import redis_store
 from .helpers.workspace_helper import make_live_presence_key
+from core.services import s3_service
 
 
 @transaction.atomic
@@ -212,3 +213,19 @@ def get_online_members_user_id(workspace):
     return redis_store.get_set_members(
         make_live_presence_key(workspace_slug=workspace.slug)
     )
+
+
+def remove_workspace_logo(workspace):
+
+    old_thumb_key = workspace.logo_thumb_key
+    old_full_key = workspace.logo_full_key
+
+    workspace.logo_thumb_key = None
+    workspace.logo_full_key = None
+    workspace.save(update_fields=["logo_thumb_key", "logo_full_key"])
+
+    # clean up S3 after DB update succeeds
+    s3_service.delete_object(old_thumb_key)
+    s3_service.delete_object(old_full_key)
+
+    return workspace
