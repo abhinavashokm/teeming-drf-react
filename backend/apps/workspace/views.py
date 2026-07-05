@@ -248,7 +248,9 @@ class SaveWorkspaceLogoUrlView(MemberBaseView):
         serializer.is_valid(raise_exception=True)
 
         workspace_services.save_workspace_logo_url(
-            workspace=request.workspace, logo_key=serializer.validated_data["logo_key"]
+            workspace=request.workspace, 
+            logo_thumb_key=serializer.validated_data["logo_thumb_key"],
+            logo_full_key=serializer.validated_data["logo_full_key"],
         )
 
         return success_response()

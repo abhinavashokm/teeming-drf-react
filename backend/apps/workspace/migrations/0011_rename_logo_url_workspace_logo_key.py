@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name='workspace',
             old_name='logo_url',
-            new_name='logo_key',
+            new_name='logo_thumb_key',
         ),
     ]

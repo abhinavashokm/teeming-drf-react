@@ -4,6 +4,7 @@ import useAppMutation from "../base/useAppMutation";
 import useWorkspaceQueryKeys from "../helper/useWorkspaceQueryKeys";
 import useWorkspace from "./useWorkspace";
 import { s3Service } from "../../services/s3Service";
+import { prepareAvatarUploads } from "../../utils/fileUtils";
 
 const useUploadWorkspaceLogo = () => {
 
@@ -13,19 +14,22 @@ const useUploadWorkspaceLogo = () => {
   return useAppMutation({
     mutationFn: async (file) => {
 
-      const { data: { uploadUrl, fileKey } } =
+      //compress and prepare full and thumbnail versions of the image
+      const { thumb, full } = await prepareAvatarUploads(file)
+
+      const { data: { thumbUploadUrl, fullUploadUrl, thumbFileKey, fullFileKey } } =
         await workspaceService.createLogoUploadUrl(
-          currentWorkspace.slug, file.type
+          currentWorkspace.slug, full.type
         );
 
-      await s3Service.uploadLogoToS3(
-        uploadUrl,
-        file
-      );
+      await Promise.all([
+        s3Service.uploadLogoToS3(thumbUploadUrl, thumb),
+        s3Service.uploadLogoToS3(fullUploadUrl, full),
+      ]);
 
       return workspaceService.saveWorkspaceLogo(
         currentWorkspace.slug,
-        fileKey
+        { "logo_thumb_key": thumbFileKey, "logo_full_key": fullFileKey }
       );
 
     },

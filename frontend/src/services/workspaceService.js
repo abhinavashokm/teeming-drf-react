@@ -57,8 +57,8 @@ export const workspaceService = {
     },
 
     //(for saving filekey in the workspace db table)
-    saveWorkspaceLogo: async (slug, fileKey) => {
-        const res = await api.post(`/workspaces/${slug}/logo/`, { logoKey: fileKey });
+    saveWorkspaceLogo: async (slug, data) => {
+        const res = await api.post(`/workspaces/${slug}/logo/`, data);
         return res.data;
     },
 

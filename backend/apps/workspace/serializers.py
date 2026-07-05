@@ -72,7 +72,7 @@ class WorkspaceUpdateSerializer(
 class BuildWorkspaceLogoUrlMixin:
 
     def get_logo_url(self, obj):
-        return s3_service.build_s3_url(file_key=obj.logo_key)
+        return s3_service.build_s3_url(file_key=obj.logo_thumb_key)
 
 
 class BaseWorkspaceSerializer(BuildWorkspaceLogoUrlMixin, serializers.ModelSerializer):
@@ -141,4 +141,4 @@ class WorkspaceLogoSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Workspace
-        fields = ["logo_key"]
+        fields = ["logo_thumb_key", "logo_full_key"]

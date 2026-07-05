@@ -108,9 +108,10 @@ def leave_workspace(user, workspace):
     member.delete()
 
 
-def save_workspace_logo_url(workspace, logo_key):
+def save_workspace_logo_url(workspace, logo_thumb_key, logo_full_key):
 
-    workspace.logo_key = logo_key
+    workspace.logo_thumb_key = logo_thumb_key
+    workspace.logo_full_key = logo_full_key
     workspace.save()
 
 

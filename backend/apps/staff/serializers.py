@@ -137,6 +137,6 @@ class AdminWorkspaceListSerializer(serializers.ModelSerializer):
         ]
 
     def get_logo_url(self, obj):
-        return s3_service.build_s3_url(obj.logo_key)
+        return s3_service.build_s3_url(obj.logo_thumb_key)
 
 

@@ -27,36 +27,13 @@ def _get_client():
     )
 
 
-def generate_workspace_logo_upload_url(workspace, content_type):
-    client = _get_client()
-
-    key = f"workspaces/" f"{workspace.slug}/" f"logo/" f"logo.png"
-
-    url = client.generate_presigned_url(
-        ClientMethod="put_object",
-        Params={
-            "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
-            "Key": key,
-            "ContentType": content_type,
-        },
-        ExpiresIn=300,
-    )
-
-    return {
-        "upload_url": url,
-        "file_key": key,
-    }
-
-
-def generate_user_avatar_upload_url(user, content_type):
+def _generate_thumb_full_upload_urls_and_keys(prefix_key, content_type):
+    """
+    Generate presigned PUT URLs for a thumb + full image pair
+    under the given S3 key prefix.
+    """
     client = _get_client()
     version = int(time.time())
-
-    prefix_key = (
-        f"users/"
-        f"{user.email}/"
-        f"avatar"
-    )
 
     thumb_key = f"{prefix_key}/thumb-{version}.png"
     full_key = f"{prefix_key}/full-{version}.png"
@@ -85,3 +62,13 @@ def generate_user_avatar_upload_url(user, content_type):
         "thumb_file_key": thumb_key,
         "full_file_key": full_key,
     }
+
+
+def generate_workspace_logo_upload_url(workspace, content_type):
+    prefix_key = f"workspaces/{workspace.slug}/logo"
+    return _generate_thumb_full_upload_urls_and_keys(prefix_key, content_type)
+
+
+def generate_user_avatar_upload_url(user, content_type):
+    prefix_key = f"users/{user.email}/avatar" 
+    return _generate_thumb_full_upload_urls_and_keys(prefix_key, content_type)
