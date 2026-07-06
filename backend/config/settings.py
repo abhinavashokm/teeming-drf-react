@@ -216,7 +216,9 @@ CACHES = {
 }
 
 
+# -----------------------------------------------------------------------------
 # JWT setup and custom exception
+# -----------------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -234,6 +236,7 @@ REST_FRAMEWORK = {
         "auth": "50/minute",  # login, refresh, register
         "sensitive": "5/minute",  # password reset, email verify
         "ai": "20/hour",  # ai features
+        "dj_rest_auth": "10/minute",
     },
 }
 

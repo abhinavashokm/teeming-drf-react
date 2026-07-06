@@ -1,53 +1,29 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useDispatch } from "react-redux";
 import { errorCodes } from "../../constants/errorCodes";
-import { globalQueryKeys } from "../../constants/queryKeys";
 import { ROUTE_PATHS } from "../../constants/routePaths.js";
 import useInvitationToken from "../../hooks/invite/useInvitationToken";
 import authService from "../../services/authService";
-import { setAccessToken } from "../../store/slices/authSlice";
 import { getErrorCode } from "../../utils/apiParser.js";
-import useAppMutation from "../base/useAppMutation.js";
-import useWelcomeBanner from "../invite/useWelcomeBanner.js";
-import useNavigateWithToast from "../routes/useNavigateWithToast.js";
-import useWorkspaceRedirect from "../routes/useWorkspaceRedirect.js";
 import { showApiError } from "../../utils/toast.js";
+import useAppMutation from "../base/useAppMutation.js";
+import useNavigateWithToast from "../routes/useNavigateWithToast.js";
+import useAuthSuccess from "./useAuthSuccess.js";
 
 
 export function useVerifyOtp({ onError = null } = {}) {
-    const dispatch = useDispatch()
-    const queryClient = useQueryClient()
+
     const navigateWithToast = useNavigateWithToast()
-
     const invitationToken = useInvitationToken()
-    const { setWelcome } = useWelcomeBanner()
-
-    const { mutate: redirectToWorkspace } = useWorkspaceRedirect()
+    const handleAuthSuccess = useAuthSuccess()
 
     return useAppMutation({
         mutationFn: (data) => authService.verifyOTP(data, invitationToken),
         onSuccess: (res) => {
-
             sessionStorage.removeItem('verificationEmail')
-
-             dispatch(setAccessToken(res.data.accessToken));
-             queryClient.setQueryData(globalQueryKeys.auth, res.data.user);
-
-
-            //if user joined a workspace using invite token, store workspace deatils for showing welcome banner
-            if (res.data?.joinedWorkspace) {
-                setWelcome(res.data.joinedWorkspace.slug, res.data.user.id)
-            }
-
-            redirectToWorkspace();
-
+            handleAuthSuccess(res.data)
         },
         onError: (error) => {
-
             console.log(error)
-
             onError?.()
-
             if (getErrorCode(error) === errorCodes.SIGNUP_SESSION_EXPIRED) {
                 navigateWithToast({
                     path: ROUTE_PATHS.SIGNUP,
@@ -55,7 +31,7 @@ export function useVerifyOtp({ onError = null } = {}) {
                     error: true,
                     replace: true,
                 })
-            }else{
+            } else {
                 showApiError(error)
             }
         },

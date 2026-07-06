@@ -266,21 +266,15 @@ class GoogleLoginView(SocialLoginView):
     client_class = OAuth2Client
 
     def get_response(self):
-        response = super().get_response()
-
-        access_token = response.data.get("access")
-        refresh_token = response.data.get("refresh")
 
         user = user_services.get_or_update_google_user(self.request.user)
+        
+        refresh_token = user_services.generate_tokens_for_user(self.request.user)
 
         res = success_response(
             data={
-                "access_token": access_token,
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "full_name": user.full_name,
-                },
+                "access_token": str(refresh_token.access_token),
+                "user": serializers.MeSerilaizer(user).data,
             }
         )
 

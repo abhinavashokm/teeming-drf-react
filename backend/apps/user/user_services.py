@@ -5,7 +5,6 @@ from rest_framework_simplejwt.exceptions import TokenError
 from django.db import transaction
 
 from .helpers import otp_helper, signup_helper, password_reset_helper
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from .models import User
 from . import exceptions
