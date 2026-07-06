@@ -24,6 +24,7 @@ from .helpers import cookie_helper
 from core.throttles import AuthThrottle, SensitiveThrottle
 from apps.invitation.serializers import JoinedWorkspaceSerializer
 from core.services import s3_service
+from . import tasks
 
 
 class RegisterView(APIView):
@@ -76,6 +77,14 @@ class CompleteSignupView(APIView):
             response_data["joined_workspace"] = JoinedWorkspaceSerializer(
                 joined_workspace
             ).data
+
+        #celery welcome mail
+        tasks.send_email_task.delay(
+            subject="Welcome!",
+            message="Thanks for signing up.",
+            recipient_list=[user.email],
+            full_name=user.full_name,
+        )
 
         response = success_response(
             message="Email verified successfully",
@@ -335,7 +344,7 @@ class SaveUserAvatarUrlView(APIView):
         )
 
         return success_response()
-    
+
 
 class RemoveUserAvatarUrlView(APIView):
 
@@ -343,6 +352,4 @@ class RemoveUserAvatarUrlView(APIView):
 
         user_services.remove_user_avatar(user=request.user)
 
-        return success_response(
-            message="User profile picture removed"
-        )
+        return success_response(message="User profile picture removed")
