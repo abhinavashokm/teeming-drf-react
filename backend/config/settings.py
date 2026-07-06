@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "dj_rest_auth",
     # myapps
+    "core",
     "apps.user",
     "apps.workspace",
     "apps.invitation",
@@ -184,7 +185,9 @@ STATIC_URL = "static/"
 AUTH_USER_MODEL = "user.User"
 
 
+# -----------------------------------------------------------------------------
 # Email service
+# -----------------------------------------------------------------------------
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp.gmail.com"
@@ -195,7 +198,9 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 
+# -----------------------------------------------------------------------------
 # Redis configuration
+# -----------------------------------------------------------------------------
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = os.getenv("REDIS_PORT")
 REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
@@ -289,7 +294,9 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 
+# -----------------------------------------------------------------------------
 # STRIPE PAYMENT GATEWAY CONIFGURATION
+# -----------------------------------------------------------------------------
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
@@ -297,7 +304,9 @@ STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 stripe.api_key = STRIPE_SECRET_KEY
 
 
+# -----------------------------------------------------------------------------
 # AI INTEGRATION
+# -----------------------------------------------------------------------------
 AI_PROVIDER = os.environ.get("AI_PROVIDER", default="gemini")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_MODEL = os.environ.get(
@@ -306,7 +315,9 @@ GEMINI_MODEL = os.environ.get(
 )
 USE_MOCK_AI = os.getenv("USE_MOCK_AI", "False").lower() == "true"
 
+# -----------------------------------------------------------------------------
 # S3 Bucket configuration
+# -----------------------------------------------------------------------------
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 

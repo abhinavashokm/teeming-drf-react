@@ -48,7 +48,7 @@ def send_workspace_invitations(emails, role, workspace, invited_by):
     invite_link = invitationHelper.generate_invite_link(invitation_token)
 
     invitationHelper.send_invite_mail(
-        to=emails,
+        recipient_list=emails,
         expires_at=format_expiry_date(expires_at),
         invite_link=invite_link,
         workspace=workspace.name,

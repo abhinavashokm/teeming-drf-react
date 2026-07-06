@@ -12,6 +12,8 @@ from . import exceptions
 from apps.invitation import invitation_services as invitation_services
 from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from core.services import s3_service
+from core import tasks
+from django.conf import settings
 
 
 def register_user(full_name, email, password):
@@ -36,6 +38,7 @@ def register_user(full_name, email, password):
     otp_helper.send_verification_otp_email(email=email, otp=otp)
 
 
+@transaction.atomic
 def verify_otp_and_complete_signup(email, otp, invitation_token=None):
     """
     1] verify otp
@@ -43,16 +46,25 @@ def verify_otp_and_complete_signup(email, otp, invitation_token=None):
     3] if invitation token exists, verify and add accept it
     """
 
-    with transaction.atomic():
-        user = _verify_otp_and_create_user(email=email, otp=otp)
+    user = _verify_otp_and_create_user(email=email, otp=otp)
 
-        joined_workspace = None
+    joined_workspace = None
 
-        if invitation_token:
-            joined_workspace = invitation_services.verify_token_and_accept_invitation(
-                invitation_token, user
-            )
-        return user, joined_workspace
+    if invitation_token:
+        joined_workspace = invitation_services.verify_token_and_accept_invitation(
+            invitation_token, user
+        )
+
+    #celery welcome mail
+    tasks.send_email_task.delay(
+        subject="Welcome!",
+        plain_message="Thanks for signing up.",
+        recipient_list=[user.email],
+        template_name= "emails/welcome_mail.html",
+        context={"name": user.full_name, "login_url": settings.FRONTEND_URL}
+    )
+
+    return user, joined_workspace
 
 
 def _verify_otp_and_create_user(email, otp):
