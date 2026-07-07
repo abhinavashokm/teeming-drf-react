@@ -19,12 +19,13 @@ import ProtectedRoute from "./guards/ProtectedRoute";
 import PublicRoute from "./guards/PublicRoute";
 import workspaceRoutes from "./workspaceRoutes";
 import adminRoutes from "./adminRoutes";
+import LandingPage from "../pages/landing/LandingPage";
 
 const publicRoutes = {
     element: <PublicRoute />,
     children: [
         { path: "auth", ...authRoutes },
-        { path: "/", element: <Navigate to={ROUTE_PATHS.LOGIN} /> }
+        { path: "/", element: <LandingPage/> }
     ]
 }
 
