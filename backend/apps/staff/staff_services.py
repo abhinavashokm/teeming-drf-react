@@ -1,7 +1,6 @@
 from apps.user.models import User
 from django.db.models import Count, Q
 from apps.user.helpers.user_helper import get_user_or_raise
-from core.services import s3_service
 
 
 def list_users(search=None, status=None):

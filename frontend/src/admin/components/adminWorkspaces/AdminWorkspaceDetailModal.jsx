@@ -1,22 +1,10 @@
 import React, { useState } from 'react';
 import { X, Search, ChevronDown, Shield } from 'lucide-react';
 import WorkspaceAvatar from '../../../components/workspace/WorkspaceAvatar';
+import useWorkspaceMembers from '../../hooks/workspaces/useWorkspaceMembers';
+import MemberAvatar from '../../../components/team/MemberAvatar';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
-
-const AVATAR_COLORS = [
-    'bg-blue-500', 'bg-violet-500', 'bg-emerald-500',
-    'bg-orange-500', 'bg-rose-500', 'bg-cyan-500',
-    'bg-pink-500', 'bg-amber-500', 'bg-indigo-500',
-];
-
-const colorFor = (id = '') =>
-    AVATAR_COLORS[
-    [...String(id)].reduce((acc, c) => acc + c.charCodeAt(0), 0) % AVATAR_COLORS.length
-    ];
-
-const getInitials = (name = '') =>
-    name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '??';
 
 const formatDate = (iso) =>
     iso
@@ -38,20 +26,14 @@ export default function AdminWorkspaceDetailModal({ workspace, onClose }) {
 
     if (!workspace) return null;
 
-    // members come from the workspace object; adjust the source key once your
-    // details endpoint is wired up (e.g. workspace.members array)
-    // const allMembers = (workspace?.members ?? []).map(m => ({
-    //     ...m,
-    //     name: m.fullName || m.email || 'Unknown',
-    //     initials: getInitials(m.fullName || m.email || ''),
-    //     color: colorFor(m.id),
-    // }));
-    const allMembers = []
+    const { data: members } = useWorkspaceMembers(workspace.id)
+    const allMembers = members ?? []
 
     const filteredMembers = allMembers.filter(m => {
+        const query = memberSearchQuery.toLowerCase();
         const matchesSearch =
-            m.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
-            (m.email ?? '').toLowerCase().includes(memberSearchQuery.toLowerCase());
+            (m.fullName ?? '').toLowerCase().includes(query) ||
+            (m.email ?? '').toLowerCase().includes(query);
         const matchesRole = memberRoleFilter === 'All' || m.role === memberRoleFilter;
         return matchesSearch && matchesRole;
     });
@@ -70,7 +52,7 @@ export default function AdminWorkspaceDetailModal({ workspace, onClose }) {
                     </button>
 
                     <div className="flex items-start gap-5">
-                        <WorkspaceAvatar workspace={workspace} size='xl'  />
+                        <WorkspaceAvatar workspace={workspace} size='xl' />
 
                         <div className="flex-1 mt-1">
                             <div className="flex items-center gap-3 mb-1">
@@ -168,18 +150,8 @@ export default function AdminWorkspaceDetailModal({ workspace, onClose }) {
                                             <tr key={member.id} className="hover:bg-slate-50/50 transition-colors">
                                                 <td className="px-6 py-3.5">
                                                     <div className="flex items-center gap-3">
-                                                        {member.avatarUrl ? (
-                                                            <img
-                                                                src={member.avatarUrl}
-                                                                alt={member.name}
-                                                                className="w-8 h-8 rounded-full object-cover shrink-0"
-                                                            />
-                                                        ) : (
-                                                            <div className={`w-8 h-8 rounded-full ${member.color} flex items-center justify-center text-[11px] font-bold text-white shrink-0`}>
-                                                                {member.initials}
-                                                            </div>
-                                                        )}
-                                                        <span className="text-[13px] font-bold text-slate-900">{member.name}</span>
+                                                        <MemberAvatar user={member} size="sm" />
+                                                        <span className="text-[13px] font-bold text-slate-900">{member.fullName}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-3.5 text-[13px] text-slate-500">{member.email}</td>

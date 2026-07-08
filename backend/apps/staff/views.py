@@ -5,12 +5,14 @@ from rest_framework import status
 from core.responses.api_response import success_response, error_response
 from . import serializers, staff_services
 from apps.workspace import workspace_services
+from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from apps.subscription.services import (
     subscription_services,
     plan_services,
     billing_services,
 )
 from apps.subscription import serializers as subscription_serializer
+from apps.workspace import serializers as workspace_serializer
 from apps.subscription.constants import PlanCode
 
 
@@ -58,6 +60,21 @@ class AdminWorkspaceListView(AdminBaseView):
                 "workspaces": serializers.AdminWorkspaceListSerializer(
                     workspaces, many=True
                 ).data
+            }
+        )
+    
+
+class AdminWorkspaceDetailView(AdminBaseView):
+    
+    def get(self, request, workspace_id):
+        
+        workspace = get_workspace_or_raise(workspace_id=workspace_id)
+        members = workspace_services.fetch_workspace_members_ordered(workspace=workspace)
+        
+
+        return success_response(
+            data={
+                "members": workspace_serializer.WorkspaceMemberSerializer(members, many=True).data
             }
         )
 
