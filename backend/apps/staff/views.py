@@ -14,22 +14,71 @@ from apps.subscription.services import (
 from apps.subscription import serializers as subscription_serializer
 from apps.workspace import serializers as workspace_serializer
 from apps.subscription.constants import PlanCode
+from rest_framework.pagination import PageNumberPagination
 
 
 class AdminBaseView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
 
+class AdminPageNumberPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+    @staticmethod
+    def get_pagination_details(paginator):
+        return {
+            "count": paginator.page.paginator.count,
+            "totalPages": paginator.page.paginator.num_pages,
+            "currentPage": paginator.page.number,
+            "hasNext": paginator.page.has_next(),
+            "hasPrevious": paginator.page.has_previous(),
+        }
+
+
 class AdminUserListView(AdminBaseView):
+    pagination_class = AdminPageNumberPagination
+
+    def get(self, request):
+        search = request.query_params.get("search", "").strip()
+        status = request.query_params.get("status", "all").lower()
+        joined = request.query_params.get("joined")
+
+        users = staff_services.list_users(search=search, status=status, joined=joined)
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(users, request, view=self)
+
+        return success_response(
+            data={
+                "users": serializers.AdminUserListSerializer(page, many=True).data,
+                "pagination": AdminPageNumberPagination.get_pagination_details(
+                    paginator
+                ),
+            }
+        )
+
+
+class AdminListRecentSignups(AdminBaseView):
+    pagination_class = AdminPageNumberPagination
 
     def get(self, request):
         search = request.query_params.get("search", "").strip()
         status = request.query_params.get("status", "all").lower()
 
-        users = staff_services.list_users(search=search, status=status)
+        users = staff_services.list_users(search=search, status=status, joined="today", order_by="-created_at")
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(users, request, view=self)
 
         return success_response(
-            data={"users": serializers.AdminUserListSerializer(users, many=True).data}
+            data={
+                "users": serializers.AdminUserListSerializer(page, many=True).data,
+                "pagination": AdminPageNumberPagination.get_pagination_details(
+                    paginator
+                ),
+            }
         )
 
 
@@ -43,6 +92,7 @@ class AdminUserDetailView(AdminBaseView):
 
 
 class AdminWorkspaceListView(AdminBaseView):
+    pagination_class = AdminPageNumberPagination
 
     def get(self, request):
         search = request.query_params.get("search", "").strip()
@@ -55,26 +105,35 @@ class AdminWorkspaceListView(AdminBaseView):
             plan=plan,
         )
 
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(workspaces, request, view=self)
+
         return success_response(
             data={
                 "workspaces": serializers.AdminWorkspaceListSerializer(
-                    workspaces, many=True
-                ).data
+                    page, many=True
+                ).data,
+                "pagination": AdminPageNumberPagination.get_pagination_details(
+                    paginator
+                ),
             }
         )
-    
+
 
 class AdminWorkspaceDetailView(AdminBaseView):
-    
+
     def get(self, request, workspace_id):
-        
+
         workspace = get_workspace_or_raise(workspace_id=workspace_id)
-        members = workspace_services.fetch_workspace_members_ordered(workspace=workspace)
-        
+        members = workspace_services.fetch_workspace_members_ordered(
+            workspace=workspace
+        )
 
         return success_response(
             data={
-                "members": workspace_serializer.WorkspaceMemberSerializer(members, many=True).data
+                "members": workspace_serializer.WorkspaceMemberSerializer(
+                    members, many=True
+                ).data
             }
         )
 

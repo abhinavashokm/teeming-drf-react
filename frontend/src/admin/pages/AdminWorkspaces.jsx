@@ -1,15 +1,17 @@
-import React, { useState, useMemo } from 'react';
 import {
-  Search, ChevronDown, SlidersHorizontal, Download, MoreHorizontal,
+  ChevronDown,
+  Download, MoreHorizontal,
+  Search,
+  SlidersHorizontal,
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { adminWorkspaceService } from '../services/adminWorkspaceService';
-import { ADMIN_QUERY_KEYS } from '../constants/queryKeys';
-import WorkspaceAvatar from "../../components/workspace/WorkspaceAvatar"
-import { formatDate } from "../../utils/timeUtils"
-import AdminWorkspaceDetailModal from '../components/adminWorkspaces/AdminWorkspaceDetailModal';
-import DangerConfirmationModal from "../../components/ui/modal/DangerConfirmationModal"
+import React, { useMemo, useState } from 'react';
+import DangerConfirmationModal from "../../components/ui/modal/DangerConfirmationModal";
+import WorkspaceAvatar from "../../components/workspace/WorkspaceAvatar";
 import { planCodes } from '../../constants/subscriptionConstants';
+import { formatDate } from "../../utils/timeUtils";
+import AdminWorkspaceDetailModal from '../components/adminWorkspaces/AdminWorkspaceDetailModal';
+import DataTable from '../components/table/DataTable';
+import useAdminWorkspaces from '../hooks/workspaces/useAdminWorkspaces';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -56,20 +58,6 @@ const transformWorkspace = (ws) => ({
   },
 });
 
-// ─── skeleton row ────────────────────────────────────────────────────────────
-
-function SkeletonRow() {
-  return (
-    <tr className="animate-pulse">
-      {[200, 140, 60, 60, 100, 40].map((w, i) => (
-        <td key={i} className="px-6 py-4">
-          <div className="h-4 bg-slate-100 rounded" style={{ width: w }} />
-        </td>
-      ))}
-    </tr>
-  );
-}
-
 // ─── main component ──────────────────────────────────────────────────────────
 
 export default function AdminWorkspaces() {
@@ -79,18 +67,27 @@ export default function AdminWorkspaces() {
   const [page, setPage] = useState(1);
   const [dropdownOpenId, setDropdownOpenId] = useState(null);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: [...ADMIN_QUERY_KEYS.WORKSPACES, { search: searchQuery, status: statusFilter, plan: planFilter, page }],
-    queryFn: () =>
-      adminWorkspaceService.adminListWorkspaces({ search: searchQuery, status: statusFilter, plan: planFilter, page })
-        .then(res => res.data),
-    keepPreviousData: true,
-  });
+  const { data, isLoading, isError } = useAdminWorkspaces(
+    {
+      search: searchQuery,
+      status: statusFilter,
+      page,
+    }
+  )
 
   const workspacesList = useMemo(
     () => (data?.workspaces ?? []).map(transformWorkspace),
     [data]
   );
+
+  const pagination = data?.pagination ?? {};
+  const {
+    count: totalCount = 0,
+    totalPages = 0,
+    currentPage = page,
+    hasNext = false,
+    hasPrevious = false,
+  } = pagination;
 
   const toggleDropdown = (e, id) => {
     e.stopPropagation();
@@ -104,7 +101,96 @@ export default function AdminWorkspaces() {
   }, []);
 
   const [workspaceDetails, setWorkspaceDetails] = useState(null)
+  const [suspendTarget, setSuspendTarget] = useState(null)
   const [isConfirmSuspendOpen, setIsConfirmSuspendOpen] = useState(false)
+
+  const columns = [
+    {
+      key: 'workspace',
+      header: 'Workspace',
+      render: (workspace) => (
+        <div className="flex items-center gap-3">
+          <WorkspaceAvatar workspace={workspace} size='sm' />
+          <div className="flex flex-col items-start">
+            <span className={`text-[14px] font-medium leading-tight mb-1 ${workspace.status === 'Suspended' ? 'text-red-600 line-through' : 'text-slate-900'}`}>
+              {workspace.name}
+            </span>
+            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${workspace.planColor}`}>
+              {workspace.plan}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'owner',
+      header: 'Owner',
+      render: (workspace) => (
+        <div className="flex items-center gap-2">
+          {workspace.owner.avatarUrl ? (
+            <img
+              src={workspace.owner.avatarUrl}
+              alt={workspace.owner.name}
+              className="w-6 h-6 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div className={`w-6 h-6 rounded-full ${workspace.owner.color} flex items-center justify-center text-[10px] font-bold text-white shrink-0`}>
+              {workspace.owner.initials}
+            </div>
+          )}
+          <span className="text-[14px] text-slate-700">{workspace.owner.name}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'members',
+      header: 'Members',
+      render: (workspace) => <span className="text-[14px] text-slate-700 font-medium">{workspace.members}</span>,
+    },
+    {
+      key: 'goals',
+      header: 'Goals',
+      render: (workspace) => <span className="text-[14px] text-slate-700 font-medium">{workspace.goals}</span>,
+    },
+    {
+      key: 'created',
+      header: 'Created',
+      render: (workspace) => <span className="text-[14px] text-slate-500">{workspace.created}</span>,
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      align: 'right',
+      render: (workspace, index) => (
+        <>
+          <button
+            onClick={(e) => toggleDropdown(e, workspace.id)}
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+          >
+            <MoreHorizontal className="w-[18px] h-[18px]" />
+          </button>
+
+          {dropdownOpenId === workspace.id && (
+            <div className={`absolute right-8 ${index >= workspacesList.length - 2 ? 'bottom-10 mb-2' : 'top-10 mt-1'} w-44 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 overflow-hidden text-left`}>
+              <button
+                onClick={() => { setWorkspaceDetails(workspace); setDropdownOpenId(null); }}
+                className="w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center text-left"
+              >
+                View Details
+              </button>
+              <button
+                disabled={workspace.status === 'Suspended'}
+                onClick={() => { setSuspendTarget(workspace); setIsConfirmSuspendOpen(true); setDropdownOpenId(null); }}
+                className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center text-left font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Suspend Workspace
+              </button>
+            </div>
+          )}
+        </>
+      ),
+    },
+  ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
@@ -167,146 +253,25 @@ export default function AdminWorkspaces() {
         </div>
       </div>
 
-      {/* table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Workspace</th>
-                <th className="px-6 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Owner</th>
-                <th className="px-6 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Members</th>
-                <th className="px-6 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Goals</th>
-                <th className="px-6 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Created</th>
-                <th className="px-6 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {isLoading ? (
-                Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)
-              ) : isError ? (
-                <tr>
-                  <td colSpan="6" className="px-6 py-10 text-center text-red-500 text-sm">
-                    Failed to load workspaces. Please try again.
-                  </td>
-                </tr>
-              ) : workspacesList.length > 0 ? (
-                workspacesList.map((workspace, index) => (
-                  <tr
-                    key={workspace.id}
-                    className={`hover:bg-slate-50/50 transition-colors group ${index % 2 !== 0 ? 'bg-slate-50/30' : ''}`}
-                  >
-                    {/* workspace */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-
-                        <WorkspaceAvatar workspace={workspace} size='sm' />
-
-
-                        <div className="flex flex-col items-start">
-                          <span className={`text-[14px] font-medium leading-tight mb-1 ${workspace.status === 'Suspended' ? 'text-red-600 line-through' : 'text-slate-900'}`}>
-                            {workspace.name}
-                          </span>
-                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${workspace.planColor}`}>
-                            {workspace.plan}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* owner */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        {workspace.owner.avatarUrl ? (
-                          <img
-                            src={workspace.owner.avatarUrl}
-                            alt={workspace.owner.name}
-                            className="w-6 h-6 rounded-full object-cover shrink-0"
-                          />
-                        ) : (
-                          <div className={`w-6 h-6 rounded-full ${workspace.owner.color} flex items-center justify-center text-[10px] font-bold text-white shrink-0`}>
-                            {workspace.owner.initials}
-                          </div>
-                        )}
-                        <span className="text-[14px] text-slate-700">{workspace.owner.name}</span>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 text-[14px] text-slate-700 font-medium">{workspace.members}</td>
-                    <td className="px-6 py-4 text-[14px] text-slate-700 font-medium">{workspace.goals}</td>
-                    <td className="px-6 py-4 text-[14px] text-slate-500">{workspace.created}</td>
-
-                    {/* actions */}
-                    <td className="px-6 py-4 text-right relative">
-                      <button
-                        onClick={(e) => toggleDropdown(e, workspace.id)}
-                        className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
-                      >
-                        <MoreHorizontal className="w-[18px] h-[18px]" />
-                      </button>
-
-                      {dropdownOpenId === workspace.id && (
-                        <div className={`absolute right-8 ${index >= workspacesList.length - 2 ? 'bottom-10 mb-2' : 'top-10 mt-1'} w-44 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 overflow-hidden text-left`}>
-                          <button
-                            onClick={() => setWorkspaceDetails(workspace)}
-                            className="w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center text-left"
-                          >
-                            View Details
-                          </button>
-                          <button
-                            disabled={workspace.status === 'Suspended'}
-                            onClick={() => setIsConfirmSuspendOpen(true)}
-                            className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center text-left font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Suspend Workspace
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-6 py-10 text-center text-slate-500 text-sm">
-                    No workspaces found matching your filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* pagination */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-          <span className="text-[13px] text-slate-500">
-            Showing {workspacesList.length} workspaces
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-3 py-1.5 border border-slate-200 rounded-md text-[13px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
-            >
-              Previous
-            </button>
-            <span className="px-3 py-1.5 bg-blue-600 border border-blue-600 rounded-md text-[13px] font-medium text-white shadow-sm">
-              {page}
-            </span>
-            <button
-              onClick={() => setPage(p => p + 1)}
-              disabled={workspacesList.length === 0}
-              className="px-3 py-1.5 border border-slate-200 rounded-md text-[13px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
+      <DataTable
+        columns={columns}
+        data={workspacesList}
+        isPending={isLoading}
+        isError={isError}
+        emptyMessage="No workspaces found matching your filters."
+        errorMessage="Failed to load workspaces. Please try again."
+        skeletonRows={8}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
+        onPageChange={setPage}
+      />
 
       {
         workspaceDetails && <AdminWorkspaceDetailModal workspace={workspaceDetails} onClose={() => setWorkspaceDetails(null)} />
       }
-
 
       <DangerConfirmationModal
         isOpen={isConfirmSuspendOpen}
@@ -317,7 +282,6 @@ export default function AdminWorkspaces() {
         confirmButtonText="Yes, Suspend"
         isLoading={isLoading}
       />
-
 
     </div>
   );

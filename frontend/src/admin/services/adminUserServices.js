@@ -2,10 +2,11 @@ import api from "../../api/axios"
 
 export const adminUserService = {
 
-    adminListUsers: async ({ search = '', status = 'All', page = 1 }) => {
+    adminListUsers: async ({ search = '', status = 'All', joined='', page = 1 }) => {
         const res = await api.get('/admin/users/', {
             params: {
                 search,
+                joined: joined.toLowerCase(),
                 ...(status !== 'All' && { status: status.toLowerCase() }),
                 page,
             }

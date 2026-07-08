@@ -1,9 +1,10 @@
 from apps.user.models import User
 from django.db.models import Count, Q
 from apps.user.helpers.user_helper import get_user_or_raise
+from django.utils import timezone
 
 
-def list_users(search=None, status=None):
+def list_users(search=None, status=None, joined=None, order_by="-created_at"):
     queryset = User.objects.annotate(
         workspace_count=Count(
             "workspace_memberships",
@@ -13,7 +14,7 @@ def list_users(search=None, status=None):
             ),
             distinct=True,
         )
-    ).order_by("-created_at")
+    ).order_by(order_by)
 
     if search:
         queryset = queryset.filter(
@@ -25,6 +26,9 @@ def list_users(search=None, status=None):
             queryset = queryset.filter(is_active=True)
         elif status == "suspended":
             queryset = queryset.filter(is_active=False)
+
+    if joined == "today":
+        queryset = queryset.filter(created_at__date=timezone.localdate())
 
     return queryset
 

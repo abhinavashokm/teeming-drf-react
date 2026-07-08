@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { adminWorkspaceService } from '../../services/adminWorkspaceServices'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { adminWorkspaceService } from '../../services/adminWorkspaceService'
 import { ADMIN_QUERY_KEYS } from '../../constants/queryKeys'
 
 function useAdminWorkspaces({ search = '', status = 'All', plan = 'All', page = 1 } = {}) {
@@ -9,6 +9,7 @@ function useAdminWorkspaces({ search = '', status = 'All', plan = 'All', page = 
             const res = await adminWorkspaceService.adminListWorkspaces({ search, status, plan, page })
             return res.data
         },
+        placeholderData: keepPreviousData,
     })
 }
 

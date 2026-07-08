@@ -1,15 +1,16 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { adminUserService } from '../../services/adminUserServices'
 import { ADMIN_QUERY_KEYS } from '../../constants/queryKeys'
 
 
-function useAdminUsers({ search = '', status = 'All', page = 1 } = {}) {
+function useAdminUsers({ search = '', status = 'All', joined = '', page = 1 } = {}) {
     return useQuery({
-        queryKey: [...ADMIN_QUERY_KEYS.USERS, { search, status, page }],
+        queryKey: [...ADMIN_QUERY_KEYS.USERS, { search, status, joined, page }],
         queryFn: async () => {
-           const res = await adminUserService.adminListUsers({ search, status, page })
-           return res.data
+            const res = await adminUserService.adminListUsers({ search, status, joined, page })
+            return res.data
         },
+        placeholderData: keepPreviousData,
     })
 }
 
