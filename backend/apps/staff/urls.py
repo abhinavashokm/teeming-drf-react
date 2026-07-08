@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     AdminUserListView,
-    UserDetailView,
+    AdminUserDetailView,
     AdminWorkspaceListView,
     AdminPlanListView,
     AdminPlanDetailView,
@@ -15,7 +15,7 @@ from .views import (
 
 urlpatterns = [
     path("users/", AdminUserListView.as_view()),
-    path("users/<uuid:user_id>/", UserDetailView.as_view()),
+    path("users/<uuid:user_id>/", AdminUserDetailView.as_view()),
     path("workspaces/", AdminWorkspaceListView.as_view()),
     path("plans/", AdminPlanListView.as_view()),
     path("plans/<uuid:plan_id>/", AdminPlanDetailView.as_view()),

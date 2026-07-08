@@ -4,5 +4,5 @@ export const ADMIN_QUERY_KEYS = {
     WORKSPACES: ['admin', 'workspaces'],
     PLANS: ['admin', 'plans'],
     TRANSACTIONS: ['admin', 'transactions'],
-    BILLING_OVERVIEW: ['admin', "billing-overview"]
+    BILLING_OVERVIEW: ['admin', "billing-overview"],
 }

@@ -2,10 +2,21 @@ import { X } from 'lucide-react';
 import useAdminUserDetail from "../../hooks/users/useAdminUserDetails";
 import { getAvatarColor } from '../../../utils/styleUtils';
 import MemberAvatar from '../../../components/team/MemberAvatar';
+import WorkspaceAvatar from '../../../components/workspace/WorkspaceAvatar';
 import { formatDate } from '../../../utils/timeUtils';
+import useUserDetails from '../../hooks/users/useUserDetails';
+import useAuth from '../../../hooks/auth/useAuth';
 
+const ROLE_STYLES = {
+    owner: 'bg-purple-100 text-purple-700',
+    admin: 'bg-blue-100 text-blue-700',
+    member: 'bg-slate-100 text-slate-600',
+};
 
-function AdminUserDetails({onClose, userDetails}) {
+function AdminUserDetails({ onClose, userDetails }) {
+
+    const { data: userExtraDetails } = useUserDetails(userDetails.id)
+    const workspaces = userExtraDetails?.workspaces ?? []
 
     return (
         <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
@@ -18,9 +29,6 @@ function AdminUserDetails({onClose, userDetails}) {
                         <X className="w-5 h-5" />
                     </button>
                     <div className="flex items-center gap-5">
-                        {/* <div className={`w-20 h-20 rounded-full ${getAvatarColor(userDetails.id)} flex items-center justify-center text-2xl font-bold text-white shadow-sm shrink-0`}>
-                            {getInitials(userDetails.fullName)}
-                        </div> */}
                         <MemberAvatar user={userDetails} size='xl' />
                         <div>
                             <h2 className="text-xl font-bold text-slate-900 mb-1">{userDetails.fullName}</h2>
@@ -47,7 +55,34 @@ function AdminUserDetails({onClose, userDetails}) {
                             {userDetails.workspaceCount} Total
                         </span>
                     </div>
-                    {/* workspace list renders here from a separate query when needed */}
+
+                    {workspaces.length === 0 ? (
+                        <div className="text-sm text-slate-400 text-center py-8">
+                            Not a member of any workspace
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            {workspaces.map((workspace) => (
+                                <div
+                                    key={workspace.id}
+                                    className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors"
+                                >
+                                    <WorkspaceAvatar workspace={workspace} size="sm" />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-semibold text-slate-900 truncate">
+                                            {workspace.name}
+                                        </div>
+                                        <div className="text-xs text-slate-500 truncate">
+                                            {workspace.memberCount} member{workspace.memberCount === 1 ? '' : 's'}
+                                        </div>
+                                    </div>
+                                    <span className={`text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider shrink-0 ${ROLE_STYLES[workspace.role] ?? 'bg-slate-100 text-slate-600'}`}>
+                                        {workspace.role}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

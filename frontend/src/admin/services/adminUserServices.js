@@ -10,7 +10,6 @@ export const adminUserService = {
                 page,
             }
         })
-        console.log(res.data)
         return res.data
     },
 

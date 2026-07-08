@@ -31,7 +31,7 @@ class AdminUserListView(AdminBaseView):
         )
 
 
-class UserDetailView(AdminBaseView):
+class AdminUserDetailView(AdminBaseView):
 
     def get(self, request, user_id):
 

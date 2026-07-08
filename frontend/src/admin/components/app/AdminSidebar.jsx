@@ -4,9 +4,10 @@ import { NavLink } from 'react-router-dom';
 import useAuth from '../../../hooks/auth/useAuth';
 import useLogout from '../../../hooks/auth/useLogout';
 import AuthLogo from '../../../components/auth/AuthLogo'
+import { ROUTE_PATHS } from '../../../constants/routePaths';
 
 const navItems = [
-    { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Dashboard', path: ROUTE_PATHS.ADMIN_DASHBOARD, icon: LayoutDashboard },
     { name: 'Users', path: '/admin/users', icon: Users },
     { name: 'Workspaces', path: '/admin/workspaces', icon: Layers },
     { name: 'Plan Management', path: '/admin/plan-settings', icon: Settings },

@@ -81,13 +81,18 @@ class AdminUserDetailSerializer(serializers.ModelSerializer):
         from apps.workspace.models import WorkspaceMember
 
         workspaces = (
-            WorkspaceMember.objects.filter(user=obj)
+            WorkspaceMember.objects.filter(
+                user=obj,
+                is_deleted=False,
+                workspace__is_deleted=False,
+            )
             .select_related("workspace")
             .annotate(member_count=Count("workspace__members"))
         )
         return [
             {
                 "id": str(m.workspace.id),
+                "logo_url": s3_service.build_s3_url(m.workspace.logo_thumb_key),
                 "name": m.workspace.name,
                 "slug": m.workspace.slug,
                 "role": m.role,
@@ -138,5 +143,3 @@ class AdminWorkspaceListSerializer(serializers.ModelSerializer):
 
     def get_logo_url(self, obj):
         return s3_service.build_s3_url(obj.logo_thumb_key)
-
-
