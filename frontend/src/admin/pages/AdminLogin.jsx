@@ -25,6 +25,7 @@ export default function AdminLogin() {
   const handleLogin = (data) => {
     adminLogin(data)
   }
+  console.log("hii")
 
   return (
     <div className="min-h-screen bg-[#E9E9E9] flex items-center justify-center p-4 font-sans">
