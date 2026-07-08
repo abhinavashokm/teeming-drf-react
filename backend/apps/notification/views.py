@@ -13,7 +13,7 @@ class NotificationListView(MemberBaseView):
             recipient=request.user,
         )
 
-        data = notification.values('id', 'message', 'is_read', 'created_at', 'workspace__name')
+        data = notification.values('id', 'message', 'is_read', 'created_at', 'workspace__name', 'notification_type', 'target_id')
         print(list(data))
         return success_response(
             data=list(data) or []

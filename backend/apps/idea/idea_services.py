@@ -23,6 +23,7 @@ def create_idea(created_by, workspace, goal_id, data):
         workspace=workspace,
         exclude_user=created_by,
         message=f'{created_by.full_name} created a new idea: "{created_idea.title}" in goal "{created_idea.goal.name}',
+        target_id=created_idea.goal.id,
     )
 
     return created_idea

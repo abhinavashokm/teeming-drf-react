@@ -14,4 +14,5 @@ export const ROUTE_PATHS = {
     WORKSPACE_SETTINGS: (slug) => `${workspacePath(slug)}/settings`,
     GOAL_DASHBOARD: (slug, goal_id) => `${workspacePath(slug)}/goals/${goal_id}`,
     UPGRADE_PLAN: (slug) => `${workspacePath(slug)}/upgrade-plan`,
+    MANAGE_TEAM: (slug) => `${workspacePath(slug)}/manage-team`,
 }

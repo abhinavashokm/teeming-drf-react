@@ -5,6 +5,9 @@ import useNotifications from '../../hooks/notification/useNotifications';
 import useMarkAllNotificationAsRead from '../../hooks/notification/useMarkAllNotificationAsRead';
 import useClearAllNotifications from '../../hooks/notification/useClearAllNotifications';
 import { useWorkspaceSocketContext } from '../../contexts/WorkspaceSocketContext';
+import { resolveNotificationLink } from '../../utils/notificationUtils';
+import useWorkspace from '../../hooks/workspace/useWorkspace'
+import { useNavigate } from 'react-router-dom';
 
 export function NotificationBell() {
 
@@ -74,7 +77,7 @@ export function NotificationBell() {
 
             {open && (
                 <div className="absolute right-0 mt-2 w-[340px] bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
-                    
+
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -122,7 +125,7 @@ export function NotificationBell() {
                                 {unread.length > 0 && (
                                     <div>
                                         {unread.map((n, i) => (
-                                            <NotificationRow key={n.id ?? i} n={n} />
+                                            <NotificationRow key={n.id ?? i} n={n} onNavigate={() => setOpen(false)} />
                                         ))}
                                     </div>
                                 )}
@@ -140,7 +143,7 @@ export function NotificationBell() {
                                 {read.length > 0 && (
                                     <div>
                                         {read.map((n, i) => (
-                                            <NotificationRow key={n.id ?? i} n={n} />
+                                            <NotificationRow key={n.id ?? i} n={n} onNavigate={() => setOpen(false)} />
                                         ))}
                                     </div>
                                 )}
@@ -153,11 +156,35 @@ export function NotificationBell() {
     );
 }
 
-function NotificationRow({ n }) {
+function NotificationRow({ n, onNavigate }) {
+
+    /* -------------------------------------------------------------------------- */
+    /* handle click notification item */
+    /* -------------------------------------------------------------------------- */
+
+    const { data: currentWorkspace } = useWorkspace()
+    const navigate = useNavigate()
+
+    const handleClickItem = () => {
+        console.log("clicke", n)        
+        const link = currentWorkspace ? resolveNotificationLink(n, currentWorkspace.slug) : null;
+        console.log(n)
+        if (link) {
+            navigate(link);
+            onNavigate?.();
+        }
+    };
+
     const timeAgo = formatTimeAgo(n.createdAt);
 
     return (
-        <div className={`px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${!n.isRead ? 'bg-blue-50/40' : ''}`}>
+        <div
+            onClick={handleClickItem}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClickItem(); }}
+            className={`px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 cursor-pointer ${!n.isRead ? 'bg-blue-50/40' : ''}`}
+        >
             <div className="flex items-start gap-2.5">
                 <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${!n.isRead ? 'bg-blue-500' : 'bg-transparent'}`} />
                 <div className="flex-1 min-w-0">

@@ -3,7 +3,7 @@ from channels.layers import get_channel_layer
 from .models import Notification
 
 
-def notify_users(workspace, users, message, exclude_user=None):
+def notify_users(workspace, users, message, target_id=None, exclude_user=None):
     """
     Create notifications and push them via WebSocket
     for a specific list/queryset of User objects.
@@ -20,6 +20,7 @@ def notify_users(workspace, users, message, exclude_user=None):
             recipient=user,
             workspace=workspace,
             message=message,
+            target_id=target_id,
         )
 
         async_to_sync(channel_layer.group_send)(
@@ -35,7 +36,7 @@ def notify_users(workspace, users, message, exclude_user=None):
         )
 
 
-def notify_workspace_members(workspace, message, exclude_user=None):
+def notify_workspace_members(workspace, message, target_id=None, exclude_user=None):
     """
     Creates a Notification record for each workspace member
     and pushes it via WebSocket.
@@ -50,6 +51,7 @@ def notify_workspace_members(workspace, message, exclude_user=None):
         workspace=workspace,
         users=[member.user for member in members],
         message=message,
+        target_id=target_id,
     )
 
 

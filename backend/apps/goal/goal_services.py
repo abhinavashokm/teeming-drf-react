@@ -3,6 +3,7 @@ from .helpers.goal_helper import get_goal_or_raise
 from django.db.models import Exists, OuterRef, Count, Q
 from apps.subscription.services import entitlements
 from apps.subscription.constants import Limits
+from apps.notification import notification_services
 
 
 def create_goal(workspace, created_by, data):
@@ -15,7 +16,16 @@ def create_goal(workspace, created_by, data):
         limit_field=Limits.MAX_GOALS,
     )
 
-    return Goal.objects.create(workspace=workspace, created_by=created_by, **data)
+    created_goal =  Goal.objects.create(workspace=workspace, created_by=created_by, **data)
+
+    notification_services.notify_workspace_members(
+        workspace=workspace,
+        target_id = created_goal.id,
+        exclude_user=created_by,
+        message=f'{created_by.full_name} created a new goal: "{created_goal.name}"',
+    )
+
+    return created_goal
 
 
 def get_goal(workspace, goal_id):
