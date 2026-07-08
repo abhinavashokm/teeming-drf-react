@@ -14,21 +14,26 @@ const navItems = [
     { name: 'Billing', path: '/admin/billing', icon: LineChart },
 ];
 
-function AdminSidebarItem({ icon: Icon, to, children, expanded }) {
+// Mirrors SidebarItem's pattern: a single isActive boolean derives both the
+// container classes and the icon classes, via NavLink's render-prop children.
+const AdminSidebarItem = ({ icon: Icon, to, children, expanded, onClick }) => {
     return (
         <NavLink
             to={to}
-            className={({ isActive }) =>
-                `flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center px-0'} py-2.5 rounded-lg transition-colors
-                ${isActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`
-            }
+            onClick={onClick}
+            end
+            className={({ isActive }) => `flex items-center ${expanded ? 'gap-3 px-3' : 'justify-center px-0'} py-2.5 rounded-lg transition-colors
+                ${isActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+            title={!expanded ? children : ''}
         >
             {({ isActive }) => (
                 <>
-                    <Icon
-                        className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-blue-400' : ''}`}
-                        strokeWidth={2.5}
-                    />
+                    {Icon && (
+                        <Icon
+                            className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-blue-400' : 'text-slate-400'}`}
+                            strokeWidth={2.5}
+                        />
+                    )}
                     {expanded && <span className="font-medium text-sm">{children}</span>}
                 </>
             )}
@@ -111,6 +116,7 @@ function AdminSidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen,
                             to={item.path}
                             icon={item.icon}
                             expanded={expanded}
+                            onClick={handleCloseMobile}
                         >
                             {item.name}
                         </AdminSidebarItem>
