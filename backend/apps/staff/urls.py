@@ -12,9 +12,11 @@ from .views import (
     AdminTransactionListView,
     AdminBillingOverviewView,
     AdminFreePlanUpdateView,
+    AdminDashboardSummaryView,
 )
 
 urlpatterns = [
+    path("dashboard/summary/", AdminDashboardSummaryView.as_view()),
     path("users/", AdminUserListView.as_view()),
     path("users/<uuid:user_id>/", AdminUserDetailView.as_view()),
     path("workspaces/", AdminWorkspaceListView.as_view()),

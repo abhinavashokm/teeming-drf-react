@@ -4,9 +4,11 @@ import { formatDistanceToNow } from 'date-fns';
 import useAdminUsers from '../hooks/users/useAdminUsers';
 import MemberAvatar from '../../components/team/MemberAvatar';
 import DataTable from '../components/table/DataTable';
+import useDashboardSummary from '../hooks/dashboard/useDashboardSummary';
 
 export default function AdminDashboard() {
   const { data, isPending, isError } = useAdminUsers({ joined: 'today' })
+  const { data: summary } = useDashboardSummary()
 
   const recentSignups = data?.users ?? []
   const recentSignupsCount = data?.pagination?.count ?? recentSignups.length
@@ -51,8 +53,8 @@ export default function AdminDashboard() {
       render: (user) => (
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500' :
-              user.status === 'pending' ? 'bg-amber-500' :
-                'bg-red-500'
+            user.status === 'pending' ? 'bg-amber-500' :
+              'bg-red-500'
             }`} />
           <span className={`text-[14px] font-medium capitalize ${user.status === 'suspended' ? 'text-red-600' : 'text-slate-900'
             }`}>
@@ -67,7 +69,7 @@ export default function AdminDashboard() {
     <div className="max-w-6xl mx-auto space-y-8 pb-12">
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-3 gap-4">
         {/* Stat 1 */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
@@ -78,11 +80,11 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-end justify-between">
             <div>
-              <h3 className="text-[28px] leading-none font-bold text-slate-900">1,248</h3>
-              <div className="flex items-center gap-1 mt-2">
+              <h3 className="text-[28px] leading-none font-bold text-slate-900">{summary?.totalUsers}</h3>
+              {/* <div className="flex items-center gap-1 mt-2">
                 <ArrowUp className="w-3 h-3 text-emerald-500" strokeWidth={3} />
                 <span className="text-xs font-semibold text-emerald-600">12 this week</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -97,17 +99,17 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-end justify-between">
             <div>
-              <h3 className="text-[28px] leading-none font-bold text-slate-900">342</h3>
-              <div className="flex items-center gap-1 mt-2">
+              <h3 className="text-[28px] leading-none font-bold text-slate-900">{summary?.totalWorkspaces}</h3>
+              {/* <div className="flex items-center gap-1 mt-2">
                 <ArrowUp className="w-3 h-3 text-emerald-500" strokeWidth={3} />
                 <span className="text-xs font-semibold text-emerald-600">8 this week</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
 
         {/* Stat 3 */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+        {/* <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[13px] font-semibold text-slate-500">Total Goals</span>
             <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-sm">
@@ -123,7 +125,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Stat 4 */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">

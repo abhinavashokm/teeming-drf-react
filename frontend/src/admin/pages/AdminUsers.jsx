@@ -88,22 +88,18 @@ export default function AdminUsers() {
                 </span>
             ),
         },
-        {
-            key: 'status',
-            header: 'Status',
-            render: (user) => (
-                <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500' :
-                            user.status === 'pending' ? 'bg-amber-500' :
-                                'bg-red-500'
-                        }`} />
-                    <span className={`text-[14px] font-medium capitalize ${user.status === 'suspended' ? 'text-red-600' : 'text-slate-900'
-                        }`}>
-                        {user.status}
-                    </span>
-                </div>
-            ),
-        },
+{
+    key: 'role',
+    header: 'Role',
+    render: (user) => (
+        <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${user.isStaff ? 'bg-violet-500' : 'bg-slate-300'}`} />
+            <span className={`text-[14px] font-medium ${user.isStaff ? 'text-violet-700' : 'text-slate-900'}`}>
+                {user.isStaff ? 'Staff' : 'User'}
+            </span>
+        </div>
+    ),
+},
         {
             key: 'actions',
             header: 'Actions',
@@ -125,13 +121,13 @@ export default function AdminUsers() {
                             >
                                 View Details
                             </button>
-                            <button
+                            {/* <button
                                 onClick={() => { setSuspendConfirmUser(user); setIsConfirmSuspendOpen(true); setDropdownOpenId(null); }}
                                 disabled={user.status === 'suspended'}
                                 className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center text-left font-medium disabled:opacity-40 disabled:pointer-events-none"
                             >
                                 Suspend User
-                            </button>
+                            </button> */}
                         </div>
                     )}
                 </>
@@ -159,7 +155,7 @@ export default function AdminUsers() {
                             />
                         </div>
 
-                        <div className="relative">
+                        {/* <div className="relative">
                             <select
                                 value={statusFilter}
                                 onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
@@ -172,17 +168,17 @@ export default function AdminUsers() {
                             <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
                                 <ChevronDown className="h-4 w-4 text-slate-400" />
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                         <button className="w-[36px] h-[36px] flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-600 transition-colors shadow-sm">
                             <SlidersHorizontal className="h-[15px] w-[15px]" />
                         </button>
                         <button className="w-[36px] h-[36px] flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-600 transition-colors shadow-sm">
                             <Download className="h-[15px] w-[15px]" />
                         </button>
-                    </div>
+                    </div> */}
                 </div>
 
                 <DataTable

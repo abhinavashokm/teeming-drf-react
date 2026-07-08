@@ -2,6 +2,7 @@ from apps.user.models import User
 from django.db.models import Count, Q
 from apps.user.helpers.user_helper import get_user_or_raise
 from django.utils import timezone
+from apps.workspace.models import Workspace
 
 
 def list_users(search=None, status=None, joined=None, order_by="-created_at"):
@@ -14,7 +15,7 @@ def list_users(search=None, status=None, joined=None, order_by="-created_at"):
             ),
             distinct=True,
         )
-    ).order_by(order_by)
+    ).filter(is_deleted=False).order_by(order_by)
 
     if search:
         queryset = queryset.filter(
@@ -46,3 +47,10 @@ def get_user_detail(user_id):
             distinct=True,
         )
     ).get(id=user_id)
+
+
+def fetch_dashboard_summary():
+    return {
+        'total_workspaces': Workspace.objects.filter(is_deleted=False).count(),
+        'total_users': User.objects.filter(is_deleted=False).count()
+    }

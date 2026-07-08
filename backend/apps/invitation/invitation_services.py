@@ -10,6 +10,8 @@ from apps.workspace.helpers.workspace_helper import get_workspace_or_raise
 from django.db import transaction
 from apps.subscription.services import entitlements
 from apps.subscription.constants import Limits
+from apps.notification import notification_services
+from apps.notification.models import Notification
 
 
 def send_workspace_invitations(emails, role, workspace, invited_by):
@@ -19,7 +21,7 @@ def send_workspace_invitations(emails, role, workspace, invited_by):
     Each email gets a unique token and shared expiry.
     Invitations are bulk created, then invite emails are dispatched.
     """
-    #guard to ensure worksapce not exceded max member limit of current plan
+    # guard to ensure worksapce not exceded max member limit of current plan
     entitlements.raise_if_limit_exceeded(
         workspace=workspace,
         limit_field=Limits.MAX_MEMBERS,
@@ -108,14 +110,14 @@ def verify_token_and_accept_invitation(invitation_token, user):
     # verify workspace still exists
     workspace = get_workspace_or_raise(workspace_id=invitation.workspace.id)
 
-    #guard to ensure worksapce not exceded max member limit of current plan
+    # guard to ensure worksapce not exceded max member limit of current plan
     entitlements.raise_if_limit_exceeded(
         workspace=workspace,
         limit_field=Limits.MAX_MEMBERS,
         current_count=workspace_services.get_workspace_members_count(
             workspace=workspace
         ),
-        error_message="Workspace member limit exceeded."
+        error_message="Workspace member limit exceeded.",
     )
 
     with transaction.atomic():
@@ -128,6 +130,13 @@ def verify_token_and_accept_invitation(invitation_token, user):
         invitation.status = Invitation.StatusChoices.ACCEPTED
         invitation.accepted_at = timezone.now()
         invitation.save()
+
+        notification_services.notify_workspace_members(
+            workspace=workspace,
+            notification_type=Notification.NotificationType.TEAM_RELATED,
+            exclude_user=user,
+            message=f'{user.full_name} joined to workspace"',
+        )
 
         return invitation.workspace
 

@@ -75,6 +75,7 @@ def create_checkin(current_user, workspace, goal_id, data):
             workspace=workspace,
             exclude_user=current_user,
             message=f'{current_user.full_name} added a new check-in for "{goal.name}"',
+            target_id=goal_id,
         )
 
         return checkin

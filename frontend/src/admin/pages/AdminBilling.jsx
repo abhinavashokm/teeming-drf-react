@@ -45,7 +45,7 @@ export default function AdminBilling() {
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
 
       {/* Top Stat Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <StatCard
           label="Total Revenue"
           value={`₹${Number(overview.totalRevenue).toLocaleString()}`}
@@ -67,13 +67,13 @@ export default function AdminBilling() {
           icon={<Building2 className="w-4 h-4 text-purple-600" />}
           iconBg="bg-purple-50"
         />
-        <StatCard
+        {/* <StatCard
           label="Total Members"
           value={overview.totalMembers}
           sub="Across all workspaces"
           icon={<UserPlus className="w-4 h-4 text-orange-500" />}
           iconBg="bg-orange-50"
-        />
+        /> */}
       </div>
 
       {/* Middle Section */}

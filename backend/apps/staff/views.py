@@ -35,6 +35,17 @@ class AdminPageNumberPagination(PageNumberPagination):
             "hasNext": paginator.page.has_next(),
             "hasPrevious": paginator.page.has_previous(),
         }
+    
+
+class AdminDashboardSummaryView(AdminBaseView):
+
+    def get(self, request):
+
+        summary = staff_services.fetch_dashboard_summary()
+
+        return success_response(
+            data=summary
+        )
 
 
 class AdminUserListView(AdminBaseView):

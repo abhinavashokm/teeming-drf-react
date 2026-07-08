@@ -57,6 +57,7 @@ def delete_idea(workspace, idea_id):
     return True
 
 
+@transaction.atomic
 def move_idea_to_planned(current_user, workspace, idea_id, assignees, deadline):
     """
     move idea to progress
@@ -65,47 +66,56 @@ def move_idea_to_planned(current_user, workspace, idea_id, assignees, deadline):
     3] assign members
     """
 
-    with transaction.atomic():
+    idea = get_idea_or_raise(
+        workspace=workspace, idea_id=idea_id, select_for_update=True
+    )
+    previous_status = idea.status
 
-        idea = get_idea_or_raise(
-            workspace=workspace, idea_id=idea_id, select_for_update=True
-        )
-        previous_status = idea.status
+    idea.status = Idea.StatusChoices.PLANNED
+    if deadline:
+        idea.deadline = deadline
 
-        idea.status = Idea.StatusChoices.PLANNED
-        if deadline:
-            idea.deadline = deadline
+    idea.save(update_fields=["status", "deadline"])
 
-        idea.save(update_fields=["status", "deadline"])
+    IdeaStatusHistory.objects.create(
+        workspace=workspace,
+        idea=idea,
+        changed_by=current_user,
+        from_status=previous_status,
+        to_status=Idea.StatusChoices.PLANNED,
+    )
 
-        IdeaStatusHistory.objects.create(
-            workspace=workspace,
-            idea=idea,
-            changed_by=current_user,
-            from_status=previous_status,
-            to_status=Idea.StatusChoices.PLANNED,
-        )
+    IdeaAssignment.objects.bulk_create(
+        [
+            IdeaAssignment(
+                workspace=workspace,
+                idea=idea,
+                assigned_by=current_user,
+                assignee=assignee,
+            )
+            for assignee in assignees
+        ]
+    )
 
-        IdeaAssignment.objects.bulk_create(
-            [
-                IdeaAssignment(
-                    workspace=workspace,
-                    idea=idea,
-                    assigned_by=current_user,
-                    assignee=assignee,
-                )
-                for assignee in assignees
-            ]
-        )
+    # notify the creator
+    notification_services.notify_users(
+        workspace=workspace,
+        exclude_user=current_user,
+        message=f'Idea you created "{idea.title}" in "{idea.goal.name}" is moved to planned',
+        users=[idea.created_by],
+        target_id=idea.goal.id,
+    )
 
-        notification_services.notify_users(
-            workspace=workspace,
-            exclude_user=current_user,
-            message=f'You were assigned to "{idea.title}" in goal "{idea.goal.name}" by {current_user.full_name}',
-            users=assignees,
-        )
+    # notify the assigned members
+    notification_services.notify_users(
+        workspace=workspace,
+        exclude_user=current_user,
+        message=f'You were assigned to "{idea.title}" in goal "{idea.goal.name}" by {current_user.full_name}',
+        users=assignees,
+        target_id=idea.goal.id,
+    )
 
-        return idea
+    return idea
 
 
 def move_idea_to_progress(current_user, workspace, idea_id):

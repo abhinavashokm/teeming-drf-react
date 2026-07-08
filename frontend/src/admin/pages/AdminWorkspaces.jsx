@@ -178,13 +178,13 @@ export default function AdminWorkspaces() {
               >
                 View Details
               </button>
-              <button
+              {/* <button
                 disabled={workspace.status === 'Suspended'}
                 onClick={() => { setSuspendTarget(workspace); setIsConfirmSuspendOpen(true); setDropdownOpenId(null); }}
                 className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center text-left font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Suspend Workspace
-              </button>
+              </button> */}
             </div>
           )}
         </>
@@ -211,7 +211,7 @@ export default function AdminWorkspaces() {
             />
           </div>
 
-          <div className="relative">
+          {/* <div className="relative">
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
@@ -224,7 +224,7 @@ export default function AdminWorkspaces() {
             <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
               <ChevronDown className="h-4 w-4 text-slate-400" />
             </div>
-          </div>
+          </div> */}
 
           <div className="relative">
             <select
@@ -243,14 +243,14 @@ export default function AdminWorkspaces() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <button className="w-[36px] h-[36px] flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-600 transition-colors shadow-sm">
             <SlidersHorizontal className="h-[15px] w-[15px]" />
           </button>
           <button className="w-[36px] h-[36px] flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-600 transition-colors shadow-sm">
             <Download className="h-[15px] w-[15px]" />
           </button>
-        </div>
+        </div> */}
       </div>
 
       <DataTable

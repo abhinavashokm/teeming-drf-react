@@ -3,7 +3,7 @@ from channels.layers import get_channel_layer
 from .models import Notification
 
 
-def notify_users(workspace, users, message, target_id=None, exclude_user=None):
+def notify_users(workspace, users, message, notification_type=Notification.NotificationType.BOARD_RELATED ,target_id=None, exclude_user=None):
     """
     Create notifications and push them via WebSocket
     for a specific list/queryset of User objects.
@@ -21,6 +21,7 @@ def notify_users(workspace, users, message, target_id=None, exclude_user=None):
             workspace=workspace,
             message=message,
             target_id=target_id,
+            notification_type=notification_type,
         )
 
         async_to_sync(channel_layer.group_send)(
@@ -32,11 +33,19 @@ def notify_users(workspace, users, message, target_id=None, exclude_user=None):
                 "workspace": workspace.name,
                 "is_read": False,
                 "created_at": notification.created_at.isoformat(),
+                "target_id": str(notification.target_id),
+                "notification_type": notification.notification_type,
             },
         )
 
 
-def notify_workspace_members(workspace, message, target_id=None, exclude_user=None):
+def notify_workspace_members(
+    workspace,
+    message,
+    notification_type=Notification.NotificationType.BOARD_RELATED,
+    target_id=None,
+    exclude_user=None,
+):
     """
     Creates a Notification record for each workspace member
     and pushes it via WebSocket.
@@ -52,6 +61,7 @@ def notify_workspace_members(workspace, message, target_id=None, exclude_user=No
         users=[member.user for member in members],
         message=message,
         target_id=target_id,
+        notification_type=notification_type,
     )
 
 
