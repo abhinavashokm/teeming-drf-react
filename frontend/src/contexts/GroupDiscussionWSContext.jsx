@@ -47,7 +47,7 @@ export function GroupDiscussionWSProvider({ workspaceSlug, goalId, children }) {
           }
         }
       },
-      onClose: (event) => console.log('[discussion] closed', event),
+      onClose: (event) => console.log('[discussion] closed'),
       onError: (error) => console.error('[discussion] error', error),
     })
 

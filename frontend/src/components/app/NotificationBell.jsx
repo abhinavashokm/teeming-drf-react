@@ -1,6 +1,5 @@
 import { Bell, CheckCheck, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from "react";
-import { useNotificationSocket } from "../../hooks/notification/useNotificationSocket";
 import useNotifications from '../../hooks/notification/useNotifications';
 import useMarkAllNotificationAsRead from '../../hooks/notification/useMarkAllNotificationAsRead';
 import useClearAllNotifications from '../../hooks/notification/useClearAllNotifications';

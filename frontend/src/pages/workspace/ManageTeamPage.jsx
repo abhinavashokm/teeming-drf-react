@@ -48,7 +48,7 @@ function ManageTeamPage() {
     const [isUpgradePlanModalOpen, setIsUpgradePlanModalOpen] = useState(false)
 
     const { data: currentWorkspace } = useWorkspace()
-    const { data: pendingInvitations } = usePendingInvitations()
+    const { data: pendingInvitations } = usePendingInvitations(canManageTeam)
 
     //enforce max member limit in ui according to current plan
     const currentPlan = currentWorkspace?.subscription?.plan

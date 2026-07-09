@@ -40,9 +40,6 @@ export function useWorkspaceSocket() {
                     default:
                         break;
                 }
-                // if (data.type === 'send_notification') {
-                //     setNotifications(prev => [data, ...prev])
-                // }
             },
             onOpen: () => {
                 console.log("workspace ws connected!!")
@@ -53,8 +50,7 @@ export function useWorkspaceSocket() {
         })
 
         return () => {
-            socket.onclose = null; // prevent log on intentional close
-            socket.close();
+            socket.close(1000, "Component unmounted");
         };
     }, [workspaceSlug]);
 

@@ -10,7 +10,7 @@ import { errorCodes } from '../constants/errorCodes';
 import useWorkspace from '../hooks/workspace/useWorkspace';
 import ErrorPage from '../pages/error/ErrorPage';
 import GoalInfoModal from '../components/goal/GoalInfoModal';
-import { useNotificationSocket } from '../hooks/notification/useNotificationSocket';
+
 import { WorkspaceSocketContext } from '../contexts/WorkspaceSocketContext';
 import { useWorkspaceSocket } from '../hooks/websocket/useWorkspaceSocket';
 
@@ -34,7 +34,6 @@ function WorkspaceLayout() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  //const notificationSocket = useNotificationSocket();
   const workspaceSocket = useWorkspaceSocket()
 
   return (
