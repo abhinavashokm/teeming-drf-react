@@ -81,7 +81,7 @@ export default function TransactionsTable() {
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setIsYearOpen(false)} />
                 <div className="absolute top-full left-0 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1">
-                  {["all", "2025", "2024"].map((year) => (
+                  {["all","2026", "2025", "2024"].map((year) => (
                     <button
                       key={year}
                       onClick={() => { setYearFilter(year); setIsYearOpen(false); }}

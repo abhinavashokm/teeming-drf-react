@@ -107,19 +107,22 @@ class GoalAssistantService:
         schema,
         message=None
     ):
-        response = self.provider.generate_structured(
-            prompt=prompt,
-            schema=schema,
-        )
+        try:
+            response = self.provider.generate_structured(
+                prompt=prompt,
+                schema=schema,
+            )
 
-        return AIAssistantResponse.objects.create(
-            workspace=self.workspace,
-            goal=self.goal,
-            user=self.user,
-            type=response_type,
-            content=response.build_content(),
-            request_text=message,
-        )
+            return AIAssistantResponse.objects.create(
+                workspace=self.workspace,
+                goal=self.goal,
+                user=self.user,
+                type=response_type,
+                content=response.build_content(),
+                request_text=message,
+            )
+        except Exception as e:
+            print("exception")
 
     @staticmethod
     def _build_context(goal):

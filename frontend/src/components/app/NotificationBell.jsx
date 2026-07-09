@@ -169,6 +169,7 @@ function NotificationRow({ n, onNavigate }) {
         console.log("clicke", n)        
         const link = currentWorkspace ? resolveNotificationLink(n, currentWorkspace.slug) : null;
         console.log(n)
+        console.log(link)
         if (link) {
             navigate(link);
             onNavigate?.();
