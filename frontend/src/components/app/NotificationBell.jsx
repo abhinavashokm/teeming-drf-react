@@ -8,6 +8,7 @@ import { useWorkspaceSocketContext } from '../../contexts/WorkspaceSocketContext
 import { resolveNotificationLink } from '../../utils/notificationUtils';
 import useWorkspace from '../../hooks/workspace/useWorkspace'
 import { useNavigate } from 'react-router-dom';
+import useMarkNotificationAsRead from '../../hooks/notification/useMarkNotificationAsRead';
 
 export function NotificationBell() {
 
@@ -161,18 +162,18 @@ function NotificationRow({ n, onNavigate }) {
     /* -------------------------------------------------------------------------- */
     /* handle click notification item */
     /* -------------------------------------------------------------------------- */
-
     const { data: currentWorkspace } = useWorkspace()
+    const { mutate: markAsRead } = useMarkNotificationAsRead()
     const navigate = useNavigate()
 
     const handleClickItem = () => {
-        console.log("clicke", n)        
         const link = currentWorkspace ? resolveNotificationLink(n, currentWorkspace.slug) : null;
-        console.log(n)
-        console.log(link)
         if (link) {
             navigate(link);
             onNavigate?.();
+        }
+        if (!n.isRead) {
+            markAsRead(n.id)
         }
     };
 

@@ -15,7 +15,7 @@ def get_object_or_raise(
         qs = model.objects.all()
 
         if workspace:
-            qs = model.objects.in_workspace(workspace)
+            qs = model.objects.filter(workspace=workspace)
 
         # when using select for update the query must be inside a transaction block
         if select_for_update:

@@ -1,7 +1,6 @@
 import { ROUTE_PATHS } from '../constants/routePaths'
 
 export function resolveNotificationLink(notification, workspaceSlug) {
-    console.log(notification)
     switch (notification.notificationType) {
         case 'board_related':
             return ROUTE_PATHS.GOAL_DASHBOARD(workspaceSlug, notification.targetId);

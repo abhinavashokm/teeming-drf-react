@@ -1,7 +1,8 @@
 from django.db import models
+from core.models import UUIDAbstractModel
 
 
-class Notification(models.Model):
+class Notification(UUIDAbstractModel, models.Model):
 
     class NotificationType(models.TextChoices):
         BOARD_RELATED     = "board_related", "Board Related"
@@ -17,8 +18,6 @@ class Notification(models.Model):
         #for redirect user to corresponding page when clicking notification
     notification_type  = models.CharField(max_length=30, default=NotificationType.BOARD_RELATED, choices=NotificationType.choices)
     target_id          = models.UUIDField(null=True, blank=True)  # id of the goal/comment/invite, etc.
-
-
 
     class Meta:
         ordering = ['-created_at']

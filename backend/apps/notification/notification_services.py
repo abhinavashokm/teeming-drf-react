@@ -1,6 +1,7 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from .models import Notification
+from .helpers.notification_helper import get_notification_or_raise
 
 
 def notify_users(workspace, users, message, notification_type=Notification.NotificationType.BOARD_RELATED ,target_id=None, exclude_user=None):
@@ -28,7 +29,7 @@ def notify_users(workspace, users, message, notification_type=Notification.Notif
             f"notifications_user_{user.id}",
             {
                 "type": "send_notification",
-                "id": notification.id,
+                "id": str(notification.id),
                 "message": notification.message,
                 "workspace": workspace.name,
                 "is_read": False,
@@ -63,6 +64,20 @@ def notify_workspace_members(
         target_id=target_id,
         notification_type=notification_type,
     )
+
+
+def mark_notification_as_read(workspace, recipient, notification_id):
+    
+    notification = get_notification_or_raise(
+        workspace=workspace,
+        recipient=recipient,
+        notification_id=notification_id,
+    )
+
+    notification.is_read = True
+    notification.save()
+
+    return True
 
 
 def mark_all_read(workspace, recipient):

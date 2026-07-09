@@ -2,6 +2,7 @@ from core.permission_views import MemberBaseView
 from .models import Notification
 from core.responses.api_response import success_response
 from . import notification_services
+from rest_framework import status
 
 
 class NotificationListView(MemberBaseView):
@@ -20,6 +21,7 @@ class NotificationListView(MemberBaseView):
         )
     
     def patch(self, request, **kwargs):
+        """mark all notification as read"""
 
         notification_services.mark_all_read(
             workspace=request.workspace,
@@ -45,12 +47,14 @@ class NotificationListView(MemberBaseView):
 class NotificationDetailView(MemberBaseView):
 
     def patch(self, request, **kwargs):
+        """mark single notification as read"""
         
-        notification = Notification.objects.get(recipient=request.user, id=kwargs["notification_id"])
-        notification.is_read = True
-        notification.save()
+        notification_services.mark_notification_as_read(
+            workspace=request.workspace,
+            recipient=request.user,
+            notification_id=kwargs["notification_id"]
+        )
+
         return success_response(
-            data={
-                "status": "marked as read"
-            }
+            message="marked as read"
         )

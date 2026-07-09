@@ -14,7 +14,8 @@ export const notificationService = {
         const res = await api.delete(`/workspaces/${slug}/notifications/`)
         return res.data
     },
-    markAsRead: (slug, notification_id) => {
-        api.patch(`/workspaces/${slug}/notifications/${notification_id}/`)
+    markAsRead: async (slug, notificationId) => {
+        const res = await api.patch(`/workspaces/${slug}/notifications/${notificationId}/`)
+        return res.data
     },
 }
