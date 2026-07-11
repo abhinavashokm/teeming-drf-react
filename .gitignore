@@ -23,10 +23,6 @@ staticfiles/
 .env
 *.env
 
-# Migrations (keep __init__.py)
-*/migrations/*.py
-!*/migrations/__init__.py
-
 # ===================================
 # Node / React (Frontend)
 # ===================================

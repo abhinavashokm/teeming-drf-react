@@ -1,5 +1,5 @@
 class PlanCode:
-    FREE = "FREE"
+    FREE = "free"
 
 
 class Features:
