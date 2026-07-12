@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+echo "Creating log files..."
+mkdir -p /app/logs
+
 echo "Applying database migrations..."
 python manage.py migrate --noinput
 
