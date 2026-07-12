@@ -15,13 +15,7 @@ DEBUG = os.getenv("DEBUG") == "True"
 DEBUG_API_DELAY = DEBUG
 MOCK_RESPONSE_DELAY = float(os.getenv("MOCK_RESPONSE_DELAY"))  # in seconds
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "simplistic-pokier-melania.ngrok-free.dev",
-    "127.0.0.1",
-    "10.10.10.69",
-]
-
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 # Application definition
 
@@ -62,19 +56,20 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = "config.asgi.application"
 
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }
 
 # For Django Channels WebSocket origin check
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -202,8 +197,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 # -----------------------------------------------------------------------------
 # Redis configuration
 # -----------------------------------------------------------------------------
-REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = os.getenv("REDIS_PORT")
+
 REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
 
 CACHES = {
