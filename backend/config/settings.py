@@ -89,12 +89,10 @@ MIDDLEWARE = [
 ]
 
 FRONTEND_URL = os.getenv("FRONTEND_URL")
-LOCAL_IP = os.getenv("LOCAL_IP")  # for tunneling
 
 CORS_ALLOWED_ORIGINS = [
     FRONTEND_URL,
     "http://localhost:5173",
-    LOCAL_IP,
 ]
 
 CORS_ALLOW_HEADERS = [
