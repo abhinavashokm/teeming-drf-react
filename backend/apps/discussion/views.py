@@ -7,8 +7,6 @@ class DiscussionListView(MemberBaseView):
 
     def get(self, request, **kwargs):
 
-        print("query params: ",request.query_params)
-
         discussion_res = discussion_services.list_discussion_messages(
             workspace=request.workspace, 
             goal_id=kwargs["goal_id"],

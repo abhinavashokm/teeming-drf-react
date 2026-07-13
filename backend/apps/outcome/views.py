@@ -16,14 +16,10 @@ class MetricListCreateView(WorkspacePermissionBaseView):
     def post(self, request, **kwargs):
         """create one or more metrics under goal"""
 
-        print(request.data)
-
         serializer = serializers.MetricWriteSerializer(
             data=request.data["metrics"], many=True
         )
         serializer.is_valid(raise_exception=True)
-
-        print(serializer.validated_data)
 
         created_metrics = outcome_services.create_metrics(
             current_user=request.user,

@@ -37,8 +37,6 @@ def raise_if_feature_not_available(
         raise FeatureNotAvailableException(
             f"{feature_label or 'This feature'} is not available on your current plan"
         )
-    else:
-        print("undu")
 
 
 def raise_if_limit_exceeded(

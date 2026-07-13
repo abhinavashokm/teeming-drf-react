@@ -66,7 +66,7 @@ def get_user_from_token(token_key):
     try:
         token = AccessToken(token_key)
         user = User.objects.get(id=token["user_id"])
-        print("✅ WebSocket user:", user)  # check terminal
+        print("✅ WebSocket user:", user.email)
         return user
     except Exception as e:
         print("❌ JWT error:", e)
@@ -105,7 +105,6 @@ class WebSocketWorkspaceMiddleware(BaseMiddleware):
             user = scope.get("user")
 
             if user and not user.is_anonymous:
-                print("workspace middlware wroked!!!!!!!")
                 scope['workspace'] = await get_workspace_for_member(slug, user)
 
         return await super().__call__(scope, receive, send)

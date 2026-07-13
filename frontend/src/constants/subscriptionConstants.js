@@ -4,7 +4,7 @@ export const currencySymbols = {
 }
 
 export const planCodes = {
-    FREE: "FREE",
-    PRO: "PRO",
-    ENTERPRISE: "ENTERPRISE",
+    FREE: "free",
+    PRO: "pro",
+    ENTERPRISE: "enterprise",
 }

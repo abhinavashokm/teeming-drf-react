@@ -26,6 +26,16 @@ services:
     depends_on:
       - db
       - redis
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend
+          target: /app
+          ignore:
+            - "**/__pycache__/"
+            - "**/*.pyc"
+        - action: rebuild
+          path: ./requirements.txt
 
   celery_worker:
     build: ./backend

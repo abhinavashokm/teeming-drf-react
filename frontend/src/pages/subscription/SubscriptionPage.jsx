@@ -69,24 +69,6 @@ function SubscriptionPage() {
             <div className="text-center max-w-2xl mx-auto mb-10 shrink-0 px-6">
                 <h1 className="text-[28px] sm:text-[32px] font-bold text-gray-900 tracking-tight mb-3">Choose a plan for {currentWorkspace.name}</h1>
                 <p className="text-[15px] text-gray-500 mb-8">All plans are billed per workspace. Upgrade or downgrade anytime.</p>
-
-                {/* Toggle */}
-                {/* <div className="inline-flex items-center justify-center p-1 bg-gray-100/80 border border-gray-200/60 rounded-full mx-auto w-auto">
-                    <button
-                        onClick={() => setBillingCycle('monthly')}
-                        className={`relative z-10 px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${billingCycle === 'monthly' ? 'text-gray-900 shadow-sm bg-white' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                        Monthly
-                    </button>
-                    <button
-                        onClick={() => setBillingCycle('yearly')}
-                        className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium rounded-full transition-all duration-200 ${billingCycle === 'yearly' ? 'text-gray-900 shadow-sm bg-white' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                        Yearly
-                        <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full transition-colors leading-none ${billingCycle === 'yearly' ? 'bg-[#1A9E6E]/10 text-[#1A9E6E]' : 'bg-gray-200 text-gray-500'}`}>Save 20%</span>
-                    </button>
-                </div> */}
-
             </div>
 
             {/* Current Subscription */}

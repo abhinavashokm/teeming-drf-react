@@ -2,7 +2,6 @@ from rest_framework.exceptions import ValidationError
 
 from django.db.models import Q
 from django.db import transaction
-from django.utils import timezone
 
 from ..models import Plan, WorkspaceSubscription, SubscriptionTransaction
 from .integrations import stripe_client

@@ -4,13 +4,14 @@ from django.conf import settings
 
 def create_plan_in_stripe(
     name,
-    description,
     monthly_price,
+    description=None,
 ):
-    product = stripe.Product.create(
-        name=name,
-        description=description,
-    )
+    product_kwargs = {"name": name}
+    if description:
+        product_kwargs["description"] = description
+
+    product = stripe.Product.create(**product_kwargs)
 
     price = stripe.Price.create(
         unit_amount=int(monthly_price * 100),
