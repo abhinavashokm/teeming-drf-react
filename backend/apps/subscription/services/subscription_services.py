@@ -28,7 +28,6 @@ def get_current_subscription(workspace):
     if subscription:
         return subscription
 
-    # fallback to free plan if no active subscription found - test mode only
     free_plan = get_free_plan()
     return WorkspaceSubscription(
         workspace=workspace,
