@@ -322,6 +322,9 @@ AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
 # -----------------------------------------------------------------------------
 # Logger configs
 # -----------------------------------------------------------------------------
+LOGS_DIR = BASE_DIR / "logs"
+LOGS_DIR.mkdir(exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
