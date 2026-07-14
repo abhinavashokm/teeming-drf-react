@@ -31,20 +31,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
 
           script: |
-            set -e
+            echo "Deploying..."
 
-            echo "Updating repository..."
-
-            cd ~/teeming-drf-react
-
-            git fetch origin
-            git checkout main
-            git pull origin main
-
-            echo "Building and restarting containers..."
-
-            docker compose -f docker-compose.prod.yml up -d --build
+            ~/deploy.sh
 
             echo "Deployment completed."
-
-            docker compose -f docker-compose.prod.yml ps
