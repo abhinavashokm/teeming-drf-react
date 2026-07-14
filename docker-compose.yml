@@ -1,10 +1,8 @@
 services:
   db:
     image: postgres:16
-    environment:
-      POSTGRES_DB: teeming_db
-      POSTGRES_USER: teeming_user
-      POSTGRES_PASSWORD: password
+    env_file:
+      - ./backend/.env
     volumes:
       - pgdata:/var/lib/postgresql/data
 
