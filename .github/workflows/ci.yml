@@ -51,10 +51,12 @@ jobs:
       - name: Run Django tests
         working-directory: ./backend
         env:
-          DB_NAME: teeming_test_db
-          DB_USER: teeming_user
-          DB_PASSWORD: password
-          DB_HOST: localhost
-          DB_PORT: 5432
+          POSTGRES_DB: teeming_test_db
+          POSTGRES_USER: teeming_user
+          POSTGRES_PASSWORD: password
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
           SECRET_KEY: test-secret-key-for-ci
         run: python manage.py test
