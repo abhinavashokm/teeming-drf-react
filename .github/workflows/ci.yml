@@ -61,4 +61,4 @@ jobs:
           SECRET_KEY: test-secret-key-for-ci
           CSRF_TRUSTED_ORIGINS: "http://localhost:5173"
           FRONTEND_URL: "http://localhost:5173"
-        run: python manage.py test apps.subscription.tests.test_entitlements
+        run: python manage.py test
