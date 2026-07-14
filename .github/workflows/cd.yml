@@ -31,8 +31,4 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
 
           script: |
-            echo "Deploying..."
-
             ~/deploy.sh
-
-            echo "Deployment completed."
