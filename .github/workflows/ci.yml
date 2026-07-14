@@ -8,7 +8,9 @@ on:
 
 jobs:
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     services:
       postgres:
@@ -43,6 +45,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
 
       - name: Install dependencies
         working-directory: ./backend
@@ -59,6 +63,6 @@ jobs:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           SECRET_KEY: test-secret-key-for-ci
-          CSRF_TRUSTED_ORIGINS: "http://localhost:5173"
-          FRONTEND_URL: "http://localhost:5173"
+          CSRF_TRUSTED_ORIGINS: http://localhost:5173
+          FRONTEND_URL: http://localhost:5173
         run: python manage.py test
