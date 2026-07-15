@@ -7,4 +7,5 @@ export const ADMIN_QUERY_KEYS = {
     TRANSACTIONS: ['admin', 'transactions'],
     BILLING_OVERVIEW: ['admin', "billing-overview"],
     DASHBOARD_SUMMARY: ['admin', 'dashboard'],
+    BILLING_REVENUE: ['admin', 'billing', 'revenue'],
 }

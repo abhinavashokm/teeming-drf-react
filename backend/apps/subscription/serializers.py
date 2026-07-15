@@ -279,3 +279,13 @@ class UpgradePlanSerializer(serializers.Serializer):
         plan = Plan.objects.get(id=attrs["plan_id"], is_archived=False)
         attrs["plan"] = plan
         return attrs
+    
+
+class RevenueQuerySerializer(serializers.Serializer):
+    start = serializers.DateField()
+    end = serializers.DateField()
+
+    def validate(self, attrs):
+        if attrs["start"] > attrs["end"]:
+            raise serializers.ValidationError("start date must not be after end date.")
+        return attrs

@@ -1,7 +1,8 @@
-import { DollarSign, Users, Building2, UserPlus } from 'lucide-react';
+import { DollarSign, Users, Building2, UserPlus, CreditCard } from 'lucide-react';
 import TransactionsTable from '../components/billing/TransactionsTable';
 import useBillingOverview from '../hooks/adminBilling/useBillingOverview';
 import WorkspaceAvatar from '../../components/workspace/WorkspaceAvatar';
+import RevenuePanel from '../components/billing/RevenuePanel';
 
 const PLAN_COLORS = {
   FREE: { stroke: '#E2E8F0', dot: 'bg-slate-300', border: 'border-slate-100', bg: 'bg-slate-50/50', text: 'text-slate-700' },
@@ -67,14 +68,9 @@ export default function AdminBilling() {
           icon={<Building2 className="w-4 h-4 text-purple-600" />}
           iconBg="bg-purple-50"
         />
-        {/* <StatCard
-          label="Total Members"
-          value={overview.totalMembers}
-          sub="Across all workspaces"
-          icon={<UserPlus className="w-4 h-4 text-orange-500" />}
-          iconBg="bg-orange-50"
-        /> */}
       </div>
+
+      <RevenuePanel />
 
       {/* Middle Section */}
       <div className="grid grid-cols-2 gap-6">
@@ -134,29 +130,40 @@ export default function AdminBilling() {
           </div>
 
           <div className="space-y-4">
-            {topPayingWorkspaces.map((ws, index) => (
-
-              <div key={ws.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 text-[13px] font-bold text-slate-400 text-center">
-                    #{index + 1}
-                  </div>
-
-                  <WorkspaceAvatar workspace={ws} size='sm' />
-
-                  <div>
-                    <h4 className="text-[14px] font-bold text-slate-900">{ws.name}</h4>
-                    <span className="text-[12px] font-semibold text-slate-500">{ws.plan}</span>
-                  </div>
+            {topPayingWorkspaces.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                  <CreditCard className="w-5 h-5 text-slate-400" />
                 </div>
-                <div className="text-right">
-                  <div className="text-[14px] font-bold text-slate-900">₹{Number(ws.amount).toLocaleString()}</div>
-                </div>
+                <p className="text-[14px] font-bold text-slate-900">No paying workspaces yet</p>
+                <p className="text-[12px] font-semibold text-slate-500 mt-1">
+                  Workspaces will show up here once a workspace upgrades
+                </p>
               </div>
+            ) : (
+              topPayingWorkspaces.map((ws, index) => (
+                <div key={ws.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 text-[13px] font-bold text-slate-400 text-center">
+                      #{index + 1}
+                    </div>
 
-            ))}
+                    <WorkspaceAvatar workspace={ws} size='sm' />
+
+                    <div>
+                      <h4 className="text-[14px] font-bold text-slate-900">{ws.name}</h4>
+                      <span className="text-[12px] font-semibold text-slate-500">{ws.plan}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[14px] font-bold text-slate-900">₹{Number(ws.amount).toLocaleString()}</div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
+
       </div>
 
       <TransactionsTable />
