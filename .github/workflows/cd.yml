@@ -11,8 +11,24 @@ on:
       - completed
 
 jobs:
+  debug:
+    name: Debug Workflow Context
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print workflow context
+        run: |
+          echo "Triggered workflow : ${{ github.event.workflow_run.name }}"
+          echo "Event            : ${{ github.event.workflow_run.event }}"
+          echo "Branch           : ${{ github.event.workflow_run.head_branch }}"
+          echo "Conclusion       : ${{ github.event.workflow_run.conclusion }}"
+          echo "SHA              : ${{ github.event.workflow_run.head_sha }}"
+          echo "Repository       : ${{ github.repository }}"
+          echo "Actor            : ${{ github.actor }}"
+
   deploy:
     name: Deploy to Production
+    needs: debug
 
     if: >
       github.event.workflow_run.conclusion == 'success' &&
@@ -24,11 +40,9 @@ jobs:
     steps:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
-
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-
           script: |
             ~/deploy.sh
