@@ -13,7 +13,6 @@ from apps.subscription.services import (
 )
 from apps.subscription import serializers as subscription_serializer
 from apps.workspace import serializers as workspace_serializer
-from apps.subscription.constants import PlanCode
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -273,7 +272,7 @@ class AdminTransactionListView(AdminBaseView):
         )
 
 
-class AdminBillingOverviewView(AdminBaseView):
+class AdminRevenueSummaryView(AdminBaseView):
 
     def get(self, request):
 
@@ -282,3 +281,17 @@ class AdminBillingOverviewView(AdminBaseView):
         serializer = subscription_serializer.BillingOverviewSerializer(data)
 
         return success_response(data=serializer.data)
+    
+
+class AdminRevenueTrendView(AdminBaseView):
+
+    def get(self, request):
+        query = subscription_serializer.RevenueQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+
+        data = billing_services.get_revenue_series(
+            start=query.validated_data["start"],
+            end=query.validated_data["end"],
+        )
+
+        return success_response(data=data)

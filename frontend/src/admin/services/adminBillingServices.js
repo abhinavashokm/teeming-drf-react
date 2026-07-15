@@ -9,7 +9,14 @@ export const adminBillingServices = {
     },
 
     adminGetBillingOverview: async () => {
-        const res = await api.get('/admin/billing-overview/')
+        const res = await api.get('/admin/billing/revenue/summary/')
+        return res.data
+    },
+
+    adminGetRevenueTrend: async ({start, end}) => {
+        const res = await api.get('/admin/billing/revenue/trend/', {
+            params: {start, end}
+        })
         return res.data
     },
 

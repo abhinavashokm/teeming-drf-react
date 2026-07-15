@@ -107,7 +107,7 @@ class AdminUserDetailSerializer(serializers.ModelSerializer):
 class AdminWorkspacePlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan
-        fields = ["id", "code", "name", "tier"]
+        fields = ["id", "code", "name", "tier", "version"]
 
 
 class AdminWorkspaceSubscriptionSerializer(serializers.ModelSerializer):
