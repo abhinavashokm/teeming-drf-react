@@ -3,8 +3,13 @@ import json
 import logging
 import time
 from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from apps.workspace import workspace_services
 from channels.generic.websocket import AsyncWebsocketConsumer
+
+from apps.goal.models import Goal
+from apps.discussion.models import DiscussionMessage
+from core.services import s3_service
 
 logger = logging.getLogger("websocket")
 
@@ -29,6 +34,9 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
         # workspace-wide presence group
         self.presence_group = f"presence_workspace_{self.workspace.slug}"
         await self.channel_layer.group_add(self.presence_group, self.channel_name)
+
+        # only one goal-discussion room can be active at a time
+        self.current_discussion = None
 
         await self.accept()
 
@@ -75,9 +83,15 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
 
         if hasattr(self, "_watchdog_task"):
             self._watchdog_task.cancel()
-            
+
         if hasattr(self, "group_name"):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+        # leave the active goal-discussion group, if any
+        if getattr(self, "current_discussion", None):
+            await self.channel_layer.group_discard(
+                f"goal_discussion_{self.current_discussion}", self.channel_name
+            )
 
         if hasattr(self, "presence_group"):
             await self.channel_layer.group_discard(
@@ -102,7 +116,6 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
                 f": Workspace WS disconnected: user={self.user.full_name}-{self.user.email}"
             )
 
-    
     async def receive(self, text_data=None, bytes_data=None):
         try:
             data = json.loads(text_data)
@@ -116,6 +129,20 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
             self.last_ping_at = time.monotonic()  # record that client is alive
             await self.send(text_data=json.dumps({"type": "pong"}))
             return
+
+        if message_type == "join_discussion":
+            await self._handle_join_discussion(data)
+            return
+
+        if message_type == "leave_discussion":
+            await self._handle_leave_discussion(data)
+            return
+
+        if message_type == "chat_message":
+            await self._handle_chat_message(data)
+            return
+
+        logger.warning(f"Unknown WS message type from user={self.user.id}: {message_type}")
 
     async def send_notification(self, event):
         await self.send(text_data=json.dumps(event))
@@ -131,3 +158,98 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
                 }
             )
         )
+
+    # matches "type": "discussion_message" sent via group_send
+    async def discussion_message(self, event):
+        await self.send(text_data=json.dumps(event))
+
+    # ---- goal discussion handlers ----
+
+    async def _handle_join_discussion(self, data):
+        goal_id = data.get("goal_id")
+        if not goal_id:
+            return
+
+        # already in this discussion — no-op
+        if goal_id == self.current_discussion:
+            return
+
+        if not await self.goal_belongs_to_workspace(goal_id):
+            logger.warning(
+                f"Rejected join_discussion: user={self.user.id} goal={goal_id} "
+                f"not in workspace={self.workspace.slug}"
+            )
+            await self.send(text_data=json.dumps({
+                "type": "discussion_error",
+                "goal_id": goal_id,
+                "error": "not_found_or_forbidden",
+            }))
+            return
+
+        # leave the previous discussion, if switching
+        if self.current_discussion:
+            await self.channel_layer.group_discard(
+                f"goal_discussion_{self.current_discussion}", self.channel_name
+            )
+
+        await self.channel_layer.group_add(f"goal_discussion_{goal_id}", self.channel_name)
+        self.current_discussion = goal_id
+
+    async def _handle_leave_discussion(self, data):
+        goal_id = data.get("goal_id")
+        # only allow leaving the room you're actually in
+        if not goal_id or goal_id != self.current_discussion:
+            return
+
+        await self.channel_layer.group_discard(f"goal_discussion_{goal_id}", self.channel_name)
+        self.current_discussion = None
+
+    async def _handle_chat_message(self, data):
+        goal_id = data.get("goal_id")
+        content = (data.get("content") or "").strip()
+
+        if not content or not goal_id:
+            return
+
+        # guard: only allow sending into the room this connection is currently in
+        if goal_id != self.current_discussion:
+            logger.warning(
+                f"Rejected chat_message: user={self.user.id} not joined to goal={goal_id}"
+            )
+            return
+
+        message = await self.save_message(goal_id, content)
+
+        await self.channel_layer.group_send(
+            f"goal_discussion_{goal_id}",
+            {
+                "type": "discussion_message",
+                "goal_id": goal_id,
+                "id": str(message.id),
+                "content": message.content,
+                "sender": {
+                    "id": str(message.sender.id),
+                    "fullName": message.sender.full_name,
+                    "email": message.sender.email,
+                    "avatarUrl": s3_service.build_s3_url(message.sender.avatar_thumb_key),
+                },
+                "createdAt": message.created_at.isoformat(),
+            },
+        )
+
+    # ---- db helpers ----
+
+    @database_sync_to_async
+    def goal_belongs_to_workspace(self, goal_id):
+        return Goal.objects.filter(id=goal_id, workspace=self.workspace).exists()
+
+    @database_sync_to_async
+    def save_message(self, goal_id, content):
+        message = DiscussionMessage.objects.create(
+            goal_id=goal_id,
+            workspace=self.workspace,
+            sender=self.user,
+            content=content,
+        )
+        # Re-fetch with sender to avoid lazy load issues in async context
+        return DiscussionMessage.objects.select_related("sender").get(id=message.id)

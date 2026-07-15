@@ -9,23 +9,6 @@ import GroupDiscussion from './GroupDiscussion';
 import useWorkspace from '../../../../hooks/workspace/useWorkspace';
 import useNavigateUpgradePlan from '../../../../hooks/routes/useNavigateUpgradePlan';
 
-const MessageStatus = ({ status = 'sent' }) => {
-    if (status === 'sent') return (
-        <svg width="14" height="10" viewBox="0 0 14 10" fill="none" className="inline-block">
-            <path d="M1 5L4.5 8.5L10 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80" />
-        </svg>
-    )
-
-    if (status === 'delivered') return (
-        <svg width="18" height="10" viewBox="0 0 18 10" fill="none" className="inline-block">
-            <path d="M1 5L4.5 8.5L10 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80" />
-            <path d="M5 5L8.5 8.5L14 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80" />
-        </svg>
-    )
-
-    return null;
-};
-
 const aiMode = 'ai'
 const discussionMode = 'discussion'
 
@@ -36,11 +19,9 @@ function RightPanel({ onClose, isMobile }) {
     const [pendingAIMessage, setPendingAIMessage] = useState(null);
 
     const { data: currentUser } = useAuth();
-    const { sendMessage } = useGroupDiscussionWS();
+    const discussion = useGroupDiscussionWS()
+    const { sendMessage, onPanelOpen, onPanelClose } = discussion
 
-    /* -------------------------------------------------------------------------- */
-    /* handle send message (ask ai/send group message) */
-    /* -------------------------------------------------------------------------- */
     const { mutate: askAI, isPending: isAIChatResGenerating } = useAIAssistant()
 
     const { data: currentWorkspace } = useWorkspace()
@@ -55,6 +36,7 @@ function RightPanel({ onClose, isMobile }) {
         if (isAiBlocked) return;
 
         if (mode === discussionMode) {
+            console.log("here 1")
             sendMessage(input.trim());
 
         } else if (mode === aiMode) {
@@ -101,10 +83,6 @@ function RightPanel({ onClose, isMobile }) {
                                 </span>
                             </div>
                         </div>
-
-                        {/* <p className="text-[11px] text-gray-500 mt-0.5">
-                            {messages?.length || 0} messages
-                        </p> */}
                     </div>
 
                     <button
@@ -121,7 +99,7 @@ function RightPanel({ onClose, isMobile }) {
 
                 {mode === discussionMode ? (
 
-                    <GroupDiscussion />
+                    <GroupDiscussion {...discussion} />
 
                 ) : (
 

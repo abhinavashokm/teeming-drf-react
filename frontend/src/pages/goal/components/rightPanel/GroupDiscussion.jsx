@@ -5,13 +5,12 @@ import ChatBubble from '../../../../components/chat/ChatBubble';
 import useAuth from "../../../../hooks/auth/useAuth";
 import { buildChatTimeline } from '../../../../utils/chatUtils';
 import { CHAT_ITEM_TYPES } from "../../../../constants/chatConstants";
-import { useGroupDiscussionWS } from "../../../../contexts/GroupDiscussionWSContext";
 import useGoalId from "../../../../hooks/params/useGoalId";
 
 
-function GroupDiscussion() {
+function GroupDiscussion({ messages, isLoading, loadMore, hasMore, isFetchingMore }) {
 
-    const { messages, isLoading, loadMore, hasMore, isFetchingMore } = useGroupDiscussionWS()
+    
     const { data: currentUser } = useAuth();
 
     const scrollRef = useRef(null)
@@ -27,7 +26,7 @@ function GroupDiscussion() {
     /* Scroll to bottom on first load only                                 */
     /* ------------------------------------------------------------------ */
     const goalId = useGoalId()
-
+    
     useEffect(() => {
         const el = scrollRef.current
         if (!el || !messages.length) return
