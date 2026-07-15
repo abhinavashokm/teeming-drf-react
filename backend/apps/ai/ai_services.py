@@ -122,7 +122,7 @@ class GoalAssistantService:
                 request_text=message,
             )
         except Exception as e:
-            print("exception")
+            pass
 
     @staticmethod
     def _build_context(goal):
