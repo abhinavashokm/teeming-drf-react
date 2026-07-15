@@ -6,11 +6,12 @@ import useAuth from "../../../../hooks/auth/useAuth";
 import { buildChatTimeline } from '../../../../utils/chatUtils';
 import { CHAT_ITEM_TYPES } from "../../../../constants/chatConstants";
 import useGoalId from "../../../../hooks/params/useGoalId";
+import { useGroupDiscussionWS } from "../../../../contexts/GroupDiscussionWSContext";
 
 
-function GroupDiscussion({ messages, isLoading, loadMore, hasMore, isFetchingMore }) {
+function GroupDiscussion() {
 
-    
+    const { messages, isLoading, loadMore, hasMore, isFetchingMore } = useGroupDiscussionWS()
     const { data: currentUser } = useAuth();
 
     const scrollRef = useRef(null)

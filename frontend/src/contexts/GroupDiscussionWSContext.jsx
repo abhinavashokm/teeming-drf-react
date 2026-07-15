@@ -1,33 +1,54 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { useWorkspaceSocketContext } from '../contexts/WorkspaceSocketContext'
+import { useQueryClient } from '@tanstack/react-query'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import useDiscussionHistory from '../hooks/discussion/useDiscussionHistory'
+import useWorkspaceQueryKeys from '../hooks/helper/useWorkspaceQueryKeys'
+import { useWorkspaceSocketContext } from './WorkspaceSocketContext'
 
 const GroupDiscussionWSContext = createContext(null)
 
 export function GroupDiscussionWSProvider({ goalId, children }) {
   const { sendJson, subscribe } = useWorkspaceSocketContext()
 
-  const seededRef = useRef(false)
   const isPanelOpenRef = useRef(false)
 
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
-  const [messages, setMessages] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
 
   const { data: history, isPending: isLoading } = useDiscussionHistory(page)
 
+  const queryClient = useQueryClient()
+  const workspaceKeys = useWorkspaceQueryKeys()
+
+  const [page1Messages, setPage1Messages] = useState([])   // authoritative — always fully replaced by fresh page-1 fetch
+  const [olderMessages, setOlderMessages] = useState([])   // pages 2+, loaded via loadMore
+  const [liveMessages, setLiveMessages] = useState([])     // messages received via socket since join
+
+  const messages = useMemo(() => {
+    const map = new Map()
+    const combined = [...olderMessages, ...page1Messages, ...liveMessages]
+    combined.forEach(m => map.set(m.id, m))
+
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+    )
+
+  }, [olderMessages, page1Messages, liveMessages])
+
   /* ---------------- join/leave lifecycle on goal change ---------------- */
   useEffect(() => {
-    if (!goalId) return
-
-    setMessages([])
+    setPage1Messages([])
+    setOlderMessages([])
+    setLiveMessages([])
     setPage(1)
     setHasMore(true)
     setIsFetchingMore(false)
-    seededRef.current = false
+
+    if (!goalId) return
+
     sendJson({ type: 'join_discussion', goal_id: goalId })
+    queryClient.invalidateQueries({ queryKey: workspaceKeys.discussions() })
 
     return () => {
       sendJson({ type: 'leave_discussion', goal_id: goalId })
@@ -39,9 +60,9 @@ export function GroupDiscussionWSProvider({ goalId, children }) {
     if (!goalId) return
 
     const unsubMessage = subscribe('discussion_message', (data) => {
-      if (data.goal_id !== goalId) return // guard against late events from a prior room
+      if (data.goal_id !== goalId) return
 
-      setMessages(prev => [...prev, data])
+      setLiveMessages(prev => [...prev, data])
       if (!isPanelOpenRef.current) {
         setUnreadCount(prev => prev + 1)
       }
@@ -63,17 +84,11 @@ export function GroupDiscussionWSProvider({ goalId, children }) {
     if (!history) return
 
     if (page === 1) {
-      if (!seededRef.current) {
-        seededRef.current = true
-        setMessages(prev => {
-          const historyIds = new Set(history.messages.map(m => m.id))
-          const liveMessages = prev.filter(m => !historyIds.has(m.id))
-          return [...history.messages, ...liveMessages]
-        })
-        setHasMore(history.hasMore)
-      }
+      setPage1Messages(history.messages)
+      setHasMore(history.hasMore)
+      setHasMore(history.hasMore)
     } else {
-      setMessages(prev => {
+      setOlderMessages(prev => {
         const existingIds = new Set(prev.map(m => m.id))
         const newMessages = history.messages.filter(m => !existingIds.has(m.id))
         return [...newMessages, ...prev]

@@ -21,7 +21,7 @@ function useWorkspaceQueryKeys() {
         metrics: workspaceQueryKeys.metrics(workspaceSlug, goalId),
         checkins: workspaceQueryKeys.checkins(workspaceSlug, goalId),
         notifications: workspaceQueryKeys.notifications(workspaceSlug),
-        discussions: (page) => workspaceQueryKeys.discussions(workspaceSlug, goalId, page),
+        discussions: () => workspaceQueryKeys.discussions(workspaceSlug, goalId),
         ai_assistant_responses: workspaceQueryKeys.ai_assistant_responses(currentUser.email, workspaceSlug, goalId)
     }
 }

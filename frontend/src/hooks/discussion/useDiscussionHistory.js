@@ -12,7 +12,7 @@ export default function useDiscussionHistory(page=1) {
     const goalId = useGoalId()
 
     return useQuery({
-        queryKey: workspaceKeys.discussions(page),
+        queryKey: [...workspaceKeys.discussions(), page],
         queryFn: async () => {
             const resData = await discussionService.fetchDiscussionHistory(workspaceSlug, goalId, page)
             return resData.data

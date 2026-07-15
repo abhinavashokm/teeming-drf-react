@@ -19,8 +19,7 @@ function RightPanel({ onClose, isMobile }) {
     const [pendingAIMessage, setPendingAIMessage] = useState(null);
 
     const { data: currentUser } = useAuth();
-    const discussion = useGroupDiscussionWS()
-    const { sendMessage, onPanelOpen, onPanelClose } = discussion
+    const { sendMessage, onPanelOpen, onPanelClose } = useGroupDiscussionWS()
 
     const { mutate: askAI, isPending: isAIChatResGenerating } = useAIAssistant()
 
@@ -36,7 +35,7 @@ function RightPanel({ onClose, isMobile }) {
         if (isAiBlocked) return;
 
         if (mode === discussionMode) {
-            console.log("here 1")
+
             sendMessage(input.trim());
 
         } else if (mode === aiMode) {
@@ -99,7 +98,7 @@ function RightPanel({ onClose, isMobile }) {
 
                 {mode === discussionMode ? (
 
-                    <GroupDiscussion {...discussion} />
+                    <GroupDiscussion />
 
                 ) : (
 

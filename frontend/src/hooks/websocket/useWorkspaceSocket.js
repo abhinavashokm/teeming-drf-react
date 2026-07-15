@@ -43,7 +43,7 @@ export function useWorkspaceSocket() {
             onMessage: (data) => {
                 switch (data.type) {
 
-                    case "send_notification":
+                    case "notification_update":
                         setNotifications((prev) => [data, ...prev]);
                         break;
 

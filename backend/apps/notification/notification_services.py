@@ -28,7 +28,7 @@ def notify_users(workspace, users, message, notification_type=Notification.Notif
         async_to_sync(channel_layer.group_send)(
             f"notifications_user_{user.id}",
             {
-                "type": "send_notification",
+                "type": "notification_update",
                 "id": str(notification.id),
                 "message": notification.message,
                 "workspace": workspace.name,

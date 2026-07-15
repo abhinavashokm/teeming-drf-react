@@ -10,7 +10,7 @@ class DiscussionListView(MemberBaseView):
         discussion_res = discussion_services.list_discussion_messages(
             workspace=request.workspace, 
             goal_id=kwargs["goal_id"],
-            page=request.query_params.get('page', None),
+            page=request.query_params.get('page', 1),
         )
 
         return success_response(

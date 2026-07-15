@@ -144,7 +144,7 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
 
         logger.warning(f"Unknown WS message type from user={self.user.id}: {message_type}")
 
-    async def send_notification(self, event):
+    async def notification_update(self, event):
         await self.send(text_data=json.dumps(event))
 
     # matches "type": "presence_update" sent via group_send
