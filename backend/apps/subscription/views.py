@@ -15,7 +15,6 @@ class UserListPlanView(AdminBaseView):
                 "plans": serializers.UserReadPlanSerializer(plans, many=True).data
             }
         )
-    
 
 class SubscriptionCheckoutView(AdminBaseView):
 

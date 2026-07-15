@@ -12,6 +12,7 @@ import { formatDate } from "../../utils/timeUtils";
 import AdminWorkspaceDetailModal from '../components/adminWorkspaces/AdminWorkspaceDetailModal';
 import DataTable from '../components/table/DataTable';
 import useAdminWorkspaces from '../hooks/workspaces/useAdminWorkspaces';
+import usePlans from '../hooks/adminPlans/usePlans';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -45,6 +46,7 @@ const transformWorkspace = (ws) => ({
   color: colorFor(ws.id),
   status: ws.isSuspended ? 'Suspended' : 'Active',
   plan: ws.activeSubscription?.plan?.name ?? 'Free',
+  version: `V${ws.activeSubscription?.plan?.version}`,
   planCode: ws.activeSubscription?.plan?.code ?? planCodes.FREE,
   planColor: getPlanColor(ws.activeSubscription?.plan?.code),
   members: ws.memberCount,
@@ -71,6 +73,7 @@ export default function AdminWorkspaces() {
     {
       search: searchQuery,
       status: statusFilter,
+      plan: planFilter,
       page,
     }
   )
@@ -116,7 +119,7 @@ export default function AdminWorkspaces() {
               {workspace.name}
             </span>
             <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${workspace.planColor}`}>
-              {workspace.plan}
+              {`${workspace.plan}-${workspace.version}`}
             </span>
           </div>
         </div>
@@ -192,6 +195,12 @@ export default function AdminWorkspaces() {
     },
   ];
 
+  /* -------------------------------------------------------------------------- */
+  /* fetch plans for showing filter options */
+  /* -------------------------------------------------------------------------- */
+  const { data: plansData, isPending: isPlansLoading, isError: isPlansError } = usePlans();
+  const plans = plansData?.plans ?? [];
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
 
@@ -230,12 +239,15 @@ export default function AdminWorkspaces() {
             <select
               value={planFilter}
               onChange={(e) => { setPlanFilter(e.target.value); setPage(1); }}
-              className="h-[36px] appearance-none bg-white border border-slate-200 rounded-lg pl-3 pr-8 text-[13px] font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+              disabled={isPlansLoading}
+              className="h-[36px] appearance-none bg-white border border-slate-200 rounded-lg pl-3 pr-8 text-[13px] font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <option value="All">All Plans</option>
-              <option value="Free">Free</option>
-              <option value="Pro">Pro</option>
-              <option value="Enterprise">Enterprise</option>
+              {!isPlansError && plans.map((plan) => (
+                <option key={plan.code} value={plan.code}>
+                  {plan.name}
+                </option>
+              ))}
             </select>
             <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
               <ChevronDown className="h-4 w-4 text-slate-400" />
