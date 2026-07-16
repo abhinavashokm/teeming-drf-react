@@ -1,15 +1,18 @@
+from rest_framework import status
 from core.exceptions.base import AppException
+from core.constants.error_codes import ErrorCode
 
-class AIException(Exception):
-    pass
+
+class AIException(AppException):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    error_code = ErrorCode.AI_UNAVILABLE
+    message = "AI service temporarily unavailable."
 
 
 class AIProviderException(AIException):
     pass
 
-
-class AIRateLimitException(AIException):
-    pass
-
 class AIQuotaExceededException(AIException):
-    pass
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    error_code = ErrorCode.AI_QUOTA_EXCEEDED
+    message = "AI limit reached. Please try again in a minute."

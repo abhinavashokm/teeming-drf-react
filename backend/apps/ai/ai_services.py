@@ -92,13 +92,15 @@ class GoalAssistantService:
 
         if not config:
             raise ValueError(f"Unsupported action: {action}")
-
+        
+       
         return self._generate_response(
             response_type=action,
             prompt=config["prompt"],
             schema=config["schema"],
             message=message,
         )
+
 
     def _generate_response(
         self,
@@ -107,22 +109,21 @@ class GoalAssistantService:
         schema,
         message=None
     ):
-        try:
-            response = self.provider.generate_structured(
-                prompt=prompt,
-                schema=schema,
-            )
 
-            return AIAssistantResponse.objects.create(
-                workspace=self.workspace,
-                goal=self.goal,
-                user=self.user,
-                type=response_type,
-                content=response.build_content(),
-                request_text=message,
-            )
-        except Exception as e:
-            pass
+        response = self.provider.generate_structured(
+            prompt=prompt,
+            schema=schema,
+        )
+
+        return AIAssistantResponse.objects.create(
+            workspace=self.workspace,
+            goal=self.goal,
+            user=self.user,
+            type=response_type,
+            content=response.build_content(),
+            request_text=message,
+        )
+
 
     @staticmethod
     def _build_context(goal):

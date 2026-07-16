@@ -309,6 +309,7 @@ GEMINI_MODEL = os.environ.get(
     default="gemini-2.5-flash",
 )
 USE_MOCK_AI = os.getenv("USE_MOCK_AI", "False").lower() == "true"
+FORCE_AI_ERROR = os.environ.get("FORCE_AI_ERROR")
 
 # -----------------------------------------------------------------------------
 # S3 Bucket configuration
