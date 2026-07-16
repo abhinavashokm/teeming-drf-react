@@ -9,6 +9,8 @@ import useAuth from '../../../../hooks/auth/useAuth';
 import useNavigateUpgradePlan from '../../../../hooks/routes/useNavigateUpgradePlan';
 import useWorkspace from '../../../../hooks/workspace/useWorkspace';
 import { errorCodes } from '../../../../constants/errorCodes';
+import { useCan } from '../../../../hooks/permissions/useCan';
+import { PERMISSIONS } from '../../../../constants/permissions';
 
 
 const quickActions = [
@@ -80,7 +82,7 @@ function AIAssistant({ pendingAIMessage, setPendingAIMessage, isAIChatResGenerat
                 const errorData = error.response?.data?.error
 
                 const message = errorData?.code === errorCodes.AI_UNAVILABLE
-                    ? errorData?.message
+                    ? "Teeming AI is temporarily unavailable. Please try again after a while"
                     : "Something went wrong. Please try again."
 
                 setAiError({
@@ -198,6 +200,7 @@ export default AIAssistant
 
 function AIAssistantLocked() {
     const goToUpgradePlan = useNavigateUpgradePlan();
+    const canUpgradePlan = useCan(PERMISSIONS.UPGRADE_PLAN)
 
     return (
         <div className="flex flex-col items-center justify-center text-center p-6 h-full">
@@ -215,15 +218,24 @@ function AIAssistantLocked() {
             </h3>
 
             <p className="text-xs text-gray-500 mt-1.5 max-w-[220px]">
-                Upgrade your plan to get AI-generated summaries and idea suggestions for this goal.
+                {canUpgradePlan
+                    ? "Upgrade your plan to get AI-generated summaries and idea suggestions for this goal."
+                    : "Ask a workspace admin to upgrade the plan to unlock AI-generated summaries and idea suggestions."
+                }
             </p>
 
-            <button
-                onClick={goToUpgradePlan}
-                className="mt-4 rounded-lg bg-[#378ADD] px-4 py-2 text-xs font-medium text-white hover:bg-[#378ADD]/90 transition-colors"
-            >
-                Upgrade plan
-            </button>
+            {canUpgradePlan ? (
+                <button
+                    onClick={goToUpgradePlan}
+                    className="mt-4 rounded-lg bg-[#378ADD] px-4 py-2 text-xs font-medium text-white hover:bg-[#378ADD]/90 transition-colors"
+                >
+                    Upgrade plan
+                </button>
+            ) : (
+                <span className="mt-4 rounded-lg bg-slate-100 px-4 py-2 text-xs font-medium text-slate-500">
+                    Admin access required
+                </span>
+            )}
         </div>
     );
 }

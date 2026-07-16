@@ -15,6 +15,8 @@ import useUpdateIdea from '../../hooks/idea/useUpdateIdea';
 import useGoalId from "../../hooks/params/useGoalId";
 import { errorCodes } from '../../constants/errorCodes';
 import useWorkspace from "../../hooks/workspace/useWorkspace"
+import useNavigateUpgradePlan from '../../hooks/routes/useNavigateUpgradePlan';
+
 
 function IdeaFormModal({
     isOpen,
@@ -42,6 +44,7 @@ function IdeaFormModal({
     const { mutate: updateIdea, isPending: isUpdating } = useUpdateIdea()
     const goalId = useGoalId();
 
+    const title = watch('title', '');
     const description = watch('description', '');
 
     useEffect(() => {
@@ -84,7 +87,7 @@ function IdeaFormModal({
     //---------------------AI FEATURE--------------------------
 
     const { data: currentWorkspace } = useWorkspace()
-    const isAiEnhacementsAvailable = currentWorkspace?.features?.aiIdeaSuggestions
+    const isAiEnhacementsAvailable = currentWorkspace?.features?.aiEnhancements
 
     const { mutate: improveIdeaWithAI } = useImproveIdea()
 
@@ -102,7 +105,13 @@ function IdeaFormModal({
         setAiError(false)
     }
 
+    const goToUpgradePlan = useNavigateUpgradePlan();
+
     const handleImproveIdea = async (data) => {
+
+        if (!isAiEnhacementsAvailable) {
+            return goToUpgradePlan()
+        }
 
         setIsEnhancingIdea(true);
 
@@ -139,10 +148,8 @@ function IdeaFormModal({
                 resetAIStates()
 
                 const errorRes = error?.response?.data?.error
-                if (errorRes?.code === errorCodes.RATE_LIMITED) {
-                    setAiError("Too many requests. Please try again later")
-                } else if (errorRes?.code === errorCodes.AI_RATE_LIMITED) {
-                    setAiError("AI is currently busy. Please try again in a minute.")
+                if (errorRes?.code === errorCodes.AI_UNAVILABLE) {
+                    setAiError("Teeming AI is currently busy. Please try again in a minute.")
                 }
             }
         })
@@ -311,7 +318,7 @@ function IdeaFormModal({
                     </div>
                 )}
 
-                {/* AI Suggestions only for create */}
+                {/* AI Enhancements only for create */}
                 {!isEditMode && (
 
                     <div className="flex justify-end mb-4">
@@ -320,16 +327,17 @@ function IdeaFormModal({
                             type="button"
                             size="sm"
                             variant="secondary"
-                            disabled={!isAiEnhacementsAvailable}
+                            disabled={!isAiEnhacementsAvailable || !title.trim()}
                             onClick={handleSubmit(handleImproveIdea)}
                             loading={isEnhancingIdea}
+                            title={!title.trim() ? "Add a title first" : undefined}
                         >
                             <Sparkles className="w-4 h-4" />
                             Enhance Idea
                             {
                                 !isAiEnhacementsAvailable &&
                                 <span className="ml-1 rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-bold text-violet-700">
-                                    PRO
+                                    Upgrade
                                 </span>
                             }
 

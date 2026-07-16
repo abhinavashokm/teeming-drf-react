@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Users, X } from 'lucide-react';
+import { ArrowRight, Check, TriangleAlert, Users, X } from 'lucide-react';
 import { useReducer } from 'react';
 import { Command } from 'cmdk';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
@@ -10,6 +10,9 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTE_PATHS } from '../../constants/routePaths';
 import useWorkspaceSlug from '../../hooks/params/useWorkspaceSlug';
 import WorkspaceAvatar from "./WorkspaceAvatar"
+import useNavigateUpgradePlan from '../../hooks/routes/useNavigateUpgradePlan';
+import { useCan } from '../../hooks/permissions/useCan';
+import { PERMISSIONS } from '../../constants/permissions';
 
 const initialState = {
     inputValue: '',
@@ -55,10 +58,13 @@ export default function InviteModal({ isOpen, onClose, memberLimit }) {
     const totalMembersAfterInvite = memberLimit.used + state.selectedEmails.length
     const exceedsMemberLimit = totalMembersAfterInvite > memberLimit.max
 
+    const navigateToUpgragePlan = useNavigateUpgradePlan()
+    const canUpgradePlan = useCan(PERMISSIONS.UPGRADE_PLAN)
+
     const handleInviteMember = () => {
 
         if (exceedsMemberLimit) {
-            navigate(ROUTE_PATHS.UPGRADE_PLAN(workspaceSlug))
+            if (canUpgradePlan) navigateToUpgragePlan()
             return
         }
 
@@ -103,6 +109,18 @@ export default function InviteModal({ isOpen, onClose, memberLimit }) {
                         {memberLimit.used}/{memberLimit.max} members
                     </div>
                 </div>
+
+                {exceedsMemberLimit && !canUpgradePlan && (
+                    <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                        <div className="flex items-start gap-2">
+                            <TriangleAlert className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                            <p className="text-[13px] text-amber-800">
+                                This invite would exceed your workspace's member limit.
+                                Ask a workspace owner or admin to upgrade the plan before inviting more people.
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Label */}
                 <div className="mb-3">
@@ -195,9 +213,13 @@ export default function InviteModal({ isOpen, onClose, memberLimit }) {
                     <AppButton
                         onClick={handleInviteMember}
                         loading={isInvitePending}
-                        disabled={isInvitePending || state.selectedEmails.length === 0}
+                        disabled={isInvitePending || state.selectedEmails.length === 0 || (!canUpgradePlan && exceedsMemberLimit)}
                     >
-                        {exceedsMemberLimit ? "Upgrade plan" : "Send invites"} <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        {exceedsMemberLimit
+                            ? (canUpgradePlan ? "Upgrade plan" : "Member limit reached")
+                            : "Send invites"
+                        }
+                        {(canUpgradePlan || !exceedsMemberLimit) && <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />}
                     </AppButton>
 
                 </div>
