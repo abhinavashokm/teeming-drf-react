@@ -19,10 +19,10 @@ class AIProvider(ABC):
             #force exception for testing
             force_error = getattr(settings, "FORCE_AI_ERROR", None)
             if force_error == "quota":
-                time.sleep(2)
+                time.sleep(1)
                 raise exceptions.AIQuotaExceededException()
             if force_error == "unavilable":
-                time.sleep(2)
+                time.sleep(1)
                 raise exceptions.AIProviderException()
             
             if settings.USE_MOCK_AI:

@@ -1,16 +1,14 @@
-import { Lock, Sparkles } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { AlertCircle, Lock, RefreshCw, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import AIResponseBubble from '../../../../components/chat/AIResponseBubble';
+import ChatBubble from '../../../../components/chat/ChatBubble';
 import useAIAssistant from '../../../../hooks/ai/useAIAssistant';
 import useAIAssistantResponses from '../../../../hooks/ai/useAIAssistantResponses';
 import useClearAllAIResponses from '../../../../hooks/ai/useClearAllAIResponses';
-import { formatTimeAgo } from '../../../../utils/timeUtils';
-import ChatBubble from '../../../../components/chat/ChatBubble';
 import useAuth from '../../../../hooks/auth/useAuth';
-import AIResponseBubble from '../../../../components/chat/AIResponseBubble';
-import useWorkspace from '../../../../hooks/workspace/useWorkspace';
-import { useNavigate } from 'react-router-dom';
-import { ROUTE_PATHS } from '../../../../constants/routePaths';
 import useNavigateUpgradePlan from '../../../../hooks/routes/useNavigateUpgradePlan';
+import useWorkspace from '../../../../hooks/workspace/useWorkspace';
+import { errorCodes } from '../../../../constants/errorCodes';
 
 
 const quickActions = [
@@ -56,6 +54,8 @@ function AIAssistant({ pendingAIMessage, setPendingAIMessage, isAIChatResGenerat
     const { mutate: askAI, isPending: isAIGenerating } = useAIAssistant()
     const { mutate: clearAllResponses, isPending: isClearing } = useClearAllAIResponses()
 
+    const [aiError, setAiError] = useState(null)
+
     const bottomRef = useRef(null);
 
     useEffect(() => {
@@ -63,17 +63,31 @@ function AIAssistant({ pendingAIMessage, setPendingAIMessage, isAIChatResGenerat
             behavior: 'smooth',
             block: 'end',
         });
-    }, [aiResponses?.length, isAIGenerating, pendingAIMessage]);
+    }, [aiResponses?.length, isAIGenerating, pendingAIMessage, aiError]);
 
     /* -------------------------------------------------------------------------- */
     /* handle ask questions or suggestions to ai */
     /* -------------------------------------------------------------------------- */
     const handleAskAI = (type) => {
+        setAiError(null)
         setPendingAIMessage(actionMap[type].requestText)
 
         askAI({ type: type }, {
             onSettled: () => {
                 setPendingAIMessage(null)
+            },
+            onError: (error) => {
+                const errorData = error.response?.data?.error
+
+                const message = errorData?.code === errorCodes.AI_UNAVILABLE
+                    ? errorData?.message
+                    : "Something went wrong. Please try again."
+
+                setAiError({
+                    type,
+                    requestText: actionMap[type].requestText,
+                    message,
+                })
             }
         })
     }
@@ -149,6 +163,24 @@ function AIAssistant({ pendingAIMessage, setPendingAIMessage, isAIChatResGenerat
                     </>
                 }
 
+                {
+                    (aiError && !pendingAIMessage) &&
+                    <div className="mb-6">
+                        <ChatBubble
+                            content={aiError.requestText}
+                            isMine
+                            showAvatar={false}
+                            showSender={false}
+                            className="mb-3"
+                        />
+
+                        <AIErrorBubble
+                            message={aiError.message}
+                            onRetry={() => handleAskAI(aiError.type)}
+                        />
+                    </div>
+                }
+
 
                 <div ref={bottomRef} />
             </div>
@@ -166,7 +198,7 @@ export default AIAssistant
 
 function AIAssistantLocked() {
     const goToUpgradePlan = useNavigateUpgradePlan();
-    
+
     return (
         <div className="flex flex-col items-center justify-center text-center p-6 h-full">
             <div className="relative mb-4">
@@ -219,6 +251,35 @@ function AIResponse({ response, currentUser }) {
                 actionMap={actionMap}
             />
 
+        </div>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* sub components - AIErrorBubble */
+/* -------------------------------------------------------------------------- */
+function AIErrorBubble({ message, onRetry }) {
+    return (
+        <div className="rounded-lg border border-red-100 bg-red-50/60">
+            <div className="p-4 flex items-start gap-3">
+                <div className="mt-0.5 shrink-0">
+                    <AlertCircle className="w-4 h-4 text-red-400" />
+                </div>
+
+                <div className="flex-1">
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                        {message}
+                    </p>
+
+                    <button
+                        onClick={onRetry}
+                        className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-medium text-[#378ADD] hover:text-[#378ADD]/80 transition-colors"
+                    >
+                        <RefreshCw className="w-3 h-3" />
+                        Retry
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

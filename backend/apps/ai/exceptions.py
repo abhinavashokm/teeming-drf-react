@@ -14,5 +14,4 @@ class AIProviderException(AIException):
 
 class AIQuotaExceededException(AIException):
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
-    error_code = ErrorCode.AI_QUOTA_EXCEEDED
     message = "AI limit reached. Please try again in a minute."
