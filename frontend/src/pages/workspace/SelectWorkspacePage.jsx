@@ -1,5 +1,5 @@
 import { ArrowRight, LayoutGrid, Plus } from 'lucide-react';
-import useMyWorkspaces from "../../hooks/workspace/useMyWorkspaces";
+import usemyMemberships from '../../hooks/workspace/usemyMemberships';
 import WorkspaceRow from '../../components/setup/WorkspaceRow';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -7,10 +7,10 @@ import { useEffect } from 'react';
 
 function SelectWorkspacePage({ onEnterWorkspace, onCreateNewWorkspace }) {
 
-    const { data: workspacesData } = useMyWorkspaces()
+    const { data: membershipData } = usemyMemberships()
     const { setCenterContent } = useOutletContext()
 
-    const myWorkspaces = workspacesData?.workspaces
+    const myMemberships = membershipData?.memberships
 
     //for removing vertical centering style of parent layout
     useEffect(() => {
@@ -36,10 +36,10 @@ function SelectWorkspacePage({ onEnterWorkspace, onCreateNewWorkspace }) {
             </div>
 
             {/* Workspaces List */}
-            {myWorkspaces?.length > 0 ? (
+            {myMemberships?.length > 0 ? (
                 <div className="w-full max-w-3xl flex flex-col gap-3">
-                    {myWorkspaces?.map(workspace => (
-                        <WorkspaceRow key={workspace.id} workspace={workspace} />
+                    {myMemberships?.map(membership => (
+                        <WorkspaceRow key={membership.workspace.id} workspace={membership.workspace} role={membership.role} />
                     ))}
                 </div>
             ) : (

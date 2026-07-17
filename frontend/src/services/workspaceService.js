@@ -4,7 +4,7 @@ import api from "../api/axios";
 export const workspaceService = {
 
     //get all workspace and last active workspace of user for redirection
-    fetchMyWorkspaces: async () => {
+    fetchmyMemberships: async () => {
         const res = await api.get("/workspaces/session/")
         return res.data
     },

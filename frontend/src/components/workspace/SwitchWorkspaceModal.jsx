@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Search, Check, Plus } from 'lucide-react';
-import useMyWorkspaces from '../../hooks/workspace/useMyWorkspaces';
+import usemyMemberships from '../../hooks/workspace/usemyMemberships';
 import useWorkspace from "../../hooks/workspace/useWorkspace"
 import useSwitchWorkspace from '../../hooks/workspace/useSwitchWorkspace';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,9 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
 
   const { data: currentWorkspace } = useWorkspace()
 
-  const { data: myWorkspacesData } = useMyWorkspaces()
+  const { data: myMembershipsData } = usemyMemberships()
+  const myMemberships = myMembershipsData?.memberships
+
   const switchWorkspace = useSwitchWorkspace()
 
   const navigate = useNavigate()
@@ -27,7 +29,7 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
     return COLORS[index]
   }
 
-  const myWorkspaces = myWorkspacesData?.workspaces
+
 
   const handleSwitchWorkspace = (workspace) => {
     switchWorkspace(workspace)
@@ -64,29 +66,32 @@ export default function SwitchWorkspaceModal({ isOpen, onClose }) {
         {/* Workspace List */}
         <div className="px-2 pb-3 max-h-[300px] overflow-y-auto">
           <div className="space-y-0.5">
-            {myWorkspaces.map(workspace => (
-              <button
-                key={workspace.id}
-                className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded-[10px] transition-colors group"
-                onClick={() => { handleSwitchWorkspace(workspace) }}
-              >
-                <div className="flex items-center gap-3">
+            {myMemberships.map(membership => {
+              const workspace = membership.workspace
+              return (
+                <button
+                  key={workspace.id}
+                  className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded-[10px] transition-colors group"
+                  onClick={() => { handleSwitchWorkspace(workspace) }}
+                >
+                  <div className="flex items-center gap-3">
 
-                  <WorkspaceAvatar
-                    workspace={workspace}
-                    size="sm"
-                  />
+                    <WorkspaceAvatar
+                      workspace={workspace}
+                      size="sm"
+                    />
 
-                  <span className={`text-[13px] font-medium ${workspace.active ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>
-                    {workspace.name}
-                  </span>
-                </div>
-                {workspace.slug == currentWorkspace.slug && (
-                  <Check className="h-4 w-4 text-teeming-green mr-2" strokeWidth={2.5} />
-                )}
-              </button>
-            ))}
-            {myWorkspaces.length === 0 && (
+                    <span className={`text-[13px] font-medium ${workspace.active ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>
+                      {workspace.name}
+                    </span>
+                  </div>
+                  {workspace.slug == currentWorkspace.slug && (
+                    <Check className="h-4 w-4 text-teeming-green mr-2" strokeWidth={2.5} />
+                  )}
+                </button>
+              )
+            })}
+            {myMemberships.length === 0 && (
               <div className="py-8 text-center text-gray-400 text-[13px]">
                 No workspaces found
               </div>

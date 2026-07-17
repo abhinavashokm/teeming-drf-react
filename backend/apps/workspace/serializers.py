@@ -83,6 +83,14 @@ class BaseWorkspaceSerializer(BuildWorkspaceLogoUrlMixin, serializers.ModelSeria
         fields = ["name", "slug", "id", "logo_url"]
 
 
+class MyWorkspacesSerializer(serializers.ModelSerializer):
+    workspace = BaseWorkspaceSerializer()
+
+    class Meta:
+        model = WorkspaceMember
+        fields = ["workspace", "role"]
+
+
 class GetCurrentWorkspaceSerializer(
     BuildWorkspaceLogoUrlMixin, serializers.ModelSerializer
 ):

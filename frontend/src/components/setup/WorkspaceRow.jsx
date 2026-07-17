@@ -4,7 +4,7 @@ import { buildWorkspacePath } from '../../utils/routeUtils';
 import WorkspaceAvatar from '../workspace/WorkspaceAvatar';
 import {workspaceRoles} from "../../constants/workspaceConstants"
 
-function WorkspaceRow({ workspace }) {
+function WorkspaceRow({ workspace, role }) {
     const roleColors = {
         [workspaceRoles.OWNER]: 'text-emerald-600 bg-emerald-50 border-emerald-100',
         [workspaceRoles.ADMIN]: 'text-blue-600 bg-blue-50 border-blue-100',
@@ -43,10 +43,10 @@ function WorkspaceRow({ workspace }) {
                         className={`
                     inline-flex items-center px-2 py-0.5 rounded
                     text-[11px] font-medium border w-fit
-                    ${roleColors[workspace.role] || roleColors.Member}
+                    ${roleColors[role] || roleColors.Member}
                 `}
                     >
-                        {workspace.role}
+                        {role}
                     </span>
                 </div>
             </div>

@@ -9,7 +9,7 @@ import { ROUTE_PATHS } from "../../constants/routePaths";
 import useAuth from "../../hooks/auth/useAuth";
 import useLogout from "../../hooks/auth/useLogout";
 import useCreateWorkspace from "../../hooks/workspace/useCreateWorkspace";
-import useMyWorkspaces from "../../hooks/workspace/useMyWorkspaces";
+import usemyMemberships from "../../hooks/workspace/usemyMemberships";
 import { toSlug } from "../../utils/slugUtils";
 import { validations } from "../../utils/validations";
 import { slugify } from "../../utils/slugUtils";
@@ -50,9 +50,8 @@ function CreateWorkspacePage() {
     }
 
     const { mutate: createWorkspace, isPending } = useCreateWorkspace()
-    const { data: workspaceData } = useMyWorkspaces()
-
-    const haveWorkspaces = workspaceData?.workspaces.length > 0
+    const { data: myMemberships } = usemyMemberships()
+    const haveWorkspaces = myMemberships?.memberships.length > 0
 
     const handleCreateWorkspace = ({ name, slug }) => {
         createWorkspace({ name, slug }, {

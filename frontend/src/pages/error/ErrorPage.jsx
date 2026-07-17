@@ -15,7 +15,7 @@ import {
 import SetupHeader from '../../components/setup/SetupHeader';
 import useAuth from '../../hooks/auth/useAuth';
 import { errorCodes } from '../../constants/errorCodes';
-import useMyWorkspaces from '../../hooks/workspace/useMyWorkspaces';
+import usemyMemberships from '../../hooks/workspace/usemyMemberships';
 import { useNavigate } from 'react-router-dom';
 import { ROUTE_PATHS } from '../../constants/routePaths';
 
@@ -70,8 +70,9 @@ export default function ErrorPage({
   };
 
   const { data: currentUser } = useAuth()
-  const { data: workspaceDetails } = useMyWorkspaces()
-  const isUserHaveWorkspace = workspaceDetails?.workspaces?.length > 0
+  const { data: membershipData } = usemyMemberships()
+  const myMemberships = membershipData?.memberships
+  const isUserHaveWorkspace = myMemberships?.length > 0
 
   const config = errorConfig[type] || errorConfig['general'];
   const Icon = config.icon;

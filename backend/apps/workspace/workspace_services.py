@@ -35,7 +35,7 @@ def fetch_user_workspace_list(user):
         workspace__is_deleted=False,
     ).select_related("workspace")
 
-    return [m.workspace for m in memberships]
+    return memberships
 
 
 def add_workspace_member(user, workspace, role):

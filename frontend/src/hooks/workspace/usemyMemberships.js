@@ -4,12 +4,12 @@ import { showApiError } from "../../utils/toast";
 import { globalQueryKeys } from "../../constants/queryKeys";
 
 
-export default function useMyWorkspaces() {
+export default function usemyMemberships() {
 
     return useQuery({
-        queryKey: globalQueryKeys.workspaces,
+        queryKey: globalQueryKeys.workspaceMemberships,
         queryFn: async () => {
-            const res = await workspaceService.fetchMyWorkspaces()
+            const res = await workspaceService.fetchmyMemberships()
             return res.data
         },
         onError: (error) => showApiError(error)

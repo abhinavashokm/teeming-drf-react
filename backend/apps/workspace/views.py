@@ -8,6 +8,7 @@ from .serializers import (
     WorkspaceMemberSerializer,
     WorkspaceUpdateSerializer,
     WorkspaceRoleUpdateSerializer,
+    MyWorkspacesSerializer,
 )
 from . import serializers
 from rest_framework.permissions import IsAuthenticated
@@ -22,9 +23,6 @@ from apps.goal import goal_services
 from apps.user import user_services
 from core.services import s3_service
 
-from core.redis_store import get_set_members
-from .models import WorkspaceMember
-
 
 class ListUserWorkspacesView(APIView):
     """
@@ -35,14 +33,14 @@ class ListUserWorkspacesView(APIView):
 
     def get(self, request):
 
-        membership_workspaces = workspace_services.fetch_user_workspace_list(
-            request.user
+        memberships = workspace_services.fetch_user_workspace_list(
+            user=request.user
         )
 
         return success_response(
             data={
-                "workspaces": serializers.BaseWorkspaceSerializer(
-                    membership_workspaces, many=True
+                "memberships": serializers.MyWorkspacesSerializer(
+                    memberships, many=True
                 ).data,
             }
         )
