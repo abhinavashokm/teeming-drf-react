@@ -1,6 +1,9 @@
 import { X, TrendingUp, TrendingDown } from 'lucide-react';
 import { Controller, useFormContext } from "react-hook-form";
 import { UNIT_OPTIONS } from '../../constants/outcomeConstants';
+import FormField from '../ui/form/FormField';
+import InputField from '../ui/form/InputField';
+import SelectField from '../ui/form/SelectField';
 
 
 function DirectionToggle({ value, onChange, disabled, dirty }) {
@@ -13,14 +16,14 @@ function DirectionToggle({ value, onChange, disabled, dirty }) {
                     disabled={disabled}
                     onClick={() => onChange('increase')}
                     className={`w-full h-full flex items-center justify-center rounded-md text-[13px] font-medium transition-all disabled:pointer-events-none ${value === 'increase'
-                            ? 'bg-white text-green-600 shadow-sm border border-gray-200'
-                            : 'text-gray-400 hover:text-gray-600'
+                        ? 'bg-white text-green-600 shadow-sm border border-gray-200'
+                        : 'text-gray-400 hover:text-gray-600'
                         }`}
                 >
-                    <span className="flex items-center gap-1 md:hidden">
-                        <TrendingUp className="w-3.5 h-3.5 shrink-0" />↑ Increase
+                    <span className="flex items-center gap-1 hidden md:flex  ">
+                        <TrendingUp className="w-3.5 h-3.5 shrink-0" />Increase
                     </span>
-                    <span className="hidden md:flex items-center justify-center">↑</span>
+                    <span className="md:hidden items-center justify-center"><TrendingUp className="w-3 h-3 text-green-400" /></span>
                 </button>
                 <div className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-10">
                     <div className="bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-lg whitespace-nowrap flex items-center gap-1.5">
@@ -36,14 +39,14 @@ function DirectionToggle({ value, onChange, disabled, dirty }) {
                     disabled={disabled}
                     onClick={() => onChange('decrease')}
                     className={`w-full h-full flex items-center justify-center rounded-md text-[13px] font-medium transition-all disabled:pointer-events-none ${value === 'decrease'
-                            ? 'bg-white text-red-500 shadow-sm border border-gray-200'
-                            : 'text-gray-400 hover:text-gray-600'
+                        ? 'bg-white text-red-500 shadow-sm border border-gray-200'
+                        : 'text-gray-400 hover:text-gray-600'
                         }`}
                 >
-                    <span className="flex items-center gap-1 md:hidden">
-                        <TrendingDown className="w-3.5 h-3.5 shrink-0" />↓ Decrease
+                    <span className="flex items-center gap-1 hidden md:flex">
+                        <TrendingDown className="w-3.5 h-3.5 shrink-0  " />Decrease
                     </span>
-                    <span className="hidden md:flex items-center justify-center">↓</span>
+                    <span className="md:hidden items-center justify-center"><TrendingDown className="w-3.5 h-3.5 shrink-0  " /></span>
                 </button>
                 <div className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-10">
                     <div className="bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-lg whitespace-nowrap flex items-center gap-1.5">
@@ -61,12 +64,11 @@ export default function FormMetricRow({ index, onRemove, canRemove }) {
 
     return (
         <div className="border border-gray-200 rounded-xl p-4 bg-white">
+
             <div className="flex items-center gap-2 mb-3">
-                <input
-                    {...register(`metrics.${index}.name`)}
-                    placeholder="Metric name"
-                    className="flex-1 min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD]"
-                />
+                <FormField label='Metric name' className='flex-1'>
+                    <InputField {...register(`metrics.${index}.name`)} />
+                </FormField>
                 <button
                     type="button"
                     onClick={() => onRemove(index)}
@@ -77,40 +79,41 @@ export default function FormMetricRow({ index, onRemove, canRemove }) {
                 </button>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-[80px_minmax(0,1fr)_minmax(0,1fr)_72px] gap-3">
-                <select
-                    {...register(`metrics.${index}.unit`)}
-                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD]"
-                >
-                    {UNIT_OPTIONS.map(unit => (
-                        <option key={unit.value} value={unit.value}>{unit.display}</option>
-                    ))}
-                </select>
+            <div className="space-y-3">
 
-                <input
-                    type="number"
-                    {...register(`metrics.${index}.baselineValue`)}
-                    placeholder="Current value"
-                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD]"
-                />
+                <div className="grid grid-cols-2 gap-3">
+                    <FormField label='Unit'>
+                        <SelectField {...register(`metrics.${index}.unit`)}>
+                            {UNIT_OPTIONS.map(unit => (
+                                <option key={unit.value} value={unit.value}>{unit.display}</option>
+                            ))}
+                        </SelectField>
+                    </FormField>
 
-                <input
-                    type="number"
-                    {...register(`metrics.${index}.targetValue`)}
-                    placeholder="Target"
-                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD]"
-                />
-
-                <Controller
-                    control={control}
-                    name={`metrics.${index}.direction`}
-                    render={({ field }) => (
-                        <DirectionToggle
-                            value={field.value}
-                            onChange={field.onChange}
+                    <FormField label={"Direction"}>
+                        <Controller
+                            control={control}
+                            name={`metrics.${index}.direction`}
+                            render={({ field }) => (
+                                <DirectionToggle
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                />
+                            )}
                         />
-                    )}
-                />
+                    </FormField>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <FormField label={"Current value"} optional>
+                        <InputField type="number" {...register(`metrics.${index}.baselineValue`)} />
+                    </FormField>
+
+                    <FormField label={"Target value"} optional>
+                        <InputField type="number" {...register(`metrics.${index}.targetValue`)} />
+                    </FormField>
+                </div>
+
             </div>
         </div>
     );

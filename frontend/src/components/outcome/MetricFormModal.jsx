@@ -4,7 +4,6 @@ import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import FormMetricRow from './FormMetricRow';
 import useCreateMetrics from '../../hooks/outcome/useCreateMetrics';
 import useUpdateMetric from '../../hooks/outcome/useUpdateMetric';
-import AppButon from "../ui/buttons/AppButton"
 import AppButton from '../ui/buttons/AppButton';
 import { useEffect } from 'react';
 import { UNIT_OPTIONS } from '../../constants/outcomeConstants';
@@ -14,7 +13,7 @@ const EMPTY_METRIC = {
     name: '',
     baselineValue: null,
     targetValue: null,
-    unit: UNIT_OPTIONS[0],
+    unit: UNIT_OPTIONS[0]?.value,
     direction: 'increase',
 };
 
@@ -23,12 +22,15 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
     const isEdit = !!currentMetric;
 
     const formMethods = useForm();
-    const { control, handleSubmit, reset, formState: { isDirty } } = formMethods;
+    const { control, handleSubmit, reset, watch, formState: { isDirty } } = formMethods;
 
     const { fields, append, remove } = useFieldArray({
         control,
         name: 'metrics'
     });
+
+    const metrics = watch('metrics');
+    const hasEmptyName = metrics?.some((metric) => !metric?.name?.trim());
 
     useEffect(() => {
         if (!isOpen) return;
@@ -125,7 +127,7 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
                         + Add another metric
                     </button>
                 )}
-                
+
             </BaseModal.Body>
 
             <BaseModal.Footer className="justify-between">
@@ -144,7 +146,7 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
                     <AppButton
                         type="button"
                         onClick={handleSubmit(isEdit ? handleEditMetric : handleCreateMetrics)}
-                        disabled={!isDirty}
+                        disabled={!isDirty || hasEmptyName}
                         variant='primary'
                         loading={isUpdating || isCreating}
                     >
