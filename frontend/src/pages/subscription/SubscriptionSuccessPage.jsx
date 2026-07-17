@@ -83,9 +83,14 @@ function SubscriptionSuccessPage() {
 
                         <Feature text={currentWorkspace.limits.goals.max ? `Up to ${currentWorkspace.limits.goals.max}  goals` : "Unlimited goals"} />
                         <Feature text={currentWorkspace.limits.members.max ? `Up to ${currentWorkspace.limits.members.max}  members` : "Unlimited members"} />
-                        <Feature text="AI Assistant" />
-                        <Feature text="Export Workspace Data" />
-                        
+                        {
+                            currentWorkspace.features.aiEnhancements &&
+                            <Feature text="AI Enhancements" />
+                        }
+                        {
+                            currentWorkspace.features.aiAssistant &&
+                            <Feature text="AI Assistant" />
+                        }
                     </div>
 
                 </div>

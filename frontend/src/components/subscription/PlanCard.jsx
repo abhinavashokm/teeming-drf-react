@@ -9,8 +9,15 @@ import { useState } from 'react';
 import usePreviewUpgrade from '../../hooks/subscription/usePreviewUpgrade';
 import ConfirmPlanChangeModal from './ConfirmPlanChangeModal';
 
+// "AI_ENHANCEMENTS" / "ai_assistant" -> "aiEnhancements" / "aiAssistant"
+// TODO: drop this once plan.features[].key is camelCase on the backend
+function normalizeKey(key) {
+    return key
+        .toLowerCase()
+        .replace(/_([a-z0-9])/g, (_, c) => c.toUpperCase());
+}
 
-function PlanCard({ plan, loading }) {
+function PlanCard({ plan, loading, onViewChanges }) {
 
     const { data: currentWorkspace } = useWorkspace()
 
@@ -39,6 +46,38 @@ function PlanCard({ plan, loading }) {
     const [isDowngradeConfrimOpen, setIsDowngradeConfrimOpen] = useState(false)
     const [upgradePreview, setUpgradePreview] = useState(null)
     const { mutate: fetchPreviewUpgrade, isPending: isPreviewLoading } = usePreviewUpgrade()
+
+    // On your OWN plan's card, show what you're actually entitled to right now
+    // (workspace.features) rather than the latest published definition of the
+    // plan (plan.features) — those can differ until you renew.
+    // On every other card, plan.features is accurate as-is (that's what you'd
+    // get if you subscribed today).
+    const workspaceFeatures = currentWorkspace?.features || {};
+
+    const latestFeatureMap = {};
+    plan?.features?.forEach((f) => {
+        latestFeatureMap[normalizeKey(f.key)] = f;
+    });
+
+    const displayFeatures = isCurrentPlan
+        ? Object.keys(latestFeatureMap).map((key) => {
+            const latestFeature = latestFeatureMap[key];
+            const currentEnabled = workspaceFeatures[key];
+            return {
+                key,
+                name: latestFeature.name,
+                enabled: Boolean(currentEnabled),
+                changed: Boolean(currentEnabled) !== Boolean(latestFeature.enabled),
+            };
+        })
+        : (plan?.features || []).map((f) => ({
+            key: f.key,
+            name: f.name,
+            enabled: f.enabled,
+            changed: false,
+        }));
+
+    const hasPlanChanged = isCurrentPlan && displayFeatures.some((f) => f.changed);
 
     const handleCreateCheckoutSession = () => {
         if (isFreePlan) {
@@ -84,11 +123,17 @@ function PlanCard({ plan, loading }) {
     `}
         >
             {/* Badge */}
-            <div className="absolute -top-3 right-4">
+            <div className="absolute -top-3 right-4 flex items-center gap-1.5">
 
                 {isCurrentPlan && (
                     <span className="bg-[#1A9E6E] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
                         Current
+                    </span>
+                )}
+
+                {hasPlanChanged && (
+                    <span className="bg-blue-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                        Updated
                     </span>
                 )}
 
@@ -178,7 +223,7 @@ function PlanCard({ plan, loading }) {
                 {/* Features */}
                 <div className="flex-1">
                     <ul className="space-y-3.5">
-                        {plan.features.map((feature) => (
+                        {displayFeatures.map((feature) => (
                             <li
                                 key={feature.key}
                                 className="flex items-start gap-2.5"
@@ -192,8 +237,14 @@ function PlanCard({ plan, loading }) {
                                             />
                                         </div>
 
-                                        <span className="text-[13px] leading-snug text-gray-700 font-medium">
+                                        <span className="text-[13px] leading-snug text-gray-700 font-medium flex items-center gap-1.5">
                                             {feature.name}
+                                            {feature.changed && (
+                                                <span
+                                                    className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"
+                                                    title="Changing at renewal"
+                                                />
+                                            )}
                                         </span>
                                     </>
                                 ) : (
@@ -205,14 +256,29 @@ function PlanCard({ plan, loading }) {
                                             />
                                         </div>
 
-                                        <span className="text-[13px] leading-snug text-gray-400 line-through">
+                                        <span className="text-[13px] leading-snug text-gray-400 line-through flex items-center gap-1.5">
                                             {feature.name}
+                                            {feature.changed && (
+                                                <span
+                                                    className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 no-underline"
+                                                    title="Changing at renewal"
+                                                />
+                                            )}
                                         </span>
                                     </>
                                 )}
                             </li>
                         ))}
                     </ul>
+
+                    {hasPlanChanged && (
+                        <button
+                            onClick={onViewChanges}
+                            className="mt-4 text-[12px] text-blue-600 font-medium hover:text-blue-700 underline underline-offset-2 transition-colors"
+                        >
+                            See what's changing at renewal
+                        </button>
+                    )}
                 </div>
 
                 {/* Button */}

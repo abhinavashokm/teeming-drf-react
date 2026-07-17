@@ -14,7 +14,6 @@ import useUpdateFreePlan from '../../hooks/adminPlans/useUpdateFreePlan';
 const FEATURES = [
   { key: 'canUseAiEnhancements', name: 'AI Enhancements' },
   { key: 'canUseAiAssistant', name: 'Advanced AI Chat Assistant' },
-  { key: 'canExportWorkspaceData', name: 'Export report as CSV' },
 ];
 
 const defaultValues = {

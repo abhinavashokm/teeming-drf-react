@@ -53,6 +53,7 @@ class UserReadPlanSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "code",
+            "version",
             "name",
             "description",
             "max_goals",
@@ -97,6 +98,7 @@ class GetPlanSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "code",
+            "version",
             "name",
             "monthly_price",
             "currency",
