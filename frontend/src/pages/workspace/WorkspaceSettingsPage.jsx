@@ -11,6 +11,7 @@ import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { slugify } from '../../utils/slugUtils';
 import WorkspaceAvatar from '../../components/workspace/WorkspaceAvatar';
 import useRemoveWorkspaceLogo from '../../hooks/workspace/useRemoveWorkspaceLogo';
+import DangerConfirmationModal from '../../components/ui/modal/DangerConfirmationModal';
 
 
 function WorkspaceSettingsPage() {
@@ -46,7 +47,6 @@ function WorkspaceSettingsPage() {
 
     const [isSlugUnlocked, setIsSlugUnlocked] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
 
     const handleDeleteWorkspace = () => {
         deleteWorkspace()
@@ -282,63 +282,24 @@ function WorkspaceSettingsPage() {
             </section>
 
             {/* Delete Workspace Modal */}
-            {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-                    <div
-                        className="fixed inset-0 bg-gray-900/40 backdrop-blur-[2px] transition-opacity"
-                        onClick={() => setIsDeleteModalOpen(false)}
-                    />
-                    <div className="bg-white rounded-[16px] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] w-full max-w-[440px] overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-200">
-                        <div className="p-6">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                                    <AlertTriangle className="h-5 w-5 text-red-600" />
-                                </div>
-                                <div>
-                                    <h2 className="text-[16px] font-semibold text-gray-900">Delete Workspace</h2>
-                                    <p className="text-[13px] text-gray-500 mt-0.5">This action cannot be undone.</p>
-                                </div>
-                            </div>
-                            <div className="text-[13px] text-gray-600 mb-5">
-                                You are about to permanently delete the <span className="font-semibold text-gray-900">{currentWorkspace.name}</span> workspace. All data, members, and settings will be permanently removed.
-                            </div>
-                            <div className="mb-2">
-                                <label className="text-[13px] font-medium text-gray-900 mb-1.5 block">
-                                    Please type <span className="font-bold">{currentWorkspace.slug}</span> to confirm.
-                                </label>
-                                <input
-                                    type="text"
-                                    value={deleteConfirmationText}
-                                    onChange={(e) => setDeleteConfirmationText(e.target.value)}
-                                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 transition-colors"
-                                    placeholder={currentWorkspace.slug}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3 rounded-b-[16px]">
-                            <button
-                                onClick={() => {
-                                    setIsDeleteModalOpen(false);
-                                    setDeleteConfirmationText('');
-                                }}
-                                className="px-4 py-2 text-[13px] font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-[10px] transition-colors shadow-sm"
-                            >
-                                Cancel
-                            </button>
-                            <AppButton
-                                variant='danger'
-                                onClick={handleDeleteWorkspace}
-                                disabled={deleteConfirmationText !== currentWorkspace.slug || isDeleteWorkspacePending}
-                                loading={isDeleteWorkspacePending}
-                            >
-                                Delete Workspace
-                            </AppButton>
-                        </div>
-
-                    </div>
-                </div>
-            )}
+            <DangerConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteWorkspace}
+                title="Delete Workspace"
+                description={
+                    <>
+                        You are about to permanently delete the{' '}
+                        <span className="font-semibold text-gray-900">{currentWorkspace.name}</span> workspace.
+                        All data, members, and settings will be permanently removed.
+                    </>
+                }
+                confirmationLabel="Type the workspace slug to confirm"
+                confirmationValue={currentWorkspace.slug}
+                confirmButtonText="Delete Workspace"
+                confirmButtonTextOnLoading="Deleting..."
+                isLoading={isDeleteWorkspacePending}
+            />
 
         </div>
     )

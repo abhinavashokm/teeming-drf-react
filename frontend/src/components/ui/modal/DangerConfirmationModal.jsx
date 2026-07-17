@@ -4,7 +4,7 @@ export default function DangerConfirmationModal({
   isOpen,
   onClose,
   onConfirm,
-  title = "Delete Workspace",
+  title = "Delete Confirmation",
   description = "This action cannot be undone.",
   confirmationLabel = "Type the workspace slug to confirm",
   confirmationValue,         // the value user must type (e.g. workspace slug)

@@ -1,6 +1,8 @@
 import { MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import useDeleteCheckin from "../../hooks/outcome/useDeleteCheckin";
+import DangerConfirmationModal from "../ui/modal/DangerConfirmationModal";
+
 
 export default function CheckinActions({
     onEdit,
@@ -29,6 +31,10 @@ export default function CheckinActions({
             );
     }, []);
 
+    /* -------------------------------------------------------------------------- */
+    /* delete checkin */
+    /* -------------------------------------------------------------------------- */
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
     const { mutate: deleteCheckin, isPending: isDeleting } = useDeleteCheckin()
 
     const handleDeleteCheckin = () => {
@@ -64,7 +70,7 @@ export default function CheckinActions({
                     </button>
 
                     <button
-                        onClick={handleDeleteCheckin}
+                        onClick={() => setIsDeleteConfirmOpen(true)}
                         disabled={isDeleting}
                         className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:pointer-events-none"
                     >
@@ -82,6 +88,15 @@ export default function CheckinActions({
                     </button>
                 </div>
             )}
+
+            <DangerConfirmationModal
+                isOpen={isDeleteConfirmOpen}
+                onClose={() => setIsDeleteConfirmOpen(false)}
+                onConfirm={handleDeleteCheckin}
+                title="Delete Checkin"
+                isLoading={isDeleting}
+            />
+
         </div>
     );
 }

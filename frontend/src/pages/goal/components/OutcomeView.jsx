@@ -91,7 +91,7 @@ function OutcomeView() {
                 }
 
                 {/* 3. Check-ins Section */}
-                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm ">
                     <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <h2 className="text-[16px] font-bold text-gray-900">Check-ins</h2>

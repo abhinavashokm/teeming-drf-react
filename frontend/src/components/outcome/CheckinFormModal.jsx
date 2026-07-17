@@ -75,6 +75,7 @@ export default function CheckinFormModal({
         handleSubmit,
         control,
         reset,
+        formState: { isDirty },
     } = useForm({
         defaultValues: isEdit
             ? {
@@ -87,7 +88,9 @@ export default function CheckinFormModal({
                     )?.value ?? '',
                 })),
             }
-            : {},
+            : {
+                status: CHECKIN_STATUS.MEASURING
+            },
     });
 
     const { fields } = useFieldArray({
@@ -171,6 +174,8 @@ export default function CheckinFormModal({
         })
     };
 
+    const isSaveDisabled = isCreatePending || isUpdatePending || (isEdit ? !isDirty : !selectedStatus);
+
     return (
         <BaseModal isOpen={isOpen} onClose={onClose} size="lg">
             <BaseModal.Header onClose={onClose}>
@@ -199,7 +204,7 @@ export default function CheckinFormModal({
                     <div className="grid grid-cols-2 gap-4">
                         <StatusCard
                             selected={selectedStatus === CHECKIN_STATUS.MEASURING}
-                            onClick={() => setValue("status", CHECKIN_STATUS.MEASURING)}
+                            onClick={() => setValue("status", CHECKIN_STATUS.MEASURING, { shouldDirty: true })}
                             statusValue={CHECKIN_STATUS.MEASURING}
                             description="Collecting data, no clear impact yet"
                             icon={Activity}
@@ -207,7 +212,7 @@ export default function CheckinFormModal({
                         />
                         <StatusCard
                             selected={selectedStatus === CHECKIN_STATUS.PROMISING}
-                            onClick={() => setValue("status", CHECKIN_STATUS.PROMISING)}
+                            onClick={() => setValue("status", CHECKIN_STATUS.PROMISING, { shouldDirty: true })}
                             statusValue={CHECKIN_STATUS.PROMISING}
                             description="Numbers are moving in the right direction"
                             icon={TrendingUp}
@@ -215,7 +220,7 @@ export default function CheckinFormModal({
                         />
                         <StatusCard
                             selected={selectedStatus === CHECKIN_STATUS.ACHIEVED}
-                            onClick={() => setValue("status", CHECKIN_STATUS.ACHIEVED)}
+                            onClick={() => setValue("status", CHECKIN_STATUS.ACHIEVED, { shouldDirty: true })}
                             statusValue={CHECKIN_STATUS.ACHIEVED}
                             description="Successfully reached the desired outcome"
                             icon={CheckCircle2}
@@ -223,7 +228,7 @@ export default function CheckinFormModal({
                         />
                         <StatusCard
                             selected={selectedStatus === CHECKIN_STATUS.NOT_WORKING}
-                            onClick={() => setValue("status", CHECKIN_STATUS.NOT_WORKING)}
+                            onClick={() => setValue("status", CHECKIN_STATUS.NOT_WORKING, { shouldDirty: true })}
                             statusValue={CHECKIN_STATUS.NOT_WORKING}
                             description="Results are flat or negatively impacted"
                             icon={TrendingDown}
@@ -322,8 +327,8 @@ export default function CheckinFormModal({
                     <AppButton
                         type="button"
                         onClick={handleSubmit(isEdit ? handleEditCheckin : handleCreateCheckin)}
-                        loading={ isCreatePending || isUpdatePending }
-                        disabled={ isCreatePending || isUpdatePending }
+                        loading={isCreatePending || isUpdatePending}
+                        disabled={isSaveDisabled}
                     >
                         {isEdit ? 'Save Changes' : 'Save Check-in'}
                     </AppButton>
