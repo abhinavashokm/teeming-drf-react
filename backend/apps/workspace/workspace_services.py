@@ -229,3 +229,7 @@ def remove_workspace_logo(workspace):
     s3_service.delete_object(old_full_key)
 
     return workspace
+
+
+def check_workspace_membership_by_email(workspace, email):
+    return WorkspaceMember.objects.filter(workspace=workspace, user__email__iexact=email).exists()

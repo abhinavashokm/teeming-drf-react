@@ -29,6 +29,17 @@ def send_workspace_invitations(emails, role, workspace, invited_by):
             workspace=workspace
         ),
     )
+    
+    # dedupe, case-insensitive, preserves order
+    emails = list(dict.fromkeys(e.lower() for e in emails))  
+
+    for email in emails:
+        if invited_by.email.lower() == email.lower():
+            raise exceptions.CannotInviteSelf()
+        if workspace_services.check_workspace_membership_by_email(
+            workspace=workspace, email=email
+        ):
+            raise exceptions.UserAlreadyWorkspaceMember()
 
     invitation_token = generate_token()
     expires_at = invitationHelper.get_invitation_expiry()

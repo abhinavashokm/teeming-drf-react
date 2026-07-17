@@ -21,4 +21,19 @@ class InvitationEmailMismatch(AppException):
     error_code = ErrorCode.INVITATION_EMAIL_MISMATCH
     message = "Please sign in with the invited account to accept this invitation."
 
+
+class UserAlreadyWorkspaceMember(AppException):
+    status_code = status.HTTP_409_CONFLICT
+    error_code = ErrorCode.USER_ALREADY_WORKSPACE_MEMBER
+    message = "This person is already a member of the workspace."
+
+
+class CannotInviteSelf(AppException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    error_code = ErrorCode.CANNOT_INVITE_SELF
+    message = "You can't invite yourself to the workspace."
+
+
+
+
     

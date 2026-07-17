@@ -56,7 +56,7 @@ export default function InviteModal({ isOpen, onClose, memberLimit }) {
     // const memberLimitReached = (memberLimit.used === memberLimit.max) ?? false
 
     const totalMembersAfterInvite = memberLimit.used + state.selectedEmails.length
-    const exceedsMemberLimit = totalMembersAfterInvite > memberLimit.max
+    const exceedsMemberLimit = memberLimit.max !== null && totalMembersAfterInvite > memberLimit.max
 
     const navigateToUpgragePlan = useNavigateUpgradePlan()
     const canUpgradePlan = useCan(PERMISSIONS.UPGRADE_PLAN)
@@ -102,11 +102,12 @@ export default function InviteModal({ isOpen, onClose, memberLimit }) {
                         </span>
                     </div>
 
+
                     <div className={`text-xs font-medium px-2 py-1 rounded-md ${exceedsMemberLimit
                         ? 'bg-amber-100 text-amber-700'
                         : 'bg-gray-100 text-gray-600'
                         }`}>
-                        {memberLimit.used}/{memberLimit.max} members
+                        {memberLimit.used}{memberLimit.max && `/${memberLimit.max}`} members
                     </div>
                 </div>
 
