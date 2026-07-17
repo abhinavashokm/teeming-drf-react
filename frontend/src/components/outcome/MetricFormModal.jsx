@@ -57,16 +57,24 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
     const { mutate: createMetrics, isPending: isCreating } = useCreateMetrics();
     const { mutate: updateMetric, isPending: isUpdating } = useUpdateMetric()
 
+    function sanitizeMetric(metric) {
+        return {
+            ...metric,
+            baselineValue: metric.baselineValue === '' ? null : Number(metric.baselineValue),
+            targetValue: metric.targetValue === '' ? null : Number(metric.targetValue),
+        };
+    }
+
+
     const handleCreateMetrics = (data) => {
-        createMetrics(data, {
+        createMetrics({ metrics: data.metrics.map(sanitizeMetric) }, {
             onSuccess: () => onClose()
         });
     };
 
     const handleEditMetric = (data) => {
-        // handle edit — data.metrics[0] has the updated values
 
-        updateMetric({ data: data.metrics[0], "metricId": currentMetric.id }, {
+        updateMetric({ data: sanitizeMetric(data.metrics[0]), metricId: currentMetric.id }, {
             onSuccess: () => {
                 onClose();
             }

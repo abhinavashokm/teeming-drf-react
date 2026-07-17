@@ -27,6 +27,9 @@ export default function MetricRow({ currentMetric, canManageMetrics }) {
     const isIncrease =
         currentMetric.direction?.toLowerCase() === "increase";
 
+    const hasBaseline = currentMetric.baselineValue !== null && currentMetric.baselineValue !== undefined && currentMetric.baselineValue !== '';
+    const hasTarget = currentMetric.targetValue !== null && currentMetric.targetValue !== undefined && currentMetric.targetValue !== '';
+
     return (
         <>
             <div className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors mb-4">
@@ -59,25 +62,41 @@ export default function MetricRow({ currentMetric, canManageMetrics }) {
 
                         </div>
 
-                        <div className="flex items-center gap-2 mt-2">
+{(hasBaseline || hasTarget) ? (
+    <div className="flex items-center gap-2 mt-2">
+        {hasBaseline ? (
+            <span className="text-[15px] font-semibold text-gray-900">
+                {!hasTarget && (
+                    <span className="text-[12px] font-normal text-gray-500 mr-1">Baseline:</span>
+                )}
+                {currentMetric.baselineValue}
+                <span className="ml-1 text-[12px] text-gray-500">{unit}</span>
+            </span>
+        ) : (
+            <span className="text-[13px] text-gray-400 italic">No baseline</span>
+        )}
 
-                            <span className="text-[15px] font-semibold text-gray-900">
-                                {currentMetric.baselineValue}
-                                <span className="ml-1 text-[12px] text-gray-500">
-                                    {unit}
-                                </span>
-                            </span>
+        {hasBaseline && hasTarget && (
+            <ArrowRight className="w-3.5 h-3.5 text-gray-400" />
+        )}
 
-                            <ArrowRight className="w-3.5 h-3.5 text-gray-400" />
-
-                            <span className="text-[15px] font-semibold text-green-700">
-                                {currentMetric.targetValue}
-                                <span className="ml-1 text-[12px] text-green-600">
-                                    {unit}
-                                </span>
-                            </span>
-
-                        </div>
+        {hasTarget ? (
+            <span className="text-[15px] font-semibold text-green-700">
+                {!hasBaseline && (
+                    <span className="text-[12px] font-normal text-gray-500 mr-1">Target:</span>
+                )}
+                {currentMetric.targetValue}
+                <span className="ml-1 text-[12px] text-green-600">{unit}</span>
+            </span>
+        ) : (
+            <span className="text-[13px] text-gray-400 italic">No target</span>
+        )}
+    </div>
+) : (
+    <div className="mt-2">
+        <span className="text-[13px] text-gray-400 italic">No baseline or target set</span>
+    </div>
+)}
 
                     </div>
 

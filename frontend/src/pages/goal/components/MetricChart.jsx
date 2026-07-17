@@ -59,7 +59,8 @@ function MetricChart() {
     const latestValue = chartData.at(-1)?.value;
 
     const change =
-        firstValue !== undefined &&
+        chartData.length > 1 &&
+            firstValue !== undefined &&
             firstValue !== null &&
             firstValue !== 0 &&
             latestValue !== undefined
@@ -224,7 +225,7 @@ function MetricChart() {
                 </div>
 
                 {/* Improvement badge */}
-                {displayChange !== null && (
+                {displayChange && (
                     <div
                         className={`
             px-3 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5

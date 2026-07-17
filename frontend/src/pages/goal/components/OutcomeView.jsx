@@ -130,8 +130,6 @@ function OutcomeView() {
                                 </AppButton>
                             }
 
-
-
                         </div>
                     )}
                 </div>
