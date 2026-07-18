@@ -10,6 +10,10 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from apps.goal.models import Goal
 from apps.discussion.models import DiscussionMessage
 from core.services import s3_service
+from apps.discussion import discussion_services
+from apps.notification import notification_services
+from apps.notification.models import Notification
+from apps.user.models import User
 
 logger = logging.getLogger("websocket")
 
@@ -45,8 +49,7 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
 
         # add live presence to redis
         await sync_to_async(workspace_services.add_online_user)(
-            workspace_slug=self.workspace.slug,
-            user_id=self.user.id
+            workspace_slug=self.workspace.slug, user_id=self.user.id
         )
 
         logger.info(
@@ -92,6 +95,9 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(
                 f"goal_discussion_{self.current_discussion}", self.channel_name
             )
+            await sync_to_async(discussion_services.remove_discussion_viewer)(
+                goal_id=self.current_discussion, user_id=self.user.id
+            )
 
         if hasattr(self, "presence_group"):
             await self.channel_layer.group_discard(
@@ -100,8 +106,7 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
 
             # remove live presence from redis
             await sync_to_async(workspace_services.remove_online_user)(
-                workspace_slug=self.workspace.slug,
-                user_id=self.user.id
+                workspace_slug=self.workspace.slug, user_id=self.user.id
             )
 
             await self.channel_layer.group_send(
@@ -142,7 +147,9 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
             await self._handle_chat_message(data)
             return
 
-        logger.warning(f"Unknown WS message type from user={self.user.id}: {message_type}")
+        logger.warning(
+            f"Unknown WS message type from user={self.user.id}: {message_type}"
+        )
 
     async def notification_update(self, event):
         await self.send(text_data=json.dumps(event))
@@ -179,11 +186,15 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
                 f"Rejected join_discussion: user={self.user.id} goal={goal_id} "
                 f"not in workspace={self.workspace.slug}"
             )
-            await self.send(text_data=json.dumps({
-                "type": "discussion_error",
-                "goal_id": goal_id,
-                "error": "not_found_or_forbidden",
-            }))
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "type": "discussion_error",
+                        "goal_id": goal_id,
+                        "error": "not_found_or_forbidden",
+                    }
+                )
+            )
             return
 
         # leave the previous discussion, if switching
@@ -192,8 +203,14 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
                 f"goal_discussion_{self.current_discussion}", self.channel_name
             )
 
-        await self.channel_layer.group_add(f"goal_discussion_{goal_id}", self.channel_name)
+        await self.channel_layer.group_add(
+            f"goal_discussion_{goal_id}", self.channel_name
+        )
         self.current_discussion = goal_id
+
+        await sync_to_async(discussion_services.add_discussion_viewer)(
+            goal_id=goal_id, user_id=self.user.id
+        )
 
     async def _handle_leave_discussion(self, data):
         goal_id = data.get("goal_id")
@@ -201,7 +218,14 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
         if not goal_id or goal_id != self.current_discussion:
             return
 
-        await self.channel_layer.group_discard(f"goal_discussion_{goal_id}", self.channel_name)
+        await self.channel_layer.group_discard(
+            f"goal_discussion_{goal_id}", self.channel_name
+        )
+        # remove from redis set
+        await sync_to_async(discussion_services.remove_discussion_viewer)(
+            goal_id=goal_id, user_id=self.user.id
+        )
+
         self.current_discussion = None
 
     async def _handle_chat_message(self, data):
@@ -231,10 +255,28 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
                     "id": str(message.sender.id),
                     "fullName": message.sender.full_name,
                     "email": message.sender.email,
-                    "avatarUrl": s3_service.build_s3_url(message.sender.avatar_thumb_key),
+                    "avatarUrl": s3_service.build_s3_url(
+                        message.sender.avatar_thumb_key
+                    ),
                 },
                 "createdAt": message.created_at.isoformat(),
             },
+        )
+
+        await self._notify_absent_members(goal_id, message)
+
+    async def _notify_absent_members(self, goal_id, message):
+        viewers = await sync_to_async(discussion_services.get_discussion_viewers)(goal_id=goal_id)
+
+        recipients = await self.get_absent_members(viewers)
+
+        await database_sync_to_async(notification_services.notify_users)(
+            workspace=self.workspace,
+            users=recipients,
+            message=f"{message.sender.full_name} sent a new message in the discussion",
+            notification_type=Notification.NotificationType.BOARD_RELATED,
+            target_id=goal_id,
+            exclude_user=self.user,
         )
 
     # ---- db helpers ----
@@ -253,3 +295,11 @@ class WorkspaceConsumer(AsyncWebsocketConsumer):
         )
         # Re-fetch with sender to avoid lazy load issues in async context
         return DiscussionMessage.objects.select_related("sender").get(id=message.id)
+    
+    @database_sync_to_async
+    def get_absent_members(self, viewer_ids):
+        return list(
+            User.objects.filter(
+                workspace_memberships__workspace=self.workspace
+            ).exclude(id__in=viewer_ids)
+        )
