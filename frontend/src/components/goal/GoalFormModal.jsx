@@ -8,6 +8,9 @@ import CancelButton from '../ui/buttons/CancelButton';
 import FormField from '../ui/form/FormField';
 import InputField from '../ui/form/InputField';
 import BaseModal from '../ui/modal/BaseModal';
+import TextareaField from '../ui/form/TextAreaField';
+import DateField from '../ui/form/DateField';
+
 
 export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
 
@@ -80,49 +83,20 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
                 </FormField>
 
                 <FormField label="Description" optional>
-                    <textarea
-                        placeholder="Add more details about this goal..."
-                        rows={3}
-                        className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 focus:outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20 transition-colors shadow-sm placeholder:text-gray-400 resize-none"
-                        {...register('description')}
-                    />
+                    <TextareaField {...register('description')} placeholder="Add more details about this goal..." rows={3} />
                 </FormField>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField label="Target Date" optional>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                            <input
-                                type="date"
-                                {...register("targetDate")}
-                                className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-[10px] text-[13px] text-gray-900 cursor-pointer focus:outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20 transition-colors shadow-sm
-                                    [&::-webkit-calendar-picker-indicator]:opacity-0
-                                    [&::-webkit-calendar-picker-indicator]:absolute
-                                    [&::-webkit-calendar-picker-indicator]:inset-0
-                                    [&::-webkit-calendar-picker-indicator]:w-full
-                                    [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                            />
-                        </div>
-                    </FormField>
-
-                    <FormField label="Status">
-                        <select
-                            {...register("status")}
-                            className="w-full px-3 py-2.5 text-[13px] border border-gray-200 rounded-[10px] bg-white text-gray-900 cursor-pointer outline-none hover:bg-gray-50 transition-colors shadow-sm focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]/20"
-                        >
-                            <option value="draft">Draft</option>
-                            <option value="active">Active</option>
-                            <option value="on_hold">On Hold</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </FormField>
-                </div>
+                <FormField label="Deadline" optional>
+                    <DateField
+                        disablePast
+                        {...register("targetDate")}
+                    />
+                </FormField>
 
             </BaseModal.Body>
 
             <BaseModal.Footer className={'justify-between'} >
-                <CancelButton onClick={handleCloseModal} className="flex-none"  />
+                <CancelButton onClick={handleCloseModal} className="flex-none" />
                 <AppButton
                     onClick={handleSubmit(handleGoalFormSubmit)}
                     disabled={!isDirty || creatingGoal || updaingGoal}

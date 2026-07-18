@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from rest_framework import serializers
 
 from .models import Idea, IdeaAssignment, IdeaStatusHistory
@@ -104,6 +106,11 @@ class IdeaMoveToPlannedSerializer(serializers.Serializer):
     )
     deadline = serializers.DateField(required=False, allow_null=True)
 
+    def validate_deadline(self, value):
+        if value and value < timezone.localdate():
+            raise serializers.ValidationError("Deadline must be today or a future date.")
+        return value
+
     def validate_assignees(self, assignees):
         idea_id = self.context["idea_id"]
 
@@ -120,31 +127,6 @@ class IdeaMoveToPlannedSerializer(serializers.Serializer):
             )
 
         return assignees
-
-
-# class IdeaMoveToProgressSerializer(serializers.Serializer):
-#     assignees = serializers.PrimaryKeyRelatedField(
-#         queryset=User.objects.all(),
-#         many=True,
-#     )
-#     deadline = serializers.DateField(required=False, allow_null=True)
-
-#     def validate_assignees(self, assignees):
-#         idea_id = self.context["idea_id"]
-
-#         existing_assignee_ids = set(
-#             IdeaAssignment.objects.filter(
-#                 idea_id=idea_id,
-#                 assignee__in=assignees,
-#             ).values_list("assignee_id", flat=True)
-#         )
-
-#         if existing_assignee_ids:
-#             raise serializers.ValidationError(
-#                 "One or more users are already assigned to this idea."
-#             )
-
-#         return assignees
 
 
 class IdeaMoveToDoneSerializer(serializers.ModelSerializer):

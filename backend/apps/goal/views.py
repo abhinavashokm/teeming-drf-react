@@ -1,7 +1,6 @@
 from core.permission_views import (
     WorkspacePermissionBaseView,
     MemberBaseView,
-    AdminBaseView,
 )
 from core.permissions import IsWorkspaceAdmin, IsWorkspaceMember
 from core.responses.api_response import success_response

@@ -8,6 +8,8 @@ import CancelButton from '../ui/buttons/CancelButton'
 import BaseModal from '../ui/modal/BaseModal'
 import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress'
 import useMoveIdeaToPlanned from '../../hooks/idea/useMoveIdeaToPlanned'
+import FormField from '../ui/form/FormField'
+import DateField from '../ui/form/DateField'
 
 
 function MoveToPlannedModal({ isOpen, onClose, onBack, currentIdea }) {
@@ -23,13 +25,13 @@ function MoveToPlannedModal({ isOpen, onClose, onBack, currentIdea }) {
 
     const handleMoveToPlanned = () => {
 
-        const data =  {'assignees': selectedMembers.map(member => member.userId)}
+        const data = { 'assignees': selectedMembers.map(member => member.userId) }
 
-        if(deadline){
+        if (deadline) {
             data.deadline = deadline
         }
 
-        moveToPlanned({data: data, ideaId: currentIdea.id}, {
+        moveToPlanned({ data: data, ideaId: currentIdea.id }, {
             onSuccess: () => {
                 setSelectedMembers([])
                 setDeadline(null)
@@ -77,7 +79,7 @@ function MoveToPlannedModal({ isOpen, onClose, onBack, currentIdea }) {
                         <div className="flex flex-wrap gap-1.5 mb-2">
                             {selectedMembers.map(member => (
                                 <div key={member.id} className="flex items-center gap-1.5 bg-blue-50 border border-[#378ADD]/30 rounded-md py-1 px-1.5">
-                                    
+
                                     <MemberAvatar user={member} size="sm" />
 
                                     <span className="text-[12px] font-medium text-gray-700">{member.fullName}</span>
@@ -135,19 +137,14 @@ function MoveToPlannedModal({ isOpen, onClose, onBack, currentIdea }) {
                 </div>
 
                 {/* Deadline */}
-                <div>
-                    <label className="block text-[12px] font-bold text-gray-700 uppercase tracking-wider mb-2">
-                        Deadline <span className="text-gray-400 normal-case font-medium">(optional)</span>
-                    </label>
-                    <div className="relative">
-                        <input
-                            type="date"
-                            value={deadline}
-                            onChange={(e) => setDeadline(e.target.value)}
-                            className={`w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 text-[13px] outline-none focus:border-[#378ADD] focus:ring-1 focus:ring-[#378ADD] transition-shadow shadow-sm ${!deadline ? 'text-gray-400' : 'text-gray-900'}`}
-                        />
-                    </div>
-                </div>
+                <FormField label="Deadline" optional>
+                    <DateField
+                        value={deadline}
+                        onChange={(e) => setDeadline(e.target.value)}
+                        size='lg'
+                        disablePast
+                    />
+                </FormField>
 
             </BaseModal.Body>
 
