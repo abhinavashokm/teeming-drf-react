@@ -14,7 +14,6 @@ class AdminWritePlanSerializer(serializers.ModelSerializer):
             "max_members",
             "can_use_ai_enhancements",
             "can_use_ai_assistant",
-            "can_export_workspace_data",
             "monthly_price",
             "tier",
         ]
@@ -37,7 +36,6 @@ class AdminPlanListSerializer(serializers.ModelSerializer):
             "max_members",
             "can_use_ai_enhancements",
             "can_use_ai_assistant",
-            "can_export_workspace_data",
             "is_archived",
             "archived_at",
             "version",
@@ -75,12 +73,7 @@ class UserReadPlanSerializer(serializers.ModelSerializer):
                 "key": "ai_assistant",
                 "name": "AI Assistant",
                 "enabled": obj.can_use_ai_assistant,
-            },
-            {
-                "key": "export_workspace_data",
-                "name": "Export Workspace Data",
-                "enabled": obj.can_export_workspace_data,
-            },
+            }
         ]
 
 
@@ -139,7 +132,6 @@ class AdminFreePlanUpdateSerializer(serializers.ModelSerializer):
             "max_goals",
             "can_use_ai_enhancements",
             "can_use_ai_assistant",
-            "can_export_workspace_data",
         ]
     
     def validate_max_members(self, value):
@@ -165,7 +157,6 @@ class AdminPlanNewVersionSerializer(serializers.ModelSerializer):
             "max_goals",
             "can_use_ai_enhancements",
             "can_use_ai_assistant",
-            "can_export_workspace_data",
         ]
 
     #at least one of these structural fields must be different to create a new version
@@ -175,7 +166,6 @@ class AdminPlanNewVersionSerializer(serializers.ModelSerializer):
         "max_goals",
         "can_use_ai_enhancements",
         "can_use_ai_assistant",
-        "can_export_workspace_data",
     ]
 
     def validate(self, attrs):

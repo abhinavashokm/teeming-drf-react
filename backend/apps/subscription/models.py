@@ -25,7 +25,6 @@ class Plan(BaseAbstractModel):
 
     can_use_ai_enhancements = models.BooleanField(default=False)
     can_use_ai_assistant = models.BooleanField(default=False)
-    can_export_workspace_data = models.BooleanField(default=False)
 
     monthly_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     currency = models.CharField(

@@ -138,10 +138,7 @@ def create_new_plan_version(plan_id: uuid.UUID, data: dict) -> Plan:
             ),
             can_use_ai_assistant=data.get(
                 "can_use_ai_assistant", plan.can_use_ai_assistant
-            ),
-            can_export_workspace_data=data.get(
-                "can_export_workspace_data", plan.can_export_workspace_data
-            ),
+            )
         )
 
         plan.replaced_by = new_plan

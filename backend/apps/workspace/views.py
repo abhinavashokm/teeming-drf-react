@@ -77,7 +77,6 @@ class WorkspaceDetailView(WorkspacePermissionBaseView):
         features = {
             "AI_ENHANCEMENTS": subscription.plan.can_use_ai_enhancements,
             "ai_assistant": subscription.plan.can_use_ai_assistant,
-            "export_workspace_data": subscription.plan.can_export_workspace_data,
         }
 
         user_services.update_last_visited_workspace(
