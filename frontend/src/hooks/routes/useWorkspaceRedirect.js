@@ -8,7 +8,7 @@ export default function useWorkspaceRedirect(){
     const navigate = useNavigate()
 
     return useAppMutation({
-        mutationFn: workspaceService.fetchMyWorkspaces,
+        mutationFn: workspaceService.fetchmyMemberships,
         onSuccess: (res) => {
             navigate(getWorkspaceRedirectPath(res.data))
         },

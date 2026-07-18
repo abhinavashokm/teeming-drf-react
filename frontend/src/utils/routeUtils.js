@@ -10,8 +10,8 @@ export const buildWorkspacePath = (slug) => {
 }
 
 
-export const getWorkspaceRedirectPath = ({ workspaces }) => {
-    if (workspaces.length === 0) return ROUTE_PATHS.CREATE_WORKSPACE
-    if (workspaces.length === 1) return buildWorkspacePath(workspaces[0]?.slug)
+export const getWorkspaceRedirectPath = ({ memberships }) => {
+    if (memberships.length === 0) return ROUTE_PATHS.CREATE_WORKSPACE
+    if (memberships.length === 1) return buildWorkspacePath(memberships[0]?.workspace?.slug)
     return ROUTE_PATHS.WORKSPACES
 }
