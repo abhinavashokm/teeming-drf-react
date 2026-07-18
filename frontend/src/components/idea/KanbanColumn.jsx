@@ -226,7 +226,7 @@ export default function KanbanColumn({ state, onCardClick }) {
                         <div className="flex-1 h-full overflow-y-auto scrollbar-hide px-3 pb-3">
                             <div className="flex flex-col gap-3">
 
-                                {[...currentIdeas].reverse().map(idea => (
+                                {[...currentIdeas].map(idea => (
                                     <IdeaCard
                                         key={idea.id}
                                         currentIdea={idea}

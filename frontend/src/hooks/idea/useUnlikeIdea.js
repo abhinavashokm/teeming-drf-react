@@ -13,7 +13,7 @@ function useUnlikeIdea() {
         passWorkspaceSlug: true,
         onMutate: async (ideaId) => {
 
-            await queryClient.cancelQueries(queryKey)
+            await queryClient.cancelQueries({ queryKey })
             const previousIdeas = queryClient.getQueryData(queryKey)
 
             queryClient.setQueryData(queryKey, (old) => {
@@ -36,8 +36,6 @@ function useUnlikeIdea() {
                 queryClient.setQueryData(context.queryKey, context.previousIdeas)
             }
         },
-
-        invalidateKeys: [queryKey],
         passWorkspaceSlug: true,
         apiSuccessToast: false,
     })

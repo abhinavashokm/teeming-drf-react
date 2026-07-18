@@ -12,7 +12,7 @@ function useLikeIdea() {
         mutationFn: ideaService.likeIdea,
         onMutate: async (ideaId) => {
             
-            await queryClient.cancelQueries(queryKey)
+            await queryClient.cancelQueries({ queryKey })
             const previousIdeas = queryClient.getQueryData(queryKey)
 
             queryClient.setQueryData(queryKey, (old) => {
@@ -37,7 +37,6 @@ function useLikeIdea() {
             }
         },
 
-        invalidateKeys: [queryKey],
         passWorkspaceSlug: true,
         apiSuccessToast: false,
     })

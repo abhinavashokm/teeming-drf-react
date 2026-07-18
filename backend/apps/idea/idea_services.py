@@ -44,6 +44,7 @@ def list_goal_ideas(current_user, workspace, goal_id):
             ),
         )
         .select_related("created_by")
+        .order_by('-like_count', '-created_at')
     )
 
 
