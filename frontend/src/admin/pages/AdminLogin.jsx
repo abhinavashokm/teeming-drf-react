@@ -12,20 +12,13 @@ import { useAdminLogin } from '../hooks/auth/useAdminLogin';
 
 export default function AdminLogin() {
 
-  const testMode = true
-  const { register, handleSubmit, formState: { errors } } = useForm(testMode && {
-    defaultValues: {
-      email: "teemingadmin@yopmail.com",
-      password: 'passwordA1'
-    }
-  })
+  const { register, handleSubmit, formState: { errors } } = useForm()
 
   const { mutate: adminLogin, isPending: isLoginPending } = useAdminLogin()
 
   const handleLogin = (data) => {
     adminLogin(data)
   }
-  console.log("hii")
 
   return (
     <div className="min-h-screen bg-[#E9E9E9] flex items-center justify-center p-4 font-sans">

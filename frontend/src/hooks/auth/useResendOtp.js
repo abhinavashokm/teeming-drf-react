@@ -13,9 +13,6 @@ export function useResendOtp() {
 
     return useAppMutation({
         mutationFn: authService.resendOTP,
-        onSuccess: (res) => {
-            showSuccess("OTP resent successfully")
-        },
         onError: (error) => {
             if (getErrorCode(error) === errorCodes.SIGNUP_SESSION_EXPIRED) {
                 navigateWithToast({

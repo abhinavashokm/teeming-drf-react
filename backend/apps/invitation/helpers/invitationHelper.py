@@ -1,6 +1,3 @@
-from django.template.loader import render_to_string
-
-from core.services.email_service import send_email
 from core.utils.time_utils import get_expiry_datetime
 from django.conf import settings
 from core.exceptions.helpers import get_object_or_raise

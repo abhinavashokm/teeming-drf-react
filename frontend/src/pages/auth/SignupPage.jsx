@@ -24,14 +24,7 @@ function SignupPage() {
 
     const invitationToken = useInvitationToken()
 
-    const testMode = true
-
-    const { handleSubmit, register, formState: { errors } } = useForm(testMode && {
-        defaultValues: {
-            fullName: 'Arjun Kumar',
-            password: 'passwordA1'
-        }
-    })
+    const { handleSubmit, register, formState: { errors } } = useForm()
 
     const { mutate: signup, isPending, error: signupError, isError } = useSignup()
 

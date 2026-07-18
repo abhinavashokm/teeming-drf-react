@@ -1,23 +1,13 @@
 import secrets
-from django.template.loader import render_to_string
 
-from core.services.email_service import send_email
 from django.conf import settings
 from core.utils.time_utils import seconds_to_human
+from core import tasks
 
 
 def generate_otp():
     otp = str(secrets.randbelow(900000) + 100000)
     return otp
-
-
-def _format_otp_expiry(seconds):
-
-    if seconds % 60 == 0:
-        minutes = seconds // 60
-        return f"{minutes} minutes"
-
-    return f"{seconds} seconds"
 
 
 def send_verification_otp_email(email, otp):
@@ -32,13 +22,10 @@ Your OTP for email verification is: {otp}
 This OTP is valid for {otp_expiry}.
 """
 
-    html_message = render_to_string(
-        "emails/verification_otp.html", {"otp": otp, "otp_expiry": otp_expiry}
-    )
-
-    send_email(
+    tasks.send_email_task.delay(
         subject=subject,
-        message=plain_message,
-        to=[email],
-        html_message=html_message,
+        plain_message=plain_message,
+        template_name="emails/verification_otp.html",
+        context= {"otp": otp, "otp_expiry": otp_expiry},
+        recipient_list=[email]
     )
