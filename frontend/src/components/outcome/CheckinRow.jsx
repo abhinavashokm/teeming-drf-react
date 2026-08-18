@@ -10,6 +10,8 @@ import MemberAvatar from "../team/MemberAvatar";
 import CheckinActions from "./CheckinActions";
 import CheckinFormModal from "./CheckinFormModal";
 import { useState } from "react";
+import { Lightbulb } from "lucide-react";
+import IdeaDetailModal from "../idea/IdeaDetailModal";
 
 
 const STATUS_CONFIG = {
@@ -57,6 +59,7 @@ function CheckinRow({
     const { createdBy } = checkin;
 
     const [isCheckinModalOpen, setisCheckinModalOpen] = useState(false)
+    const [selectedIdea, setSelectedIdea] = useState(null);
 
     return (
         <>
@@ -145,6 +148,56 @@ function CheckinRow({
                         </div>
                     )}
 
+                    {/* Contiributed Ideas */}
+                    {checkin.contributedIdeas?.length > 0 && (
+                        <section className="mt-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-sm font-semibold text-gray-700">
+                                    Contributed Ideas
+                                </h4>
+
+                                <span className="text-xs text-gray-500">
+                                    {checkin.contributedIdeas.length} idea
+                                    {checkin.contributedIdeas.length !== 1 ? "s" : ""}
+                                </span>
+                            </div>
+
+                            <div className="space-y-2">
+                                {checkin.contributedIdeas.map((idea) => (
+                                    <button
+                                        key={idea.id}
+                                        type="button"
+                                        onClick={() => setSelectedIdea(idea)}
+                                        className="w-full text-left flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 hover:border-gray-300 hover:bg-gray-50 transition-colors group"
+                                    >
+                                        {/* Icon */}
+                                        <div className="shrink-0 w-8 h-8 rounded-md bg-amber-50 flex items-center justify-center">
+                                            <Lightbulb className="w-4 h-4 text-amber-500" />
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-medium text-gray-700 truncate group-hover:text-gray-900">
+                                                {idea.title}
+                                            </p>
+
+                                            {idea.description && (
+                                                <p className="text-xs text-gray-500 truncate mt-0.5">
+                                                    {idea.description}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Arrow */}
+                                        <span className="text-gray-400 group-hover:text-gray-600 transition-colors">
+                                            →
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
                     {/* Notes */}
                     {checkin.notes && (
                         <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-4">
@@ -161,6 +214,12 @@ function CheckinRow({
                 onClose={() => setisCheckinModalOpen(false)}
                 goalName={"goal"}
                 currentCheckin={checkin}
+            />
+
+            <IdeaDetailModal
+                currentIdea={selectedIdea}
+                isOpen={!!selectedIdea}
+                onClose={() => setSelectedIdea(null)}
             />
         </>
 

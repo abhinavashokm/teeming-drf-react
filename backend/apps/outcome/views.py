@@ -10,7 +10,7 @@ class MetricListCreateView(WorkspacePermissionBaseView):
 
     permission_map = {
         "GET": [IsWorkspaceMember],
-        "POST":[IsWorkspaceAdmin],
+        "POST": [IsWorkspaceAdmin],
     }
 
     def post(self, request, **kwargs):
@@ -92,14 +92,14 @@ class MetricDetailView(WorkspacePermissionBaseView):
 
 class CheckinListCreateView(WorkspacePermissionBaseView):
 
-    permission_map = {
-        "GET": [IsWorkspaceMember],
-        "POST": [IsWorkspaceAdmin]
-    }
+    permission_map = {"GET": [IsWorkspaceMember], "POST": [IsWorkspaceAdmin]}
 
     def post(self, request, **kwargs):
 
-        serializer = serializers.WriteCheckinSerializer(data=request.data)
+        serializer = serializers.WriteCheckinSerializer(
+            data=request.data,
+            context={"goal_id": kwargs["goal_id"]},
+        )
         serializer.is_valid(raise_exception=True)
 
         checkin = outcome_services.create_checkin(
@@ -137,22 +137,23 @@ class CheckinDetailView(AdminBaseView):
         )
 
         return success_response(data=serializers.ReadCheckinSerializer(checkin).data)
-    
+
     def patch(self, request, **kwargs):
 
         checkin = get_checkin_or_raise(
-            workspace=request.workspace,
-            checkin_id=kwargs["checkin_id"]
+            workspace=request.workspace, checkin_id=kwargs["checkin_id"]
         )
 
-        serializer = serializers.WriteCheckinSerializer(instance=checkin, data=request.data, partial=True)
+        serializer = serializers.WriteCheckinSerializer(
+            instance=checkin, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
         updated_checkin = serializer.save()
 
         return success_response(
             message="Metric updated",
-            data=serializers.ReadCheckinSerializer(updated_checkin).data
+            data=serializers.ReadCheckinSerializer(updated_checkin).data,
         )
 
     def delete(self, request, **kwargs):

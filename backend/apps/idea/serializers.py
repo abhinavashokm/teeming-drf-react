@@ -134,3 +134,10 @@ class IdeaMoveToDoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = IdeaStatusHistory
         fields = ["note"]
+
+
+class BaseIdeaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Idea
+        fields = ["id", "title", "description",]

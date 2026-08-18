@@ -44,41 +44,42 @@ def delete_metric(workspace, metric_id):
     return
 
 
+@transaction.atomic()
 def create_checkin(current_user, workspace, goal_id, data):
-
     goal = get_goal_or_raise(workspace=workspace, goal_id=goal_id)
 
-    with transaction.atomic():
+    checkin = OutcomeCheckIn.objects.create(
+        created_by=current_user,
+        workspace=workspace,
+        goal=goal,
+        status=data["status"],
+        notes=data.get("notes"),
+    )
 
-        checkin = OutcomeCheckIn.objects.create(
-            created_by=current_user,
-            workspace=workspace,
-            goal=goal,
-            status=data["status"],
-            notes=data.get("notes"),
+    if data.get("metric_values"):
+        CheckInMetricValue.objects.bulk_create(
+            [
+                CheckInMetricValue(
+                    workspace=workspace,
+                    checkin=checkin,
+                    metric=mv["metric"],
+                    value=mv["value"],
+                )
+                for mv in data["metric_values"]
+            ]
         )
 
-        if data.get("metric_values"):
-            CheckInMetricValue.objects.bulk_create(
-                [
-                    CheckInMetricValue(
-                        workspace=workspace,
-                        metric=mv["metric"],
-                        value=mv["value"],
-                        checkin=checkin,
-                    )
-                    for mv in data["metric_values"]
-                ]
-            )
+    if data.get("contributed_ideas"):
+        checkin.contributed_ideas.set(data["contributed_ideas"])
 
-        notification_services.notify_workspace_members(
-            workspace=workspace,
-            exclude_user=current_user,
-            message=f'{current_user.full_name} added a new check-in for "{goal.name}"',
-            target_id=goal_id,
-        )
+    notification_services.notify_workspace_members(
+        workspace=workspace,
+        exclude_user=current_user,
+        message=f'{current_user.full_name} added a new check-in for "{goal.name}"',
+        target_id=goal_id,
+    )
 
-        return checkin
+    return checkin
 
 
 def list_goal_checkins(workspace, goal_id):
@@ -92,7 +93,8 @@ def list_goal_checkins(workspace, goal_id):
             Prefetch(
                 "metric_values",
                 queryset=CheckInMetricValue.objects.select_related("metric"),
-            )
+            ),
+             "contributed_ideas",
         )
         .filter(goal=goal).order_by("-created_at")
     )

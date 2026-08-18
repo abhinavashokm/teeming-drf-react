@@ -1,20 +1,27 @@
+import { Command } from "cmdk";
 import {
     Activity,
     Check,
     CheckCircle2,
     Flag,
+    Lightbulb,
     RefreshCw,
     TrendingDown,
     TrendingUp,
+    X,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import BaseModal from "../ui/modal/BaseModal";
-import useMetrics from "../../hooks/outcome/useMetrics";
-import useCreateCheckin from "../../hooks/outcome/useCreateCheckin";
+import { IDEA_STATUS } from "../../constants/ideaConstants";
 import { CHECKIN_STATUS, CHECKIN_STATUS_LABELS } from "../../constants/outcomeConstants";
-import AppButton from "../ui/buttons/AppButton";
+import useIdeas from "../../hooks/idea/useIdeas";
+import useCreateCheckin from "../../hooks/outcome/useCreateCheckin";
+import useMetrics from "../../hooks/outcome/useMetrics";
 import useUpdateCheckin from "../../hooks/outcome/useUpdateCheckin";
-import { useEffect } from "react";
+import { formatDate } from "../../utils/timeUtils";
+import AppButton from "../ui/buttons/AppButton";
+import BaseModal from "../ui/modal/BaseModal";
+import IdeaDetailModal from "../idea/IdeaDetailModal";
 
 
 function StatusCard({
@@ -68,6 +75,9 @@ export default function CheckinFormModal({
         )
         : allMetrics;
 
+    const { data: ideas = [] } = useIdeas();
+    const completedIdeas = ideas?.filter(idea => idea.status === IDEA_STATUS.DONE) || [];
+
     const {
         register,
         watch,
@@ -81,6 +91,7 @@ export default function CheckinFormModal({
             ? {
                 status: currentCheckin.status,
                 notes: currentCheckin.notes ?? '',
+                contributed_ideas: currentCheckin.contributed_ideas ?? [],
                 metricValues: checkinMetrics.map(metric => ({
                     metricId: metric.id,
                     value: currentCheckin.metricValues?.find(
@@ -89,7 +100,8 @@ export default function CheckinFormModal({
                 })),
             }
             : {
-                status: CHECKIN_STATUS.MEASURING
+                status: CHECKIN_STATUS.MEASURING,
+                contributed_ideas: [],
             },
     });
 
@@ -99,6 +111,26 @@ export default function CheckinFormModal({
     });
 
     const selectedStatus = watch("status");
+    const selectedIdeaIds = watch("contributed_ideas") ?? [];
+
+    const [ideaSearch, setIdeaSearch] = useState("");
+
+    const toggleIdea = (ideaId) => {
+        const current = selectedIdeaIds;
+        const isAdding = !current.includes(ideaId);
+        const next = isAdding
+            ? [...current, ideaId]
+            : current.filter(id => id !== ideaId);
+        setValue("contributed_ideas", next, { shouldDirty: true });
+        if (isAdding) setIdeaSearch("");
+    };
+
+    const selectedIdeas = completedIdeas.filter(
+        idea => selectedIdeaIds.includes(idea.id)
+    );
+    const unselectedIdeas = completedIdeas.filter(
+        idea => !selectedIdeaIds.includes(idea.id)
+    );
 
     const calculateChange = (baseline, current) => {
         if (!current || isNaN(current)) return null;
@@ -116,10 +148,13 @@ export default function CheckinFormModal({
     useEffect(() => {
         if (!isOpen) return;
 
+        setIdeaSearch("");
+
         if (isEdit) {
             reset({
                 status: currentCheckin.status,
                 notes: currentCheckin.notes ?? '',
+                contributed_ideas: currentCheckin.contributed_ideas ?? [],
                 metricValues: checkinMetrics.map(metric => ({
                     metricId: metric.id,
                     value: currentCheckin.metricValues?.find(
@@ -131,6 +166,7 @@ export default function CheckinFormModal({
             reset({
                 status: '',
                 notes: '',
+                contributed_ideas: [],
                 metricValues: [],
             });
         }
@@ -167,6 +203,7 @@ export default function CheckinFormModal({
                 reset({
                     status: '',
                     notes: '',
+                    contributed_ideas: [],
                     metricValues: [],
                 })
                 onClose()
@@ -295,6 +332,71 @@ export default function CheckinFormModal({
                         </div>
                     </div>
                 )}
+
+                {/* CONTRIBUTING IDEAS */}
+                <div className="mb-8">
+                    <label className="block text-[12px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                        What contributed to this? (optional)
+                    </label>
+                    <p className="text-[12px] text-gray-500 mb-3">
+                        Select any completed ideas you think caused this change
+                    </p>
+
+                    {/* Selected chips */}
+                    {selectedIdeas.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                            {selectedIdeas.map(idea => (
+                                <div
+                                    key={idea.id}
+                                    className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-md py-1 px-1.5"
+                                >
+                                    <Lightbulb className="w-3 h-3 text-amber-500 shrink-0" />
+                                    <span className="text-[12px] font-medium text-gray-700 truncate max-w-[200px]">
+                                        {idea.title}
+                                    </span>
+                                    <button type="button" onClick={() => toggleIdea(idea.id)}>
+                                        <X className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Combobox */}
+                    <Command className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <Command.Input
+                            value={ideaSearch}
+                            onValueChange={setIdeaSearch}
+                            placeholder="Search completed ideas..."
+                            className="w-full px-3.5 py-2.5 text-[13px] outline-none border-b border-gray-100"
+                        />
+                        <Command.List className="max-h-[108px] sm:max-h-[180px] overflow-y-auto">
+                            <Command.Empty className="py-5 text-center text-[13px] text-gray-400">
+                                {completedIdeas.length === 0
+                                    ? "No completed ideas since the last check-in"
+                                    : "No matching ideas"}
+                            </Command.Empty>
+                            {unselectedIdeas.map((idea) => (
+                                <Command.Item
+                                    key={idea.id}
+                                    value={idea.title}
+                                    onSelect={() => toggleIdea(idea.id)}
+                                    className="flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-2.5">
+                                        <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                                        <span className="text-[13px] font-medium text-gray-900">
+                                            {idea.title}
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] text-gray-400 shrink-0">
+                                        Done {formatDate(idea.movedToDoneAt)}
+                                    </span>
+                                </Command.Item>
+                            ))}
+                        </Command.List>
+                    </Command>
+                </div>
 
                 {/* NOTES */}
                 <div>
