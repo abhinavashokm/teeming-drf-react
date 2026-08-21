@@ -1,7 +1,7 @@
 import {
   Menu
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/app/Navbar';
 import Sidebar from "../components/app/Sidebar";
@@ -14,10 +14,11 @@ import ErrorPage from '../pages/error/ErrorPage';
 import { WorkspaceSocketContext } from '../contexts/WorkspaceSocketContext';
 import { useWorkspaceSocket } from '../hooks/websocket/useWorkspaceSocket';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import useAuth from '../hooks/auth/useAuth';
 import { startTour } from '../store/slices/tourSlice';
 import { workspaceRoles } from '../constants/workspaceConstants';
+import useCompleteTour from '../hooks/auth/useCompleteTour';
 
 function WorkspaceLayout() {
 
@@ -48,12 +49,25 @@ function WorkspaceLayout() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (!currentUser || currentUser.hasCompletedTour) return;
-    if (currentWorkspace?.role !== workspaceRoles.OWNER) return; // tour for owners only (for now)
+    if (!currentUser || currentUser.hasCompletedTour) return
+    if (currentWorkspace?.role !== workspaceRoles.OWNER) return // tour for owners only (for now)
 
     dispatch(startTour());
 
-  }, [currentUser, currentWorkspace]);
+  }, [currentUser?.hasCompletedTour, currentWorkspace?.role]);
+
+  const active = useSelector((state) => state.tour.active);
+  const { mutate: completeTour } = useCompleteTour();
+  const wasActive = useRef(false);
+
+  useEffect(() => {
+    // fires exactly once, the moment `active` flips from true → false,
+    // regardless of whether that happened via skip (X button) or a natural finish
+    if (wasActive.current && !active) {
+      completeTour();
+    }
+    wasActive.current = active;
+  }, [active]);
 
   return (
     <>
