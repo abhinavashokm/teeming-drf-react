@@ -7,6 +7,7 @@ import { IDEA_STATUS } from '../../../constants/ideaConstants.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { tourDriver, driveWhenReady } from '../../../utils/tourDriver';
 import { TOUR_STEPS } from '../../../store/slices/tourSlice';
+import useIdeas from '../../../hooks/idea/useIdeas';
 
 
 
@@ -60,17 +61,42 @@ function BoardView({ isDiscussionPanelOpen }) {
     }, [active, stepIndex]);
 
 
+    const { data: ideas = [] } = useIdeas()
+
+    const draftCount = ideas.filter(i => i.status === IDEA_STATUS.DRAFT).length
+    const plannedCount = ideas.filter(i => i.status === IDEA_STATUS.PLANNED).length
+    const progressCount = ideas.filter(i => i.status === IDEA_STATUS.IN_PROGRESS).length
+    const doneCount = ideas.filter(i => i.status === IDEA_STATUS.DONE).length
+
     return (
         <div className="relative flex flex-col h-[calc(100dvh-120px)]">
-            <div className="md:hidden flex gap-2 mb-4 shrink-0 pl-8 md:pl-12 lg:pl-16">
-                <button onClick={() => scrollToColumn(IDEA_STATUS.DRAFT)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-[12px] font-bold border border-amber-200">
-                    💡 Idea <span>0</span>
+            <div className="md:hidden flex gap-1.5 mb-4 shrink-0 pl-8 overflow-x-auto scrollbar-none">
+                <button
+                    onClick={() => scrollToColumn(IDEA_STATUS.DRAFT)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-semibold border border-amber-200 whitespace-nowrap"
+                >
+                    Idea <span className="font-bold">{draftCount}</span>
                 </button>
-                <button onClick={() => scrollToColumn(IDEA_STATUS.IN_PROGRESS)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-[#378ADD] text-[12px] font-bold border border-[#378ADD]/30">
-                    ⚡ Progress <span>0</span>
+
+                <button
+                    onClick={() => scrollToColumn(IDEA_STATUS.PLANNED)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-[#378ADD] text-[11px] font-semibold border border-[#378ADD]/30 whitespace-nowrap"
+                >
+                    Plan <span className="font-bold">{plannedCount}</span>
                 </button>
-                <button onClick={() => scrollToColumn(IDEA_STATUS.DONE)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-[12px] font-bold border border-green-200">
-                    ✓ Done <span>0</span>
+
+                <button
+                    onClick={() => scrollToColumn(IDEA_STATUS.IN_PROGRESS)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-[#378ADD] text-[11px] font-semibold border border-[#378ADD]/30 whitespace-nowrap"
+                >
+                    Progress <span className="font-bold">{progressCount}</span>
+                </button>
+
+                <button
+                    onClick={() => scrollToColumn(IDEA_STATUS.DONE)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold border border-green-200 whitespace-nowrap"
+                >
+                    Done <span className="font-bold">{doneCount}</span>
                 </button>
             </div>
 
