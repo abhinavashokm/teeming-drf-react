@@ -7,7 +7,8 @@ import {
   Search,
   Settings,
   Users,
-  Zap
+  Zap,
+  HelpCircle
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
@@ -252,7 +253,6 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
         <nav className={`flex-1 overflow-y-auto ${sidebarContentExpanded ? 'px-3' : 'px-1.5'} py-5 space-y-4`}>
 
 
-
           {/* Home */}
           <div className="pb-4 border-b border-gray-200">
             <SidebarItem
@@ -311,6 +311,10 @@ function Sidebar({ isSidebarVisible, setIsSidebarVisible, isMobileMenuOpen, setI
                 <span>Settings</span>
               </SidebarItem>
             )}
+
+            <SidebarItem to={"how-it-works"} sidebarContentExpanded={sidebarContentExpanded} icon={HelpCircle} onClick={handleCloseSidebarOnMobile} >
+              <span>How it works</span>
+            </SidebarItem>
 
           </div>
 

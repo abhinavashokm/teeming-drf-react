@@ -17,10 +17,11 @@ import { useWorkspaceSocket } from '../hooks/websocket/useWorkspaceSocket';
 import { useDispatch } from 'react-redux';
 import useAuth from '../hooks/auth/useAuth';
 import { startTour } from '../store/slices/tourSlice';
+import { workspaceRoles } from '../constants/workspaceConstants';
 
 function WorkspaceLayout() {
 
-  const { isPending: isWorkspacePending, error } = useWorkspace()
+  const { data: currentWorkspace, isPending: isWorkspacePending, error } = useWorkspace()
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -47,10 +48,12 @@ function WorkspaceLayout() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (currentUser && !currentUser?.hasCompletedTour) {
-      dispatch(startTour());
-    }
-  }, [currentUser?.hasCompletedTour]);
+    if (!currentUser || currentUser.hasCompletedTour) return;
+    if (currentWorkspace?.role !== workspaceRoles.OWNER) return; // tour for owners only (for now)
+
+    dispatch(startTour());
+
+  }, [currentUser, currentWorkspace]);
 
   return (
     <>

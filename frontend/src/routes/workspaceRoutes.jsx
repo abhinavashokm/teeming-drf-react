@@ -1,3 +1,4 @@
+import { elements } from "chart.js";
 import GoalDashboardLayout from "../layouts/GoalDashboardLayout";
 import WorkspaceLayout from "../layouts/WorkspaceLayout";
 import GoalDashboard from "../pages/goal/GoalDashboard";
@@ -8,6 +9,7 @@ import HomePage from "../pages/workspace/HomePage";
 import ManageTeamPage from "../pages/workspace/ManageTeamPage";
 import MyAccountPage from "../pages/workspace/MyAccountPage";
 import WorkspaceSettingsPage from "../pages/workspace/WorkspaceSettingsPage";
+import HowItWorksPage from "../pages/workspace/HowItWorksPage";
 
 
 
@@ -51,6 +53,11 @@ const workspaceRoutes = {
                 element: <GoalDashboard />,
                 index: true
             }]
+        },
+        {
+            path: 'how-it-works',
+            element: <HowItWorksPage />,
+            handle: { breadcrumb: "how it works" }
         }
     ]
 }
