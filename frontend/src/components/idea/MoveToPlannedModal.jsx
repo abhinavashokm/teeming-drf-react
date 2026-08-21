@@ -1,15 +1,18 @@
 import { Command } from 'cmdk'
 import { Check, ChevronRight, Lightbulb, Target, X, Zap } from 'lucide-react'
 import { useState } from 'react'
+import useMoveIdeaToPlanned from '../../hooks/idea/useMoveIdeaToPlanned'
 import useTeamMembers from '../../hooks/team/useTeamMembers'
 import MemberAvatar from '../team/MemberAvatar'
 import AppButton from '../ui/buttons/AppButton'
 import CancelButton from '../ui/buttons/CancelButton'
-import BaseModal from '../ui/modal/BaseModal'
-import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress'
-import useMoveIdeaToPlanned from '../../hooks/idea/useMoveIdeaToPlanned'
-import FormField from '../ui/form/FormField'
 import DateField from '../ui/form/DateField'
+import FormField from '../ui/form/FormField'
+import BaseModal from '../ui/modal/BaseModal'
+
+import { useDispatch, useSelector } from 'react-redux'
+import { TOUR_STEPS, advanceTour } from '../../store/slices/tourSlice'
+import { resumeStepIfActive } from '../../utils/tourDriver';
 
 
 function MoveToPlannedModal({ isOpen, onClose, onBack, currentIdea }) {
@@ -22,28 +25,57 @@ function MoveToPlannedModal({ isOpen, onClose, onBack, currentIdea }) {
     const [selectedMembers, setSelectedMembers] = useState([])
     const [deadline, setDeadline] = useState(null)
 
+    /* -------------------------------------------------------------------------- */
+    /* move idea to planned + new user walkthrough */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex } = useSelector((state) => state.tour);
+    const dispatch = useDispatch();
+    const isTourTarget = active && stepIndex === TOUR_STEPS.MOVE_TO_PLANNED;
 
     const handleMoveToPlanned = () => {
+        const data = { assignees: selectedMembers.map(m => m.userId) };
+        if (deadline) data.deadline = deadline;
 
-        const data = { 'assignees': selectedMembers.map(member => member.userId) }
-
-        if (deadline) {
-            data.deadline = deadline
-        }
-
-        moveToPlanned({ data: data, ideaId: currentIdea.id }, {
+        moveToPlanned({ data, ideaId: currentIdea.id }, {
             onSuccess: () => {
-                setSelectedMembers([])
-                setDeadline(null)
-                onClose()
+                setSelectedMembers([]);
+                setDeadline(null);
+                onClose();
+
+                if (isTourTarget) {
+                    dispatch(advanceTour()); // → TOUR_STEPS.GO_TO_OUTCOME
+                }
             }
-        })
+        });
     }
 
-    return (
-        <BaseModal isOpen={isOpen} onClose={onClose}>
+    const handleBack = () => {
+        onBack();
 
-            <BaseModal.Header onClose={onClose}>
+        //resume walkthrough if user closed in the middle of walkthrough
+        resumeStepIfActive(TOUR_STEPS.MOVE_TO_PLANNED, '[data-tour="move-to-planned-btn"]', {
+            title: 'Move to Planned',
+            description: 'Click here to plan this idea.',
+            showButtons: ['close'],
+        });
+    };
+
+    // const handleClose = () => {
+    //     onClose();
+
+    //     //resume walkthrough if user closed in the middle of walkthrough
+    //     resumeStepIfActive(TOUR_STEPS.MOVE_TO_PLANNED, '[data-tour="move-to-planned-btn"]', {
+    //         title: 'Move to Planned',
+    //         description: 'Click here to plan this idea.',
+    //         showButtons: ['close'],
+    //     });
+    // }
+
+
+    return (
+        <BaseModal isOpen={isOpen} onClose={handleBack}>
+
+            <BaseModal.Header onClose={handleBack}>
                 <span className="px-2.5 py-1 bg-blue-50 text-[#378ADD] border border-[#378ADD]/20 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <Zap className="w-3.5 h-3.5" />
                     Starting idea
@@ -158,7 +190,7 @@ function MoveToPlannedModal({ isOpen, onClose, onBack, currentIdea }) {
                 </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
 
-                    <CancelButton shadow onClick={onBack} text={"← Back"} />
+                    <CancelButton shadow onClick={handleBack} text={"← Back"} />
 
                     <AppButton
                         shadow

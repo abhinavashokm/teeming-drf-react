@@ -10,13 +10,18 @@ import GoalFormModal from '../../components/goal/GoalFormModal';
 import UpgradePlanModal from '../../components/subscription/UpgradePlanModal';
 import AppButton from '../../components/ui/buttons/AppButton';
 import { PERMISSIONS } from '../../constants/permissions';
+import { workspaceRoles } from '../../constants/workspaceConstants';
 import useAuth from '../../hooks/auth/useAuth';
 import useGoals from '../../hooks/goal/useGoals';
 import useWelcomeBanner from '../../hooks/invite/useWelcomeBanner';
 import { useCan } from '../../hooks/permissions/useCan';
 import useWorkspace from '../../hooks/workspace/useWorkspace';
 import { cn } from '../../utils/cn';
-import { workspaceRoles } from '../../constants/workspaceConstants';
+
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { tourDriver } from '../../utils/tourDriver';
+import { advanceTour, TOUR_STEPS } from '../../store/slices/tourSlice';
 
 
 function HomePage() {
@@ -58,6 +63,12 @@ function HomePage() {
     setShowWelcome(false)
   }
 
+  /* -------------------------------------------------------------------------- */
+  /* new user website walkthrough and handle create goal */
+  /* -------------------------------------------------------------------------- */
+  const { active, stepIndex } = useSelector((state) => state.tour);
+  const dispatch = useDispatch();
+
   const handleCreateGoal = () => {
 
     if (goalLimitReached) {
@@ -65,12 +76,49 @@ function HomePage() {
       return
     }
 
+    if (active && stepIndex === TOUR_STEPS.CREATE_GOAL) {
+      tourDriver.destroy(); // clear the spotlight so the modal is usable
+    }
+
     setIsGoalFormModalOpen(true)
   }
 
-  const handleLoadMoreGoals = () => {
 
-  }
+  useEffect(() => {
+    if (!active) return;
+
+    if (stepIndex === TOUR_STEPS.WELCOME) {
+      tourDriver.setSteps([
+        {
+          popover: {
+            title: 'Welcome to Teeming 👋',
+            description: "Teeming isn't a task tracker — it's an outcome tracker. Try ideas, ship initiatives, and see what actually moved the needle. Let's create your first goal.",
+            showButtons: ['next', 'close'],       // suppress Previous and Close buttons, keep only forward nav
+            nextBtnText: 'Next',
+            onNextClick: () => {
+              dispatch(advanceTour());
+              tourDriver.destroy();
+            },
+          },
+        },
+      ]);
+      tourDriver.drive();
+    }
+
+    if (stepIndex === TOUR_STEPS.CREATE_GOAL) {
+      tourDriver.setSteps([
+        {
+          element: '[data-tour="new-goal-btn"]',
+          popover: {
+            title: 'Create your first goal',
+            description: 'Click here to get started.',
+            showButtons: ['close'], // no Next — only the real click advances this one
+          },
+        },
+      ]);
+      tourDriver.drive();
+    }
+  }, [active, stepIndex]);
 
   return (
 
@@ -129,6 +177,7 @@ function HomePage() {
               <AppButton
                 onClick={handleCreateGoal}
                 className="w-full sm:w-auto"
+                data-tour="new-goal-btn"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 New Goal
@@ -205,7 +254,7 @@ function HomePage() {
           )}
 
         </section>
-        
+
         {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
           <section>

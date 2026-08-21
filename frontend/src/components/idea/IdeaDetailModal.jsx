@@ -1,18 +1,23 @@
-import { Activity, AlertCircle, Check, CheckCircle2, ChevronDown, ChevronRight, Flag, ThumbsUp } from 'lucide-react';
-import { useState } from 'react';
+import { Activity, AlertCircle, Check, CheckCircle2, ChevronDown, ChevronRight, Flag } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { IDEA_STATUS } from '../../constants/ideaConstants.js';
 import { PERMISSIONS } from '../../constants/permissions.js';
 import useAuth from '../../hooks/auth/useAuth.js';
 import useDeleteIdea from '../../hooks/idea/useDeleteIdea.js';
+import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress.js';
 import { useCan } from '../../hooks/permissions/useCan.js';
 import { formatDate } from '../../utils/timeUtils.js';
 import MemberAvatar from '../team/MemberAvatar.jsx';
 import AppButton from '../ui/buttons/AppButton.jsx';
 import BaseModal from '../ui/modal/BaseModal';
-import useMoveIdeaToPlanned from '../../hooks/idea/useMoveIdeaToPlanned.js';
-import useMoveIdeaToProgress from '../../hooks/idea/useMoveIdeaToProgress.js';
 import DangerConfirmationModal from '../ui/modal/DangerConfirmationModal.jsx';
 import IdeaLikeButton from './IdeaLikeButton.jsx';
+
+import { useSelector } from 'react-redux';
+import { TOUR_STEPS } from '../../store/slices/tourSlice';
+import { driveWhenReady, resumeStepIfActive, tourDriver } from '../../utils/tourDriver';
+
+
 
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -99,12 +104,44 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
     const [isDeleteConfirmModalOpen, setisDeleteConfirmModalOpen] = useState(false)
 
     const handleDeleteIdea = () => { deleteIdea(currentIdea.id, { onSuccess: onClose }) };
+
+    /* -------------------------------------------------------------------------- */
+    /* New user walkthrough */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex, currentIdeaId } = useSelector((state) => state.tour);
+    const isTourTarget = active && stepIndex === TOUR_STEPS.MOVE_TO_PLANNED && currentIdea.id === currentIdeaId;
+
+    useEffect(() => {
+        if (isOpen && isTourTarget) {
+            driveWhenReady('[data-tour="move-to-planned-btn"]', {
+                title: 'Move to Planned',
+                description: 'Click here to plan this idea.',
+                showButtons: ['close'],
+            });
+        }
+    }, [isOpen, isTourTarget]);
+
+    const handleMoveClick = () => {
+        if (isTourTarget) tourDriver.destroy();
+        onMove();
+    };
+
+    const handleClose = () => {
+        onClose(); // the original prop, closes the modal
+
+        resumeStepIfActive(TOUR_STEPS.MOVE_TO_PLANNED, '[data-tour="target-idea-card"]', {
+            title: 'Move it forward',
+            description: 'Click your idea to open it and move it to Planned.',
+            showButtons: ['close'],
+        });
+    };
+
     return (
         <>
-            <BaseModal isOpen={isOpen} onClose={onClose}>
+            <BaseModal isOpen={isOpen} onClose={handleClose}>
 
                 {/* Header */}
-                <BaseModal.Header onClose={onClose}>
+                <BaseModal.Header onClose={handleClose}>
                     <span className={`px-2.5 py-1 border rounded-md text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 ${badge.className}`}>
                         {badge.icon} {badge.label}
                     </span>
@@ -425,7 +462,11 @@ function IdeaDetailModal({ currentIdea, isOpen, onClose, onMove }) {
 
                         <div className="ml-auto">
                             {isDraft && canMoveIdeaToPlanned && (
-                                <AppButton variant="primary" onClick={onMove}>
+                                <AppButton
+                                    variant="primary"
+                                    onClick={handleMoveClick}
+                                    data-tour={isTourTarget ? 'move-to-planned-btn' : undefined}
+                                >
                                     <ChevronRight className="w-4 h-4" /> Move to In Planned
                                 </AppButton>
                             )}

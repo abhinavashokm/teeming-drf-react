@@ -14,6 +14,10 @@ import IdeaLikeButton from './IdeaLikeButton.jsx'
 import MoveToDoneModal from './MoveToDoneModal'
 import MoveToPlannedModal from './MoveToPlannedModal.jsx'
 
+import { useSelector } from 'react-redux'
+import { TOUR_STEPS } from '../../store/slices/tourSlice'
+import { tourDriver } from '../../utils/tourDriver';
+
 
 const STATE_STYLES = {
     draft: {
@@ -68,9 +72,25 @@ export default function IdeaCard({ currentIdea, state, theme }) {
 
     const canDeleteOthersIdea = useCan(PERMISSIONS.DELETE_OTHERS_IDEA)
 
+    /* -------------------------------------------------------------------------- */
+    /* For new user walkthrough (how to like an idea) */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex, currentIdeaId } = useSelector((state) => state.tour);
+    const isTourLikeTarget = active && stepIndex === TOUR_STEPS.LIKE_IDEA && currentIdea.id === currentIdeaId;
+    const isTourMoveTarget = active && stepIndex === TOUR_STEPS.MOVE_TO_PLANNED && currentIdea.id === currentIdeaId;
+
+    const handleCardClick = () => {
+        if (isTourMoveTarget) tourDriver.destroy();
+        setActiveModal('detail');
+    };
+
     return (
         <>
-            <div onClick={() => setActiveModal('detail')} className={`${wrapper} ${base}`}>
+            <div
+                onClick={handleCardClick}
+                className={`${wrapper} ${base}`}
+                data-tour={isTourMoveTarget ? 'target-idea-card' : undefined}
+            >
 
                 {state === IDEA_STATUS.PLANNED && (
                     <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-500 rounded-l-xl" />
@@ -140,6 +160,7 @@ export default function IdeaCard({ currentIdea, state, theme }) {
                                 isLiked={currentIdea.isLiked}
                                 likeCount={currentIdea.likeCount}
                                 ideaId={currentIdea.id}
+                                data-tour={isTourLikeTarget ? 'like-idea-btn' : undefined}
                             />
 
                             <div className="flex items-center gap-1.5">

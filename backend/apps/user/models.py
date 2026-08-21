@@ -51,6 +51,9 @@ class User(BaseAbstractModel, AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
+    #for new user walkthourgh guide
+    has_completed_tour = models.BooleanField(default=False)
+
     # Hide AbstractUser's fields
     username = None
     first_name = None

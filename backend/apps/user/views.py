@@ -268,7 +268,7 @@ class GoogleLoginView(SocialLoginView):
     def get_response(self):
 
         user = user_services.get_or_update_google_user(self.request.user)
-        
+
         refresh_token = user_services.generate_tokens_for_user(self.request.user)
 
         res = success_response(
@@ -338,3 +338,13 @@ class RemoveUserAvatarUrlView(APIView):
         user_services.remove_user_avatar(user=request.user)
 
         return success_response(message="User profile picture removed")
+
+
+class CompleteTourView(APIView):
+    """update the flag when new user completed the initial walkthrough guide"""
+
+    def patch(self, request, **kwargs):
+        user = request.user
+        user.has_completed_tour = True
+        user.save(update_fields=["has_completed_tour"])
+        return success_response()

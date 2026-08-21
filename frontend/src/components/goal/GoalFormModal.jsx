@@ -1,15 +1,22 @@
-import { Calendar, Target } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { Target } from 'lucide-react';
 import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { ROUTE_PATHS } from '../../constants/routePaths';
 import useCreateGoal from '../../hooks/goal/useCreateGoal';
 import useUpdateGoal from '../../hooks/goal/useUpdateGoal';
+import useWorkspaceSlug from '../../hooks/params/useWorkspaceSlug';
+import { advanceTour, setTourGoalId, TOUR_STEPS } from '../../store/slices/tourSlice';
+import { driveWhenReady, resumeStepIfActive } from '../../utils/tourDriver';
 import AppButton from '../ui/buttons/AppButton';
 import CancelButton from '../ui/buttons/CancelButton';
+import DateField from '../ui/form/DateField';
 import FormField from '../ui/form/FormField';
 import InputField from '../ui/form/InputField';
-import BaseModal from '../ui/modal/BaseModal';
 import TextareaField from '../ui/form/TextAreaField';
-import DateField from '../ui/form/DateField';
+import BaseModal from '../ui/modal/BaseModal';
+
 
 
 export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
@@ -37,6 +44,14 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
         }
     }, [goal, isEditMode, reset])
 
+    /* -------------------------------------------------------------------------- */
+    /* Goal submit + New user walkthrough guide */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex } = useSelector((state) => state.tour);
+    const dispatch = useDispatch();
+    const navigate = useNavigate()
+    const workspaceSlug = useWorkspaceSlug()
+
     const handleGoalFormSubmit = (data) => {
         const payload = {
             name: data.name,
@@ -51,7 +66,19 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
             })
         } else {
             createGoal(payload, {
-                onSuccess: () => { reset(); onClose() }
+                onSuccess: (res) => {
+                    reset();
+                    onClose();
+
+                    const createdGoal = res.data
+
+                    if (active && stepIndex === TOUR_STEPS.CREATE_GOAL) {
+                        dispatch(setTourGoalId(createdGoal.id));
+                        dispatch(advanceTour());
+                        navigate(ROUTE_PATHS.GOAL_DASHBOARD(workspaceSlug, createdGoal.id))
+                    }
+
+                }
             })
         }
     }
@@ -59,6 +86,12 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
     const handleCloseModal = () => {
         reset()
         onClose()
+
+        resumeStepIfActive(TOUR_STEPS.CREATE_GOAL, '[data-tour="new-goal-btn"]', {
+            title: 'Create your first goal',
+            description: 'Click here to get started.',
+            showButtons: ['close'],
+        });
     }
 
     return (
@@ -79,7 +112,7 @@ export default function GoalFormModal({ isOpen, onClose, isEditMode, goal }) {
             <BaseModal.Body className="space-y-5">
 
                 <FormField label="Goal Name">
-                    <InputField size="md" {...register('name')} placeholder="e.g. Launch V2" />
+                    <InputField size="md" {...register('name')} placeholder="e.g. Reduce Checkout Drop-off" />
                 </FormField>
 
                 <FormField label="Description" optional>

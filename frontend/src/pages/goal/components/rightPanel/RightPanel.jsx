@@ -9,6 +9,12 @@ import GroupDiscussion from './GroupDiscussion';
 import useWorkspace from '../../../../hooks/workspace/useWorkspace';
 import useNavigateUpgradePlan from '../../../../hooks/routes/useNavigateUpgradePlan';
 
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { advanceTour, finishTour, TOUR_STEPS } from '../../../../store/slices/tourSlice';
+import { tourDriver, driveWhenReady } from '../../../../utils/tourDriver';
+
+
 const aiMode = 'ai'
 const discussionMode = 'discussion'
 
@@ -50,6 +56,42 @@ function RightPanel({ onClose, isMobile }) {
         setInput('');
     };
 
+    /* -------------------------------------------------------------------------- */
+    /* new user walkthrough (introudce right panel discussion and ai features) */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex } = useSelector((state) => state.tour);
+    const dispatch = useDispatch();
+    const isAiTarget = active && stepIndex === TOUR_STEPS.OPEN_AI_ASSISTANT;
+
+    useEffect(() => {
+        if (isAiTarget && mode !== aiMode) {
+            driveWhenReady('[data-tour="assistant-tab-btn"]', {
+                title: 'Meet your AI assistant',
+                description: 'Ask it anything about this goal — it has full context.',
+                showButtons: ['close'],
+            });
+        }
+    }, [isAiTarget, mode]);
+
+    const handleAssistantClick = () => {
+        setMode(aiMode);
+
+        if (isAiTarget) {
+            tourDriver.destroy();
+            dispatch(finishTour());
+
+            tourDriver.setSteps([{
+                popover: {
+                    title: "You're all set! 🎉",
+                    description: "That's the full loop — try ideas, ship initiatives, and track outcomes. Now invite your team and start collaborating.",
+                    showButtons: ['close'],
+                },
+            }]);
+            tourDriver.drive();
+        }
+    };
+
+
     return (
         <div className="flex flex-col flex-1 min-h-0 bg-white">
             {/* Header */}
@@ -70,7 +112,8 @@ function RightPanel({ onClose, isMobile }) {
 
                                 <span>
                                     <button
-                                        onClick={() => setMode(aiMode)}
+                                        onClick={handleAssistantClick}
+                                         data-tour={isAiTarget ? 'assistant-tab-btn' : undefined}
                                         className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-md transition ${mode === aiMode
                                             ? 'bg-white shadow text-gray-900'
                                             : 'text-gray-500'

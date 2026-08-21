@@ -12,10 +12,15 @@ import useMetrics from '../../../hooks/outcome/useMetrics';
 import { useCan } from "../../../hooks/permissions/useCan";
 import MetricChart from './MetricChart';
 
+import { useSelector, useDispatch } from 'react-redux';
+import { advanceTour, TOUR_STEPS } from '../../../store/slices/tourSlice';
+import { tourDriver, driveWhenReady } from '../../../utils/tourDriver';
+import { useEffect } from 'react';
+
 
 function OutcomeView() {
 
-    const { data: currentGoal  } = useGoal()
+    const { data: currentGoal } = useGoal()
 
     const { data: metrics } = useMetrics()
     const { data: checkins = [] } = useCheckins()
@@ -26,9 +31,62 @@ function OutcomeView() {
     const canManageMetrics = useCan(PERMISSIONS.MANAGE_METRICS)
     const canManageCheckins = useCan(PERMISSIONS.MANAGE_CHECKINS)
 
+    /* -------------------------------------------------------------------------- */
+    /* New user walkthrough (add metric) */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex } = useSelector((state) => state.tour);
+    const dispatch = useDispatch();
+    const isCreateMetricTarget = active && stepIndex === TOUR_STEPS.CREATE_METRIC;
+    const isAddCheckinTarget = active && stepIndex === TOUR_STEPS.ADD_CHECKIN;
+    const isViewChartTarget = active && stepIndex === TOUR_STEPS.VIEW_METRIC_CHART;
+
+    const handleAddMetricClick = () => {
+        if (isCreateMetricTarget) tourDriver.destroy();
+        setIsMetricFormModalOpen(true);
+    };
+
+    const handleAddCheckinClick = () => {
+        if (isAddCheckinTarget) tourDriver.destroy();
+        setIsCheckinFormModalOpen(true);
+    };
+
+    useEffect(() => {
+
+        if (isCreateMetricTarget) {
+            driveWhenReady('[data-tour="add-metric-btn"]', {
+                title: 'Add a metric',
+                description: 'Set a baseline and target so you can track real impact.',
+                showButtons: ['close'],
+            });
+        }
+        if (isAddCheckinTarget) {
+            driveWhenReady('[data-tour="add-checkin-btn"]', {
+                title: 'Log a check-in',
+                description: "Now record how things are going — that's the whole point of Teeming.",
+                showButtons: ['close'],
+            });
+        }
+
+    }, [isCreateMetricTarget, isAddCheckinTarget]);
+
+    useEffect(() => {
+        if (isViewChartTarget) {
+            driveWhenReady('[data-tour="metric-chart"]', {
+                title: 'See your progress',
+                description: 'Your check-in is now plotted here — this is how you track real impact over time.',
+                showButtons: ['next', 'close'],
+                nextBtnText: 'Next',
+                onNextClick: () => {
+                    dispatch(advanceTour()); // → TOUR_STEPS.OPEN_DISCUSSION
+                    tourDriver.destroy();
+                },
+            });
+        }
+    }, [isViewChartTarget]);
+
     return (
         <>
-             <div className="max-w-7xl px-8 md:px-12 lg:px-16 pb-8 md:pb-12 space-y-6">
+            <div className="max-w-7xl px-8 md:px-12 lg:px-16 pb-8 md:pb-12 space-y-6">
                 {/* 1. Outcome Header Card */}
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                     <div className="flex flex-col min-[1210px]:flex-row min-[1210px]:items-start justify-between gap-4 min-[1210px]:gap-0 mb-6">
@@ -40,13 +98,20 @@ function OutcomeView() {
                         <div className="flex items-center gap-3 w-full min-[1210px]:w-auto">
                             {
                                 canManageMetrics &&
-                                <button onClick={() => setIsMetricFormModalOpen(true)} className="flex-1 min-[1210px]:flex-none px-4 py-2 border border-gray-200 text-gray-700 font-medium rounded-lg text-[13px] hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center">
+                                <button
+                                    onClick={handleAddMetricClick}
+                                    data-tour={isCreateMetricTarget ? 'add-metric-btn' : undefined}
+                                    className="flex-1 min-[1210px]:flex-none px-4 py-2 border border-gray-200 text-gray-700 font-medium rounded-lg text-[13px] hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center"
+                                >
                                     Add Metric
                                 </button>
                             }
                             {
                                 canManageCheckins &&
-                                <AppButton onClick={() => setIsCheckinFormModalOpen(true)} >
+                                <AppButton
+                                    onClick={handleAddCheckinClick}
+                                    data-tour="add-checkin-btn"
+                                >
                                     Add Checkin
                                 </AppButton>
                             }
@@ -56,7 +121,7 @@ function OutcomeView() {
 
                     {metrics?.length > 0 ? (
                         metrics.map(metric => (
-                            <MetricRow currentMetric={metric} canManageMetrics={canManageCheckins} />
+                            <MetricRow key={metric.id} currentMetric={metric} canManageMetrics={canManageCheckins} />
                         ))
                     ) : (
                         <div className="flex flex-col items-center justify-center py-8 px-4 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200 mb-4">
@@ -86,8 +151,10 @@ function OutcomeView() {
 
                 {/* 2. Metrics Journey Chart */}
                 {
-                    metrics?.length > 0 
-                    && <MetricChart />
+                    metrics?.length > 0
+                    && <div data-tour="metric-chart">
+                        <MetricChart />
+                    </div>
                 }
 
                 {/* 3. Check-ins Section */}

@@ -5,18 +5,22 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/app/Navbar';
 import Sidebar from "../components/app/Sidebar";
+import GoalInfoModal from '../components/goal/GoalInfoModal';
 import FullPageLoader from '../components/ui/FullPageLoader';
 import { errorCodes } from '../constants/errorCodes';
 import useWorkspace from '../hooks/workspace/useWorkspace';
 import ErrorPage from '../pages/error/ErrorPage';
-import GoalInfoModal from '../components/goal/GoalInfoModal';
 
 import { WorkspaceSocketContext } from '../contexts/WorkspaceSocketContext';
 import { useWorkspaceSocket } from '../hooks/websocket/useWorkspaceSocket';
 
+import { useDispatch } from 'react-redux';
+import useAuth from '../hooks/auth/useAuth';
+import { startTour } from '../store/slices/tourSlice';
+
 function WorkspaceLayout() {
 
-  const { data, isPending: isWorkspacePending, isError, error } = useWorkspace()
+  const { isPending: isWorkspacePending, error } = useWorkspace()
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -35,6 +39,18 @@ function WorkspaceLayout() {
   }, []);
 
   const workspaceSocket = useWorkspaceSocket()
+
+  /* -------------------------------------------------------------------------- */
+  /* website walkthrough for new users*/
+  /* -------------------------------------------------------------------------- */
+  const { data: currentUser } = useAuth()
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (currentUser && !currentUser?.hasCompletedTour) {
+      dispatch(startTour());
+    }
+  }, [currentUser?.hasCompletedTour]);
 
   return (
     <>

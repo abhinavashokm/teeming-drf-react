@@ -11,6 +11,7 @@ export default function DangerConfirmationModal({
   confirmButtonText = "Delete",
   confirmButtonTextOnLoading = "Deleting..",
   isLoading = false,
+  zIndexClass = 'z-78',
 }) {
   const [inputValue, setInputValue] = useState("");
 
@@ -27,7 +28,7 @@ export default function DangerConfirmationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-78 flex items-center justify-center">
+    <div className={`fixed inset-0 ${zIndexClass} flex items-center justify-center`}>
       <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
         {/* Header */}

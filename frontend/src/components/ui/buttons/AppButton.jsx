@@ -12,6 +12,7 @@ function AppButton({
     fullWidth = false,
     shadow = false,
     className = "",
+    ...props
 }) {
     const isDisabled = loading || disabled;
 
@@ -67,6 +68,7 @@ function AppButton({
                 shadow && "shadow-sm",
                 className
             )}
+            {...props}
         >
             {loading && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} />}
             {children}

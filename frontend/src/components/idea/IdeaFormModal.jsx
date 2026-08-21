@@ -17,6 +17,10 @@ import { errorCodes } from '../../constants/errorCodes';
 import useWorkspace from "../../hooks/workspace/useWorkspace"
 import useNavigateUpgradePlan from '../../hooks/routes/useNavigateUpgradePlan';
 
+import { useSelector, useDispatch } from 'react-redux';
+import { setTourIdeaId, advanceTour, TOUR_STEPS } from '../../store/slices/tourSlice';
+import { resumeStepIfActive } from '../../utils/tourDriver';
+
 
 function IdeaFormModal({
     isOpen,
@@ -69,6 +73,12 @@ function IdeaFormModal({
         })
     }
 
+    /* -------------------------------------------------------------------------- */
+    /* Idea form submit + new user walkthrough (how to add an idea) */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex } = useSelector((state) => state.tour);
+    const dispatch = useDispatch();
+
     const handleFormSubmit = (data) => {
 
         if (isEditMode) {
@@ -79,13 +89,20 @@ function IdeaFormModal({
         addIdea(
             { data, goalId },
             {
-                onSuccess: handleClose,
+                onSuccess: (res) => {
+                    handleClose();
+                    if (active && stepIndex === TOUR_STEPS.ADD_IDEA) {
+                        dispatch(setTourIdeaId(res.data.id));
+                        dispatch(advanceTour());
+                    }
+                },
             }
         );
     };
 
-    //---------------------AI FEATURE--------------------------
-
+    /* -------------------------------------------------------------------------- */
+    /* AI ENHANCMENT FEATURE */
+    /* -------------------------------------------------------------------------- */
     const { data: currentWorkspace } = useWorkspace()
     const isAiEnhacementsAvailable = currentWorkspace?.features?.aiEnhancements
 
@@ -191,6 +208,13 @@ function IdeaFormModal({
         reset();
         onClose();
         resetAIStates()
+
+        //for new user walkthorugh
+        resumeStepIfActive(TOUR_STEPS.ADD_IDEA, '[data-tour="add-idea-btn"]', {
+            title: 'Add your first idea',
+            description: 'This is where your team proposes things to try.',
+            showButtons: ['close'],
+        });
     };
 
     return (

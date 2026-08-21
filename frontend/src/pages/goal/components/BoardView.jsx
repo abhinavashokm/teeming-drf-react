@@ -1,18 +1,63 @@
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useDrag } from '@use-gesture/react';
 import KanbanColumn from '../../../components/idea/KanbanColumn';
 import { IDEA_STATUS } from '../../../constants/ideaConstants.js';
+
+import { useSelector, useDispatch } from 'react-redux';
+import { tourDriver, driveWhenReady } from '../../../utils/tourDriver';
+import { TOUR_STEPS } from '../../../store/slices/tourSlice';
+
 
 
 function BoardView({ isDiscussionPanelOpen }) {
 
     //for mouse click and drag to horizontal scroll for boards
     const scrollRef = useRef(null);
-    
+
     const bind = useDrag(({ delta: [dx] }) => {
         scrollRef.current.scrollLeft -= dx;
     }, { pointer: { mouse: true } });
+
+    /* -------------------------------------------------------------------------- */
+    /* new user walkthrough guide */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex } = useSelector((state) => state.tour);
+
+    useEffect(() => {
+        if (!active) return;
+
+        if (stepIndex === TOUR_STEPS.ADD_IDEA) {
+            tourDriver.setSteps([
+                {
+                    element: '[data-tour="add-idea-btn"]',
+                    popover: {
+                        title: 'Add your first idea',
+                        description: 'This is where your team proposes things to try.',
+                        showButtons: ['close'],
+                    },
+                },
+            ]);
+            tourDriver.drive();
+        }
+
+        if (stepIndex === TOUR_STEPS.LIKE_IDEA) {
+            driveWhenReady('[data-tour="like-idea-btn"]', {
+                title: 'Like the idea',
+                description: 'Give it a thumbs up to show support.',
+                showButtons: ['close'],
+            });
+        }
+
+        if (stepIndex === TOUR_STEPS.MOVE_TO_PLANNED) {
+            driveWhenReady('[data-tour="target-idea-card"]', {
+                title: 'Move it forward',
+                description: 'Click your idea to open it and move it to Planned.',
+                showButtons: ['close'],
+            });
+        }
+
+    }, [active, stepIndex]);
 
 
     return (

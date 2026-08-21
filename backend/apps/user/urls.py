@@ -15,6 +15,7 @@ from .views import (
     UserAvatarUploadURLView,
     SaveUserAvatarUrlView,
     RemoveUserAvatarUrlView,
+    CompleteTourView,
 )
 
 urlpatterns = [
@@ -36,4 +37,5 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("registration/", include("dj_rest_auth.registration.urls")),
     path("social/google/", GoogleLoginView.as_view()),
+    path("complete-tour/", CompleteTourView.as_view()),
 ]

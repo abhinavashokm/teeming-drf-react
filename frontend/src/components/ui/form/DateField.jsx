@@ -21,7 +21,7 @@ export default function DateField({
         <input
             type="date"
             readOnly={readOnly}
-            value={value}
+            value={value ?? undefined}
             min={min ?? (disablePast ? getToday() : undefined)}
             {...props}
             className={cn(

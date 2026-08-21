@@ -1,12 +1,16 @@
-import { Info, Flag } from 'lucide-react';
-import BaseModal from '../ui/modal/BaseModal';
+import { Flag, Info } from 'lucide-react';
+import { useEffect } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import FormMetricRow from './FormMetricRow';
+import { UNIT_OPTIONS } from '../../constants/outcomeConstants';
 import useCreateMetrics from '../../hooks/outcome/useCreateMetrics';
 import useUpdateMetric from '../../hooks/outcome/useUpdateMetric';
 import AppButton from '../ui/buttons/AppButton';
-import { useEffect } from 'react';
-import { UNIT_OPTIONS } from '../../constants/outcomeConstants';
+import BaseModal from '../ui/modal/BaseModal';
+import FormMetricRow from './FormMetricRow';
+
+import { useSelector, useDispatch } from 'react-redux';
+import { advanceTour, TOUR_STEPS } from '../../store/slices/tourSlice';
+import { resumeStepIfActive } from '../../utils/tourDriver';
 
 
 const EMPTY_METRIC = {
@@ -65,13 +69,6 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
         };
     }
 
-
-    const handleCreateMetrics = (data) => {
-        createMetrics({ metrics: data.metrics.map(sanitizeMetric) }, {
-            onSuccess: () => onClose()
-        });
-    };
-
     const handleEditMetric = (data) => {
 
         updateMetric({ data: sanitizeMetric(data.metrics[0]), metricId: currentMetric.id }, {
@@ -82,10 +79,38 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
 
     };
 
-    return (
-        <BaseModal isOpen={isOpen} onClose={onClose} size="lg">
+    /* -------------------------------------------------------------------------- */
+    /* handle create metric + new user walkthrough */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex } = useSelector((state) => state.tour);
+    const dispatch = useDispatch();
+    const isTourTarget = active && stepIndex === TOUR_STEPS.CREATE_METRIC;
 
-            <BaseModal.Header onClose={onClose}>
+    const handleCreateMetrics = (data) => {
+        createMetrics({ metrics: data.metrics.map(sanitizeMetric) }, {
+            onSuccess: () => {
+                onClose();
+                if (isTourTarget) {
+                    dispatch(advanceTour()); // → TOUR_STEPS.ADD_CHECKIN
+                }
+            }
+        });
+    };
+
+    const handleClose = () => {
+        onClose();
+        resumeStepIfActive(TOUR_STEPS.CREATE_METRIC, '[data-tour="add-metric-btn"]', {
+            title: 'Add a metric',
+            description: 'Set a baseline and target so you can track real impact.',
+            showButtons: ['close'],
+        });
+    };
+
+
+    return (
+        <BaseModal isOpen={isOpen} onClose={handleClose} size="lg">
+
+            <BaseModal.Header onClose={handleClose}>
                 <span className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-[11px] font-bold uppercase tracking-wider">
                     {isEdit ? 'Edit Metric' : 'Metrics'}
                 </span>
@@ -146,7 +171,7 @@ export default function MetricFormModal({ isOpen, onClose, goalName = 'Goal', cu
                 <div className="flex items-center gap-3">
                     <button
                         type="button"
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg text-[13px] hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
                     >
                         Cancel

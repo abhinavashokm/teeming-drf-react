@@ -67,7 +67,7 @@ export default function FormMetricRow({ index, onRemove, canRemove }) {
 
             <div className="flex items-center gap-2 mb-3">
                 <FormField label='Metric name' className='flex-1'>
-                    <InputField {...register(`metrics.${index}.name`)} />
+                    <InputField {...register(`metrics.${index}.name`)} placeholder="e.g. Checkout completion rate"  />
                 </FormField>
                 <button
                     type="button"

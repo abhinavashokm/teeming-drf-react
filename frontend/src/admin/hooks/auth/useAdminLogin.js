@@ -20,7 +20,6 @@ export function useAdminLogin() {
             const user = res.data.user
 
             dispatch(setAccessToken(res.data.accessToken))
-            console.log(res.data)
             if (!user.isStaff) {
                 showError("You don't have admin access")
             } else {
@@ -30,7 +29,7 @@ export function useAdminLogin() {
 
         },
         onError: (err) => {
-            console.log("error")
+            //console.log("error")
         },
         apiSuccessToast: false,
     })

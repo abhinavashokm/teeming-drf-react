@@ -9,6 +9,11 @@ import GoalTabs from './components/GoalTabs';
 import OutcomeView from './components/OutcomeView';
 import RightPanel from './components/rightPanel/RightPanel';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { advanceTour, TOUR_STEPS } from '../../store/slices/tourSlice';
+import { driveWhenReady, tourDriver } from '../../utils/tourDriver';
+import useCompleteTour from '../../hooks/auth/useCompleteTour';
+
 
 export default function GoalDashboard({ goalTitle }) {
 
@@ -21,11 +26,6 @@ export default function GoalDashboard({ goalTitle }) {
   /* -------------------------------------------------------------------------- */
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false)
   const { onPanelOpen, onPanelClose } = useGroupDiscussionWS()
-
-  const handleOpenPanel = () => {
-    setIsRightPanelOpen(true)
-    onPanelOpen()              // ← clears unread, flips ref
-  }
 
   const handleClosePanel = () => {
     setIsRightPanelOpen(false)
@@ -79,6 +79,37 @@ export default function GoalDashboard({ goalTitle }) {
     };
   }, []);
 
+  /* -------------------------------------------------------------------------- */
+  /* new user walkthrough (introdcue discussion section) */
+  /* -------------------------------------------------------------------------- */
+  const { active, stepIndex } = useSelector((state) => state.tour);
+  const dispatch = useDispatch();
+  const isDiscussionTarget = active && stepIndex === TOUR_STEPS.OPEN_DISCUSSION;
+  const { mutate: completeTour } = useCompleteTour();
+
+  useEffect(() => {
+    if (isDiscussionTarget && !isRightPanelOpen) {
+      driveWhenReady('[data-tour="open-panel-btn"]', {
+        title: 'Chat with your team',
+        description: 'Discuss ideas and goals in real time, right from here.',
+        showButtons: ['close'],
+      });
+      //temporarly calling complete tour hook before completing the tour 
+      //(cause something wrong when calling it at the end of tour. the hook is triggering, backend endpoint is working and it logging the result correctly as worked. but data not actually updating in the db)
+      completeTour();
+    }
+  }, [isDiscussionTarget, isRightPanelOpen]);
+
+  const handleOpenPanel = () => {
+    if (isDiscussionTarget) {
+      tourDriver.destroy();
+      dispatch(advanceTour()); // → TOUR_STEPS.OPEN_AI_ASSISTANT
+    }
+    setIsRightPanelOpen(true)
+    onPanelOpen()
+  }
+
+
   return (
 
     <div className="flex flex-1 h-full overflow-hidden  relative">
@@ -104,7 +135,10 @@ export default function GoalDashboard({ goalTitle }) {
 
       {
         !isRightPanelOpen &&
-        <RightPanelToggleBtn onOpen={handleOpenPanel} />
+        <RightPanelToggleBtn
+          onOpen={handleOpenPanel}
+          data-tour={isDiscussionTarget ? 'open-panel-btn' : undefined}
+        />
       }
 
       {/* Right Side Panel */}

@@ -113,6 +113,11 @@ const authService = {
         return res.data;
     },
 
+    completeTour: async () => {
+        const res = await api.patch(`auth/complete-tour/`)
+        return res.data
+    }
+
 }
 
 export default authService

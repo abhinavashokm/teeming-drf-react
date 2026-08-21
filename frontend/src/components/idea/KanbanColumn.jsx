@@ -1,12 +1,19 @@
-import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, ListFilter, MoreHorizontal, Plus, Search, ThumbsUp, Lightbulb, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ChevronRight, Clock, Lightbulb, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { IDEA_STATUS } from '../../constants/ideaConstants.js';
 import useIdeas from '../../hooks/idea/useIdeas';
 import IdeaCard from './IdeaCard';
-import IdeaFormModal from './IdeaFormModal.jsx';
-import { IDEA_STATUS } from '../../constants/ideaConstants.js';
 import IdeaCardSkeleton from './IdeaCardSkelton.jsx';
+import IdeaFormModal from './IdeaFormModal.jsx';
+
+import { useSelector } from 'react-redux';
+import { TOUR_STEPS } from '../../store/slices/tourSlice';
+import { tourDriver } from '../../utils/tourDriver';
 
 
+/* -------------------------------------------------------------------------- */
+/* Reusable kanban board config for each board */
+/* -------------------------------------------------------------------------- */
 const COLUMN_CONFIGS = {
     draft: {
         id: 'ideas',
@@ -52,6 +59,9 @@ const COLUMN_CONFIGS = {
     },
 }
 
+/* -------------------------------------------------------------------------- */
+/* Empty state contents of each kanban board */
+/* -------------------------------------------------------------------------- */
 const EMPTY_STATES = {
     [IDEA_STATUS.DRAFT]: {
         icon: <Lightbulb className="w-5 h-5 text-gray-400" />,
@@ -77,6 +87,7 @@ const EMPTY_STATES = {
         description: 'Finished ideas will appear here',
     },
 };
+
 export default function KanbanColumn({ state, onCardClick }) {
 
     const { data: ideas = [], isSuccess, isPending } = useIdeas()
@@ -126,7 +137,22 @@ export default function KanbanColumn({ state, onCardClick }) {
         if (e.key === 'Escape') setIsSearchOpen(false);
     };
 
+    /* -------------------------------------------------------------------------- */
+    /* New user walkthrough guide + Open add idea modal */
+    /* -------------------------------------------------------------------------- */
+    const { active, stepIndex } = useSelector((state) => state.tour);
 
+    const handleAddIdeaClick = () => {
+        if (active && stepIndex === TOUR_STEPS.ADD_IDEA) {
+            tourDriver.destroy();
+        }
+        setIsAddIdeaFormModalOpen(true);
+    };
+
+
+    /* -------------------------------------------------------------------------- */
+    /* board collapsed view */
+    /* -------------------------------------------------------------------------- */
     if (isCollapsed) {
         return (
             <div
@@ -239,9 +265,14 @@ export default function KanbanColumn({ state, onCardClick }) {
                         </div>
                     )}
 
+            {/* show add idea button only for draft idea board */}
             {showAddIdea && (
                 <div className="shrink-0 px-3 pb-3 pt-1 mt-auto">
-                    <button onClick={() => setIsAddIdeaFormModalOpen(true)} className="flex items-center justify-center gap-1.5 w-full text-green-600 hover:text-green-700 hover:bg-amber-100/40 rounded-xl py-2 transition-colors text-[13px] font-medium">
+                    <button
+                        onClick={handleAddIdeaClick}
+                        data-tour="add-idea-btn"
+                        className="flex items-center justify-center gap-1.5 w-full text-green-600 hover:text-green-700 hover:bg-amber-100/40 rounded-xl py-2 transition-colors text-[13px] font-medium"
+                    >
                         <Plus className="w-4 h-4" /> Add idea
                     </button>
                 </div>
