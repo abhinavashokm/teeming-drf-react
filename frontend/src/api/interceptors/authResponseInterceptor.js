@@ -61,7 +61,6 @@ export const authResponseInterceptor =
 
             // retry original request
             error.config.headers.Authorization = `Bearer ${accessToken}`
-            console.log("no error")
             return api({
                 ...error.config,
                 _retry: true  // ← explicitly carry it into the new request

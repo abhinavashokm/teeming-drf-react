@@ -28,9 +28,9 @@ const useUploadProfilePic = () => {
             return authService.saveProfilePic({ "avatar_thumb_key": thumbFileKey, "avatar_full_key": fullFileKey })
 
         },
-        onError: (error) => {
-            console.log(error)
-        },
+        // onError: (error) => {
+        //     console.log(error)
+        // },
         apiSuccessToast: false,
         invalidateKeys: [globalQueryKeys.auth],
     });

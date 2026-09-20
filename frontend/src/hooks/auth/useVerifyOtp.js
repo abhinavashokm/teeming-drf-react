@@ -22,7 +22,6 @@ export function useVerifyOtp({ onError = null } = {}) {
             handleAuthSuccess(res.data)
         },
         onError: (error) => {
-            console.log(error)
             onError?.()
             if (getErrorCode(error) === errorCodes.SIGNUP_SESSION_EXPIRED) {
                 navigateWithToast({

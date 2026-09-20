@@ -68,7 +68,7 @@ export function useWorkspaceSocket() {
                 }
             },
             onOpen: () => {
-                console.log("workspace ws connected!!")
+                //console.log("workspace ws connected!!")
                 // flush anything queued while we were connecting
                 const queued = queueRef.current;
                 queueRef.current = [];
@@ -77,7 +77,7 @@ export function useWorkspaceSocket() {
                 });
             },
             onClose: () => {
-                console.log("workspace ws disconnected!!")
+                //console.log("workspace ws disconnected!!")
             }
         })
 

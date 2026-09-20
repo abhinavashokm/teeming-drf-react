@@ -13,8 +13,8 @@ export function useLogin() {
         mutationFn: (data) => authService.login(data, invitationToken),
         onSuccess: (res) => handleAuthSuccess(res.data),
         apiSuccessToast: false,
-        onError: (err) => {
-            console.log(err)
-        }
+        // onError: (err) => {
+        //     console.log(err)
+        // }
     })
 }

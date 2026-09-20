@@ -13,8 +13,8 @@ export default function useWorkspaceRedirect(){
             navigate(getWorkspaceRedirectPath(res.data))
         },
         apiSuccessToast: false,
-        onError: (err) => {
-            console.log(err)
-        }
+        // onError: (err) => {
+        //     console.log(err)
+        // }
     })
 }

@@ -33,9 +33,9 @@ const useUploadWorkspaceLogo = () => {
       );
 
     },
-    onError: (error) => {
-      console.log(error)
-    },
+    // onError: (error) => {
+    //   console.log(error)
+    // },
     apiSuccessToast: false,
     invalidateKeys: [workspaceKeys.root],
   });
