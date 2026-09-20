@@ -302,6 +302,7 @@ stripe.api_key = STRIPE_SECRET_KEY
 # -----------------------------------------------------------------------------
 # AI INTEGRATION
 # -----------------------------------------------------------------------------
+AI_ENABLED = os.getenv("AI_ENABLED", "false").lower() == "true"
 AI_PROVIDER = os.environ.get("AI_PROVIDER", default="gemini")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_MODEL = os.environ.get(

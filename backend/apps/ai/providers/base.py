@@ -28,6 +28,10 @@ class AIProvider(ABC):
             if settings.USE_MOCK_AI:
                 return schema.mock()
 
+        ai_enabled = getattr(settings, "AI_ENABLED", None)
+        if not ai_enabled:
+            raise exceptions.AIException()
+
         return self._generate_structured(
             prompt=prompt,
             schema=schema,
