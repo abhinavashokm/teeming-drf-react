@@ -4,7 +4,7 @@ import { showError } from "../../utils/toast";
 
 export const authResponseInterceptor =
     async (store, api, error) => {
-        console.log(error.response?.data)
+        //console.log(error.response?.data)
 
         // console.log('interceptor hit', {
         //     url: error.config?.url,
